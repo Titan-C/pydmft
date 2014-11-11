@@ -11,6 +11,7 @@ from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.plot.mpl_interface import subplots
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class IPTSolver(object):
@@ -25,21 +26,27 @@ class IPTSolver(object):
         self.gdw = self.gup.copy()
         self.g0up = self.gup.copy()
         self.g0dw = self.gup.copy()
-        self.sigma = self.gup.copy()
+        self.sigmaup = self.gup.copy()
+        self.sigmadw = self.gup.copy()
 
         # Imaginary time
-        self.g0t = GfImTime(indices=[0], beta=self.beta)
-        self.sigmat = self.g0t.copy()
+        self.g0tup = GfImTime(indices=[0], beta=self.beta)
+        self.g0tdw = self.g0tup.copy()
+        self.sigmatup = self.g0tup.copy()
+        self.sigmatdw = self.g0tup.copy()
 
     def solve(self):
 
-        self.g0t <<= InverseFourier(self.g0up)
-        self.sigmat <<= (self.U**2) * self.g0t * self.g0t * self.g0t
-        self.sigma <<= Fourier(self.sigmat)
+        self.g0tup <<= InverseFourier(self.g0up)
+        self.g0tdw <<= InverseFourier(self.g0dw)
+        self.sigmatup <<= (self.U**2) * self.g0tup * self.g0tdw * self.g0tdw
+        self.sigmatdw <<= (self.U**2) * self.g0tdw * self.g0tup * self.g0tup
+        self.sigmaup <<= Fourier(self.sigmatup)
+        self.sigmadw <<= Fourier(self.sigmatdw)
 
         # Dyson equation to get G
-        self.gup <<= self.g0up * inverse(1.0 - self.sigma * self.g0up)
-        self.gdw <<= self.g0dw * inverse(1.0 - self.sigma * self.g0dw)
+        self.gup <<= self.g0up * inverse(1.0 - self.sigmaup * self.g0up)
+        self.gdw <<= self.g0dw * inverse(1.0 - self.sigmadw * self.g0dw)
 
     def dmft_loop(self, n_loops, t):
         for i in range(n_loops):
@@ -56,42 +63,37 @@ def ev_on_loops(n_loops, U, beta, t):
 
     for loop in n_loops:
         S = IPTSolver(U=U, beta=beta)
-        S.gup <<= inverse(iOmega_n +0.1+ 0.5j)
+        S.gup <<= inverse(iOmega_n + 0.1 + 0.5j)
 
-        S.gdw <<= inverse(iOmega_n + 0.4j)
+        S.gdw <<= inverse(iOmega_n - 0.1 + 0.5j)
 
         S.dmft_loop(loop, t)
-        ax1.oplot(S.sigma, '-o', RI='I', x_window=(0, 2),
-                  label="nloop={}".format(loop))
+        ax1.oplot(S.sigmaup, '-o', RI='I', x_window=(0, 2),
+                  label="$\uparrow$ nl={}".format(loop))
+        ax1.oplot(S.sigmadw, '-o', RI='I', x_window=(0, 2),
+                  label="$\downarrow$ nl={}".format(loop))
         ax1.set_ylabel('$\Sigma(i\omega_n)$')
 
-        ax2.oplot(S.g0t, label="nloop={}".format(loop))
+        ax2.oplot(S.g0tup, label="$\uparrow$ nl={}".format(loop))
+        ax2.oplot(S.g0tdw, label="$\downarrow$ nl={}".format(loop))
 
         grealup = GfReFreq(indices=[1], window=(-4, 4), n_points=400)
         grealdw = grealup.copy()
         grealup.set_from_pade(S.gup, 201, 0.0)
         grealdw.set_from_pade(S.gdw, 201, 0.0)
-        ax3.oplot(grealup, RI='I', label="$\uparrow$  nloop={}".format(loop))
+        ax3.oplot(grealup, RI='I', label="$\uparrow$  nl={}".format(loop))
         ax3.oplot(grealdw, '--', RI='I',
-                  label="$\downarrow$ nloop={}".format(loop))
+                  label="$\downarrow$ nl={}".format(loop))
 
-    ax1.set_title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$" % (beta, U))
-
-
-def ev_on_interaction(n_loops, U, beta, t):
-    """Studies change of Green's function depending on DMFT interaction"""
-
-
-    for u_int in U:
-        S = IPTSolver(U = u_int, beta = beta)
-        S.g <<= SemiCircular(2*t)
-        S.dmft_loop(n_loops, t)
-        oplot(S.g, label = "U={}".format(u_int))
-
-    plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $loop=%.2f$".format(beta,n_loops))
+    ax1.set_title("Green's functions, IPT, Bethe lattice,"
+                  "$\\beta={:.2f}$, $U={:.2f}$".format(beta, U))
+    f.savefig('gf_{:.2f}.png'.format(U), format='png',
+              transparent=False, bbox_inches='tight', pad_inches=0.05)
+    plt.close(f)
 
 if __name__ == "__main__":
-    ev_on_loops([15], 2., 55, 0.5)
+    for u_int in np.linspace(0, 4, 40):
+        ev_on_loops([20], u_int, 35, 0.5)
 
 
             # Get the real-axis with Pade approximants
