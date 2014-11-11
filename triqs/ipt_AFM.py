@@ -17,8 +17,6 @@ import numpy as np
 class IPTSolver(object):
 
     def __init__(self, **params):
-
-        self.U = params['U']
         self.beta = params['beta']
 
         # Matsubara frequency
@@ -35,12 +33,12 @@ class IPTSolver(object):
         self.sigmatup = self.g0tup.copy()
         self.sigmatdw = self.g0tup.copy()
 
-    def solve(self):
+    def solve(self, U):
 
         self.g0tup <<= InverseFourier(self.g0up)
         self.g0tdw <<= InverseFourier(self.g0dw)
-        self.sigmatup <<= (self.U**2) * self.g0tup * self.g0tdw * self.g0tdw
-        self.sigmatdw <<= (self.U**2) * self.g0tdw * self.g0tup * self.g0tup
+        self.sigmatup <<= (U**2) * self.g0tup * self.g0tdw * self.g0tdw
+        self.sigmatdw <<= (U**2) * self.g0tdw * self.g0tup * self.g0tup
         self.sigmaup <<= Fourier(self.sigmatup)
         self.sigmadw <<= Fourier(self.sigmatdw)
 
@@ -48,11 +46,11 @@ class IPTSolver(object):
         self.gup <<= self.g0up * inverse(1.0 - self.sigmaup * self.g0up)
         self.gdw <<= self.g0dw * inverse(1.0 - self.sigmadw * self.g0dw)
 
-    def dmft_loop(self, n_loops, t):
+    def dmft_loop(self, n_loops, t, U):
         for i in range(n_loops):
             self.g0up <<= inverse(iOmega_n - t**2 * self.gdw)
             self.g0dw <<= inverse(iOmega_n - t**2 * self.gup)
-            self.solve()
+            self.solve(U)
 
 
 def ev_on_loops(n_loops, U, beta, t):
@@ -62,12 +60,12 @@ def ev_on_loops(n_loops, U, beta, t):
     f, (ax1, ax2, ax3) = subplots(3, 1)
 
     for loop in n_loops:
-        S = IPTSolver(U=U, beta=beta)
+        S = IPTSolver(beta=beta)
         S.gup <<= inverse(iOmega_n + 0.1 + 0.5j)
 
         S.gdw <<= inverse(iOmega_n - 0.1 + 0.5j)
 
-        S.dmft_loop(loop, t)
+        S.dmft_loop(loop, t, U)
         ax1.oplot(S.sigmaup, '-o', RI='I', x_window=(0, 2),
                   label="$\uparrow$ nl={}".format(loop))
         ax1.oplot(S.sigmadw, '-o', RI='I', x_window=(0, 2),
@@ -84,6 +82,7 @@ def ev_on_loops(n_loops, U, beta, t):
         ax3.oplot(grealup, RI='I', label="$\uparrow$  nl={}".format(loop))
         ax3.oplot(grealdw, '--', RI='I',
                   label="$\downarrow$ nl={}".format(loop))
+        ax3.set_ylim(-2, 0)
 
     ax1.set_title("Green's functions, IPT, Bethe lattice,"
                   "$\\beta={:.2f}$, $U={:.2f}$".format(beta, U))
@@ -91,12 +90,12 @@ def ev_on_loops(n_loops, U, beta, t):
               transparent=False, bbox_inches='tight', pad_inches=0.05)
     plt.close(f)
 
+
 if __name__ == "__main__":
     for u_int in np.linspace(0, 4, 40):
         ev_on_loops([20], u_int, 35, 0.5)
 
-
-            # Get the real-axis with Pade approximants
+# Get the real-axis with Pade approximants
 #        greal = GfReFreq(indices = [1], window = (-4.0,4.0), n_points = 400)
 #        greal.set_from_pade(S.g, 201, 0.0)
 
