@@ -9,6 +9,7 @@ from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
     inverse, Omega, iOmega_n, Wilson, SemiCircular,InverseFourier, Fourier
 
 from pytriqs.plot.mpl_interface import oplot
+from pytriqs.plot.mpl_interface import subplots
 import matplotlib.pyplot as plt
 
 class IPTSolver(object):
@@ -41,17 +42,41 @@ class IPTSolver(object):
             self.g0 <<= inverse( iOmega_n - t**2 * self.g)
             self.solve()
 
+def ev_on_loops(n_loops, U, beta, t):
+    """Studies change of Green's function depending on DMFT loop count"""
+# open 2 panels top (t) and bottom (b)
 
-if __name__ == "__main__":
-    fig = plt.figure(figsize=(6,6))
-    t = 0.5
-    beta = 50
-    U = 3.0
-    n_loops = 40
-    for loop in [10, 20, 25, 30, 40, 50]:
+    f, (ax1, ax2, ax3) = subplots( 3,1)
+
+    for loop in n_loops:
         S = IPTSolver(U = U, beta = beta)
         S.g <<= SemiCircular(2*t)
         S.dmft_loop(loop, t)
+        ax1.oplot(S.sigma, RI='I', x_window  = (0,2), label = "nloop={}".format(loop))
+        ax1.set_ylabel('$\Sigma(i\omega_n)$')
+        ax2.oplot(S.g, RI='I', x_window  = (0,2), label = "nloop={}".format(loop))
+        greal = GfReFreq(indices=[1], window=(-4,4), n_points=400)
+        greal.set_from_pade(S.g,201,0.0)
+        ax3.oplot(greal,RI='I', label = "nloop={}".format(loop))
+
+    ax1.set_title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$"%(beta,U))
+
+
+def ev_on_interaction(n_loops, U, beta, t):
+    """Studies change of Green's function depending on DMFT interaction"""
+
+
+    for u_int in U:
+        S = IPTSolver(U = u_int, beta = beta)
+        S.g <<= SemiCircular(2*t)
+        S.dmft_loop(n_loops, t)
+        oplot(S.g, label = "U={}".format(u_int))
+
+    plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $loop=%.2f$".format(beta,n_loops))
+
+if __name__ == "__main__":
+    ev_on_loops([1,2,5,10,20,30,40,50], 2.6, 20, 0.5)
+
 
             # Get the real-axis with Pade approximants
 #        greal = GfReFreq(indices = [1], window = (-4.0,4.0), n_points = 400)
@@ -59,9 +84,7 @@ if __name__ == "__main__":
 
         # Generate the plot
 
-        oplot(S.g, figure = fig, label = "nloop={}".format(loop))
 
-    plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$"%(beta,U))
 #    plt.xlim(-4,4)
 #    plt.ylim(0,0.7)
 #    plt.ylabel("$A(\omega)$")
@@ -71,3 +94,4 @@ if __name__ == "__main__":
 #    fig.savefig("dos_%s"%U, format="png", transparent=False)
 #    dos_files.append("dos_%s"%U)
 #    plt.close(fig)
+
