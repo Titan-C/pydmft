@@ -39,7 +39,7 @@ def ocupation(eig_e, eig_states):
 
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-20, 20, 800)  +1e-4j
+    omega = np.linspace(-9, 11, 3500) +4e-3j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
@@ -67,9 +67,15 @@ def lattice_green(mu, sigma, omega):
 
     return np.asarray(G)
 
-E,V=update_H(0,0.1,-0.5,2,3)
+def lattice_ocupation(latG, w):
+    return simps(latG.imag[w.real<=0],w.real[w.real<=0])/np.pi
+
+e_d, mu, e_c, u_int, hyb = 0,0,0,4,1
+E,V=update_H(e_d, mu, e_c, u_int, hyb)
 w,G = lehmann(E,V,f_destruct(4,0).T,1e5)
-G_0=free_green(0,0.1,-0.5,3, w)
+G_0=free_green(e_d, mu, e_c, hyb, w)
 sigma=1/G_0 - 1/G
-latG=lattice_green(0.1,sigma, w)
-plt.plot(w.real,G,w.real,G_0,w.real,latG)
+latG=lattice_green(mu,sigma, w)
+plt.plot(w.real,G,w.real,G_0)
+plt.figure()
+plt.plot(w.real,latG.real,w.real,latG.imag,w.real,dos.bethe_lattice(w.real,2))
