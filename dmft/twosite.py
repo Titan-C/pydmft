@@ -36,9 +36,10 @@ def ocupation(eig_e, eig_states):
 
     return n_up, n_dw
 
+
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-20, 20, 400)#+1e-11j
+    omega = np.linspace(-20, 20, 800)  +1e-4j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
@@ -48,8 +49,27 @@ def lehmann(eig_e, eig_states, d_dag, beta):
                  (omega + eig_e[i] - eig_e[j])
     return omega, G / zet
 
-def free_green(e_d, mu, e_c, hyb):
+
+def free_green(e_d, mu, e_c, hyb, omega):
     """Outputs the Green's Function of the free propagator of the impurity"""
-    omega = np.linspace(-20, 20, 400)  # +1e-11j
     hyb2 = hyb**2
     return (omega - e_c + mu) / ((omega - e_d + mu)*(omega - e_c + mu) - hyb2)
+
+
+from scipy.integrate import simps
+from slaveparticles.quantum import dos
+def lattice_green(mu, sigma, omega):
+    """Compute lattice green function"""
+    G = []
+    for w, s_w in zip(omega, sigma):
+        integrable = lambda x: dos.bethe_lattice(x, 2)/(w + mu - x - s_w)
+        G.append(simps(integrable(omega), omega))
+
+    return np.asarray(G)
+
+E,V=update_H(0,0.1,-0.5,2,3)
+w,G = lehmann(E,V,f_destruct(4,0).T,1e5)
+G_0=free_green(0,0.1,-0.5,3, w)
+sigma=1/G_0 - 1/G
+latG=lattice_green(0.1,sigma, w)
+plt.plot(w.real,G,w.real,G_0,w.real,latG)
