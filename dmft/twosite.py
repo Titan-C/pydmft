@@ -7,6 +7,7 @@ The two site DMFT approach given by M. Potthoff PRB 64, 165114 (2001)
 
 from __future__ import division, absolute_import, print_function
 from slaveparticles.quantum.operators import *
+import numpy as np
 
 d_up, d_dw, c_up, c_dw = [f_destruct(4, index) for index in range(4)]
 
@@ -34,3 +35,15 @@ def ocupation(eig_e, eig_states):
     n_dw = expected_value((d_dw.T*d_dw).todense(), eig_e, eig_states, 1e5)
 
     return n_up, n_dw
+
+def lehmann(eig_e, eig_states, d_dag, beta):
+    """Outputs the lehmann representation of the greens function"""
+    omega = np.linspace(-20, 20, 400)+1e-11j
+    zet = partition_func(beta, eig_e)
+    G = 0
+    for i in range(len(eig_e)):
+        for j in range(len(eig_e)):
+            G += np.dot(eig_states[:, j].T, d_dag.dot(eig_states[:, i])) * \
+                 (np.exp(-beta*eig_e[i]) + np.exp(-beta*eig_e[j])) / \
+                 (omega + eig_e[i] - eig_e[j])
+    return omega, G / zet
