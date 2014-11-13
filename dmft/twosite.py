@@ -38,7 +38,7 @@ def ocupation(eig_e, eig_states):
 
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-20, 20, 400)+1e-11j
+    omega = np.linspace(-20, 20, 400)#+1e-11j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
@@ -47,3 +47,9 @@ def lehmann(eig_e, eig_states, d_dag, beta):
                  (np.exp(-beta*eig_e[i]) + np.exp(-beta*eig_e[j])) / \
                  (omega + eig_e[i] - eig_e[j])
     return omega, G / zet
+
+def free_green(e_d, mu, e_c, hyb):
+    """Outputs the Green's Function of the free propagator of the impurity"""
+    omega = np.linspace(-20, 20, 400)  # +1e-11j
+    hyb2 = hyb**2
+    return (omega - e_c + mu) / ((omega - e_d + mu)*(omega - e_c + mu) - hyb2)
