@@ -12,6 +12,7 @@ from scipy.integrate import simps
 from slaveparticles.quantum import dos, fermion
 import matplotlib.pyplot as plt
 
+
 def m2_weight(t, g):
     x = np.linspace(-2*t, 2*t, g)
     return simps(x*x*dos.bethe_lattice(x, t), x)
@@ -25,7 +26,10 @@ class twosite(object):
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t, 200)
-        self.omega = np.linspace(-4, 4, 3500) + 8e-2j
+
+        self.omega = np.linspace(-4, 4, 3500) + 8e-2j  # Real axis
+#        self.omega = np.arange(1, 3500, 2) / self.beta   # Matsubara freq
+
         self.eig_energies = None
         self.eig_states = None
         self.oper = [fermion.destruct(4, index) for index in range(4)]
@@ -106,7 +110,7 @@ def out_plot(sim, spec):
         if 'sigma' == gfp:
             key = '$\Sigma$'
         if 'G' == gfp:
-            key == 'Lat G'
+            key = 'Lat G'
         if 'A' == gfp:
             plt.plot(w, -1/np.pi*sim.GF['Lat G'].imag, label='A')
             continue
@@ -116,7 +120,7 @@ def out_plot(sim, spec):
 
 if __name__ == "__main__":
 
-    sim = twosite(80, 0.5)
+    sim = twosite(80, 1)
     hyb = 0.5
     for i in range(5):
         hyb = sim.solve(1, 1, 2, hyb)
