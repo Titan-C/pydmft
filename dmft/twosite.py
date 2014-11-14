@@ -28,13 +28,12 @@ class twosite(object):
         self.m2 = m2_weight(t, 200)
 
         self.omega = np.linspace(-4, 4, 3500) + 8e-2j  # Real axis
-#        self.omega = np.arange(1, 3500, 2) / self.beta   # Matsubara freq
+#        self.omega = 1j*np.arange(1, 3500, 2) / self.beta   # Matsubara freq
 
         self.eig_energies = None
         self.eig_states = None
         self.oper = [fermion.destruct(4, index) for index in range(4)]
         self.GF = {}
-        self.solve(1, 1, 2, t)
 
     def hamiltonian(self, mu, e_c, u_int, hyb):
         """Two site single impurity anderson model"""
@@ -90,9 +89,10 @@ class twosite(object):
     def lattice_gf(self, mu):
         """Compute lattice green function"""
         G = []
+        betlat = dos.bethe_lattice(self.omega.real, self.t)
         for w, s_w in zip(self.omega, self.GF['$\Sigma$']):
-            integrable = lambda x: dos.bethe_lattice(x, self.t)/(w + mu - x - s_w)
-            G.append(simps(integrable(self.omega), self.omega))
+            integrable = betlat/(w + mu - self.omega.real - s_w)
+            G.append(simps(integrable, self.omega.real))
 
         return np.asarray(G)
 
@@ -119,9 +119,21 @@ def out_plot(sim, spec):
 
 
 if __name__ == "__main__":
+    res = []
+    for U in [0.2, .8, 1.5, 2, 2.5, 2.7, 3.2,4]:
+#
+        sim = twosite(80, 0.5)
+        hyb = 0.3#np.sqrt(sim.imp_z()*sim.m2)
+        f=plt.figure()
+        for i in range(12):
 
-    sim = twosite(80, 1)
-    hyb = 0.5
-    for i in range(5):
-        hyb = sim.solve(1, 1, 2, hyb)
-        out_plot(sim, 'A')
+            hyb = sim.solve(U/2, U/2, U, hyb)
+            out_plot(sim, 'A')
+        plt.legend()
+        plt.title('U={}'.format(U))
+        plt.ylabel('A($\omega$)')
+        plt.xlabel('$\omega$')
+        f.savefig('Af_{:.2f}.png'.format(U), format='png',
+              transparent=False, bbox_inches='tight', pad_inches=0.05)
+        plt.close(f)
+        res.append((U, sim))
