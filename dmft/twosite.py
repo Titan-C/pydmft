@@ -39,7 +39,7 @@ def ocupation(eig_e, eig_states):
 
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-6, 8, 3500) +2.1e-2j
+    omega = np.linspace(-4, 4, 3500) +55e-3j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
@@ -78,20 +78,22 @@ def m2_weight(t,g):
     return simps(x*x*dos.bethe_lattice(x,t),x)
 
 t=1
+U=1
 m2 = m2_weight(t,200)
 
-e_d, mu, e_c, u_int, hyb = 0,0.2,0.8,5,hyb
+e_d, mu, e_c, u_int, hyb = 0,U/2,U/2,U,hyb
 E,V=update_H(e_d, mu, e_c, u_int, hyb)
 w,impG = lehmann(E,V,f_destruct(4,0).T,1e5)
 impG_0=free_green(e_d, mu, e_c, hyb, w)
 sigma=1/impG_0 - 1/impG
 latG=lattice_green(mu, sigma, w, t)
-plt.plot(w.real,impG.real,w.real,impG.imag)#,w.real,impG_0)
-plt.plot(w.real,impG_0.real,'--',w.real,impG_0.imag,'--')
-plt.figure()
-plt.plot(w.real,latG.real,w.real,latG.imag)
+#plt.plot(w.real,impG.real,w.real,impG.imag)#,w.real,impG_0)
+#plt.plot(w.real,impG_0.real,'--',w.real,impG_0.imag,'--')
+#plt.figure()
+#plt.plot(w.real,latG.real)
+plt.plot(w.real,-1/np.pi*latG.imag)
 
-hyb=quasiparticle_weight(w, sigma)*m2
+hyb=np.sqrt(quasiparticle_weight(w, sigma)*m2)
 print('n_lattice=', lattice_ocupation(latG,w))
 print('n_imp=', ocupation(E,V))
 #
