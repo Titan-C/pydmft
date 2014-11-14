@@ -39,7 +39,7 @@ def ocupation(eig_e, eig_states):
 
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-4, 4, 3500) +55e-3j
+    omega = np.linspace(-4, 4, 3500) +80e-3j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
@@ -56,7 +56,7 @@ def free_green(e_d, mu, e_c, hyb, omega):
     return (omega - e_c + mu) / ((omega - e_d + mu)*(omega - e_c + mu) - hyb2)
 
 def quasiparticle_weight(w, sigma):
-    return 1/(1-np.mean(np.gradient(sigma.real)[(-0.0025<=w.real) * (w.real<=0.0025)]))
+    return 1/(1-np.mean(np.gradient(sigma.real,0.0022863675335811351)[(-0.025<=w.real) * (w.real<=0.025)]))
 
 
 from scipy.integrate import simps
@@ -77,8 +77,8 @@ def m2_weight(t,g):
     x=np.linspace(-2*t,2*t,g)
     return simps(x*x*dos.bethe_lattice(x,t),x)
 
-t=1
-U=1
+t=0.5
+U=4
 m2 = m2_weight(t,200)
 
 e_d, mu, e_c, u_int, hyb = 0,U/2,U/2,U,hyb
@@ -94,6 +94,7 @@ latG=lattice_green(mu, sigma, w, t)
 plt.plot(w.real,-1/np.pi*latG.imag)
 
 hyb=np.sqrt(quasiparticle_weight(w, sigma)*m2)
+print(quasiparticle_weight(w,sigma))
 print('n_lattice=', lattice_ocupation(latG,w))
 print('n_imp=', ocupation(E,V))
 #
