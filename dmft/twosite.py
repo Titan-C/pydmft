@@ -61,11 +61,11 @@ def quasiparticle_weight(w, sigma):
 
 from scipy.integrate import simps
 from slaveparticles.quantum import dos
-def lattice_green(mu, sigma, omega):
+def lattice_green(mu, sigma, omega, t):
     """Compute lattice green function"""
     G = []
     for w, s_w in zip(omega, sigma):
-        integrable = lambda x: dos.bethe_lattice(x, 2)/(w + mu - x - s_w)
+        integrable = lambda x: dos.bethe_lattice(x, t)/(w + mu - x - s_w)
         G.append(simps(integrable(omega), omega))
 
     return np.asarray(G)
@@ -73,15 +73,27 @@ def lattice_green(mu, sigma, omega):
 def lattice_ocupation(latG, w):
     return -2*simps(latG.imag[w.real<=0],w.real[w.real<=0])/np.pi
 
-e_d, mu, e_c, u_int, hyb = 0,0,0,4,0.3
+def m2_weight(t,g):
+    x=np.linspace(-2*t,2*t,g)
+    return simps(x*x*dos.bethe_lattice(x,t),x)
+
+t=1
+m2 = m2_weight(t,200)
+
+e_d, mu, e_c, u_int, hyb = 0,0.2,0.8,5,hyb
 E,V=update_H(e_d, mu, e_c, u_int, hyb)
 w,impG = lehmann(E,V,f_destruct(4,0).T,1e5)
 impG_0=free_green(e_d, mu, e_c, hyb, w)
 sigma=1/impG_0 - 1/impG
-latG=lattice_green(mu,sigma, w)
-#plt.plot(w.real,impG.real,w.real,impG.imag)#,w.real,impG_0)
+latG=lattice_green(mu, sigma, w, t)
+plt.plot(w.real,impG.real,w.real,impG.imag)#,w.real,impG_0)
+plt.plot(w.real,impG_0.real,'--',w.real,impG_0.imag,'--')
 plt.figure()
-plt.plot(w.real,latG.real,w.real,latG.imag,w.real,dos.bethe_lattice(w.real,2))
+plt.plot(w.real,latG.real,w.real,latG.imag)
+
+hyb=quasiparticle_weight(w, sigma)*m2
+print('n_lattice=', lattice_ocupation(latG,w))
+print('n_imp=', ocupation(E,V))
 #
 #plt.figure
 #for i in range(4):
