@@ -39,12 +39,12 @@ def ocupation(eig_e, eig_states):
 
 def lehmann(eig_e, eig_states, d_dag, beta):
     """Outputs the lehmann representation of the greens function"""
-    omega = np.linspace(-9, 11, 3500) +4e-3j
+    omega = np.linspace(-6, 8, 3500) +2.1e-2j
     zet = partition_func(beta, eig_e)
     G = 0
     for i in range(len(eig_e)):
         for j in range(len(eig_e)):
-            G += np.dot(eig_states[:, j].T, d_dag.dot(eig_states[:, i])) * \
+            G += np.dot(eig_states[:, j].T, d_dag.dot(eig_states[:, i]))**2 * \
                  (np.exp(-beta*eig_e[i]) + np.exp(-beta*eig_e[j])) / \
                  (omega + eig_e[i] - eig_e[j])
     return omega, G / zet
@@ -54,6 +54,9 @@ def free_green(e_d, mu, e_c, hyb, omega):
     """Outputs the Green's Function of the free propagator of the impurity"""
     hyb2 = hyb**2
     return (omega - e_c + mu) / ((omega - e_d + mu)*(omega - e_c + mu) - hyb2)
+
+def quasiparticle_weight(w, sigma):
+    return 1/(1-np.mean(np.gradient(sigma.real)[(-0.0025<=w.real) * (w.real<=0.0025)]))
 
 
 from scipy.integrate import simps
@@ -68,14 +71,21 @@ def lattice_green(mu, sigma, omega):
     return np.asarray(G)
 
 def lattice_ocupation(latG, w):
-    return simps(latG.imag[w.real<=0],w.real[w.real<=0])/np.pi
+    return -2*simps(latG.imag[w.real<=0],w.real[w.real<=0])/np.pi
 
-e_d, mu, e_c, u_int, hyb = 0,0,0,4,1
+e_d, mu, e_c, u_int, hyb = 0,0,0,4,0.3
 E,V=update_H(e_d, mu, e_c, u_int, hyb)
-w,G = lehmann(E,V,f_destruct(4,0).T,1e5)
-G_0=free_green(e_d, mu, e_c, hyb, w)
-sigma=1/G_0 - 1/G
+w,impG = lehmann(E,V,f_destruct(4,0).T,1e5)
+impG_0=free_green(e_d, mu, e_c, hyb, w)
+sigma=1/impG_0 - 1/impG
 latG=lattice_green(mu,sigma, w)
-plt.plot(w.real,G,w.real,G_0)
+#plt.plot(w.real,impG.real,w.real,impG.imag)#,w.real,impG_0)
 plt.figure()
 plt.plot(w.real,latG.real,w.real,latG.imag,w.real,dos.bethe_lattice(w.real,2))
+#
+#plt.figure
+#for i in range(4):
+#    w,G = lehmann(E,V,f_destruct(4,i).T,1e5)
+##    impG.append(G)
+#    plt.plot(w.real,G.real, label='Re G p{}'.format(i))
+##    plt.plot(w.real,G.imag, label='Im G p{}'.format(i))
