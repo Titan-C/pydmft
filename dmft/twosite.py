@@ -21,14 +21,19 @@ def m2_weight(t, g):
 class twosite(object):
     """DMFT solver for an impurity and a single bath site"""
 
-    def __init__(self, beta, t):
+    def __init__(self, beta, t, freq_axis):
         """Generates Operators and sets up environment"""
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t, 200)
+        self.freq_axis = freq_axis
 
-        self.omega = np.linspace(-4, 4, 3500) + 8e-2j  # Real axis
-#        self.omega = 1j*np.arange(1, 3500, 2) / self.beta   # Matsubara freq
+        if freq_axis == 'real':
+            self.omega = np.linspace(-4, 4, 3500) + 8e-2j  # Real axis
+        elif freq_axis == 'matsubara':
+            self.omega = 1j*np.arange(1, 3500, 2) / self.beta   # Matsubara freq
+        else:
+            raise ValueError('Set an working frequency axis')
 
         self.eig_energies = None
         self.eig_states = None
@@ -83,16 +88,21 @@ class twosite(object):
            of the self enerry"""
         w = self.omega.real
         sigma = self.GF['$\Sigma$']
-        dw = w[1]-w[0]
-        return 1/(1 - np.mean(np.gradient(sigma.real, dw)[(-dw <= w) * (w <= dw)]))
+        if self.freq_axis == 'real':
+            dw = w[1]-w[0]
+            return 1/(1 - np.mean(np.gradient(sigma.real, dw)[(-dw <= w) * (w <= dw)]))
+        else:
+            dw = 2/self.beta
+            return 1/(1 -np.gradient(sigma.imag[:5], dw)[0])
 
     def lattice_gf(self, mu):
         """Compute lattice green function"""
         G = []
-        betlat = dos.bethe_lattice(self.omega.real, self.t)
+        x = np.linspace(-4, 4, 3500)
+        betlat = dos.bethe_lattice(x, self.t)
         for w, s_w in zip(self.omega, self.GF['$\Sigma$']):
-            integrable = betlat/(w + mu - self.omega.real - s_w)
-            G.append(simps(integrable, self.omega.real))
+            integrable = betlat/(w + mu - x - s_w)
+            G.append(simps(integrable, x))
 
         return np.asarray(G)
 
@@ -100,8 +110,13 @@ class twosite(object):
         return -2*simps(latG.imag[w.real <= 0], w.real[w.real <= 0])/np.pi
 
 
-def out_plot(sim, spec):
-    w = sim.omega.real
+def out_plot(sim, spec, label=''):
+    w = sim.omega.imag
+    stl = '+-'
+    if sim.freq_axis == 'real':
+        w = sim.omega.real
+        stl = '-'
+
     for gfp in spec.split():
         if 'impG' == gfp:
             key = 'Imp G'
@@ -112,28 +127,27 @@ def out_plot(sim, spec):
         if 'G' == gfp:
             key = 'Lat G'
         if 'A' == gfp:
-            plt.plot(w, -1/np.pi*sim.GF['Lat G'].imag, label='A')
+            plt.plot(w, -1/np.pi*sim.GF['Lat G'].imag, stl, label='A '+label)
             continue
-        plt.plot(w, sim.GF[key].real, label='Re {}'.format(key))
-        plt.plot(w, sim.GF[key].real, label='Im {}'.format(key))
+#        plt.plot(w, sim.GF[key].real, stl, label='Re {} {}'.format(key, label))
+        plt.plot(w, sim.GF[key].imag, stl, label='Im {} {}'.format(key, label))
 
 
 if __name__ == "__main__":
     res = []
-    for U in [0.2, .8, 1.5, 2, 2.5, 2.7, 3.2,4]:
+    for U in np.linspace(-4, 4, 3500):
 #
-        sim = twosite(80, 0.5)
+        sim = twosite(80, 0.5, 'matsubara')
         hyb = 0.3#np.sqrt(sim.imp_z()*sim.m2)
         f=plt.figure()
         for i in range(12):
-
             hyb = sim.solve(U/2, U/2, U, hyb)
-            out_plot(sim, 'A')
+            out_plot(sim, 'sigma', 'loop {}'.format(i))
         plt.legend()
-        plt.title('U={}'.format(U))
+        plt.title('U={}, hyb={}'.format(U,hyb))
         plt.ylabel('A($\omega$)')
         plt.xlabel('$\omega$')
-        f.savefig('Af_{:.2f}.png'.format(U), format='png',
+        f.savefig('Sigma_iw_{:.2f}.png'.format(U), format='png',
               transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(f)
         res.append((U, sim))
