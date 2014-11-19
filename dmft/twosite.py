@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-The two site DMFT approach given by M. Potthoff PRB 64, 165114 (2001)
+Two Site Dynamical Mean Field Theory
+====================================
+The two site DMFT approach given by M. Potthoff[Potthoff2001]_ on how to
+treat the impurity bath as a sigle site of the DMFT. Work is around a single
+impurity Anderson model.
 
-@author: oscar
+.. [Potthoff2001] M. Potthoff PRB, 64, 165114, 2001
+
 """
 
 from __future__ import division, absolute_import, print_function
@@ -14,6 +19,8 @@ import matplotlib.pyplot as plt
 
 
 def m2_weight(t, g):
+    """Calculates the :math:`M_2^{(0)}=\int dx x^2 \rho_0(x)` which is the
+       variance of the non-interacting density of eig_states"""
     x = np.linspace(-2*t, 2*t, g)
     return simps(x*x*dos.bethe_lattice(x, t), x)
 
@@ -22,18 +29,31 @@ class twosite(object):
     """DMFT solver for an impurity and a single bath site"""
 
     def __init__(self, beta, t, freq_axis):
-        """Generates Operators and sets up environment"""
+        """Sets up environment
+           Parameters
+           ----------
+           beta : float
+                  Inverse temperature of the system
+           t : float
+               Hopping amplitude between first neighbor lattice sites
+           freq_axis: string
+                      'real' or 'matsubara' frequencies
+
+            Attributes
+            ----------
+            GF : dictionary
+                 Stores the Green functions and self enerry"""
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t, 200)
         self.freq_axis = freq_axis
 
         if freq_axis == 'real':
-            self.omega = np.linspace(-4, 4, 3500) + 8e-2j  # Real axis
+            self.omega = np.linspace(-4, 4, 3500) + 8e-2j
         elif freq_axis == 'matsubara':
-            self.omega = 1j*np.arange(1, 3500, 2) / self.beta   # Matsubara freq
+            self.omega = 1j*np.arange(1, 3500, 2) / self.beta
         else:
-            raise ValueError('Set an working frequency axis')
+            raise ValueError('Set a working frequency axis')
 
         self.eig_energies = None
         self.eig_states = None
@@ -41,8 +61,16 @@ class twosite(object):
         self.GF = {}
 
     def hamiltonian(self, mu, e_c, u_int, hyb):
-        """Two site single impurity anderson model"""
+        """Two site single impurity anderson model
+
+           .. math:
+              \mathcal{H} = -\mu d^\dagger_\sigma d_sigma
+              + (\epsilon - \mu) c^\dagger_\sigma c_\sigma +
+              U d^\dagger_\\uparrow d_\\uparrow d^\dagger_\downarrow d_\downarrow
+              + V(d^\dagger_\sigma c_\sigma + h.c.)"""
+
         d_up, d_dw, c_up, c_dw = self.oper
+
         return - mu*(d_up.T*d_up + d_dw.T*d_dw) + \
             (e_c - mu)*(c_up.T*c_up + c_dw.T*c_dw) + \
             u_int*d_up.T*d_up*d_dw.T*d_dw + \
@@ -96,7 +124,10 @@ class twosite(object):
             return 1/(1 -np.gradient(sigma.imag[:5], dw)[0])
 
     def lattice_gf(self, mu):
-        """Compute lattice green function"""
+        """Compute lattice green function
+
+        .. math:
+            G(\omega) = \int \frac{\rho_0(x) dx}{\omega + i\eta + \mu + x + \Sigma(w)}"""
         G = []
         x = np.linspace(-4, 4, 3500)
         betlat = dos.bethe_lattice(x, self.t)
@@ -129,25 +160,25 @@ def out_plot(sim, spec, label=''):
         if 'A' == gfp:
             plt.plot(w, -1/np.pi*sim.GF['Lat G'].imag, stl, label='A '+label)
             continue
-#        plt.plot(w, sim.GF[key].real, stl, label='Re {} {}'.format(key, label))
+        plt.plot(w, sim.GF[key].real, stl, label='Re {} {}'.format(key, label))
         plt.plot(w, sim.GF[key].imag, stl, label='Im {} {}'.format(key, label))
 
 
 if __name__ == "__main__":
     res = []
     for U in np.linspace(-4, 4, 3500):
-#
+
         sim = twosite(80, 0.5, 'matsubara')
-        hyb = 0.3#np.sqrt(sim.imp_z()*sim.m2)
-        f=plt.figure()
+        hyb = 0.5  # np.sqrt(sim.imp_z()*sim.m2)
+        fig = plt.figure()
         for i in range(12):
             hyb = sim.solve(U/2, U/2, U, hyb)
             out_plot(sim, 'sigma', 'loop {}'.format(i))
         plt.legend()
-        plt.title('U={}, hyb={}'.format(U,hyb))
+        plt.title('U={}, hyb={}'.format(U, hyb))
         plt.ylabel('A($\omega$)')
         plt.xlabel('$\omega$')
-        f.savefig('Sigma_iw_{:.2f}.png'.format(U), format='png',
-              transparent=False, bbox_inches='tight', pad_inches=0.05)
-        plt.close(f)
+        fig.savefig('Sigma_iw_{:.2f}.png'.format(U), format='png',
+                    transparent=False, bbox_inches='tight', pad_inches=0.05)
+        plt.close(fig)
         res.append((U, sim))
