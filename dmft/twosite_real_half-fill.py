@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for U in np.arange(0, 4, 0.2):
 
         sim = twosite(80, 0.5, 'real')
-        hyb = 0.5  # np.sqrt(sim.imp_z()*sim.m2)
+        hyb = 0.05  # np.sqrt(sim.imp_z()*sim.m2)
         fig = plt.figure()
         for i in range(80):
             old = hyb
@@ -28,8 +28,20 @@ if __name__ == "__main__":
         plt.title('U={}, hyb={}'.format(U, hyb))
         plt.ylabel('A($\omega$)')
         plt.xlabel('$\omega$')
-        fig.savefig('Aw_halffill_{:.2f}.png'.format(U), format='png',
+        fig.savefig('Aw_halffill_Ins{:.2f}.png'.format(U), format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
         res.append((U, sim))
-    np.save('realax_halffill', res)
+    np.save('realax_halffill_ins', res)
+
+    for U, sim in res:
+        fig = plt.figure()
+        out_plot(sim, 'A', '')
+
+        plt.legend()
+        plt.title('U={}, hyb={}'.format(U, np.sqrt(sim.imp_z()*sim.m2)))
+        plt.ylabel('A($\omega$)')
+        plt.xlabel('$\omega$')
+        fig.savefig('Aw_halffill_end_Ins{:.2f}.png'.format(U), format='png',
+                    transparent=False, bbox_inches='tight', pad_inches=0.05)
+        plt.close(fig)
