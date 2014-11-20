@@ -12,7 +12,8 @@ from twosite import twosite, out_plot
 
 if __name__ == "__main__":
     res = []
-    for U in np.arange(0, 4, 0.2):
+    u_int = np.arange(0, 4, 0.2)
+    for U in u_int:
 
         sim = twosite(80, 0.5, 'real')
         hyb = 0.05  # np.sqrt(sim.imp_z()*sim.m2)
@@ -50,9 +51,10 @@ if __name__ == "__main__":
     zet = []
     for U, sim in res:
         zet.append(sim.imp_z())
-    plt.plot(res[:,0], zet)
+    plt.plot(u_int, zet,'+-', label='2 site DMFT')
+    plt.plot(u_int, 1-u_int.clip(0,3)**2/9, '--', label='Gutwiller $1-U^2/U_c^2)
     plt.legend()
-    plt.title('Quasiparticle weigth of the impurity)
+    plt.title('Quasiparticle weigth of the impurity')
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig('Quasiparticle.png', format='png',
