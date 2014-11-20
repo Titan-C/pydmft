@@ -57,7 +57,7 @@ def ev_on_loops(n_loops, U, beta, t):
     """Studies change of Green's function depending on DMFT loop count"""
 # open 2 panels top (t) and bottom (b)
 
-    f, (ax1, ax2, ax3) = subplots(3, 1)
+    plt_env = subplots(3, 1)
 
     for loop in n_loops:
         S = IPTSolver(beta=beta)
@@ -66,49 +66,59 @@ def ev_on_loops(n_loops, U, beta, t):
         S.gdw <<= inverse(iOmega_n - 0.1 + 0.5j)
 
         S.dmft_loop(loop, t, U)
-        ax1.oplot(S.sigmaup, '-o', RI='I', x_window=(0, 2),
-                  label="$\uparrow$ nl={}".format(loop))
-        ax1.oplot(S.sigmadw, '-o', RI='I', x_window=(0, 2),
-                  label="$\downarrow$ nl={}".format(loop))
-        ax1.set_ylabel('$\Sigma(i\omega_n)$')
+        plot_GSG(S, loop, plt_env)
 
-        ax2.oplot(S.g0tup, label="$\uparrow$ nl={}".format(loop))
-        ax2.oplot(S.g0tdw, label="$\downarrow$ nl={}".format(loop))
+    plt_env[1][0].set_ylim(-2, 0)
+    plt_env[0].savefig('gf_{:.2f}.png'.format(U), format='png',
+                       transparent=False, bbox_inches='tight', pad_inches=0.05)
+    plt.close(plt_env[0])
 
-        grealup = GfReFreq(indices=[1], window=(-4, 4), n_points=400)
-        grealdw = grealup.copy()
-        grealup.set_from_pade(S.gup, 201, 0.0)
-        grealdw.set_from_pade(S.gdw, 201, 0.0)
-        ax3.oplot(grealup, RI='I', label="$\uparrow$  nl={}".format(loop))
-        ax3.oplot(grealdw, '--', RI='I',
-                  label="$\downarrow$ nl={}".format(loop))
-        ax3.set_ylim(-2, 0)
 
-    ax1.set_title("Green's functions, IPT, Bethe lattice,"
-                  "$\\beta={:.2f}$, $U={:.2f}$".format(beta, U))
-    f.savefig('gf_{:.2f}.png'.format(U), format='png',
-              transparent=False, bbox_inches='tight', pad_inches=0.05)
-    plt.close(f)
+def plot_GSG(S, loop, plt_env):
+    """Takes an IPT Solver and plots 3 subplots showing the selfenergy
+       , the greensfunction in matsubara frequencies and the greens function
+       int the real axis"""
+    nl = ""#"  nl={}".format(loop)
+
+    for i, ax in enumerate(plt_env[1]):
+        if i == 0:
+            grealup = GfReFreq(indices=[1], window=(-4, 4), n_points=400)
+            grealdw = grealup.copy()
+            grealup.set_from_pade(S.gup, 201, 0.0)
+            grealdw.set_from_pade(S.gdw, 201, 0.0)
+            ax.oplot(grealup, RI='S', label="$\uparrow$"+nl)
+            ax.oplot(grealdw, '--', RI='S',
+                     label="$\downarrow$"+nl)
+            ax.set_ylabel('$A(\omega)$')
+        if i == 1:
+            ax.oplot(S.gup, '-o', RI='I', x_window=(0, 5),
+                     label="$\uparrow$"+nl)
+            ax.oplot(S.gdw, '-+', RI='I', x_window=(0, 5),
+                     label="$\downarrow$"+nl)
+        if i == 2:
+            ax.oplot(S.sigmaup, '-o', RI='I', x_window=(0, 5),
+                     label="$\uparrow$"+nl)
+            ax.oplot(S.sigmadw, '-+', RI='I', x_window=(0, 5),
+                     label="$\downarrow$"+nl)
+            ax.set_ylabel('$\Sigma(i\omega_n)$')
+        if i == 3:
+            ax.oplot(S.g0tup, '-', label="$\uparrow$"+nl)
+            ax.oplot(S.g0tdw, '--', label="$\downarrow$"+nl)
+
+    plt_env[1][0].set_title("Green's functions, IPT, Bethe lattice,"
+                            "$\\beta={:.2f}$, $U={:.2f}$".format(beta, U))
+
+
+def AFM_follow(S, t, U, loops):
+    """Follows the Metal to insulator transition promoting keeping old GF"""
+
+    S.gup <<= inverse(iOmega_n + 0.1 + 0.5j)
+    S.gdw <<= inverse(iOmega_n - 0.1 + 0.5j)
+    S.dmft_loop(loops, t, U)
+
+    plot_GSG(S, loops, subplots(4, 1))
 
 
 if __name__ == "__main__":
-    for u_int in np.linspace(0, 4, 40):
-        ev_on_loops([20], u_int, 35, 0.5)
-
-# Get the real-axis with Pade approximants
-#        greal = GfReFreq(indices = [1], window = (-4.0,4.0), n_points = 400)
-#        greal.set_from_pade(S.g, 201, 0.0)
-
-        # Generate the plot
-
-
-#    plt.xlim(-4,4)
-#    plt.ylim(0,0.7)
-#    plt.ylabel("$A(\omega)$")
-#    plt.title("Local DOS, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$"%(beta,U))
-
-#    # Save the plot in a file
-#    fig.savefig("dos_%s"%U, format="png", transparent=False)
-#    dos_files.append("dos_%s"%U)
-#    plt.close(fig)
+    AFM_follow(S=IPTSolver(beta=40), t=0.5, U=2.7, loops=55)
 

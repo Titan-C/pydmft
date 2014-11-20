@@ -45,3 +45,16 @@ if __name__ == "__main__":
         fig.savefig('Aw_halffill_end_Ins{:.2f}.png'.format(U), format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
+
+    fig = plt.figure()
+    zet = []
+    for U, sim in res:
+        zet.append(sim.imp_z())
+    plt.plot(res[:,0], zet)
+    plt.legend()
+    plt.title('Quasiparticle weigth of the impurity)
+    plt.ylabel('Z')
+    plt.xlabel('U/D')
+    fig.savefig('Quasiparticle.png', format='png',
+                transparent=False, bbox_inches='tight', pad_inches=0.05)
+    plt.close(fig)
