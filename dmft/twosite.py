@@ -52,7 +52,7 @@ class twosite(object):
 
         self.x = np.linspace(-4, 4, 800)
         if freq_axis == 'real':
-            self.omega = self.x + 1e-6j
+            self.omega = self.x# + 1e-6j
         elif freq_axis == 'matsubara':
             self.omega = 1j*np.arange(1, 400, 2) / self.beta
         else:
@@ -128,13 +128,19 @@ class twosite(object):
         w = self.omega.real
         sigma = self.GF['$\Sigma$']
         if self.freq_axis == 'real':
-            dw = w[1]-w[0]
-            sigma = sigma[(-dw <= w) * (w <= dw)]
-            zet = 1/(1 - (sigma[-1]-sigma[0])/2/dw)
-            return zet
+            dw = 0.03
+            interval = (-dw <= w) * (w <= dw)
+            sigma = sigma.real[interval]
+            dsigma = np.polyfit(w[interval], sigma, 1)[0]
+            zet = 1/(1 - dsigma)
         else:
-            dw = 2/self.beta
-            return 1/(1 - np.gradient(sigma.imag[:5], dw)[0])
+            dw = 1/self.beta
+            zet = 1/(1 - sigma.imag[0]/dw)
+
+        if zet < 1e-3:
+            return 0.
+        else:
+            return zet
 
     def lattice_ocupation(latG, w):
         return -2*simps(latG.imag[w.real <= 0], w.real[w.real <= 0])/np.pi
@@ -177,22 +183,33 @@ def out_plot(sim, spec, label=''):
 
 if __name__ == "__main__":
     res = []
-    for U in [4]:
-
+    hyb = 0.4
+    for U in [2.5]:
         sim = twosite(50, 0.5, 'real')
-        hyb = 0.32041  # np.sqrt(sim.imp_z()*sim.m2)
-        fig = plt.figure()
-        for i in range(12):
+        for i in range(80):
             old = hyb
             hyb = sim.solve(U/2, U/2, U, old)
-            out_plot(sim, 'sigma', 'loop {}'.format(i))
-            if np.abs(old - hyb) < 1e-6:
+            print(hyb)
+#            out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
+            if 0.05 < hyb < .27:
+                hyb = hyb*0.5+0.5*0.27
+                print('br')
+            if np.abs(old - hyb) < 5e-4:
                 break
+        print('bao')
 
+        hyb = sim.solve(U/2, U/2, U, hyb)
+        out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
+        gf=lattice_gf(sim, U/2, 7e-3)
+        plt.plot(sim.omega.real, -1/np.pi*gf.imag, '-',
+                 label='U={}, hyb={:.3f}, Z={:.3f}'.format(U, hyb, sim.imp_z()))
         plt.legend()
-        plt.title('U={}, hyb={}'.format(U, hyb))
+        plt.ylim([-1,1])
+
+        plt.title('U={}, hyb={}, Z={}'.format(U, hyb, sim.imp_z()))
         plt.ylabel('A($\omega$)')
         plt.xlabel('$\omega$')
+
 #        fig.savefig('Sigma_iw_{:.2f}.png'.format(U), format='png',
 #                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 #        plt.close(fig)
