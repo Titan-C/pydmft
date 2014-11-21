@@ -52,7 +52,7 @@ class twosite(object):
 
         self.x = np.linspace(-4, 4, 800)
         if freq_axis == 'real':
-            self.omega = self.x# + 1e-6j
+            self.omega = self.x # + 1e-6j
         elif freq_axis == 'matsubara':
             self.omega = 1j*np.arange(1, 400, 2) / self.beta
         else:
@@ -108,13 +108,7 @@ class twosite(object):
         self.GF['$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
         return np.sqrt(self.imp_z()*self.m2)
 
-    def imp_ocupation(self):
-        """gets the ocupation of the impurity"""
-        d_up, d_dw, c_up, c_dw = self.oper
-        n_up = self.expected((d_up.T*d_up).todense())
-        n_dw = self.expected((d_dw.T*d_dw).todense())
 
-        return n_up, n_dw
 
     def imp_free_gf(self, mu, e_c, hyb):
         """Outputs the Green's Function of the free propagator of the impurity"""
@@ -142,8 +136,20 @@ class twosite(object):
         else:
             return zet
 
-    def lattice_ocupation(latG, w):
-        return -2*simps(latG.imag[w.real <= 0], w.real[w.real <= 0])/np.pi
+    def imp_ocupation(self):
+        """gets the ocupation of the impurity"""
+        d_up, d_dw, c_up, c_dw = self.oper
+        n_up = self.expected((d_up.T*d_up).todense())
+        n_dw = self.expected((d_dw.T*d_dw).todense())
+
+        return n_up, n_dw
+
+    def lattice_ocupation(self, mu):
+        w = self.omega.real[self.omega.real <= 0]
+        half_range = w + mu - self.GF['$\Sigma$'][:len(w)]
+        dosint = 2*simps(dos.bethe_lattice(half_range, sim.t), w)
+
+        return dosint
 
 
 def lattice_gf(sim, mu, wide=5e-3):
@@ -183,24 +189,22 @@ def out_plot(sim, spec, label=''):
 
 if __name__ == "__main__":
     res = []
-    hyb = 0.4
+    hyb = 0.3
     for U in [2.5]:
-        sim = twosite(50, 0.5, 'real')
+        sim = twosite(1e5, 0.5, 'real')
         for i in range(80):
             old = hyb
             hyb = sim.solve(U/2, U/2, U, old)
-            print(hyb)
 #            out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
-            if 0.05 < hyb < .27:
-                hyb = hyb*0.5+0.5*0.27
-                print('br')
-            if np.abs(old - hyb) < 5e-4:
+            if 2.5 < U < 3:
+                hyb = (hyb*0.7 + .3*old)
+
+            if np.abs(old - hyb) < 1e-4:
                 break
-        print('bao')
 
         hyb = sim.solve(U/2, U/2, U, hyb)
         out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
-        gf=lattice_gf(sim, U/2, 7e-3)
+        gf=lattice_gf(sim, U/2, 8e-3)
         plt.plot(sim.omega.real, -1/np.pi*gf.imag, '-',
                  label='U={}, hyb={:.3f}, Z={:.3f}'.format(U, hyb, sim.imp_z()))
         plt.legend()
