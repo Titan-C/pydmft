@@ -122,7 +122,7 @@ class twosite(object):
         w = self.omega.real
         sigma = self.GF['$\Sigma$']
         if self.freq_axis == 'real':
-            dw = 0.03
+            dw = 0.02
             interval = (-dw <= w) * (w <= dw)
             sigma = sigma.real[interval]
             dsigma = np.polyfit(w[interval], sigma, 1)[0]
