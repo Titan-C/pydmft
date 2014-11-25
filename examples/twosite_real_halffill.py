@@ -27,6 +27,23 @@ def plot_spectalfunc(res, name):
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
 
+
+def plot_feature(res, name, feature):
+    for U, zet, sim in res:
+        fig = plt.figure()
+        out_plot(sim, feature, '')
+
+        plt.legend()
+        plt.title('U={:.4f}, hyb={:.4f}'.format(U, np.sqrt(zet*sim.m2)))
+        if sim.freq_axis == 'real':
+            plt.xlabel('$\\omega$')
+        else:
+            plt.xlabel('$i\\omega_n$')
+        plt.ylim([0, 0.7])
+        fig.savefig('{}_{}_U{:.2f}.png'.format(name, feature, U), format='png',
+                    transparent=False, bbox_inches='tight', pad_inches=0.05)
+        plt.close(fig)
+
 if __name__ == "__main__":
     axis = 'matsubara'
     beta = 10
@@ -38,7 +55,9 @@ if __name__ == "__main__":
         res = metallic_loop(u_int, axis=axis, beta=beta, hop=0.5)
         np.save(out_file, res)
 
-    plot_spectalfunc(res, out_file)
+#    plot_spectalfunc(res, out_file)
+    plot_feature(res, out_file, 'sigma')
+
 
     fig = plt.figure()
     zet = res[:, 1]
