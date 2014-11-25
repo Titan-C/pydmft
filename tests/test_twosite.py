@@ -32,7 +32,6 @@ def test_mit_real():
 
 def test_matsubara():
     z_ref = np.array([1., 0.85714, 0.48826, 0.03748, 0.01218, 0.00735, 0.00631])
-
     zet = metallic_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05], axis='matsubara',
                         beta=10, hop=0.5)[:, 1]
 
