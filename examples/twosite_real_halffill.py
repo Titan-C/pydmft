@@ -10,15 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dmft.twosite import lattice_gf, out_plot, metallic_loop
 
-if __name__ == "__main__":
-    out_file = 'realax_halffill.npy'
-    u_int = np.arange(0, 3.2, 0.05)
-    try:
-        res = np.load(out_file)
-    except IOError:
-        res = metallic_loop(u_int, axis='real', beta=1e5, hop=0.5)
-        np.save(out_file, res)
 
+def plot_spectalfunc(res, name):
     for U, zet, sim in res:
         fig = plt.figure()
         sim.GF['Lat G'] = lattice_gf(sim, U/2)
@@ -30,9 +23,22 @@ if __name__ == "__main__":
         plt.title('U={:.4f}, hyb={:.4f}'.format(U, np.sqrt(zet*sim.m2)))
         plt.xlabel('$\\omega$')
         plt.ylim([0, 0.7])
-        fig.savefig('rhow_halffill_ins{:.2f}.png'.format(U), format='png',
+        fig.savefig(name+'rhow_U{:.2f}.png'.format(U), format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
+
+if __name__ == "__main__":
+    axis = 'matsubara'
+    beta = 10
+    out_file = axis+'_halffill_b'+str(beta)
+    u_int = np.arange(0, 3.2, 0.05)
+    try:
+        res = np.load(out_file+'.npy')
+    except IOError:
+        res = metallic_loop(u_int, axis=axis, beta=beta, hop=0.5)
+        np.save(out_file, res)
+
+    plot_spectalfunc(res, out_file)
 
     fig = plt.figure()
     zet = res[:, 1]
@@ -44,4 +50,4 @@ if __name__ == "__main__":
     plt.xlabel('U/D')
     fig.savefig('Quasiparticle_ins.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
-    plt.close(fig)
+#    plt.close(fig)

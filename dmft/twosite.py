@@ -105,7 +105,7 @@ class twosite(object):
         self.GF['Imp G'] = gf_lehmann(self.eig_energies, self.eig_states,
                                       d_up_dag, self.beta, self.omega)
         self.GF['Imp G$_0$'] = self.imp_free_gf(mu, e_c, hyb)
-        self.GF['$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
+        self.GF[r'$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
         return np.sqrt(self.imp_z()*self.m2)
 
     def imp_free_gf(self, mu, e_c, hyb):
@@ -118,7 +118,7 @@ class twosite(object):
         """Calculates the impurity quasiparticle weight from the real part
            of the self enerry"""
         w = self.omega
-        sigma = self.GF['$\Sigma$']
+        sigma = self.GF[r'$\Sigma$']
         if self.freq_axis == 'real':
             dw = w[1]-w[0]#0.02
             interval = (-dw <= w) * (w <= dw)
@@ -136,7 +136,7 @@ class twosite(object):
 
     def imp_ocupation(self):
         """gets the ocupation of the impurity"""
-        d_up, d_dw, c_up, c_dw = self.oper
+        d_up, d_dw = self.oper[:2]
         n_up = self.expected((d_up.T*d_up).todense())
         n_dw = self.expected((d_dw.T*d_dw).todense())
 
@@ -144,7 +144,7 @@ class twosite(object):
 
     def interacting_dos(self, mu):
         """Evaluates the interacting density of states"""
-        w = self.omega + mu - self.GF['$\Sigma$']
+        w = self.omega + mu - self.GF[r'$\Sigma$']
         return dos.bethe_lattice(w, self.t)
 
     def lattice_ocupation(self, mu):
@@ -159,7 +159,7 @@ def lattice_gf(sim, mu, wide=5e-3):
 
     .. math:: G(\\omega) = \\int \\frac{\\rho_0(x) dx}{\\omega + i\\eta + \\mu - \\Sigma(w) - x }"""
     G = []
-    var = sim.omega + mu - sim.GF['$\Sigma$'] + 1j*wide
+    var = sim.omega + mu - sim.GF[r'$\Sigma$'] + 1j*wide
     for w in var:
         integrable = sim.rho_0/(w - sim.x)
         G.append(simps(integrable, sim.x))
@@ -171,7 +171,7 @@ def out_plot(sim, spec, label=''):
     stl = '+-'
     if sim.freq_axis == 'real':
         w = sim.omega.real
-        stl = '+-'
+        stl = '-'
 
     for gfp in spec.split():
         if 'impG' == gfp:
@@ -179,7 +179,7 @@ def out_plot(sim, spec, label=''):
         if 'impG0' in gfp:
             key = 'Imp G$_0$'
         if 'sigma' == gfp:
-            key = '$\Sigma$'
+            key = r'$\Sigma$'
         if 'G' == gfp:
             key = 'Lat G'
         if 'A' == gfp:
@@ -190,8 +190,8 @@ def out_plot(sim, spec, label=''):
 
 
 def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
-                  beta=1e5, hop=0.5):
-    hyb = 0.4
+                  beta=1e5, hop=0.5, hyb = 0.4):
+    res = []
     for U in u_int:
         sim = twosite(beta, hop, axis)
         for i in range(80):
@@ -207,34 +207,5 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 if __name__ == "__main__":
-    res = []
-    hyb = 0.4
-    for U in [2.9, 3, 3.02]:
-        sim = twosite(10000, 0.5, 'real')
-        for i in range(80):
-            old = hyb
-            hyb = sim.solve(U/2, U/2, U, old)
-#            if 2.5 < U < 3:
-#                hyb = (hyb + old)/2
-            if np.abs(old - hyb) < 1e-4:
-                break
 
-        hyb = sim.solve(U/2, U/2, U, hyb)
-
-        hyb = sim.solve(U/2, U/2, U, hyb)
-        out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
-#        gf = lattice_gf(sim, U/2, 8e-3)
-#        plt.plot(sim.omega, -1/np.pi*gf.imag, '-',
-#                 label='U={}, hyb={:.3f}, Z={:.3f}'.format(U, hyb, sim.imp_z()))
-#
-#        plt.ylim([-1, 1])
-
-        plt.legend()
-        plt.title('U={}, hyb={}, Z={}'.format(U, hyb, sim.imp_z()))
-        plt.ylabel('A($\omega$)')
-        plt.xlabel('$\omega$')
-
-#        fig.savefig('Sigma_iw_{:.2f}.png'.format(U), format='png',
-#                    transparent=False, bbox_inches='tight', pad_inches=0.05)
-#        plt.close(fig)
-        res.append((U, sim))
+    res = metallic_loop([2.9, 3, 3.02])
