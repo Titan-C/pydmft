@@ -11,24 +11,25 @@ impurity Anderson model.
 """
 
 from __future__ import division, absolute_import, print_function
-from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import simps, quad
+from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 from slaveparticles.quantum import dos, fermion
 import matplotlib.pyplot as plt
 
 
-def m2_weight(t, g):
+def m2_weight(t):
     """Calculates the :math:`M_2^{(0)}=\int dx x^2 \rho_0(x)` which is the
        variance of the non-interacting density of eig_states"""
-    x = np.linspace(-2*t, 2*t, g)
-    return simps(x*x*dos.bethe_lattice(x, t), x)
+    second_moment = lambda x: x*x*dos.bethe_lattice(x, t)
+
+    return quad(second_moment, -2*t, 2*t)[0]
 
 
 class twosite(object):
     """DMFT solver for an impurity and a single bath site"""
 
-    def __init__(self, beta, t, freq_axis):
+    def __init__(self, beta, t, freq_axis, npoints=500):
         """Sets up environment
 
         Parameters
@@ -47,14 +48,14 @@ class twosite(object):
         """
         self.beta = beta
         self.t = t
-        self.m2 = m2_weight(t, 200)
+        self.m2 = m2_weight(t)
         self.freq_axis = freq_axis
 
-        self.x = np.linspace(-4, 4, 800)
+        self.x = np.linspace(-4, 4, npoints)
         if freq_axis == 'real':
-            self.omega = self.x # + 1e-6j
+            self.omega = self.x
         elif freq_axis == 'matsubara':
-            self.omega = 1j*np.arange(1, 400, 2) / self.beta
+            self.omega = 1j*np.arange(1, npoints, 2) / self.beta
         else:
             raise ValueError('Set a working frequency axis')
 
@@ -108,8 +109,6 @@ class twosite(object):
         self.GF['$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
         return np.sqrt(self.imp_z()*self.m2)
 
-
-
     def imp_free_gf(self, mu, e_c, hyb):
         """Outputs the Green's Function of the free propagator of the impurity"""
         hyb2 = hyb**2
@@ -119,10 +118,10 @@ class twosite(object):
     def imp_z(self):
         """Calculates the impurity quasiparticle weight from the real part
            of the self enerry"""
-        w = self.omega.real
+        w = self.omega
         sigma = self.GF['$\Sigma$']
         if self.freq_axis == 'real':
-            dw = 0.02
+            dw = w[1]-w[0]#0.02
             interval = (-dw <= w) * (w <= dw)
             sigma = sigma.real[interval]
             dsigma = np.polyfit(w[interval], sigma, 1)[0]
@@ -144,10 +143,14 @@ class twosite(object):
 
         return n_up, n_dw
 
+    def interacting_dos(self, mu):
+        """Evaluates the interacting density of states"""
+        w = self.omega + mu - self.GF['$\Sigma$']
+        return dos.bethe_lattice(w, self.t)
+
     def lattice_ocupation(self, mu):
-        w = self.omega.real[self.omega.real <= 0]
-        half_range = w + mu - self.GF['$\Sigma$'][:len(w)]
-        dosint = 2*simps(dos.bethe_lattice(half_range, sim.t), w)
+        w = self.omega[self.omega <= 0]
+        dosint = 2*simps(self.interacting_dos(mu)[:len(w)], w)
 
         return dosint
 
@@ -169,7 +172,7 @@ def out_plot(sim, spec, label=''):
     stl = '+-'
     if sim.freq_axis == 'real':
         w = sim.omega.real
-        stl = '-'
+        stl = '+-'
 
     for gfp in spec.split():
         if 'impG' == gfp:
@@ -189,27 +192,28 @@ def out_plot(sim, spec, label=''):
 
 if __name__ == "__main__":
     res = []
-    hyb = 0.3
-    for U in [2.5]:
-        sim = twosite(1e5, 0.5, 'real')
+    hyb = 0.4
+    for U in [2.9, 3, 3.02]:
+        sim = twosite(10000, 0.5, 'real')
         for i in range(80):
             old = hyb
             hyb = sim.solve(U/2, U/2, U, old)
-#            out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
-            if 2.5 < U < 3:
-                hyb = (hyb*0.7 + .3*old)
-
+#            if 2.5 < U < 3:
+#                hyb = (hyb + old)/2
             if np.abs(old - hyb) < 1e-4:
                 break
 
         hyb = sim.solve(U/2, U/2, U, hyb)
-        out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
-        gf=lattice_gf(sim, U/2, 8e-3)
-        plt.plot(sim.omega.real, -1/np.pi*gf.imag, '-',
-                 label='U={}, hyb={:.3f}, Z={:.3f}'.format(U, hyb, sim.imp_z()))
-        plt.legend()
-        plt.ylim([-1,1])
 
+        hyb = sim.solve(U/2, U/2, U, hyb)
+        out_plot(sim, 'sigma', 'loop {} hyb {}'.format(i, hyb))
+#        gf = lattice_gf(sim, U/2, 8e-3)
+#        plt.plot(sim.omega, -1/np.pi*gf.imag, '-',
+#                 label='U={}, hyb={:.3f}, Z={:.3f}'.format(U, hyb, sim.imp_z()))
+#
+#        plt.ylim([-1, 1])
+
+        plt.legend()
         plt.title('U={}, hyb={}, Z={}'.format(U, hyb, sim.imp_z()))
         plt.ylabel('A($\omega$)')
         plt.xlabel('$\omega$')
