@@ -15,7 +15,7 @@ from scipy.integrate import simps, quad
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 from slaveparticles.quantum import dos, fermion
 import matplotlib.pyplot as plt
-
+from scipy.optimize import fsolve
 
 def m2_weight(t):
     """Calculates the :math:`M_2^{(0)}=\\int  x^2 \\rho_0(x)dx` which is the
@@ -106,6 +106,9 @@ class twosite(object):
                                       d_up_dag, self.beta, self.omega)
         self.GF['Imp G$_0$'] = self.imp_free_gf(mu, e_c, hyb)
         self.GF[r'$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
+
+    def hyb_V(self):
+        """Returns the hybridization parameter :math:`V=\\sqrt{zM_2}`"""
         return np.sqrt(self.imp_z()*self.m2)
 
     def imp_free_gf(self, mu, e_c, hyb):
@@ -155,11 +158,35 @@ class twosite(object):
 
         return dosint
 
+    def selfconsitentcy(self, e_c, hyb, mu, u_int):
+        """Performs the selfconsistency loop"""
+        convergence = False
+        ne_ec = e_c
+        while not convergence:
+            old = hyb
+            old_ec = ne_ec
+            ne_ec = fsolve(self.restriction, old_ec, (mu, u_int, old), xtol=1e-2)[0]
+            self.solve(mu, ne_ec, u_int, hyb)
+            hyb = self.hyb_V()
+#            print('hyb'+str(hyb))
+            convergence = np.abs(old - hyb) < 1e-5\
+                and np.abs(self.restriction(ne_ec, mu, u_int, hyb)) < 1e-2
+
+        return e_c, hyb, mu
+
+    def restriction(self, e_c, mu, u_int, hyb):
+        """Lagrange multiplier in lattice slave spin"""
+#        print('e'+str(e_c))
+        self.solve(mu, float(e_c), u_int, hyb)
+        return np.sum(self.imp_ocupation())-self.lattice_ocupation(mu)
+
 
 def lattice_gf(sim, mu, wide=5e-3):
     """Compute lattice green function
 
-    .. math:: G(\\omega) = \\int \\frac{\\rho_0(x) dx}{\\omega + i\\eta + \\mu - \\Sigma(w) - x }"""
+    .. math::
+        G(\\omega) = \\int \\frac{\\rho_0(x) dx}{\\omega
+        + i\\eta + \\mu - \\Sigma(w) - x }"""
     G = []
     var = sim.omega + mu - sim.GF[r'$\Sigma$'] + 1j*wide
     for w in var:
@@ -198,7 +225,8 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
         sim = twosite(beta, hop, axis)
         for i in range(80):
             old = hyb
-            hyb = sim.solve(U/2, U/2, U, old)
+            sim.solve(U/2, U/2, U, old)
+            hyb = sim.hyb_V()
             if 2.5 < U < 3:
                 hyb = (hyb + old)/2
             if np.abs(old - hyb) < 1e-5:
@@ -210,4 +238,9 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
 if __name__ == "__main__":
 
-    res = metallic_loop([2.5])[0][2]
+    sim = metallic_loop([2])[0, 2]
+    ecc =1.0
+    for mu in [1, 0.9, 0.8, 0.7, 0.6, 0.5]:
+        old_e = ecc
+        ecc, hyb, mu = sim.selfconsitentcy(old_e,sim.hyb_V(),mu,2)
+        print(ecc, hyb, mu, sim.lattice_ocupation(mu))
