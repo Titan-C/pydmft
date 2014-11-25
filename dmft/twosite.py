@@ -2,12 +2,11 @@
 """
 Two Site Dynamical Mean Field Theory
 ====================================
-The two site DMFT approach given by M. Potthoff[Potthoff2001]_ on how to
+The two site DMFT approach given by M. Potthoff [Potthoff2001]_ on how to
 treat the impurity bath as a sigle site of the DMFT. Work is around a single
 impurity Anderson model.
 
 .. [Potthoff2001] M. Potthoff PRB, 64, 165114, 2001
-
 """
 
 from __future__ import division, absolute_import, print_function
@@ -19,33 +18,33 @@ import matplotlib.pyplot as plt
 
 
 def m2_weight(t):
-    """Calculates the :math:`M_2^{(0)}=\int dx x^2 \rho_0(x)` which is the
-       variance of the non-interacting density of eig_states"""
+    """Calculates the :math:`M_2^{(0)}=\\int  x^2 \\rho_0(x)dx` which is the
+       variance of the non-interacting density of states of a Bethe Lattice"""
     second_moment = lambda x: x*x*dos.bethe_lattice(x, t)
 
     return quad(second_moment, -2*t, 2*t)[0]
 
 
 class twosite(object):
-    """DMFT solver for an impurity and a single bath site"""
+    """DMFT solver for an impurity and a single bath site
+
+    Sets up environment
+
+    Parameters
+    ----------
+    beta : float
+           Inverse temperature of the system
+    t : float
+        Hopping amplitude between first neighbor lattice sites
+    freq_axis : string
+               'real' or 'matsubara' frequencies
+
+    Attributes
+    ----------
+    GF : dictionary
+         Stores the Green functions and self energy"""
 
     def __init__(self, beta, t, freq_axis, npoints=500):
-        """Sets up environment
-
-        Parameters
-        ----------
-        beta : float
-               Inverse temperature of the system
-        t : float
-            Hopping amplitude between first neighbor lattice sites
-        freq_axis: string
-                   'real' or 'matsubara' frequencies
-
-         Attributes
-         ----------
-         GF : dictionary
-              Stores the Green functions and self enerry
-        """
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t)
@@ -70,11 +69,11 @@ class twosite(object):
         """Two site single impurity anderson model
         generate the matrix operators that will be used for this hamiltonian
 
-        .. math:
-           \mathcal{H} = -\mu d^\dagger_\sigma d_sigma
-           + (\epsilon - \mu) c^\dagger_\sigma c_\sigma +
-           U d^\dagger_\\uparrow d_\\uparrow d^\dagger_\downarrow d_\downarrow
-           + V(d^\dagger_\sigma c_\sigma + h.c.)"""
+        .. math::
+           \\mathcal{H} = -\\mu d^\\dagger_\\sigma d_\\sigma
+           + (\\epsilon - \\mu) c^\\dagger_\\sigma c_\\sigma +
+           U d^\\dagger_\\uparrow d_\\uparrow d^\\dagger_\\downarrow d_\\downarrow
+           + V(d^\\dagger_\\sigma c_\\sigma + h.c.)"""
 
         d_up, d_dw, c_up, c_dw = self.oper
 
@@ -158,7 +157,7 @@ class twosite(object):
 def lattice_gf(sim, mu, wide=5e-3):
     """Compute lattice green function
 
-    .. math: G(\\omega) = \\int \\frac{\\rho_0(x) dx}{\\omega + i\\eta + \\mu + x + \\Sigma(w)}"""
+    .. math:: G(\\omega) = \\int \\frac{\\rho_0(x) dx}{\\omega + i\\eta + \\mu - \\Sigma(w) - x }"""
     G = []
     var = sim.omega + mu - sim.GF['$\Sigma$'] + 1j*wide
     for w in var:
@@ -189,6 +188,23 @@ def out_plot(sim, spec, label=''):
         plt.plot(w, sim.GF[key].real, stl, label='Re {} {}'.format(key, label))
         plt.plot(w, sim.GF[key].imag, stl+'-', label='Im {} {}'.format(key, label))
 
+
+def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
+                  beta=1e5, hop=0.5):
+    hyb = 0.4
+    for U in u_int:
+        sim = twosite(beta, hop, axis)
+        for i in range(80):
+            old = hyb
+            hyb = sim.solve(U/2, U/2, U, old)
+            if 2.5 < U < 3:
+                hyb = (hyb + old)/2
+            if np.abs(old - hyb) < 1e-5:
+                break
+
+        hyb = sim.solve(U/2, U/2, U, hyb)
+        res.append((U, sim.imp_z(), sim))
+    return np.asarray(res)
 
 if __name__ == "__main__":
     res = []

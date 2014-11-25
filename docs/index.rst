@@ -8,10 +8,8 @@ Welcome to Learn DMFT's documentation!
 
 Contents:
 
-.. toctree::
-   :maxdepth: 2
-
-
+.. automodule:: dmft.twosite
+    :members:
 
 Indices and tables
 ==================
