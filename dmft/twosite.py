@@ -141,11 +141,7 @@ class twosite(object):
 
     def imp_ocupation(self):
         """gets the ocupation of the impurity"""
-        d_up, d_dw = self.oper[:2]
-        n_up = self.expected((d_up.T*d_up).todense())
-        n_dw = self.expected((d_dw.T*d_dw).todense())
-
-        return n_up, n_dw
+        return [self.expected((f.T*f).todense()) for f in self.oper[:2]]
 
     def interacting_dos(self, mu):
         """Evaluates the interacting density of states"""
@@ -155,8 +151,12 @@ class twosite(object):
     def lattice_ocupation(self, mu):
         w = self.omega[self.omega <= 0]
         dosint = 2*simps(self.interacting_dos(mu)[:len(w)], w)
-
         return dosint
+
+    def find_mu(self, target_n, u_int):
+        """Find the required chemical potential to give the required filling"""
+        zero = lambda mu: self.lattice_ocupation(mu) - target_n
+        return fsolve(zero, u_int*target_n/2)[0]
 
     def selfconsitentcy(self, e_c, hyb, mu, u_int):
         """Performs the selfconsistency loop"""
@@ -232,7 +232,8 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
             if np.abs(old - hyb) < 1e-5:
                 break
 
-        hyb = sim.solve(U/2, U/2, U, hyb)
+        sim.solve(U/2, U/2, U, hyb)
+        hyb = sim.hyb_V()
         res.append((U, sim.imp_z(), sim))
     return np.asarray(res)
 
