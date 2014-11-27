@@ -44,7 +44,7 @@ class twosite(object):
     GF : dictionary
          Stores the Green functions and self energy"""
 
-    def __init__(self, beta, t, freq_axis, npoints=500):
+    def __init__(self, beta, t, freq_axis, npoints=600):
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t)
@@ -64,16 +64,17 @@ class twosite(object):
         self.oper = [fermion.destruct(4, index) for index in range(4)]
         self.H_operators = self.hamiltonian()
         self.GF = {}
+        self.solve(0, 0, 0, 0)
 
     def hamiltonian(self):
-        """Two site single impurity anderson model
+        r"""Two site single impurity anderson model
         generate the matrix operators that will be used for this hamiltonian
 
         .. math::
-           \\mathcal{H} = -\\mu d^\\dagger_\\sigma d_\\sigma
-           + (\\epsilon - \\mu) c^\\dagger_\\sigma c_\\sigma +
-           U d^\\dagger_\\uparrow d_\\uparrow d^\\dagger_\\downarrow d_\\downarrow
-           + V(d^\\dagger_\\sigma c_\\sigma + h.c.)"""
+           \mathcal{H} = -\mu d^\dagger_\sigma d_\sigma
+           + (\epsilon_c - \mu) c^\dagger_\sigma c_\sigma +
+           U d^\dagger_\uparrow d_\uparrow d^\dagger_\downarrow d_\downarrow
+           + V(d^\dagger_\sigma c_\sigma + h.c.)"""
 
         d_up, d_dw, c_up, c_dw = self.oper
 
@@ -156,23 +157,24 @@ class twosite(object):
     def find_mu(self, target_n, u_int):
         """Find the required chemical potential to give the required filling"""
         zero = lambda mu: self.lattice_ocupation(mu) - target_n
-        return fsolve(zero, u_int*target_n/2)[0]
+        return fsolve(zero, u_int*target_n/2, xtol=5e-3)[0]
 
-    def selfconsitentcy(self, e_c, hyb, mu, u_int):
+    def selfconsitentcy(self, e_c, hyb, target_n, u_int):
         """Performs the selfconsistency loop"""
         convergence = False
         ne_ec = e_c
         while not convergence:
             old = hyb
             old_ec = ne_ec
-            ne_ec = fsolve(self.restriction, old_ec, (mu, u_int, old), xtol=1e-2)[0]
+            mu = self.find_mu(target_n, u_int)
+            ne_ec = fsolve(self.restriction, old_ec, (mu, u_int, old), xtol=5e-3)[0]
             self.solve(mu, ne_ec, u_int, hyb)
             hyb = self.hyb_V()
 #            print('hyb'+str(hyb))
             convergence = np.abs(old - hyb) < 1e-5\
                 and np.abs(self.restriction(ne_ec, mu, u_int, hyb)) < 1e-2
 
-        return e_c, hyb, mu
+        return ne_ec, hyb, mu
 
     def restriction(self, e_c, mu, u_int, hyb):
         """Lagrange multiplier in lattice slave spin"""
@@ -238,10 +240,16 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 if __name__ == "__main__":
-
-    sim = metallic_loop([2])[0, 2]
-    ecc =1.0
-    for mu in [1, 0.9, 0.8, 0.7, 0.6, 0.5]:
+    u = 2
+    sim = metallic_loop([u])[0, 2]
+    ecc = u/2
+    res=[]
+    filling = np.arange(1,0,-0.1)
+    for n in filling:
         old_e = ecc
-        ecc, hyb, mu = sim.selfconsitentcy(old_e,sim.hyb_V(),mu,2)
-        print(ecc, hyb, mu, sim.lattice_ocupation(mu))
+        res.append( sim.selfconsitentcy(old_e,sim.hyb_V(),n,u))
+
+    res=np.asarray(res)
+    plt.plot(filling,end[:,0], label='ec')
+    plt.plot(filling,end[:,1], label='hyb')
+    plt.plot(filling,end[:,2], label='mu')
