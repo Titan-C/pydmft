@@ -128,6 +128,8 @@ class twosite(object):
         else:
             dw = 1/self.beta
             zet = 1/(1 - sigma.imag[0]/dw)
+            if sigma.imag[1] > sigma.imag[0]:
+                return 0.
 
         if zet < 1e-3:
             return 0.
@@ -208,4 +210,4 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
 if __name__ == "__main__":
 
-    res = metallic_loop([2.9, 3, 3.02])
+    res = metallic_loop([2.5])[0][2]
