@@ -50,7 +50,7 @@ class twosite(object):
         self.m2 = m2_weight(t)
         self.freq_axis = freq_axis
 
-        self.x = np.linspace(-4, 4, npoints)
+        self.x = np.linspace(-5, 5, npoints)
         if freq_axis == 'real':
             self.omega = self.x
         elif freq_axis == 'matsubara':
@@ -197,6 +197,7 @@ def lattice_gf(sim, mu, wide=5e-3):
 
     return np.asarray(G)
 
+
 def out_plot(sim, spec, label=''):
     w = sim.omega.imag
     stl = '+-'
@@ -221,7 +222,7 @@ def out_plot(sim, spec, label=''):
 
 
 def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
-                  beta=1e5, hop=0.5, hyb = 0.4):
+                  beta=1e5, hop=1., hyb = 0.4):
     res = []
     for U in u_int:
         sim = twosite(beta, hop, axis)
@@ -240,16 +241,17 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 if __name__ == "__main__":
-    u = 2
+    u = 4
     sim = metallic_loop([u])[0, 2]
     ecc = u/2
-    res=[]
-    filling = np.arange(1,0,-0.1)
+    res = []
+    filling = np.arange(1, 0, -0.025)
     for n in filling:
         old_e = ecc
-        res.append( sim.selfconsitentcy(old_e,sim.hyb_V(),n,u))
+        res.append( sim.selfconsitentcy(old_e, sim.hyb_V(), n, u))
+        ecc = res[-1][0]
 
-    res=np.asarray(res)
-    plt.plot(filling,end[:,0], label='ec')
-    plt.plot(filling,end[:,1], label='hyb')
-    plt.plot(filling,end[:,2], label='mu')
+    res = np.asarray(res)
+    plt.plot(filling, res[:, 0], label='ec')
+    plt.plot(filling, res[:, 1], label='hyb')
+    plt.plot(filling, res[:, 2], label='mu')
