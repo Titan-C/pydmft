@@ -161,7 +161,8 @@ class twosite(object):
     def find_mu(self, target_n, u_int):
         """Find the required chemical potential to give the required filling"""
         zero = lambda mu: self.lattice_ocupation(mu) - target_n
-        self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-3)[0]
+        self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-4)[0]
+        return self.mu
 
     def selfconsitency(self, e_c, hyb, target_n, u_int):
         """Performs the selfconsistency loop"""
@@ -170,20 +171,19 @@ class twosite(object):
         if target_n == 1:
             ne_ec = u_int / 2
             self.mu = u_int / 2
-            print('ha')
         while not convergence:
             old = hyb
-            if not target_n == 1:
-                old_ec = ne_ec
-                self.find_mu(target_n, u_int)
-                ne_ec = fsolve(self.restriction, old_ec,
-                               (u_int, old), xtol=5e-3)[0]
+#            if not target_n == 1:
+            old_ec = ne_ec
+            self.find_mu(target_n, u_int)
+            ne_ec = fsolve(self.restriction, old_ec,
+                           (u_int, old), xtol=5e-3)[0]
             self.solve(ne_ec, u_int, hyb)
             hyb = self.hyb_V()
             if 2.5 < u_int < 3:
                 hyb = (hyb + old)/2
             convergence = np.abs(old - hyb) < 1e-5\
-                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 5e-3
+                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 2e-2
 
         return ne_ec, hyb
 
@@ -249,11 +249,15 @@ def out_plot(sim, spec, label=''):
 
 def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
               beta=1e5, hop=0.5, hyb=0.4, filling=1):
+    if axis == 'matsubara':
+        return matsubara_loop(u_int, beta, hop, hyb)
+
     res = []
     e_c = 0
     for U in u_int:
         sim = twosite(beta, hop, axis)
         e_c, hyb = sim.selfconsitency(e_c, hyb, filling, U)
+        print(U, sim.mu, e_c, hyb)
 
         sim.solve(e_c, U, hyb)
         hyb = sim.hyb_V()
@@ -262,7 +266,7 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
 
 def matsubara_loop(u_int=np.arange(0, 3.2, 0.05), axis='matsubara',
-                  beta=1e5, hop=1., hyb=0.4):
+                   beta=1e5, hop=0.5, hyb=0.4):
     res = []
     for U in u_int:
         sim = twosite(beta, hop, axis)
@@ -276,14 +280,15 @@ def matsubara_loop(u_int=np.arange(0, 3.2, 0.05), axis='matsubara',
             if np.abs(old - hyb) < 1e-5:
                 break
 
+        print(U, sim.find_mu(1, U), hyb)
         sim.solve(U/2, U, hyb)
         hyb = sim.hyb_V()
         res.append((U, sim.imp_z(), sim))
     return np.asarray(res)
 
 if __name__ == "__main__":
-    u = 0
-    sim = dmft_loop([u])[0, 1]
+    u = np.arange(0, 1.0, 0.05)
+    sim = dmft_loop(u,axis='real')
     ecc = u/2
     res = []
 #    filling = np.arange(1, 0.9, -0.025)
