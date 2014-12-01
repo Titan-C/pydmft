@@ -52,7 +52,7 @@ class twosite(object):
         self.freq_axis = freq_axis
 
         if freq_axis == 'real':
-            self.omega = np.linspace(-8, 8, npoints)
+            self.omega = np.linspace(-4, 4, npoints)
         elif freq_axis == 'matsubara':
             self.omega = 1j*np.arange(1, npoints, 2) / self.beta
         else:
@@ -151,8 +151,11 @@ class twosite(object):
         return dos.bethe_lattice(w, self.t)
 
     def lattice_ocupation(self, mu):
-        w = self.omega[self.omega <= 0]
-        dosint = 2*simps(self.interacting_dos(mu)[:len(w)], w)
+        w = np.copy(self.omega[:len(self.omega)/2+1])
+        intdos = self.interacting_dos(mu)[:len(w)]
+        w[-1] = 0
+        intdos[-1] = (intdos[-1] + intdos[-2])/2
+        dosint = 2*simps(intdos, w)
         return dosint
 
     def find_mu(self, target_n, u_int):
@@ -160,31 +163,37 @@ class twosite(object):
         zero = lambda mu: self.lattice_ocupation(mu) - target_n
         self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-3)[0]
 
-    def selfconsitentcy(self, e_c, hyb, target_n, u_int):
+    def selfconsitency(self, e_c, hyb, target_n, u_int):
         """Performs the selfconsistency loop"""
         convergence = False
         ne_ec = e_c
+        if target_n == 1:
+            ne_ec = u_int / 2
+            self.mu = u_int / 2
+            print('ha')
         while not convergence:
             old = hyb
-            old_ec = ne_ec
-            self.find_mu(target_n, u_int)
-            ne_ec = fsolve(self.restriction, old_ec, (u_int, old), xtol=5e-3)[0]
+            if not target_n == 1:
+                old_ec = ne_ec
+                self.find_mu(target_n, u_int)
+                ne_ec = fsolve(self.restriction, old_ec,
+                               (u_int, old), xtol=5e-3)[0]
             self.solve(ne_ec, u_int, hyb)
             hyb = self.hyb_V()
-#            print('hyb'+str(hyb))
+            if 2.5 < u_int < 3:
+                hyb = (hyb + old)/2
             convergence = np.abs(old - hyb) < 1e-5\
-                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2
+                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 5e-3
 
         return ne_ec, hyb
 
     def restriction(self, e_c, u_int, hyb):
         """Lagrange multiplier in lattice slave spin"""
-#        print('e'+str(e_c))
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.imp_ocupation())-self.lattice_ocupation(self.mu)
 
 
-def lattice_gf(sim, x=np.linspace(-8, 8, 600), wide=5e-3):
+def lattice_gf(sim, x=np.linspace(-4, 4, 600), wide=5e-3):
     """Compute lattice green function
 
     .. math::
@@ -238,7 +247,21 @@ def out_plot(sim, spec, label=''):
         plt.plot(w, sim.GF[key].imag, stl+'-', label='Im {} {}'.format(key, label))
 
 
-def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
+def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
+              beta=1e5, hop=0.5, hyb=0.4, filling=1):
+    res = []
+    e_c = 0
+    for U in u_int:
+        sim = twosite(beta, hop, axis)
+        e_c, hyb = sim.selfconsitency(e_c, hyb, filling, U)
+
+        sim.solve(e_c, U, hyb)
+        hyb = sim.hyb_V()
+        res.append((U, sim.imp_z(), sim))
+    return np.asarray(res)
+
+
+def matsubara_loop(u_int=np.arange(0, 3.2, 0.05), axis='matsubara',
                   beta=1e5, hop=1., hyb=0.4):
     res = []
     for U in u_int:
@@ -259,8 +282,8 @@ def metallic_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 if __name__ == "__main__":
-    u = 8
-    sim = metallic_loop([u])[0, 2]
+    u = 0
+    sim = dmft_loop([u])[0, 1]
     ecc = u/2
     res = []
 #    filling = np.arange(1, 0.9, -0.025)
