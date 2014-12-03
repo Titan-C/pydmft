@@ -194,7 +194,7 @@ class twosite_real(twosite):
 
 class twosite_matsubara(twosite):
     """DMFT solver on the matsubara frequency axis"""
-    def __init__(self, beta=100, t=1, nfreq=1200):
+    def __init__(self, beta=100, t=1, nfreq=20):
         super(twosite_matsubara, self).__init__(beta, t)
 
         self.omega = 1j*np.arange(1, nfreq, 2) / self.beta

@@ -7,6 +7,7 @@ Created on Wed Nov 19 15:12:44 2014
 
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
+import matplotlib.animation as anim
 import numpy as np
 from dmft.twosite import out_plot, matsubara_loop
 
@@ -26,11 +27,35 @@ def plot_feature(res, name, feature):
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
         plt.close(fig)
 
+def movie_feature(res, name, feature):
+    """Outputs an animate movie of the evolution of an specific feature"""
+    figi, ax = plt.subplots()
+    line, = ax.plot([], [], '*-')
+    ax.set_ylim(-1e-8, 0)
+    iwn = res[0, 2].omega.imag
+    ax.set_xlim(0, iwn.max())
+
+
+    def run(i):
+        # update the data
+        s = res[i, 2].GF[r'$\Sigma$'].imag
+        ymin, ymax = ax.get_ylim()
+
+        if s.min() <= ymin:
+            ax.set_ylim(2*s.min(), 0)
+            ax.figure.canvas.draw()
+        line.set_data(iwn, s)
+
+        return line,
+
+    ani = anim.FuncAnimation(figi, run, blit=True, interval=50)
+#    plt.close(figi)
+
 def run_halffill(axis = 'matsubara'):
     fig = plt.figure()
-    u_int = np.arange(0, 6.2, 0.05)
+    u_int = np.arange(0, 6.2, 0.01)
     for beta in [1.5, 2, 3, 4, 6, 10, 20, 30, 50, 100, 1e4]:
-        out_file = axis+'_halffill_b'+str(beta)
+        out_file = axis+'_halffill_b{}_dU{}'.format(beta, 0.01)
         try:
             res = np.load(out_file+'.npy')
         except IOError:
@@ -39,11 +64,17 @@ def run_halffill(axis = 'matsubara'):
 
 #        plot_feature(res, out_file, 'A')
 #        plot_feature(res, out_file, 'sigma')
+        ste=118
+        w=res[ste,2].omega.imag
+        s = res[ste, 2].GF[r'$\Sigma$'].imag
+        plt.plot(w,s,'+--', label=r'U={}, $\beta$={}'.format(res[ste,0],res[ste,2].beta))
 
-
-        plt.plot(res[:, 0]/2., res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
+#        plt.plot(res[:, 0], res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
-    plt.legend()
+    plt.legend(loc=0)
+    plt.xlim([0,30])
+#    plt.ylim([-12,0])
+
     plt.title('Quasiparticle weigth')
     plt.ylabel('Z')
     plt.xlabel('U/D')
