@@ -2,16 +2,17 @@
 Two site Dynamical Mean-Field Theory
 ====================================
 
-The DMFT is a valuable method to investigate the physics of strongly
-correlated electrons on a lattice. It consists of a procedure to map
-the original lattice problem into an effective impurity model which
-describes a single correlate impurity orbital embedded in an uncorrelated
-bath of conduction-band states. This mapping is designed to be
-self-consistent, that is the bath parameters depend on the on-site lattice
-Green's function.
+The Dynamical mean field theory has become a valuable method to investigate the physics
+of strongly correlated electrons in a lattice. It consist of a procedure in
+which the original lattice problem is mapped into an effective impurity model
+that describes a single correlated impurity orbital embedded in an uncorrelated
+bath of conduction-band states. This mapping is a self-consistent one, where
+the bath parameters depend on the on-site impuriry Green's function.
 
-The impurity model is the critical problem in the DMFT since it poses a highly
-non trivial many-body problem that must be solved repeatedly.
+The impurity model is crucial in the DMFT as it poses a highly non-trivial
+many-body problem that must be solved repeatedly, incrementing the cost
+of solving the problem computationally and limiting the applicability of
+the method.
 
 There is no problem to treat the single-impurity Anderson model with a small
 number of lattice sites :math:`n_s` numerically exact. But for a finite number of
