@@ -57,17 +57,6 @@ class twosite(object):
         self.H_operators = self.hamiltonian()
         self.GF = {}
 
-#        if freq_axis == 'real':
-#            self.omega = np.linspace(-4, 4, npoints)
-#        elif freq_axis == 'matsubara':
-#            self.omega = 1j*np.arange(1, npoints, 2) / self.beta
-#        else:
-#            raise ValueError('Set a working frequency axis')
-
-
-        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
-        self.solve(0, 0, 0)
-
     def hamiltonian(self):
         r"""Two site single impurity anderson model
         generate the matrix operators that will be used for this hamiltonian
@@ -100,11 +89,13 @@ class twosite(object):
         """Wrapper to the expected_value function to fix the eigenbasis"""
         return expected_value(observable, self.eig_energies, self.eig_states,
                               self.beta)
+
     def imp_free_gf(self, e_c, hyb):
         """Outputs the Green's Function of the free propagator of the impurity"""
         hyb2 = hyb**2
         omega = self.omega
-        return (omega - e_c + self.mu) / ((omega + self.mu)*(omega - e_c + self.mu) - hyb2)
+        return (omega - e_c + self.mu) / \
+               ((omega + self.mu)*(omega - e_c + self.mu) - hyb2)
 
     def solve(self, e_c, u_int, hyb):
         """Solves the impurity problem"""
@@ -137,20 +128,14 @@ class twosite_real(twosite):
 
     def imp_z(self):
         """Calculates the impurity quasiparticle weight from the real part
-           of the self enerry"""
+           of the self energy"""
         w = self.omega
-        sigma = self.GF[r'$\Sigma$']
-        if self.freq_axis == 'real':
-            dw = w[1]-w[0]
-            interval = (-dw <= w) * (w <= dw)
-            sigma = sigma.real[interval]
-            dsigma = np.polyfit(w[interval], sigma, 1)[0]
-            zet = 1/(1 - dsigma)
-        else:
-            dw = 1/self.beta
-            zet = 1/(1 - sigma.imag[0]/dw)
-            if sigma.imag[1] > sigma.imag[0]:
-                return 0.
+        dw = w[1]-w[0]
+        interval = (-dw <= w) * (w <= dw)
+
+        sigma = self.GF[r'$\Sigma$'].real[interval]
+        dsigma = np.polyfit(w[interval], sigma, 1)[0]
+        zet = 1/(1 - dsigma)
 
         if zet < 1e-3:
             return 0.
@@ -205,6 +190,30 @@ class twosite_real(twosite):
         """Lagrange multiplier in lattice slave spin"""
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.imp_ocupation())-self.lattice_ocupation(self.mu)
+
+
+class twosite_matsubara(twosite):
+    """DMFT solver on the matsubara frequency axis"""
+    def __init__(self, beta=100, t=1, nfreq=1200):
+        super(twosite, self).__init(beta, t)
+
+        self.iomega_n = 1j*np.arange(1, nfreq, 2) / self.beta
+
+        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
+
+        self.solve(0, 0, 0)
+
+    def imp_z(self):
+        """Calculates the impurity quasiparticle weight from the imaginary
+        part of the self energy"""
+        dw = 1/self.beta
+        zet = 1/(1 - self.GF[r'$\Sigma$'].imag[0]/dw)
+
+        if zet < 1e-3:
+            return 0.
+        else:
+            return zet
+
 
 def lattice_gf(sim, x=np.linspace(-4, 4, 600), wide=5e-3):
     """Compute lattice green function
