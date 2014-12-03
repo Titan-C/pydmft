@@ -118,7 +118,7 @@ class twosite(object):
 class twosite_real(twosite):
     """DMFT solver in the real axis"""
     def __init__(self, beta=1e5, t=1, omega=np.linspace(-6, 6, 1200)):
-        super(twosite, self).__init(beta, t)
+        super(twosite_real, self).__init__(beta, t)
 
         self.omega = omega
 
@@ -195,12 +195,9 @@ class twosite_real(twosite):
 class twosite_matsubara(twosite):
     """DMFT solver on the matsubara frequency axis"""
     def __init__(self, beta=100, t=1, nfreq=1200):
-        super(twosite, self).__init(beta, t)
+        super(twosite_matsubara, self).__init__(beta, t)
 
-        self.iomega_n = 1j*np.arange(1, nfreq, 2) / self.beta
-
-        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
-
+        self.omega = 1j*np.arange(1, nfreq, 2) / self.beta
         self.solve(0, 0, 0)
 
     def imp_z(self):
@@ -288,22 +285,21 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 
-def matsubara_loop(u_int=np.arange(0, 3.2, 0.05), axis='matsubara',
+def matsubara_loop(u_int=np.arange(0, 3.2, 0.05),
                    beta=1e5, hop=0.5, hyb=0.4):
     res = []
     for U in u_int:
-        sim = twosite(beta, hop, axis)
+        sim = twosite_matsubara(beta, hop)
         sim.mu = U/2
         for i in range(80):
             old = hyb
             sim.solve(U/2, U, old)
             hyb = sim.hyb_V()
-            if 2.5 < U < 3:
-                hyb = (hyb + old)/2
+            hyb = (hyb + old)/2
             if np.abs(old - hyb) < 1e-5:
                 break
 
-        print(U, sim.find_mu(1, U), hyb)
+        print(U, hyb, sim.ocupations())
         sim.solve(U/2, U, hyb)
         hyb = sim.hyb_V()
         res.append((U, sim.imp_z(), sim))
