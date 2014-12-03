@@ -26,9 +26,8 @@ def test_mit_real():
 
 
 def test_matsubara():
-    z_ref = np.array([1., 0.85714, 0.48826, 0.03748, 0.01218, 0.00735, 0.00631])
+    z_ref = np.array([1., 0.88889, 0.75, 0.55556, 0.30556, 0.06556, 0.])
     zet = matsubara_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05],
-                    beta=10, hop=0.5)[:, 1]
+                    beta=1e5, hop=0.5)[:, 1]
     print(np.abs(zet-z_ref))
     assert (np.abs(zet-z_ref) < 1e-5).all()
-
