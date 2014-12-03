@@ -45,26 +45,27 @@ class twosite(object):
     GF : dictionary
          Stores the Green functions and self energy"""
 
-    def __init__(self, beta, t, freq_axis, npoints=600):
+    def __init__(self, beta, t):
         self.beta = beta
         self.t = t
         self.m2 = m2_weight(t)
-        self.freq_axis = freq_axis
+        self.mu = 0.
 
-        if freq_axis == 'real':
-            self.omega = np.linspace(-4, 4, npoints)
-        elif freq_axis == 'matsubara':
-            self.omega = 1j*np.arange(1, npoints, 2) / self.beta
-        else:
-            raise ValueError('Set a working frequency axis')
-
-        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
         self.eig_energies = None
         self.eig_states = None
         self.oper = [fermion.destruct(4, index) for index in range(4)]
         self.H_operators = self.hamiltonian()
         self.GF = {}
-        self.mu = 0.
+
+#        if freq_axis == 'real':
+#            self.omega = np.linspace(-4, 4, npoints)
+#        elif freq_axis == 'matsubara':
+#            self.omega = 1j*np.arange(1, npoints, 2) / self.beta
+#        else:
+#            raise ValueError('Set a working frequency axis')
+
+
+        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
         self.solve(0, 0, 0)
 
     def hamiltonian(self):
@@ -99,6 +100,11 @@ class twosite(object):
         """Wrapper to the expected_value function to fix the eigenbasis"""
         return expected_value(observable, self.eig_energies, self.eig_states,
                               self.beta)
+    def imp_free_gf(self, e_c, hyb):
+        """Outputs the Green's Function of the free propagator of the impurity"""
+        hyb2 = hyb**2
+        omega = self.omega
+        return (omega - e_c + self.mu) / ((omega + self.mu)*(omega - e_c + self.mu) - hyb2)
 
     def solve(self, e_c, u_int, hyb):
         """Solves the impurity problem"""
@@ -113,11 +119,21 @@ class twosite(object):
         """Returns the hybridization parameter :math:`V=\\sqrt{zM_2}`"""
         return np.sqrt(self.imp_z()*self.m2)
 
-    def imp_free_gf(self, e_c, hyb):
-        """Outputs the Green's Function of the free propagator of the impurity"""
-        hyb2 = hyb**2
-        omega = self.omega
-        return (omega - e_c + self.mu) / ((omega + self.mu)*(omega - e_c + self.mu) - hyb2)
+    def ocupations(self):
+        """gets the ocupation of the impurity"""
+        return np.asarray([self.expected((f.T*f).todense()) for f in self.oper])
+
+
+class twosite_real(twosite):
+    """DMFT solver in the real axis"""
+    def __init__(self, beta=1e5, t=1, omega=np.linspace(-6, 6, 1200)):
+        super(twosite, self).__init(beta, t)
+
+        self.omega = omega
+
+        self.rho_0 = dos.bethe_lattice(self.omega, self.t)
+
+        self.solve(0, 0, 0)
 
     def imp_z(self):
         """Calculates the impurity quasiparticle weight from the real part
@@ -141,9 +157,7 @@ class twosite(object):
         else:
             return zet
 
-    def imp_ocupation(self):
-        """gets the ocupation of the impurity"""
-        return [self.expected((f.T*f).todense()) for f in self.oper[:2]]
+
 
     def interacting_dos(self, mu):
         """Evaluates the interacting density of states"""
@@ -191,7 +205,6 @@ class twosite(object):
         """Lagrange multiplier in lattice slave spin"""
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.imp_ocupation())-self.lattice_ocupation(self.mu)
-
 
 def lattice_gf(sim, x=np.linspace(-4, 4, 600), wide=5e-3):
     """Compute lattice green function
