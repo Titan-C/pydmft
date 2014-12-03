@@ -206,13 +206,14 @@ class twosite_matsubara(twosite):
     def imp_z(self):
         """Calculates the impurity quasiparticle weight from the imaginary
         part of the self energy"""
-        dw = 1/self.beta
-        zet = 1/(1 - self.GF[r'$\Sigma$'].imag[0]/dw)
+        im_sigma = self.GF[r'$\Sigma$'].imag
 
-        if zet < 1e-3:
+        if im_sigma[1] > im_sigma[0]:
             return 0.
-        else:
-            return zet
+
+        dw = 1/self.beta
+        zet = 1/(1 - im_sigma[0]/dw)
+        return zet
 
 
 def lattice_gf(sim, x=np.linspace(-4, 4, 600), wide=5e-3):
