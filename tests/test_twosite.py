@@ -27,7 +27,7 @@ def test_mit_real():
 
 def test_matsubara():
     z_ref = np.array([1., 0.88889, 0.75, 0.55556, 0.30556, 0.06556, 0.])
-    zet = matsubara_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05],
+    zet = dmft_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05], axis='matsubara',
                     beta=1e5, hop=0.5)[:, 1]
     print(np.abs(zet-z_ref))
     assert (np.abs(zet-z_ref) < 1e-5).all()

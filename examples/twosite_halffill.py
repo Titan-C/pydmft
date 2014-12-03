@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
-from dmft.twosite import out_plot, matsubara_loop, twosite_matsubara
+from dmft.twosite import dmft_loop, twosite_matsubara
 
 def plot_feature(res, name, feature):
     for U, zet, sim in res:
@@ -63,13 +63,13 @@ def movie_feature(res, name, feature):
 
 def run_halffill(axis = 'matsubara'):
     fig = plt.figure()
-    u_int = np.arange(0, 6.2, 0.01)
+    u_int = np.arange(0, 6.2, 0.1)
     for beta in [1.5, 2, 3, 4, 6, 10, 20, 30, 50, 100, 1e3]:
         out_file = axis+'_halffill_b{}_dU{}'.format(beta, 0.01)
         try:
             res = np.load(out_file+'.npy')
         except IOError:
-            res = matsubara_loop(u_int, beta=beta, hop=1)
+            res = dmft_loop(u_int, axis, beta=beta, hop=1)
             np.save(out_file, res)
 
 #        plot_feature(res, out_file, 'A')
@@ -78,14 +78,14 @@ def run_halffill(axis = 'matsubara'):
 #        w=res[ste,2].omega.imag
 #        s = res[ste, 2].GF[r'$\Sigma$'].imag
 #        plt.plot(w,s,'+--', label=r'U={}, $\beta$={}'.format(res[ste,0],res[ste,2].beta))
-        movie_feature(res, out_file, 'sigma')
-        plt.plot(res[:, 0], res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
+#        movie_feature(res, out_file, 'sigma')
+        plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
     plt.legend(loc=0)
 #    plt.xlim([0,30])
 #    plt.ylim([-12,0])
 
-    plt.title('Quasiparticle weigth')
+    plt.title('Quasiparticle weigth, estimated in Matsubara freq')
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig(out_file+'_Z.png', format='png',
@@ -93,7 +93,8 @@ def run_halffill(axis = 'matsubara'):
 #    plt.close(fig)
 
 if __name__ == "__main__":
-    run_halffill()
+#    run_halffill()
+    run_halffill('real')
 #    fig = plt.figure()
 #    axis = 'real'
 #    u_int = np.arange(0, 3.2, 0.05)
