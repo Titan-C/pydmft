@@ -285,19 +285,20 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 
+
 def matsubara_loop(u_int=np.arange(0, 3.2, 0.05),
                    beta=1e5, hop=0.5, hyb=0.4):
     res = []
     for U in u_int:
         sim = twosite_matsubara(beta, hop)
         sim.mu = U/2
-        for i in range(80):
+        convergence = False
+        while not convergence:
             old = hyb
             sim.solve(U/2, U, old)
             hyb = sim.hyb_V()
             hyb = (hyb + old)/2
-            if np.abs(old - hyb) < 1e-5:
-                break
+            convergence = np.abs(old - hyb) < 1e-5
 
         print(U, hyb, sim.ocupations())
         sim.solve(U/2, U, hyb)
