@@ -11,23 +11,7 @@ import matplotlib.animation as anim
 import numpy as np
 from dmft.twosite import dmft_loop, twosite_matsubara
 
-def plot_feature(res, name, feature):
-    for U, zet, sim in res:
-        fig = plt.figure()
-        out_plot(sim, feature, '')
-
-        plt.legend()
-        plt.title('U={:.4f}, hyb={:.4f}'.format(U, np.sqrt(zet*sim.m2)))
-        if sim.freq_axis == 'real':
-            plt.xlabel('$\\omega$')
-        else:
-            plt.xlabel('$i\\omega_n$')
-
-        fig.savefig('{}_{}_U{:.2f}.png'.format(name, feature, U), format='png',
-                    transparent=False, bbox_inches='tight', pad_inches=0.05)
-        plt.close(fig)
-
-def movie_feature(res, name, feature):
+def movie_feature(res, name):
     """Outputs an animate movie of the evolution of an specific feature"""
     figi, ax = plt.subplots()
     line, = ax.plot([], [], '*-')
@@ -89,10 +73,10 @@ def movie_feature_real(res, name):
     def init():
         line.set_data([], [])
         line2.set_data([], [])
-        return line, line2,
+        line3.set_data([], [])
+        return line, line2, line3,
 
     def run(i):
-        # update the data
         u_int = res[i, 0]
         w = res[i, 2].omega
         s = res[i, 2].GF[r'$\Sigma$']
@@ -101,7 +85,7 @@ def movie_feature_real(res, name):
         rho = dos.bethe_lattice(ra, res[i, 2].t)
 
         line.set_data(w, rho)
-#        plt.legend([line], ['U={:.2f}'.format(u_int)])
+        plt.legend([line], ['U={:.2f}'.format(u_int)])
         line2.set_data(w, s)
         line3.set_data(w, g)
         return line, line2, line3
@@ -110,6 +94,7 @@ def movie_feature_real(res, name):
                              frames=res.shape[0])
     ani.save(name+'.mp4')
     plt.close(f)
+
 
 def run_halffill(axis = 'matsubara'):
     fig = plt.figure()
@@ -122,51 +107,18 @@ def run_halffill(axis = 'matsubara'):
             res = dmft_loop(u_int, axis, beta=beta, hop=1)
             np.save(out_file, res)
 
-#        plot_feature(res, out_file, 'A')
-#        plot_feature(res, out_file, 'sigma')
-#        ste=118
-#        w=res[ste,2].omega.imag
-#        s = res[ste, 2].GF[r'$\Sigma$'].imag
-#        plt.plot(w,s,'+--', label=r'U={}, $\beta$={}'.format(res[ste,0],res[ste,2].beta))
         movie_feature_real(res, out_file)
         plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
     plt.legend(loc=0)
-#    plt.xlim([0,30])
-#    plt.ylim([-12,0])
 
     plt.title('Quasiparticle weigth, estimated in real freq')
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig(out_file+'_Z.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
-#    plt.close(fig)
+    plt.close(fig)
 
 if __name__ == "__main__":
-#    run_halffill()
+    run_halffill()
     run_halffill('real')
-#    fig = plt.figure()
-#    axis = 'real'
-#    u_int = np.arange(0, 3.2, 0.05)
-#    beta = 1e5
-#    for fill in np.arange(1, 0.9, -0.025):
-#        out_file = 'real_{}fill_b{}'.format(fill, beta)
-#        try:
-#            res = np.load(out_file+'.npy')
-#        except IOError:
-#            res = dmft_loop(u_int, axis=axis, beta=beta, hop=0.5, filling=fill)
-#            np.save(out_file, res)
-#
-#        plot_feature(res, out_file, 'A')
-#        plot_feature(res, out_file, 'sigma')
-#
-#
-#        plt.plot(res[:, 0], res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
-#    #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
-#    plt.legend()
-#    plt.title('Quasiparticle weigth')
-#    plt.ylabel('Z')
-#    plt.xlabel('U/D')
-#    fig.savefig(out_file+'_Z.png', format='png',
-#                transparent=False, bbox_inches='tight', pad_inches=0.05)
-#    plt.close(fig)
