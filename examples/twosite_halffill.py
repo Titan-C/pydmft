@@ -39,6 +39,7 @@ def movie_feature(res, name, feature):
     ax.set_xlim(0, iwn.max())
     ax.set_xlabel('$i\\omega_n$')
     ax.set_ylabel(r'$Im \Sigma$')
+    ax.set_title('Evolution of the Self Energy at $\\beta=${}'.format(beta))
 
 
     def run(i):
@@ -61,10 +62,50 @@ def movie_feature(res, name, feature):
     ani.save(name+'.mp4')
     plt.close(figi)
 
+from slaveparticles.quantum import dos
+
+def movie_feature_real(res, name, feature):
+    """Outputs an animate movie of the evolution of an specific feature"""
+    f, (ax1, ax2) = plt.subplots(2, sharex=True)
+    line, = ax1.plot([], [], '--')
+    ax1.set_xlim([-6, 6])
+    ax1.set_ylim([-6, 6])
+    line2, = ax2.plot([], [], '-')
+    ax2.set_ylim([0, 0.66])
+
+    beta = res[0, 2].beta
+    ax1.set_xlabel('$\\omega$')
+    ax1.set_ylabel(r'$\Sigma(\omega)$')
+    ax2.set_ylabel(r'$A(\omega)$')
+    ax1.set_title('Evolution of the Self Energy at $\\beta=${}'.format(beta))
+    f.subplots_adjust(hspace=0)
+    def init():
+        line.set_data([], [])
+        line2.set_data([], [])
+        return line, line2,
+
+    def run(i):
+        # update the data
+        u_int = res[i, 0]
+        w = res[i, 2].omega
+        s = res[i, 2].GF[r'$\Sigma$']
+        ra = w+u_int/2.-s
+        rho = dos.bethe_lattice(ra, res[i, 2].t)
+
+        line.set_data(w, s)
+        line2.set_data(w, rho)
+        plt.legend([line], ['U={:.2f}'.format(u_int)])
+        return line, line2,
+
+    ani = anim.FuncAnimation(f, run, blit=True, interval=150, init_func=init,
+                             frames=res.shape[0])
+    ani.save(name+'.mp4')
+    plt.close(f)
+
 def run_halffill(axis = 'matsubara'):
     fig = plt.figure()
-    u_int = np.arange(0, 6.2, 0.1)
-    for beta in [1.5, 2, 3, 4, 6, 10, 20, 30, 50, 100, 1e3]:
+    u_int = np.arange(0, 6.2, 0.01)
+    for beta in [6, 10, 20, 30, 50, 100, 1e3]:
         out_file = axis+'_halffill_b{}_dU{}'.format(beta, 0.01)
         try:
             res = np.load(out_file+'.npy')
@@ -78,14 +119,14 @@ def run_halffill(axis = 'matsubara'):
 #        w=res[ste,2].omega.imag
 #        s = res[ste, 2].GF[r'$\Sigma$'].imag
 #        plt.plot(w,s,'+--', label=r'U={}, $\beta$={}'.format(res[ste,0],res[ste,2].beta))
-#        movie_feature(res, out_file, 'sigma')
+        movie_feature_real(res, out_file, 'sigma')
         plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
     plt.legend(loc=0)
 #    plt.xlim([0,30])
 #    plt.ylim([-12,0])
 
-    plt.title('Quasiparticle weigth, estimated in Matsubara freq')
+    plt.title('Quasiparticle weigth, estimated in real freq')
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig(out_file+'_Z.png', format='png',

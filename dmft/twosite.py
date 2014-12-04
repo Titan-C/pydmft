@@ -163,6 +163,14 @@ class twosite_matsubara(twosite):
         return zet
 
 
+def refine_mat_solution(end_solver, u_int):
+    beta = end_solver.beta
+    sim = twosite_matsubara(beta, end_solver.t, 30*beta)
+    sim.solve(u_int/2, u_int, end_solver.hyb_V())
+
+    return sim
+
+
 def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
                    beta=1e5, hop=0.5, hyb=0.4):
     res = []
