@@ -84,33 +84,28 @@ class twosite_real_dop(twosite_real):
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.ocupations())-self.lattice_ocupation(self.mu)
 
-def doping_config(res):
+def doping_config(res, fill):
     fig, axes = plt.subplots(3, sharex=True)
     axes[-1].set_xlabel('$<N>_{imp}$')
     for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
-        ax.plot(filling, res[:, i], label=lab)
+        ax.plot(fill, res[:, i], label=lab)
         ax.set_ylabel(lab)
 
-def dmft_loop_dop():
-    u = 4
-    ecc = 2
+import copy
+def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, dop=np.arange(1, 0.015, -0.2)):
     res = []
-    hyb = 0.74
-    import copy
     sim=twosite_real_dop()
-    sim.solve(ecc, u, hyb)
-    filling = np.arange(1, 0.015, -0.02)
+    sim.solve(e_c, u_int, hyb)
+    filling = np.arange(1, 0.015, -0.2)
     for n in filling:
 #        sim = twosite_real_dop()
-        sim.selfconsistency(ecc, hyb, n, u)
+        sim.selfconsistency(sim.e_c, sim.hyb_V(), n, u_int)
         res.append([sim.e_c, sim.hyb_V(), sim.mu, copy.deepcopy(sim)])
-        ecc = sim.e_c
-        hyb = sim.hyb_V()
 
-    res = np.asarray(res)
-    fig, axes = plt.subplots(3, sharex=True)
-    for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
-        ax.plot(filling, res[:, i], label=lab)
+    return np.asarray(res)
 
 if __name__ == "__main__":
-    pass
+    dop=np.arange(1, 0.015, -0.2)
+    res = dmft_loop_dop()
+
+    doping_config(res, dop)
