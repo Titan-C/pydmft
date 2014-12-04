@@ -50,6 +50,7 @@ class twosite(object):
         self.t = t
         self.m2 = m2_weight(t)
         self.mu = 0.
+        self.e_c = 0.
 
         self.eig_energies = None
         self.eig_states = None
@@ -110,9 +111,9 @@ class twosite(object):
         """Returns the hybridization parameter :math:`V=\\sqrt{zM_2}`"""
         return np.sqrt(self.imp_z()*self.m2)
 
-    def ocupations(self):
+    def ocupations(self, top=2):
         """gets the ocupation of the impurity"""
-        return np.asarray([self.expected((f.T*f).todense()) for f in self.oper])
+        return np.asarray([self.expected((f.T*f).todense()) for f in self.oper[:top]])
 
 
 class twosite_real(twosite):

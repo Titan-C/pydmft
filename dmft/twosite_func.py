@@ -41,54 +41,6 @@ def fit_sigma(sim):
     sigma = sim.GF[r'$\Sigma$']
     return curve_fit(two_pole, w, sigma)
 
-def interacting_dos(self, mu):
-    """Evaluates the interacting density of states"""
-    w = self.omega + mu - self.GF[r'$\Sigma$']
-    return dos.bethe_lattice(w, self.t)
-
-def lattice_ocupation(self, mu):
-    w = np.copy(self.omega[:len(self.omega)/2+1])
-    intdos = self.interacting_dos(mu)[:len(w)]
-    w[-1] = 0
-    intdos[-1] = (intdos[-1] + intdos[-2])/2
-    dosint = 2*simps(intdos, w)
-    return dosint
-
-def find_mu(self, target_n, u_int):
-    """Find the required chemical potential to give the required filling"""
-    zero = lambda mu: self.lattice_ocupation(mu) - target_n
-    self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-4)[0]
-    return self.mu
-
-def selfconsitency(self, e_c, hyb, target_n, u_int):
-    """Performs the selfconsistency loop"""
-    convergence = False
-    ne_ec = e_c
-    if target_n == 1:
-        ne_ec = u_int / 2
-        self.mu = u_int / 2
-    while not convergence:
-        old = hyb
-#            if not target_n == 1:
-        old_ec = ne_ec
-        self.find_mu(target_n, u_int)
-        ne_ec = fsolve(self.restriction, old_ec,
-                       (u_int, old), xtol=5e-3)[0]
-        self.solve(ne_ec, u_int, hyb)
-        hyb = self.hyb_V()
-        if 2.5 < u_int < 3:
-            hyb = (hyb + old)/2
-        convergence = np.abs(old - hyb) < 1e-5\
-            and np.abs(self.restriction(ne_ec, u_int, hyb)) < 2e-2
-
-    return ne_ec, hyb
-
-def restriction(self, e_c, u_int, hyb):
-    """Lagrange multiplier in lattice slave spin"""
-    self.solve(float(e_c), u_int, hyb)
-    return np.sum(self.imp_ocupation())-self.lattice_ocupation(self.mu)
-
-
 def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
               beta=1e5, hop=0.5, hyb=0.4, filling=1):
     if axis == 'matsubara':
