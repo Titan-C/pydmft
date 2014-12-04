@@ -57,7 +57,7 @@ class twosite_real_dop(twosite_real):
         self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-4)[0]
         return self.mu
 
-    def selfconsitency(self, e_c, hyb, target_n, u_int):
+    def selfconsistency(self, e_c, hyb, target_n, u_int):
         """Performs the selfconsistency loop"""
         convergence = False
         ne_ec = e_c
@@ -84,8 +84,14 @@ class twosite_real_dop(twosite_real):
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.ocupations())-self.lattice_ocupation(self.mu)
 
+def doping_config(res):
+    fig, axes = plt.subplots(3, sharex=True)
+    axes[-1].set_xlabel('$<N>_{imp}$')
+    for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
+        ax.plot(filling, res[:, i], label=lab)
+        ax.set_ylabel(lab)
 
-if __name__ == "__main__":
+def dmft_loop_dop():
     u = 4
     ecc = 2
     res = []
@@ -93,15 +99,18 @@ if __name__ == "__main__":
     import copy
     sim=twosite_real_dop()
     sim.solve(ecc, u, hyb)
-    filling = np.arange(1, 0.1, -0.025)
+    filling = np.arange(1, 0.015, -0.02)
     for n in filling:
 #        sim = twosite_real_dop()
-        sim.selfconsitency(ecc, hyb, n, u)
+        sim.selfconsistency(ecc, hyb, n, u)
         res.append([sim.e_c, sim.hyb_V(), sim.mu, copy.deepcopy(sim)])
         ecc = sim.e_c
         hyb = sim.hyb_V()
 
     res = np.asarray(res)
-    plt.plot(filling, res[:, 0], label='ec')
-    plt.plot(filling, res[:, 1], label='hyb')
-    plt.plot(filling, res[:, 2], label='mu')
+    fig, axes = plt.subplots(3, sharex=True)
+    for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
+        ax.plot(filling, res[:, i], label=lab)
+
+if __name__ == "__main__":
+    pass

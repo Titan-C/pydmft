@@ -16,8 +16,8 @@ def movie_feature(res, name):
     figi, ax = plt.subplots()
     line, = ax.plot([], [], '*-')
     ax.set_ylim(-1e-8, 0)
-    beta = res[0,2].beta
-    sim = twosite_matsubara(beta, res[0, 2].t,  30*beta)
+    beta = res[0, 2].beta
+    sim = twosite_matsubara(beta, res[0, 2].t, 30*beta)
 
     iwn = np.arange(1, 30*beta, 2) / beta
     ax.set_xlim(0, iwn.max())
@@ -66,7 +66,7 @@ def movie_feature_real(res, name):
     ax1.set_ylabel(r'$A(\omega)$')
     ax2.set_ylabel(r'$\Sigma(\omega)$')
     ax3.set_ylabel(r'$G_{imp}(\omega)$')
-    ax2.set_title('Transition to Mott Insulator at $\\beta=${}'.format(beta))
+    ax1.set_title('Transition to Mott Insulator at $\\beta=${}'.format(beta))
 
     f.subplots_adjust(hspace=0)
 
@@ -96,23 +96,27 @@ def movie_feature_real(res, name):
     plt.close(f)
 
 
-def run_halffill(axis = 'matsubara'):
+def run_halffill(axis='matsubara'):
     fig = plt.figure()
-    u_int = np.arange(0, 6.2, 0.01)
+    du = 0.05
+    u_int = np.arange(0, 6.2, du)
     for beta in [6, 10, 20, 30, 50, 100, 1e3]:
-        out_file = axis+'_halffill_b{}_dU{}'.format(beta, 0.01)
+        out_file = axis+'_halffill_b{}_dU{}'.format(beta, du)
         try:
             res = np.load(out_file+'.npy')
         except IOError:
             res = dmft_loop(u_int, axis, beta=beta, hop=1)
             np.save(out_file, res)
 
-        movie_feature_real(res, out_file)
+        if axis == 'real':
+            movie_feature_real(res, out_file)
+        if axis == 'matsubara':
+            movie_feature(res, out_file)
         plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
     plt.legend(loc=0)
 
-    plt.title('Quasiparticle weigth, estimated in real freq')
+    plt.title('Quasiparticle weigth, estimated in {} freq'.format(axis))
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig(out_file+'_Z.png', format='png',
