@@ -105,7 +105,7 @@ def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, dop=np.arange(1, 0.015, -0.2)):
     return np.asarray(res)
 
 if __name__ == "__main__":
-    dop=np.arange(1, 0.015, -0.2)
+    dop=np.arange(1, 0.015, -0.02)
     res = dmft_loop_dop()
 
     doping_config(res, dop)

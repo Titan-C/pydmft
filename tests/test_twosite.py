@@ -43,5 +43,3 @@ def test_doping():
     for i, ref in enumerate([e_c_ref, V_ref, mu_ref]):
         print(np.abs(ref-res[:, i]))
         assert (np.abs(ref-res[:, i]) < 5e-5).all()
-
-test_doping()
