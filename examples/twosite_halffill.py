@@ -64,21 +64,28 @@ def movie_feature(res, name, feature):
 
 from slaveparticles.quantum import dos
 
-def movie_feature_real(res, name, feature):
+def movie_feature_real(res, name):
     """Outputs an animate movie of the evolution of an specific feature"""
-    f, (ax1, ax2) = plt.subplots(2, sharex=True)
+    f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     line, = ax1.plot([], [], '--')
     ax1.set_xlim([-6, 6])
-    ax1.set_ylim([-6, 6])
+    ax1.set_ylim([0, 0.66])
+
     line2, = ax2.plot([], [], '-')
-    ax2.set_ylim([0, 0.66])
+    ax2.set_ylim([-6, 6])
+
+    line3, = ax3.plot([], [], '-')
+    ax3.set_ylim([-6, 6])
 
     beta = res[0, 2].beta
     ax1.set_xlabel('$\\omega$')
-    ax1.set_ylabel(r'$\Sigma(\omega)$')
-    ax2.set_ylabel(r'$A(\omega)$')
-    ax1.set_title('Evolution of the Self Energy at $\\beta=${}'.format(beta))
+    ax1.set_ylabel(r'$A(\omega)$')
+    ax2.set_ylabel(r'$\Sigma(\omega)$')
+    ax3.set_ylabel(r'$G_{imp}(\omega)$')
+    ax2.set_title('Transition to Mott Insulator at $\\beta=${}'.format(beta))
+
     f.subplots_adjust(hspace=0)
+
     def init():
         line.set_data([], [])
         line2.set_data([], [])
@@ -89,13 +96,15 @@ def movie_feature_real(res, name, feature):
         u_int = res[i, 0]
         w = res[i, 2].omega
         s = res[i, 2].GF[r'$\Sigma$']
+        g = res[i, 2].GF['Imp G']
         ra = w+u_int/2.-s
         rho = dos.bethe_lattice(ra, res[i, 2].t)
 
-        line.set_data(w, s)
-        line2.set_data(w, rho)
-        plt.legend([line], ['U={:.2f}'.format(u_int)])
-        return line, line2,
+        line.set_data(w, rho)
+#        plt.legend([line], ['U={:.2f}'.format(u_int)])
+        line2.set_data(w, s)
+        line3.set_data(w, g)
+        return line, line2, line3
 
     ani = anim.FuncAnimation(f, run, blit=True, interval=150, init_func=init,
                              frames=res.shape[0])
@@ -119,7 +128,7 @@ def run_halffill(axis = 'matsubara'):
 #        w=res[ste,2].omega.imag
 #        s = res[ste, 2].GF[r'$\Sigma$'].imag
 #        plt.plot(w,s,'+--', label=r'U={}, $\beta$={}'.format(res[ste,0],res[ste,2].beta))
-        movie_feature_real(res, out_file, 'sigma')
+        movie_feature_real(res, out_file)
         plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
     #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
     plt.legend(loc=0)
