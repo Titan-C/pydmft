@@ -44,6 +44,7 @@ def m2_weight(t):
 
 
 class twosite(object):
+    """Base class for a two site DMFT solver"""
 
     def __init__(self, beta, t):
         self.beta = beta

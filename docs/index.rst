@@ -8,6 +8,10 @@ Welcome to Learn DMFT's documentation!
 
 Contents:
 
+.. toctree::
+
+   twosite.rst
+
 .. automodule:: dmft.twosite
     :members:
 
