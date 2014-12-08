@@ -146,6 +146,7 @@ in both models match.
 where the band filling is calculated via
 
 .. math:: n_{lattice} = - \frac{2}{\pi} \int_{-\infty}^0 \Im m G(\omega+ i0^+) d\omega
+   :label: lattice_ocupation
 
 Equation :eq:`occupancy_match` can be seen as an integral for of the original
 self-consistency condition :eq:`DMFT_selfconsistency` and the paramagnetic
@@ -196,5 +197,39 @@ leading to the second self-consistency condition
 
 Algorithm implementation
 ''''''''''''''''''''''''
+
+Using the two self-consistency conditions :eq:`occupancy_match` and :eq:`hybridization_match`
+the bath parameters can be fixed and calculated self-consistently. One starts with
+the model parameters :math:`\epsilon_d=0, t, U, \mu, \rho_0(x)` and takes a guess
+for :math:`\epsilon_c, V^2`. That defines the two-site impurity model and can be
+solved to find de average occupancy of the impurity :math:`n_{imp}=\braket{n_\uparrow}+\braket{n_\downarrow}`
+and using the Lehmann representation one finds :math:`G_{imp}`, through the Dyson
+equation one can extract the self-energy.
+
+The self-enery yields the quasiparticle weight and through :eq:`hybridization_match`
+a new value for the hybridization strength :math:`V`. The self-energy is used
+again in :eq:`Site_GF_H_Trans` to obtain the lattice Green function, which via
+:eq:`lattice_ocupation` yields the filling of the lattice sites and has to be
+compared to the impurity occupancy. Then a new value for :math:`\epsilon_c` is
+chosen to reduce the difference in occupancies between lattice and impurity models.
+This cycle is performed until the self-consisten conditions are full-filled.
+
+It is inconvenient to calculate the lattice Green function on each iteration to
+calculate later the lattice occupancy with :eq:`lattice_ocupation`, as the numerical
+pole broadening :math:`i0^+` intruduces a lot of numerical variation. Instead, given
+that the self-energy is a real two poled function, and on the bethe lattice is
+purely local and momentum independent, the lattice filling can be directly calculated
+by
+
+.. math:: n= 2 \int_{-\infty}^0 d\omega \rho_0(\omega + \mu - \Sigma(\omega))
+
+where :math:`\rho(\omega)=\rho_0(\omega + \mu - \Sigma(\omega))` becomes the
+interacting density of states. This becomes much more favorable as only this real
+integral has to be calculated instead of the much more expensive hilbert transform
+of :eq:`Site_GF_H_Trans` and one does not need to include the line broadening at
+all.
+
+
+
 
 
