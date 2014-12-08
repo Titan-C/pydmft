@@ -67,7 +67,7 @@ class twosite_real_dop(twosite_real):
             if 2.5 < u_int < 3:
                 hyb = (hyb + old)/2
             convergence = np.abs(old - hyb) < 1e-5\
-                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 5e-3
+                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2
 
         self.e_c = ne_ec
 
@@ -75,16 +75,6 @@ class twosite_real_dop(twosite_real):
         """Lagrange multiplier in lattice slave spin"""
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.ocupations())-self.lattice_ocupation()
-
-
-def doping_config(res):
-    fig, axes = plt.subplots(3, sharex=True)
-    axes[-1].set_xlabel('$<N>_{imp}$')
-    fill = res[:, 3]
-    axes[0].set_xlim([0, 1])
-    for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
-        ax.plot(fill, res[:, i], label=lab)
-        ax.set_ylabel(lab)
 
 
 def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.05)):
@@ -95,7 +85,8 @@ def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.05)):
     sim.solve(e_c, u_int, hyb)
     for fmu in mu:
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
-        res.append([sim.e_c, sim.hyb_V(), sim.mu, np.sum(sim.ocupations()), copy.deepcopy(sim)])
+        print(fmu, sim.e_c, sim.hyb_V())
+        res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
 
     return np.asarray(res)
 
@@ -106,5 +97,3 @@ if __name__ == "__main__":
     except IOError:
         res = dmft_loop_dop(mu=mu)
         np.save('dopU4', res)
-
-    doping_config(res)
