@@ -51,6 +51,7 @@ from slaveparticles.quantum import dos
 def movie_feature_real(res, name):
     """Outputs an animate movie of the evolution of an specific feature"""
     f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
+
     line, = ax1.plot([], [], '--')
     ax1.set_xlim([-6, 6])
     ax1.set_ylim([0, 0.66])
@@ -62,12 +63,10 @@ def movie_feature_real(res, name):
     ax3.set_ylim([-6, 6])
 
     beta = res[0, 2].beta
-    ax1.set_xlabel('$\\omega$')
+    ax1.set_xlabel('$\\omega / t$')
     ax1.set_ylabel(r'$A(\omega)$')
     ax2.set_ylabel(r'$\Sigma(\omega)$')
     ax3.set_ylabel(r'$G_{imp}(\omega)$')
-    ax1.set_title('Transition to Mott Insulator at $\\beta=${}'.format(beta))
-
     f.subplots_adjust(hspace=0)
 
     def init():
@@ -85,9 +84,11 @@ def movie_feature_real(res, name):
         rho = dos.bethe_lattice(ra, res[i, 2].t)
 
         line.set_data(w, rho)
-        plt.legend([line], ['U={:.2f}'.format(u_int)])
         line2.set_data(w, s)
         line3.set_data(w, g)
+        ax1.set_title('Transition to Mott Insulator at '
+                      '$\\beta=${} and U/D={}'.format(beta,u_int))
+
         return line, line2, line3
 
     ani = anim.FuncAnimation(f, run, blit=True, interval=150, init_func=init,
@@ -96,9 +97,8 @@ def movie_feature_real(res, name):
     plt.close(f)
 
 
-def run_halffill(axis='matsubara'):
+def run_halffill(axis='matsubara', du=0.05):
     fig = plt.figure()
-    du = 0.05
     u_int = np.arange(0, 6.2, du)
     for beta in [6, 10, 20, 30, 50, 100, 1e3]:
         out_file = axis+'_halffill_b{}_dU{}'.format(beta, du)

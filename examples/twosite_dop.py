@@ -32,7 +32,7 @@ def movie_feature_real(res, name):
     ax1.set_ylabel(r'$A(\omega)$')
     ax2.set_ylabel(r'$\Sigma(\omega)$')
     ax3.set_ylabel(r'$G_{imp}(\omega)$')
-    ax2.set_title('Evolution under doping at $\\beta=${}'.format(beta))
+    ax1.set_title('Evolution under doping at $\\beta=${}'.format(beta))
 
     f.subplots_adjust(hspace=0)
 
@@ -100,4 +100,5 @@ if __name__ == "__main__":
             log.append([U, n, copy.deepcopy(doper)])
 
     log = np.asarray(log)
+    np.save('real_dop')
 

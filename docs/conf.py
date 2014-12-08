@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.pngmath',
+    'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.ifconfig',
 ]
 

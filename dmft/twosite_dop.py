@@ -84,6 +84,7 @@ class twosite_real_dop(twosite_real):
         self.solve(float(e_c), u_int, hyb)
         return np.sum(self.ocupations())-self.lattice_ocupation(self.mu)
 
+
 def doping_config(res, fill):
     fig, axes = plt.subplots(3, sharex=True)
     axes[-1].set_xlabel('$<N>_{imp}$')
@@ -91,21 +92,24 @@ def doping_config(res, fill):
         ax.plot(fill, res[:, i], label=lab)
         ax.set_ylabel(lab)
 
+
 import copy
 def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, dop=np.arange(1, 0.015, -0.2)):
     res = []
     sim=twosite_real_dop()
     sim.solve(e_c, u_int, hyb)
-    filling = np.arange(1, 0.015, -0.2)
-    for n in filling:
-#        sim = twosite_real_dop()
+    for n in dop:
         sim.selfconsistency(sim.e_c, sim.hyb_V(), n, u_int)
         res.append([sim.e_c, sim.hyb_V(), sim.mu, copy.deepcopy(sim)])
 
     return np.asarray(res)
 
 if __name__ == "__main__":
-    dop=np.arange(1, 0.015, -0.02)
-    res = dmft_loop_dop()
+    dop = np.arange(1, 0.015, -0.02)
+    try:
+        res = np.load('dopU4.npy')
+    except IOError:
+        res = dmft_loop_dop(dop=dop)
+        np.save('dopU4', res)
 
     doping_config(res, dop)

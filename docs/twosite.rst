@@ -101,6 +101,7 @@ and the free :math:`(U=0)` impurity Green function is a two pole function
    G^{(0)}_{imp} =& \frac{\omega - \epsilon_c + \mu}{(\omega + \mu - \epsilon_d)(\omega + \mu - \epsilon_c) - V^2} \\
     =& \frac{1}{2r} \left( \frac{r-\delta\epsilon}{\omega + \mu - \bar{\epsilon} +r}
     + \frac{r + \delta\epsilon}{\omega + \mu - \bar{\epsilon} - r} \right)
+   :label: ImpGF_free
 
 where :math:`\bar{\epsilon}=(\epsilon_d+\epsilon_c)/2`, :math:`\delta{\epsilon}
 =(\epsilon_d-\epsilon_c)/2` and :math:`r=\sqrt{\delta \epsilon^2 + V^2}`. The
@@ -206,18 +207,18 @@ solved to find de average occupancy of the impurity :math:`n_{imp}=\braket{n_\up
 and using the Lehmann representation one finds :math:`G_{imp}`, through the Dyson
 equation one can extract the self-energy.
 
-The self-enery yields the quasiparticle weight and through :eq:`hybridization_match`
+The self-energy yields the quasiparticle weight and through :eq:`hybridization_match`
 a new value for the hybridization strength :math:`V`. The self-energy is used
 again in :eq:`Site_GF_H_Trans` to obtain the lattice Green function, which via
 :eq:`lattice_ocupation` yields the filling of the lattice sites and has to be
 compared to the impurity occupancy. Then a new value for :math:`\epsilon_c` is
 chosen to reduce the difference in occupancies between lattice and impurity models.
-This cycle is performed until the self-consisten conditions are full-filled.
+This cycle is performed until the self-consistency conditions are full-filled.
 
 It is inconvenient to calculate the lattice Green function on each iteration to
 calculate later the lattice occupancy with :eq:`lattice_ocupation`, as the numerical
-pole broadening :math:`i0^+` intruduces a lot of numerical variation. Instead, given
-that the self-energy is a real two poled function, and on the bethe lattice is
+pole broadening :math:`i0^+` introduces a lot of numerical variation. Instead, given
+that the self-energy is a real two poled function, and on the Bethe lattice is
 purely local and momentum independent, the lattice filling can be directly calculated
 by
 
@@ -230,6 +231,76 @@ of :eq:`Site_GF_H_Trans` and one does not need to include the line broadening at
 all.
 
 
+Results
+-------
 
+The Mott transition at half-filling
+'''''''''''''''''''''''''''''''''''
 
+For the symmetric case of half-filling particle-hole symmetry requires
+:math:`\epsilon_c=\mu=U/2` to ensure the first self-consistency equation :eq:`occupancy_match`.
+One then follows to calculate the state of the system as the local Coulomb interaction
+is raised and one shows in the next figure the change of the quasiparticle
+weight at different temperatures.
 
+.. plot::
+
+    from __future__ import division, absolute_import, print_function
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from dmft.twosite import dmft_loop
+
+    axis = 'real'
+    du = 0.05
+    fig = plt.figure()
+    u_int = np.arange(0, 6.2, du)
+    for beta in [6, 10, 20, 30, 50, 100, 1e3]:
+        out_file = axis+'_halffill_b{}_dU{}'.format(beta, du)
+        try:
+            res = np.load(out_file+'.npy')
+        except IOError:
+            res = dmft_loop(u_int, axis, beta=beta, hop=1)
+            np.save(out_file, res)
+
+        plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
+
+    plt.legend(loc=0)
+    plt.title('Quasiparticle weigth, estimated in {} frequencies'.format(axis))
+    plt.ylabel('Z')
+    plt.ylim([0,1.05])
+    plt.xlim([0,3.3])
+    plt.xlabel('U/D')
+
+Following the system state as the metallic behavior is lost. Higher temperatures
+are less capable of sustaining the metal solution and the system just drops into
+the insulating state.
+
+The evolution of the spectral function is demostrated in the next figures.
+
+.. plot:: ../examples/twosite_halffill_1.py
+
+The structure of the spectral function is not as rich as a full DMFT calculation
+would provide. Nevertheless the the transfer of spectral weight for low to high
+energy is clearly demonstrated with the formation of the upper an lower Hubbard
+bands as the remaining quasiparticle peak. There is the clear evidence of the
+3 peak structure. The two site DMFT reduces the lattice Green function at very
+low temperatures to a function of 4 poles, 2 poles coming from the self-energy
+and the other 2 from the free impurity Green function :eq:`ImpGF_free`.
+
+Away of Half-filling
+''''''''''''''''''''
+
+The self-consistency equations become more complicated to fulfill, as now one
+has to search for the parameters :math:`\mu,\epsilon_c,V` at the same time for
+a given target population and for a given local interaction. The next figure shows
+this parameters as a function of filling for the case :math:`U/D=2`. In this
+case :math:`U<U_c` the hybridization strength is finite for :math:`n=1` and the
+system becomes less correlated for decreasing filling. Consequently :math:`V` has
+to increase until :math:`V\rightarrow M_2^{(0)}` for (:math:`n=0`).
+
+.. plot:: ../dmft/twosite_dop.py
+
+As for :math:`\epsilon_c=U/2` at half-filling and it decreases with decreasing
+filling until it diverges on appraching the empty band limit where
+:math:`\epsilon_c \rightarrow -\infty`, as is necessary to ensure a vanishing
+occupancy of the impurity orbital for finite :math:`V`
