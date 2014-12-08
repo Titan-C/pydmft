@@ -121,7 +121,7 @@ In the limit of high frequencies the exact self-energy of the impurity problem
            + \mathcal{O}(1/\omega^2)
    :label: High_w_sigma_expan
 
-where :math:`n_d` is the average occupancy of the impurity orbital:
+where :math:`n_d\equiv n_{d\sigma}` is the spin specific average occupancy of the impurity orbital:
 
 .. math:: n_d = \braket{d^\dagger_\sigma d_\sigma} = - \frac{1}{\pi}
    \int_{-\infty}^0 \Im m G_{imp}(\omega+ i0^+) d\omega
@@ -132,8 +132,69 @@ allows to find the high-frequency expansion of the on-site lattice Green functio
 .. math:: G(\omega) =&
     \frac{1}{\omega} + \frac{\epsilon_d - \mu + U n_d}{\omega^2} \\
     & + \frac{M_2^{(0)} + (\epsilon_d - \mu)^2 + 2(\epsilon_d -\mu)U n_d
-              U^2 n_d}{\omega^3} + \mathcal{O}(1/\omega^4)
+             + U^2 n_d}{\omega^3} + \mathcal{O}(1/\omega^4)
     :label: High_w_sigma_expan_High_G
 
-where :math:`M_2^{(0)}=\\int  x^2 \\rho_0(x)dx` is the variance of the non-
-interacting density of states :eq:`Bethe_dos`.
+where :math:`M_2^{(0)}=\int  x^2 \rho_0(x)dx` is the variance of the non-
+interacting density of states :eq:`Bethe_dos`. This expansion has to relate the
+fillings of the impurity :math:`n_{imp} \equiv 2 n_d` model with the lattice model as such it is required that the fillings
+in both models match.
+
+.. math:: n_{lattice} = n_{imp}
+   :label: occupancy_match
+
+where the band filling is calculated via
+
+.. math:: n_{lattice} = - \frac{2}{\pi} \int_{-\infty}^0 \Im m G(\omega+ i0^+) d\omega
+
+Equation :eq:`occupancy_match` can be seen as an integral for of the original
+self-consistency condition :eq:`DMFT_selfconsistency` and the paramagnetic
+solution is enforced as the spin species are dealt equivalent.
+
+The low-frequency limit of the self-energy can be expanded in powers of :math:`\omega`
+
+.. math:: \Sigma(\omega) = a + b\omega +\mathcal{O}(\omega^2)
+   :label: Low_w_sigma_expan
+
+The definition :math:`z=1/(1-b)` of the quasiparticle weight for the metal behavior
+of the system is convenient :math:`z=1/(1-d\Sigma(0)/d\omega)`. Inserting the
+expansion :eq:`Low_w_sigma_expan` with the definition of the quasiparticle
+weigh one obtains the coherent part of the on-site Green function:
+
+.. math:: G^{coh}(\omega) = z \int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{\omega -z(x-\mu+a)}
+   :label: G_coh
+
+On the other hand the coherent part of the impurity Green function is
+
+.. math:: G^{coh}_{imp}(\omega) = \frac{z}{\omega - z(\epsilon_d - \mu + a + \Delta(\omega))}
+
+If one where to compare the low frequency expansion of these coherent Green functions
+one obtains
+
+.. math::
+    G^{coh}(\omega)= & \int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{x - \mu + a}
+    - \frac{\omega}{z}\int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{(x - \mu + a)^2}
+    + \frac{\omega^2}{z^2}\int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{(x - \mu + a)^3} +\mathcal{O}(\omega^3) \\
+    G^{coh}_{imp}(\omega)= & \frac{\mu -\epsilon_c}{k-V^2}  + \left(\frac{\mu -\epsilon_c}{k-V^2}
+    - \frac{(\mu - \epsilon_c)(k' + k -  V^2)}{(k-V^2)^2}\right) \omega +\mathcal{O}(\omega^2)
+
+where :math:`k'=2\mu - \epsilon_c - \epsilon_d + b` and
+:math:`k=\mu^2 -2\mu(\epsilon_c + \epsilon_d) + \epsilon_c\epsilon_d -a`. Since
+it becomes to complicated to find a link in these low frequency exspansions, one
+performs the high-frequency expansion of the coherent Green functios to obtains
+
+.. math::
+    G^{coh}(\omega) =& \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
+    +\frac{z^3(M_2^{(0)} + (\epsilon_d - \mu +a)^2)}{\omega^3} \\
+    G^{coh}_{imp}(\omega)= & \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
+    +\frac{z^2V^2 + z^3(\epsilon_d - \mu +a)^2)}{\omega^3} \\
+
+leading to the second self-consistency condition
+
+.. math:: V^2 = z M_2^{(0)}
+   :label: hybridization_match
+
+Algorithm implementation
+''''''''''''''''''''''''
+
+
