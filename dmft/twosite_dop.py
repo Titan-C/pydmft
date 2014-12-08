@@ -29,6 +29,7 @@ DMFT solver for an impurity and a single bath site
 
 from __future__ import division, absolute_import, print_function
 import numpy as np
+import copy
 from dmft.twosite import twosite_real
 from scipy.integrate import simps
 from slaveparticles.quantum import dos
@@ -38,36 +39,27 @@ import matplotlib.pyplot as plt
 
 class twosite_real_dop(twosite_real):
 
-    def interacting_dos(self, mu):
+    def interacting_dos(self):
         """Evaluates the interacting density of states"""
-        w = self.omega + mu - self.GF[r'$\Sigma$']
+        w = self.omega + self.mu - self.GF[r'$\Sigma$']
         return dos.bethe_lattice(w, self.t)
 
-    def lattice_ocupation(self, mu):
+    def lattice_ocupation(self):
         w = np.copy(self.omega[:len(self.omega)/2+1])
-        intdos = self.interacting_dos(mu)[:len(w)]
+        intdos = self.interacting_dos()[:len(w)]
         w[-1] = 0
         intdos[-1] = (intdos[-1] + intdos[-2])/2
         dosint = 2*simps(intdos, w)
         return dosint
 
-    def find_mu(self, target_n, u_int):
-        """Find the required chemical potential to give the required filling"""
-        zero = lambda mu: self.lattice_ocupation(mu) - target_n
-        self.mu = fsolve(zero, u_int*target_n/2, xtol=5e-4)[0]
-        return self.mu
-
-    def selfconsistency(self, e_c, hyb, target_n, u_int):
+    def selfconsistency(self, e_c, hyb, mu, u_int):
         """Performs the selfconsistency loop"""
         convergence = False
         ne_ec = e_c
-        if target_n == 1:
-            ne_ec = u_int / 2
-            self.mu = u_int / 2
+        self.mu = mu
         while not convergence:
             old = hyb
             old_ec = ne_ec
-            self.find_mu(target_n, u_int)
             ne_ec = fsolve(self.restriction, old_ec,
                            (u_int, old), xtol=5e-3)[0]
             self.solve(ne_ec, u_int, hyb)
@@ -75,41 +67,44 @@ class twosite_real_dop(twosite_real):
             if 2.5 < u_int < 3:
                 hyb = (hyb + old)/2
             convergence = np.abs(old - hyb) < 1e-5\
-                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 2e-2
+                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 5e-3
 
         self.e_c = ne_ec
 
     def restriction(self, e_c, u_int, hyb):
         """Lagrange multiplier in lattice slave spin"""
         self.solve(float(e_c), u_int, hyb)
-        return np.sum(self.ocupations())-self.lattice_ocupation(self.mu)
+        return np.sum(self.ocupations())-self.lattice_ocupation()
 
 
-def doping_config(res, fill):
+def doping_config(res):
     fig, axes = plt.subplots(3, sharex=True)
     axes[-1].set_xlabel('$<N>_{imp}$')
+    fill = res[:, 3]
+    axes[0].set_xlim([0, 1])
     for i, ax, lab in zip(range(3), axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
         ax.plot(fill, res[:, i], label=lab)
         ax.set_ylabel(lab)
 
 
-import copy
-def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, dop=np.arange(1, 0.015, -0.2)):
+def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.05)):
     res = []
-    sim=twosite_real_dop()
+    sim = twosite_real_dop()
+    sim.mu = mu[0]
+    sim.e_c = e_c
     sim.solve(e_c, u_int, hyb)
-    for n in dop:
-        sim.selfconsistency(sim.e_c, sim.hyb_V(), n, u_int)
-        res.append([sim.e_c, sim.hyb_V(), sim.mu, copy.deepcopy(sim)])
+    for fmu in mu:
+        sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
+        res.append([sim.e_c, sim.hyb_V(), sim.mu, np.sum(sim.ocupations()), copy.deepcopy(sim)])
 
     return np.asarray(res)
 
 if __name__ == "__main__":
-    dop = np.arange(1, 0.015, -0.02)
+    mu = np.arange(2, -2, -0.05)
     try:
         res = np.load('dopU4.npy')
     except IOError:
-        res = dmft_loop_dop(dop=dop)
+        res = dmft_loop_dop(mu=mu)
         np.save('dopU4', res)
 
-    doping_config(res, dop)
+    doping_config(res)
