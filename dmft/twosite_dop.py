@@ -61,11 +61,11 @@ class twosite_real_dop(twosite_real):
             old = hyb
             old_ec = ne_ec
             ne_ec = fsolve(self.restriction, old_ec,
-                           (u_int, old), xtol=5e-3)[0]
+                           (u_int, old), xtol=1e-2)[0]
+            if np.abs(ne_ec-old_ec)< 1e-6:
+                ne_ec+=1e-3
             self.solve(ne_ec, u_int, hyb)
-            hyb = self.hyb_V()
-            if 2.5 < u_int < 3:
-                hyb = (hyb + old)/2
+            hyb = (self.hyb_V() + old)/2
             convergence = np.abs(old - hyb) < 1e-5\
                 and np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2
 
@@ -85,7 +85,6 @@ def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.05)):
     sim.solve(e_c, u_int, hyb)
     for fmu in mu:
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
-        print(fmu, sim.e_c, sim.hyb_V())
         res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
 
     return np.asarray(res)

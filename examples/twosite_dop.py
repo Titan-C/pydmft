@@ -26,12 +26,11 @@ def movie_feature_real(res, name):
     line3, = ax3.plot([], [], '-')
     ax3.set_ylim([-6, 6])
 
-    beta = res[0, 2].beta
+    beta = res[0, 1].beta
     ax1.set_xlabel('$\\omega$')
     ax1.set_ylabel(r'$A(\omega)$')
     ax2.set_ylabel(r'$\Sigma(\omega)$')
     ax3.set_ylabel(r'$G_{imp}(\omega)$')
-    ax1.set_title('Evolution under doping at $\\beta=${}'.format(beta))
 
     f.subplots_adjust(hspace=0)
 
@@ -46,9 +45,10 @@ def movie_feature_real(res, name):
         s = res[i, 1].GF[r'$\Sigma$']
         g = res[i, 1].GF['Imp G']
         ra = w + res[i, 1].mu - s
-        rho = dos.bethe_lattice(ra, res[i, 2].t)
+        rho = dos.bethe_lattice(ra, res[i, 1].t)
 
         line.set_data(w, rho)
+        ax1.set_title('Evolution under doping n={} at $\\beta=${}'.format(res[i, 0],beta))
         line2.set_data(w, s)
         line3.set_data(w, g)
         return line, line2, line3
@@ -75,19 +75,18 @@ def doping_config(res, name):
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
     plt.close(fig)
 
-def run_dop(axis='real', beta=1e3, u_int=[1, 4]):#, 4, 6, 8, 10, 100]):
+def run_dop(axis='real', beta=1e3, u_int=[1., 2., 4.0]):#, 4, 6, 8, 10, 100]):
     fig = plt.figure()
     for u in u_int:
         out_file = axis+'_dop_b{}_U{}'.format(beta, u)
         try:
             res = np.load(out_file+'.npy')
         except IOError:
-            du = -u/80
-            res = dmft_loop_dop(u, u/2, mu=np.arange(u/2 + du, -u/2, du))
+            res = dmft_loop_dop(u, u/2, 0.8, np.arange(u/2, np.min([-2,u/2]), -0.1))
             np.save(out_file, res)
 
         doping_config(res, out_file)
-#            movie_feature_real(res, out_file)
+#        movie_feature_real(res, out_file)
         zet = [sim.imp_z() for sim in res[:, 1]]
         plt.plot(res[:, 0], zet, '+-', label='$U/t= {}$'.format(u))
 
@@ -101,3 +100,4 @@ def run_dop(axis='real', beta=1e3, u_int=[1, 4]):#, 4, 6, 8, 10, 100]):
 
 if __name__ == "__main__":
     run_dop()
+#    movie_feature_real(res, 'dopU4')
