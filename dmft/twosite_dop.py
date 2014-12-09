@@ -33,7 +33,7 @@ import copy
 from dmft.twosite import twosite_real
 from scipy.integrate import simps
 from slaveparticles.quantum import dos
-from scipy.optimize import fsolve
+from scipy.optimize import root
 import matplotlib.pyplot as plt
 
 
@@ -57,19 +57,33 @@ class twosite_real_dop(twosite_real):
         convergence = False
         ne_ec = e_c
         self.mu = mu
+        count = 0
         while not convergence:
             old = hyb
             old_ec = ne_ec
-            ne_ec = fsolve(self.restriction, old_ec,
-                           (u_int, old), xtol=1e-2)[0]
-            if np.abs(ne_ec - old_ec) < 1e-6:
+            print('U={}, V={}, e_c={}, ni={}, nl={}'.format(u_int,
+                      old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
+            tuned = root(self.restriction, old_ec,
+                           (u_int, old), tol=1e-2)
+            if not tuned.success:
+                print('U={}, V={}, e_c={}, ni={}, nl={}'.format(u_int,
+                      old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
+                ne_ec = float((old_ec + tuned.x) / 2.)
+                self.solve(ne_ec, u_int, old)
+                print('stuck'*20)
+                if count > 6:
+                    print('exiting')
+                    return 0.
+            ne_ec = float(tuned.x)
+            if np.abs(ne_ec - old_ec) < 1e-9:
                 ne_ec += 1e-3
             if ne_ec > u_int/2.+1e-2:
                 ne_ec = mu
+                print('outbound')
             self.solve(ne_ec, u_int, hyb)
-            hyb = (self.hyb_V() + old)/2
+            hyb = self.hyb_V()
             convergence = np.abs(old - hyb) < 1e-5\
-                and np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2
+                and (np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2)
 
         self.e_c = ne_ec
 
@@ -79,22 +93,20 @@ class twosite_real_dop(twosite_real):
         return np.sum(self.ocupations())-self.lattice_ocupation()
 
 
-def dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.05)):
+def dmft_loop_dop(u_int=4):
     res = []
     sim = twosite_real_dop()
-    sim.mu = mu[0]
-    sim.e_c = e_c
-    sim.solve(e_c, u_int, hyb)
-    for fmu in mu:
+    sim.mu = -1.95
+    sim.e_c = .5
+    sim.solve(-15, u_int, 1.)
+    for fmu in np.arange(-1.95, u_int/2.+0.05, 0.05):
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
+        print(fmu, u_int, '-'*30)
         res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
+        if sim.lattice_ocupation() > 1:
+            break
 
     return np.asarray(res)
 
 if __name__ == "__main__":
-    mu = np.arange(2, -2, -0.05)
-    try:
-        res = np.load('dopU4.npy')
-    except IOError:
-        res = dmft_loop_dop(mu=mu)
-        np.save('dopU4', res)
+    mu = dmft_loop_dop(8)

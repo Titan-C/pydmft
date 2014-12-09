@@ -298,7 +298,9 @@ case :math:`U<U_c` the hybridization strength is finite for :math:`n=1` and the
 system becomes less correlated for decreasing filling. Consequently :math:`V` has
 to increase until :math:`V\rightarrow M_2^{(0)}` for (:math:`n=0`).
 
-.. plot:: ../dmft/twosite_dop.py
+.. plot::
+    import examples.twosite_dop as ts
+    run_dop(u_int=[4.0])
 
 As for :math:`\epsilon_c=U/2` at half-filling and it decreases with decreasing
 filling until it diverges on appraching the empty band limit where
