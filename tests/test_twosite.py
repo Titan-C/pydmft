@@ -31,15 +31,19 @@ def test_matsubara():
     zet = dmft_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05], axis='matsubara',
                     beta=1e5, hop=0.5)[:, 1]
     print(np.abs(zet-z_ref))
-    assert (np.abs(zet-z_ref) < 1e-5).all()
+    assert (np.abs(zet-z_ref) < 5e-4).all()
 
 
 def test_doping():
-    e_c_ref = np.array([2.00007, 0.88531, -0.00766, -0.94985, -2.41781])
-    V_ref = np.array([0.74535, 0.82123, 0.90668, 0.95978, 0.98858])
-    mu_ref = np.array([1.99956, 0.94027, 0.17653, -0.48374, -1.12271])
-    res = dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, dop=np.arange(1, 0.015, -0.2))
+    e_c_ref = np.array([2.00051, 1.16494, 0.26837, -0.81399, -2.63926])
+    V_ref = np.array([0.74534, 0.79271, 0.88327, 0.95445, 0.99037])
+    n_ref = np.array([1.00008, 0.85657, 0.66318, .42671, 0.17771])
+    res = dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.8))
 
-    for i, ref in enumerate([e_c_ref, V_ref, mu_ref]):
-        print(np.abs(ref-res[:, i]))
-        assert (np.abs(ref-res[:, i]) < 5e-5).all()
+    e_c = [sim.e_c for sim in res[:, 1]]
+    V = [sim.hyb_V() for sim in res[:, 1]]
+    n = [sim.ocupations().sum() for sim in res[:, 1]]
+
+    for ref, test in zip([e_c_ref, V_ref, n_ref], [e_c, V, n]):
+        print(np.abs(ref-test))
+        assert (np.abs(ref-test) < 5e-5).all()

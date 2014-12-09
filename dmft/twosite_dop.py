@@ -62,8 +62,10 @@ class twosite_real_dop(twosite_real):
             old_ec = ne_ec
             ne_ec = fsolve(self.restriction, old_ec,
                            (u_int, old), xtol=1e-2)[0]
-            if np.abs(ne_ec-old_ec)< 1e-6:
-                ne_ec+=1e-3
+            if np.abs(ne_ec - old_ec) < 1e-6:
+                ne_ec += 1e-3
+            if ne_ec > u_int/2.+1e-2:
+                ne_ec = mu
             self.solve(ne_ec, u_int, hyb)
             hyb = (self.hyb_V() + old)/2
             convergence = np.abs(old - hyb) < 1e-5\

@@ -96,6 +96,7 @@ def run_dop(axis='real', beta=1e3, u_int=[1., 2., 4.0]):#, 4, 6, 8, 10, 100]):
     plt.xlabel('n')
     fig.savefig(out_file+'_Z.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
+    plt.xlim([0,1])
     plt.close(fig)
 
 if __name__ == "__main__":
