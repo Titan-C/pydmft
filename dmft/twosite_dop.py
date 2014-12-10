@@ -65,24 +65,31 @@ class twosite_real_dop(twosite_real):
                       old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
             tuned = root(self.restriction, old_ec,
                            (u_int, old), tol=1e-2)
+            ne_ec = float(tuned.x)
+
             if not tuned.success:
-                print('U={}, V={}, e_c={}, ni={}, nl={}'.format(u_int,
-                      old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
-                ne_ec = float((old_ec + tuned.x) / 2.)
+                ne_ec = old_ec
                 self.solve(ne_ec, u_int, old)
+                print('fail on U={}, V={}, e_c={}, ni={}, nl={}'.format(u_int,
+                      old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
+                if self.hyb_V() < 1e-5:
+                    break
                 print('stuck'*20)
                 if count > 6:
+                    count += 1
                     print('exiting')
-                    return 0.
-            ne_ec = float(tuned.x)
-            if np.abs(ne_ec - old_ec) < 1e-9:
-                ne_ec += 1e-3
-            if ne_ec > u_int/2.+1e-2:
+                    break
+            if np.abs(ne_ec - old_ec) < 1e-7\
+                    and np.abs(self.restriction(ne_ec, u_int, hyb)) > 1e-2:
+                ne_ec += 1e-4
+                print('jump')
+            if self.ocupations().sum() > 1. or ne_ec > mu:
+                print('balance from ni={} e_c={}'.format(self.ocupations().sum(), ne_ec))
                 ne_ec = mu
-                print('outbound')
-            self.solve(ne_ec, u_int, hyb)
+            self.solve(ne_ec, u_int, old)
             hyb = self.hyb_V()
-            convergence = np.abs(old - hyb) < 1e-5\
+
+            convergence = (np.abs(old - hyb) < 1e-5 or hyb < 1e-5)\
                 and (np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2)
 
         self.e_c = ne_ec
@@ -96,14 +103,14 @@ class twosite_real_dop(twosite_real):
 def dmft_loop_dop(u_int=4):
     res = []
     sim = twosite_real_dop()
-    sim.mu = -1.95
     sim.e_c = .5
     sim.solve(-15, u_int, 1.)
     for fmu in np.arange(-1.95, u_int/2.+0.05, 0.05):
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
         print(fmu, u_int, '-'*30)
         res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
-        if sim.lattice_ocupation() > 1:
+        if sim.ocupations().sum() >= 1 and u_int >= 6.:
+            res[-1][1].solve(sim.e_c, u_int, 1e-2)
             break
 
     return np.asarray(res)

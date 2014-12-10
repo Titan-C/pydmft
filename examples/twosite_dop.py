@@ -86,7 +86,7 @@ def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
             np.save(out_file, res)
 
         doping_config(res, out_file)
-#        movie_feature_real(res, out_file)
+        movie_feature_real(res, out_file)
         zet = [sim.imp_z() for sim in res[:, 1]]
         plt.plot(res[:, 0], zet, '+-', label='$U/t= {}$'.format(u))
 
@@ -97,7 +97,7 @@ def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
     fig.savefig(out_file+'_Z.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
     plt.xlim([0,1])
-#    plt.close(fig)
+    plt.close(fig)
 
 if __name__ == "__main__":
     run_dop()
