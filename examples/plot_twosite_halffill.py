@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec  8 15:04:39 2014
+================================================
+Following the Metal to Mott insulator Transition
+================================================
 
-@author: oscar
+Sequence of plots showing the transfer of spectral weight for a Hubbard
+Model in the Bethe Lattice as the local interaction is raised.
 """
 
+# Code source: Óscar Nájera
+# License: BSD 3 clause
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import numpy as np

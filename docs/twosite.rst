@@ -243,44 +243,23 @@ One then follows to calculate the state of the system as the local Coulomb inter
 is raised and one shows in the next figure the change of the quasiparticle
 weight at different temperatures.
 
-.. plot::
+.. plot:: ../examples/plot_twosite_halffill_z.py plot_z_real
 
-    from __future__ import division, absolute_import, print_function
-    import matplotlib.pyplot as plt
-    import numpy as np
-    from dmft.twosite import dmft_loop
-
-    axis = 'real'
-    du = 0.05
-    fig = plt.figure()
-    u_int = np.arange(0, 6.2, du)
-    for beta in [6, 10, 20, 30, 50, 100, 1e3]:
-        out_file = axis+'_halffill_b{}_dU{}'.format(beta, du)
-        try:
-            res = np.load(out_file+'.npy')
-        except IOError:
-            res = dmft_loop(u_int, axis, beta=beta, hop=1)
-            np.save(out_file, res)
-
-        plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
-
-    plt.legend(loc=0)
-    plt.title('Quasiparticle weigth, estimated in {} frequencies'.format(axis))
-    plt.ylabel('Z')
-    plt.ylim([0,1.05])
-    plt.xlim([0,3.3])
-    plt.xlabel('U/D')
+.. plot:: ../examples/plot_twosite_halffill_z.py plot_z
 
 Following the system state as the metallic behavior is lost. Higher temperatures
 are less capable of sustaining the metal solution and the system just drops into
 the insulating state.
 
-The evolution of the spectral function is demostrated in the next figures.
+The evolution of the spectral function is demostrated in the next figures,
+accompanied by the plot of the self energy and the impurity Green function. It
+can be clearly seen that the self-energy has in general only 2 poles and the
+local Green function is in general a 4 poled function.
 
-.. plot:: ../examples/twosite_halffill_1.py
+.. plot:: ../examples/plot_twosite_halffill.py
 
 The structure of the spectral function is not as rich as a full DMFT calculation
-would provide. Nevertheless the the transfer of spectral weight for low to high
+would provide. Nevertheless the transfer of spectral weight for low to high
 energy is clearly demonstrated with the formation of the upper an lower Hubbard
 bands as the remaining quasiparticle peak. There is the clear evidence of the
 3 peak structure. The two site DMFT reduces the lattice Green function at very

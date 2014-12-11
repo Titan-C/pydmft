@@ -99,6 +99,6 @@ def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
     plt.xlim([0,1])
     plt.close(fig)
 
-if __name__ == "__main__":
+if __name__ == "gallery":
     run_dop()
 #    movie_feature_real(res, 'dopU4')

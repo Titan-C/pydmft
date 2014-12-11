@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
 from dmft.twosite import dmft_loop, twosite_matsubara
+from slaveparticles.quantum import dos
 
 def movie_feature(res, name):
     """Outputs an animate movie of the evolution of an specific feature"""
@@ -46,7 +47,6 @@ def movie_feature(res, name):
     ani.save(name+'.mp4')
     plt.close(figi)
 
-from slaveparticles.quantum import dos
 
 def movie_feature_real(res, name):
     """Outputs an animate movie of the evolution of an specific feature"""
@@ -108,15 +108,10 @@ def run_halffill(axis='matsubara', du=0.05):
             res = dmft_loop(u_int, axis, beta=beta, hop=1)
             np.save(out_file, res)
 
-        if axis == 'real':
-            movie_feature_real(res, out_file)
-        if axis == 'matsubara':
-            movie_feature(res, out_file)
         plt.plot(res[:, 0]/2, res[:, 1], '+-', label='$\\beta = {}$'.format(beta))
-    #    plt.plot(u_int, 1-u_int.clip(0, 3)**2/9, '--', label='$1-U^2/U_c^2')
-    plt.legend(loc=0)
 
-    plt.title('Quasiparticle weigth, estimated in {} freq'.format(axis))
+    plt.legend(loc=0)
+    plt.title('Quasiparticle weigth, estimated in {} frequencies'.format(axis))
     plt.ylabel('Z')
     plt.xlabel('U/D')
     fig.savefig(out_file+'_Z.png', format='png',
@@ -124,5 +119,5 @@ def run_halffill(axis='matsubara', du=0.05):
     plt.close(fig)
 
 if __name__ == "__main__":
-    run_halffill()
     run_halffill('real')
+    run_halffill('matsubara')
