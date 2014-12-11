@@ -18,7 +18,7 @@ def movie_feature_real(res, name):
     f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True)
     line, = ax1.plot([], [], '--')
     ax1.set_xlim([-6, 6])
-    ax1.set_ylim([0, 0.66])
+    ax1.set_ylim([0, 0.36])
 
     line2, = ax2.plot([], [], '-')
     ax2.set_ylim([-6, 6])
@@ -59,7 +59,7 @@ def movie_feature_real(res, name):
     plt.close(f)
 
 
-def doping_config(res, name):
+def doping_config(res=np.load('real_dop_b1000.0_U4.0.npy'), name='real_dop_b1000.0_U4.0'):
     fig, axes = plt.subplots(3, sharex=True)
     axes[-1].set_xlabel('$<N>_{imp}$')
     fill = res[:, 0]
@@ -73,9 +73,9 @@ def doping_config(res, name):
 
     fig.savefig(name+'_bathparam.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
-    plt.close(fig)
 
-def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
+
+def plot_z(axis='real', beta=1e3, u_int=[2., 4., 5.85, 6., 8., 10., 100.]):
     fig = plt.figure()
     for u in u_int:
         out_file = axis+'_dop_b{}_U{}'.format(beta, u)
@@ -85,8 +85,6 @@ def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
             res = dmft_loop_dop(u)
             np.save(out_file, res)
 
-        doping_config(res, out_file)
-        movie_feature_real(res, out_file)
         zet = [sim.imp_z() for sim in res[:, 1]]
         plt.plot(res[:, 0], zet, '+-', label='$U/t= {}$'.format(u))
 
@@ -94,11 +92,9 @@ def run_dop(axis='real', beta=1e3, u_int=[2., 4., 6., 8., 10.]):
     plt.title('Quasiparticle weigth, estimated in real freq at $\\beta={}$'.format(beta))
     plt.ylabel('Z')
     plt.xlabel('n')
+    plt.xlim([0,1])
     fig.savefig(out_file+'_Z.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
-    plt.xlim([0,1])
-    plt.close(fig)
 
 if __name__ == "gallery":
-    run_dop()
-#    movie_feature_real(res, 'dopU4')
+    plot_z()

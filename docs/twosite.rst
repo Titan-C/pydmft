@@ -245,8 +245,6 @@ weight at different temperatures.
 
 .. plot:: ../examples/plot_twosite_halffill_z.py plot_z_real
 
-.. plot:: ../examples/plot_twosite_halffill_z.py plot_z
-
 Following the system state as the metallic behavior is lost. Higher temperatures
 are less capable of sustaining the metal solution and the system just drops into
 the insulating state.
@@ -270,18 +268,36 @@ Away of Half-filling
 ''''''''''''''''''''
 
 The self-consistency equations become more complicated to fulfill, as now one
-has to search for the parameters :math:`\mu,\epsilon_c,V` at the same time for
-a given target population and for a given local interaction. The next figure shows
-this parameters as a function of filling for the case :math:`U/D=2`. In this
+has to search for the parameters :math:`\epsilon_c,V` at the same time for
+a given target population and for a given local interaction. In the next figure
+it is shown the quasiparticle weight decay as a function of increasing filling
+for different values of the local interaction. In the empty band limit
+:math:`Z\rightarrow 1` for an arbitrary :math:`U`. As
+long as the system is away from half-filling it has a metallic behavior.
+
+.. plot:: ../examples/plot_twosite_dop.py plot_z
+
+The next figure shows
+this parameters as a function of filling for the case :math:`U/t=4`. In this
 case :math:`U<U_c` the hybridization strength is finite for :math:`n=1` and the
 system becomes less correlated for decreasing filling. Consequently :math:`V` has
 to increase until :math:`V\rightarrow M_2^{(0)}` for (:math:`n=0`).
 
-.. plot::
-    import examples.twosite_dop as ts
-    run_dop(u_int=[4.0])
+.. plot:: ../examples/plot_twosite_dop.py doping_config
+    :context: reset
 
 As for :math:`\epsilon_c=U/2` at half-filling and it decreases with decreasing
 filling until it diverges on appraching the empty band limit where
 :math:`\epsilon_c \rightarrow -\infty`, as is necessary to ensure a vanishing
-occupancy of the impurity orbital for finite :math:`V`
+occupancy of the impurity orbital for finite :math:`V`. For the usable chemical
+potential to dope the system it is only spanned in the range of bandwith of the
+non interacting density of states.
+
+The structure of the spectral function change under doping is presented in the
+next figure. The strong simplification of the two site DMFT approximation allows
+only the visualization of the 3 "peaks" which always present a disconnected
+structure. The quasiparticle peak never joins the lower Hubbard band at low
+fillings.
+
+.. plot:: ../examples/plot_twosite_dop_A.py
+

@@ -89,7 +89,7 @@ class twosite_real_dop(twosite_real):
             self.solve(ne_ec, u_int, old)
             hyb = self.hyb_V()
 
-            convergence = (np.abs(old - hyb) < 1e-5 or hyb < 1e-5)\
+            convergence = (np.abs(old - hyb) < 2.5e-5 or hyb < 1e-5)\
                 and (np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2)
 
         self.e_c = ne_ec

@@ -33,6 +33,8 @@ def plot_z(axis='matsubara', du=0.05):
     plt.title('Quasiparticle weigth, estimated in {} frequencies'.format(axis))
     plt.ylabel('Z')
     plt.xlabel('U/D')
+    fig.savefig(out_file+'_Z.png', format='png',
+                transparent=False, bbox_inches='tight', pad_inches=0.05)
 
 
 def plot_z_real():
