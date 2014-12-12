@@ -301,3 +301,43 @@ fillings.
 
 .. plot:: ../examples/plot_twosite_dop_A.py
 
+In Matsubara frequencies
+''''''''''''''''''''''''
+
+The twosite DMFT can also be treated in the imaginary axis using the Matsubara
+frequencies. Since one is only treating the analytic continuation into the
+imaginary axis, all equations are kept the same one only needs to change
+:math:`\omega \rightarrow i\omega_n`, where :math:`omega_n = (2n+1)/\beta`.
+The most substantial change comes from the
+definition of the quasiparticle weight were it becomes
+
+.. math:: z = [1 - \Im m \Sigma(\omega_0)/\omega_0) ]^{-1}
+
+Until now only the treatment at half-filling is handled, because in this situation
+the particle-hole symmetry requires :math:`\epsilon_c=\mu=U/2` and :eq:`occupancy_match`
+is automatically fulfilled. The next figure shows the drop in the quasiparticle
+weight as the local interaction is raised. It is very similar to the one presented
+for the real frequencies. First an most noticeable if that a :math:`\beta = 6`
+the quasiparticle weight doesn't drop completely to zero at :math:`U/D=1.6`, but
+that the metallic solution is sustained up to :math:`U/D=2`. In general the metallic
+solutions are sustained for larger interaction values(although not directly noticeable)
+that the calculations performed in the real frequency axis.
+
+The search for the
+coexistence region of the metallic and insulating solutions is not possible
+in the 2 site DMFT approximation as one only uses equation :eq:`hybridization_match`
+to update the bath hybridization and starting from the insulating solution with
+:math:`z=0` does not allow the system to escape the insulating case.
+
+.. plot:: ../examples/plot_twosite_halffill_z.py plot_z
+
+The behavior of the Green function and the self-energy is much more abstract than
+in the real case. Here there are no poles to be seen. The next figure shows the
+imaginary parts of the Green function and self-energy at different local interaction
+strength. In the case of the self-energy the behavior is the same know from my
+previous training with IPT. For the Green function there was the behavior it should
+go to the bandwidth value at at zero frequency, this know condition is not met
+neither was it enforced. In the case of the 2 site DMFT the Green Function always
+"goes" through zero although there is no zero frequency in the fermionic case.
+
+.. plot:: ../examples/plot_twosite_halffill_matsubara.py

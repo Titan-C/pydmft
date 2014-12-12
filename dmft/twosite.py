@@ -116,6 +116,10 @@ class twosite(object):
         """gets the ocupation of the impurity"""
         return np.asarray([self.expected((f.T*f).todense()) for f in self.oper[:top]])
 
+    def double_ocupation(self):
+        """Calculates the double ocupation of the impurity"""
+        d_up, d_dw = self.oper[:2]
+        return self.expected((d_up.T*d_up*d_dw.T*d_dw).todense())
 
 class twosite_real(twosite):
     """DMFT solver in the real axis"""
@@ -167,7 +171,10 @@ class twosite_matsubara(twosite):
 
 def refine_mat_solution(end_solver, u_int):
     beta = end_solver.beta
-    sim = twosite_matsubara(beta, end_solver.t, 30*beta)
+    sim = twosite_matsubara(beta, end_solver.t, beta)
+    bound = 30*beta
+    sim.omega = 1j*np.arange(-bound+1, bound, 2) / sim.beta
+    sim.mu = end_solver.mu
     sim.solve(u_int/2, u_int, end_solver.hyb_V())
 
     return sim
