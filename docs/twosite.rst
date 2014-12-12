@@ -182,8 +182,8 @@ one obtains
 
 where :math:`k'=2\mu - \epsilon_c - \epsilon_d + b` and
 :math:`k=\mu^2 -2\mu(\epsilon_c + \epsilon_d) + \epsilon_c\epsilon_d -a`. Since
-it becomes to complicated to find a link in these low frequency exspansions, one
-performs the high-frequency expansion of the coherent Green functios to obtains
+it becomes to complicated to find a link in these low frequency expansions, one
+performs the high-frequency expansion of the coherent Green functions to obtains
 
 .. math::
     G^{coh}(\omega) =& \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
@@ -249,7 +249,7 @@ Following the system state as the metallic behavior is lost. Higher temperatures
 are less capable of sustaining the metal solution and the system just drops into
 the insulating state.
 
-The evolution of the spectral function is demostrated in the next figures,
+The evolution of the spectral function is demonstrated in the next figures,
 accompanied by the plot of the self energy and the impurity Green function. It
 can be clearly seen that the self-energy has in general only 2 poles and the
 local Green function is in general a 4 poled function.
@@ -275,7 +275,16 @@ for different values of the local interaction. In the empty band limit
 :math:`Z\rightarrow 1` for an arbitrary :math:`U`. As
 long as the system is away from half-filling it has a metallic behavior.
 
-.. plot:: ../examples/plot_twosite_dop.py plot_z
+.. plot:: ../examples/plot_twosite_dop_z.py plot_z
+
+The next plot show the expected value of the double occupation in the impurity.
+At low lattice filling, attibuted to the low electron population, double occupancy
+is low. When the system is subject to a local Coulomb interaction :math:`U<U_c`
+the double occupancy increases as the system approaches the half-filling regime
+and remains finite. When :math:`U<U_c` there is no double occupancy any more
+at half-filling.
+
+.. plot:: ../examples/plot_twosite_dop_d.py plot_d
 
 The next figure shows
 this parameters as a function of filling for the case :math:`U/t=4`. In this
@@ -283,14 +292,13 @@ case :math:`U<U_c` the hybridization strength is finite for :math:`n=1` and the
 system becomes less correlated for decreasing filling. Consequently :math:`V` has
 to increase until :math:`V\rightarrow M_2^{(0)}` for (:math:`n=0`).
 
-.. plot:: ../examples/plot_twosite_dop.py doping_config
-    :context: reset
+.. plot:: ../examples/plot_twosite_dop.py plot_doping_param
 
 As for :math:`\epsilon_c=U/2` at half-filling and it decreases with decreasing
 filling until it diverges on appraching the empty band limit where
 :math:`\epsilon_c \rightarrow -\infty`, as is necessary to ensure a vanishing
 occupancy of the impurity orbital for finite :math:`V`. For the usable chemical
-potential to dope the system it is only spanned in the range of bandwith of the
+potential to dope the system it is only spanned in the range of bandwidth of the
 non interacting density of states.
 
 The structure of the spectral function change under doping is presented in the
@@ -300,6 +308,10 @@ structure. The quasiparticle peak never joins the lower Hubbard band at low
 fillings.
 
 .. plot:: ../examples/plot_twosite_dop_A.py
+
+When analyzing the double occupancy of the impurity site
+
+
 
 In Matsubara frequencies
 ''''''''''''''''''''''''
