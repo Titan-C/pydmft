@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 from dmft.twosite import dmft_loop
 from dmft.twosite_dop import dmft_loop_dop
 import numpy as np
-import pytest
 
 
 def test_sigma():
@@ -21,7 +20,7 @@ def test_mit_real():
     calculated in the real axis formalism"""
     z_ref = np.array([1., 0.88889, 0.75, 0.55556, 0.30556, 0.06556, 0.])
     zet = dmft_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05], axis='real',
-                        beta=1e5, hop=0.5)[:, 1]
+                    beta=1e5, hop=0.5)[:, 1]
     print(np.abs(zet-z_ref))
     assert (np.abs(zet-z_ref) < 3e-3).all()
 
@@ -35,10 +34,10 @@ def test_matsubara():
 
 
 def test_doping():
-    e_c_ref = np.array([2.00051, 1.16494, 0.26837, -0.81399, -2.63926])
-    V_ref = np.array([0.74534, 0.79271, 0.88327, 0.95445, 0.99037])
-    n_ref = np.array([1.00008, 0.85657, 0.66318, .42671, 0.17771])
-    res = dmft_loop_dop(u_int=4, e_c=2, hyb=0.74, mu=np.arange(2, -2, -0.8))
+    e_c_ref = np.array([-0.98093, -0.23627, 0.38745, 0.95069, 1.48207])
+    V_ref = np.array([0.96091, 0.92330, 0.87213, 0.81438, 0.76532])
+    n_ref = np.array([0.39486, 0.54847, 0.69036, 0.81363, 0.91498])
+    res = dmft_loop_dop(u_int=4, mu=[-.5, 0, 0.5, 1, 1.5])
 
     e_c = [sim.e_c for sim in res[:, 1]]
     V = [sim.hyb_V() for sim in res[:, 1]]

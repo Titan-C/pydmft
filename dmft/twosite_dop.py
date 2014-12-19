@@ -100,12 +100,12 @@ class twosite_real_dop(twosite_real):
         return np.sum(self.ocupations())-self.lattice_ocupation()
 
 
-def dmft_loop_dop(u_int=4):
+def dmft_loop_dop(u_int=4, mu=np.arange(-1.95, 2.05, 0.05)):
     res = []
     sim = twosite_real_dop()
     sim.e_c = .5
     sim.solve(-15, u_int, 1.)
-    for fmu in np.arange(-1.95, u_int/2.+0.05, 0.05):
+    for fmu in mu:
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
         print(fmu, u_int, '-'*30)
         res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
