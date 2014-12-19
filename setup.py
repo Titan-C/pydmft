@@ -29,7 +29,7 @@ setup(
     author_email='najera.oscar@gmail.com',
     license="GNU General Public License v3 (GPLv3)",
 
-    install_requires=['numpy', 'scipy', 'Sphinx', 'matplotlib'],
+    install_requires=['numpy', 'scipy', 'Sphinx', 'matplotlib', 'slaveparticles'],
 
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest},
