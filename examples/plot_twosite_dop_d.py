@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dmft.twosite_dop import dmft_loop_dop
 
-def plot_d(axis='real', beta=1e3, u_int=[2., 4., 5.85, 6., 8., 10., 100.]):
+
+def plot_d(axis='real', beta=1e3, u_int=np.array([2., 4., 5.85, 6., 8., 10., 100.])):
     fig = plt.figure()
     for u in u_int:
         out_file = axis+'_dop_b{}_U{}'.format(beta, u)
@@ -33,7 +34,7 @@ def plot_d(axis='real', beta=1e3, u_int=[2., 4., 5.85, 6., 8., 10., 100.]):
     plt.title('Impurity double occupation at $\\beta={}$'.format(beta))
     plt.ylabel('$\\langle n_\\uparrow n_\\downarrow \\rangle$')
     plt.xlabel('n')
-    plt.xlim([0,1])
+    plt.xlim([0, 1])
     fig.savefig(out_file+'_b.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
 

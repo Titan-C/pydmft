@@ -7,6 +7,8 @@ Created on Wed Nov 19 15:12:44 2014
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import numpy as np
+from dmft.twosite_dop import dmft_loop_dop
+
 
 def doping_config(res, name):
     fig, axes = plt.subplots(3, sharex=True)

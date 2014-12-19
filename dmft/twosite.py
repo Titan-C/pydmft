@@ -32,7 +32,6 @@ import numpy as np
 from scipy.integrate import quad
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 from slaveparticles.quantum import dos, fermion
-import matplotlib.pyplot as plt
 
 
 def m2_weight(t):
@@ -43,7 +42,7 @@ def m2_weight(t):
     return quad(second_moment, -2*t, 2*t)[0]
 
 
-class twosite(object):
+class TwoSite(object):
     """Base class for a two site DMFT solver"""
 
     def __init__(self, beta, t):
@@ -114,17 +113,19 @@ class twosite(object):
 
     def ocupations(self, top=2):
         """gets the ocupation of the impurity"""
-        return np.asarray([self.expected((f.T*f).todense()) for f in self.oper[:top]])
+        return np.asarray([self.expected((f.T*f).todense())
+                            for f in self.oper[:top]])
 
     def double_ocupation(self):
         """Calculates the double ocupation of the impurity"""
         d_up, d_dw = self.oper[:2]
         return self.expected((d_up.T*d_up*d_dw.T*d_dw).todense())
 
-class twosite_real(twosite):
+class TwoSite_Real(TwoSite):
     """DMFT solver in the real axis"""
+
     def __init__(self, beta=1e5, t=1, omega=np.linspace(-6, 6, 1200)):
-        super(twosite_real, self).__init__(beta, t)
+        super(TwoSite_Real, self).__init__(beta, t)
 
         self.omega = omega
 
@@ -148,10 +149,11 @@ class twosite_real(twosite):
         else:
             return zet
 
-class twosite_matsubara(twosite):
+class TwoSite_Matsubara(TwoSite):
     """DMFT solver on the matsubara frequency axis"""
+
     def __init__(self, beta=100, t=1, nfreq=20):
-        super(twosite_matsubara, self).__init__(beta, t)
+        super(TwoSite_Matsubara, self).__init__(beta, t)
 
         self.omega = 1j*np.arange(1, nfreq, 2) / self.beta
         self.solve(0, 0, 0)
@@ -170,8 +172,12 @@ class twosite_matsubara(twosite):
 
 
 def refine_mat_solution(end_solver, u_int):
+    """Takes the end converged dmft solver in matsubara frequencies
+    and increases the range of the matsubara frequencies to get
+    nicer plots"""
+
     beta = end_solver.beta
-    sim = twosite_matsubara(beta, end_solver.t, beta)
+    sim = TwoSite_Matsubara(beta, end_solver.t, beta)
     bound = 30*beta
     sim.omega = 1j*np.arange(-bound+1, bound, 2) / sim.beta
     sim.mu = end_solver.mu
@@ -181,12 +187,14 @@ def refine_mat_solution(end_solver, u_int):
 
 
 def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
-                   beta=1e5, hop=0.5, hyb=0.4):
+              beta=1e5, hop=0.5, hyb=0.4):
+    """Perform a DMFT loop for the half-filled case of the
+    Two site formulation"""
     res = []
     if axis == 'real':
-        solver = twosite_real
+        solver = TwoSite_Real
     if axis == 'matsubara':
-        solver = twosite_matsubara
+        solver = TwoSite_Matsubara
 
     for U in u_int:
         sim = solver(beta, hop)
@@ -207,7 +215,7 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
 if __name__ == "__main__":
     u = np.arange(0, 3.2, 0.1)
-    sim = dmft_loop(u,axis='real')
+    sim = dmft_loop(u, axis='real')
 #    filling = np.arange(1, 0.9, -0.025)
 #    for n in filling:
 #        old_e = ecc

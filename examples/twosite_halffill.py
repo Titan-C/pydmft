@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import matplotlib.animation as anim
 import numpy as np
-from dmft.twosite import dmft_loop, twosite_matsubara
+from dmft.twosite import dmft_loop, TwoSite_Matsubara
 from slaveparticles.quantum import dos
 
 def movie_feature(res, name):
@@ -18,7 +18,7 @@ def movie_feature(res, name):
     line, = ax.plot([], [], '*-')
     ax.set_ylim(-1e-8, 0)
     beta = res[0, 2].beta
-    sim = twosite_matsubara(beta, res[0, 2].t, 30*beta)
+    sim = TwoSite_Matsubara(beta, res[0, 2].t, 30*beta)
 
     iwn = np.arange(1, 30*beta, 2) / beta
     ax.set_xlim(0, iwn.max())
@@ -87,7 +87,7 @@ def movie_feature_real(res, name):
         line2.set_data(w, s)
         line3.set_data(w, g)
         ax1.set_title('Transition to Mott Insulator at '
-                      '$\\beta=${} and U/D={}'.format(beta,u_int))
+                      '$\\beta=${} and U/D={}'.format(beta, u_int))
 
         return line, line2, line3
 

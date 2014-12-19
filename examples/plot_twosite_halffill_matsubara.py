@@ -13,7 +13,6 @@ Model in the Bethe Lattice as the local interaction is raised.
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import numpy as np
-from slaveparticles.quantum import dos
 from dmft.twosite import refine_mat_solution
 
 axis = 'matsubara'
@@ -29,7 +28,7 @@ for u in u_int:
 
     f, (ax1, ax2) = plt.subplots(2, sharex=True)
     ax1.set_title('Transition to Mott Insulator at '
-                '$\\beta=${} and U/D={}'.format(beta, u/2))
+                  '$\\beta=${} and U/D={}'.format(beta, u/2))
 
     sim = refine_mat_solution(res[ind, 2], u)
 
@@ -37,13 +36,12 @@ for u in u_int:
     s = sim.GF[r'$\Sigma$']
     g = sim.GF['Imp G']
 
-
     ax1.plot(w, g.imag, 'b+')
     ax1.set_xlim([w.min(), w.max()])
 
     ax2.plot(w, s.imag, 'b+')
     bound = s.imag.max() * 1.2
-    ax2.set_ylim([np.max([-bound, -25]) , np.min([bound, 25])])
+    ax2.set_ylim([np.max([-bound, -25]), np.min([bound, 25])])
 
     ax1.set_ylabel(r'$\Im m G_{imp}(\omega)$', color='b')
     ax2.set_ylabel(r'$\Im m \Sigma(\omega)$', color='b')

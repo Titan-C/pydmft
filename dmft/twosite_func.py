@@ -41,22 +41,6 @@ def fit_sigma(sim):
     sigma = sim.GF[r'$\Sigma$']
     return curve_fit(two_pole, w, sigma)
 
-def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
-              beta=1e5, hop=0.5, hyb=0.4, filling=1):
-    if axis == 'matsubara':
-        return matsubara_loop(u_int, beta, hop, hyb)
-
-    res = []
-    e_c = 0
-    for U in u_int:
-        sim = twosite(beta, hop, axis)
-        e_c, hyb = sim.selfconsitency(e_c, hyb, filling, U)
-        print(U, sim.mu, e_c, hyb)
-
-        sim.solve(e_c, U, hyb)
-        hyb = sim.hyb_V()
-        res.append((U, sim.imp_z(), sim))
-    return np.asarray(res)
 
 def out_plot(sim, spec, label=''):
     w = sim.omega.imag

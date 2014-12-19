@@ -30,14 +30,13 @@ DMFT solver for an impurity and a single bath site
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import copy
-from dmft.twosite import twosite_real
+from dmft.twosite import TwoSite_Real
 from scipy.integrate import simps
 from slaveparticles.quantum import dos
 from scipy.optimize import root
-import matplotlib.pyplot as plt
 
 
-class twosite_real_dop(twosite_real):
+class TwoSite_Real_Dop(TwoSite_Real):
 
     def interacting_dos(self):
         """Evaluates the interacting density of states"""
@@ -62,9 +61,10 @@ class twosite_real_dop(twosite_real):
             old = hyb
             old_ec = ne_ec
             print('U={}, V={}, e_c={}, ni={}, nl={}'.format(u_int,
-                      old, ne_ec, self.ocupations().sum(), self.lattice_ocupation()))
+                  old, ne_ec, self.ocupations().sum(),
+                  self.lattice_ocupation()))
             tuned = root(self.restriction, old_ec,
-                           (u_int, old), tol=1e-2)
+                         (u_int, old), tol=1e-2)
             ne_ec = float(tuned.x)
 
             if not tuned.success:
@@ -102,7 +102,7 @@ class twosite_real_dop(twosite_real):
 
 def dmft_loop_dop(u_int=4, mu=np.arange(-1.95, 2.05, 0.05)):
     res = []
-    sim = twosite_real_dop()
+    sim = TwoSite_Real_Dop()
     sim.e_c = .5
     sim.solve(-15, u_int, 1.)
     for fmu in mu:
@@ -116,4 +116,4 @@ def dmft_loop_dop(u_int=4, mu=np.arange(-1.95, 2.05, 0.05)):
     return np.asarray(res)
 
 if __name__ == "__main__":
-    mu = dmft_loop_dop(8)
+    res = dmft_loop_dop(8)
