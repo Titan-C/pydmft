@@ -92,7 +92,8 @@ class TwoSite(object):
                               self.beta)
 
     def imp_free_gf(self, e_c, hyb):
-        """Outputs the Green's Function of the free propagator of the impurity"""
+        """Outputs the Green's Function of the free propagator
+        of the impurity"""
         hyb2 = hyb**2
         omega = self.omega
         return (omega - e_c + self.mu) / \
@@ -120,6 +121,7 @@ class TwoSite(object):
         """Calculates the double ocupation of the impurity"""
         d_up, d_dw = self.oper[:2]
         return self.expected((d_up.T*d_up*d_dw.T*d_dw).todense())
+
 
 class TwoSite_Real(TwoSite):
     """DMFT solver in the real axis"""

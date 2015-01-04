@@ -100,17 +100,23 @@ class TwoSite_Real_Dop(TwoSite_Real):
         return np.sum(self.ocupations())-self.lattice_ocupation()
 
 
-def dmft_loop_dop(u_int=4, mu=np.arange(-1.95, 2.05, 0.05)):
+def dmft_loop_dop(u_int=4):
     res = []
     sim = TwoSite_Real_Dop()
     sim.e_c = .5
     sim.solve(-15, u_int, 1.)
-    for fmu in mu:
+    mu_max = 2.0
+    if u_int <= 6:
+        mu_max = u_int/2.
+
+    for fmu in np.linspace(-1.95, mu_max, 80):
         sim.selfconsistency(sim.e_c, sim.hyb_V(), fmu, u_int)
         print(fmu, u_int, '-'*30)
         res.append([np.sum(sim.ocupations()), copy.deepcopy(sim)])
         if sim.ocupations().sum() >= 1 and u_int >= 6.:
             res[-1][1].solve(sim.e_c, u_int, 1e-2)
+            break
+        if fmu >= u_int/2:
             break
 
     return np.asarray(res)

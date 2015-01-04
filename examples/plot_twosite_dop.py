@@ -10,7 +10,7 @@ import numpy as np
 from dmft.twosite_dop import dmft_loop_dop
 
 
-def doping_config(res, name):
+def doping_config(res, u, name):
     fig, axes = plt.subplots(3, sharex=True)
     axes[-1].set_xlabel('$<N>_{imp}$')
     fill = res[:, 0]
@@ -21,7 +21,7 @@ def doping_config(res, name):
     for feat, ax, lab in zip([e_c, V, mu], axes, ['$\\epsilon_c$', 'V', '$\\mu$']):
         ax.plot(fill, feat, label=lab)
         ax.set_ylabel(lab)
-
+    axes[0].set_title('Two site DMFT parameters at U={}'.format(u))
     fig.savefig(name+'_bathparam.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
 
@@ -35,7 +35,7 @@ def plot_doping_param(axis='real', beta=1e3, u_int=[4.]):
             res = dmft_loop_dop(u)
             np.save(out_file, res)
 
-        doping_config(res, out_file)
+        doping_config(res, u, out_file)
 
 if __name__ == "gallery":
     plot_doping_param(u_int=[2., 4., 5.85, 6., 8., 10., 100.])
