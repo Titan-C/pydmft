@@ -189,7 +189,7 @@ performs the high-frequency expansion of the coherent Green functions to obtains
     G^{coh}(\omega) =& \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
     +\frac{z^3(M_2^{(0)} + (\epsilon_d - \mu +a)^2)}{\omega^3} \\
     G^{coh}_{imp}(\omega)= & \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
-    +\frac{z^2V^2 + z^3(\epsilon_d - \mu +a)^2)}{\omega^3} \\
+    +\frac{z^2V^2 + z^3(\epsilon_d - \mu +a)^2}{\omega^3} \\
 
 leading to the second self-consistency condition
 
@@ -319,7 +319,7 @@ In Matsubara frequencies
 The twosite DMFT can also be treated in the imaginary axis using the Matsubara
 frequencies. Since one is only treating the analytic continuation into the
 imaginary axis, all equations are kept the same one only needs to change
-:math:`\omega \rightarrow i\omega_n`, where :math:`omega_n = (2n+1)/\beta`.
+:math:`\omega \rightarrow i\omega_n`, where :math:`\omega_n = (2n+1)/\beta`.
 The most substantial change comes from the
 definition of the quasiparticle weight were it becomes
 
