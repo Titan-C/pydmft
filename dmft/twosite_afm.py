@@ -205,7 +205,7 @@ class TwoSite_Real(TwoSite):
             self.solve(ne_ec, u_int, old)
             hyb = self.hyb_V()
 
-            convergence = (np.abs(old - hyb) < 2.5e-5).all() or (hyb < 1e-5).all()\
+            convergence = ((np.abs(old - hyb) < 2.5e-5).all() or (hyb < 1e-5).all())\
                 and (np.abs(self.restriction(ne_ec, u_int, hyb)) < 1e-2).all()
 
         self.e_c = ne_ec
@@ -213,7 +213,7 @@ class TwoSite_Real(TwoSite):
     def restriction(self, e_c, u_int, hyb):
         """Lagrange multiplier in lattice slave spin"""
         self.solve(e_c, u_int, hyb)
-        print('au',e_c,hyb)
+        print(e_c,hyb,self.ocupations())
         return self.ocupations()-self.lattice_ocupation()
 
 
@@ -245,9 +245,9 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 if __name__ == "__main__":
     u = np.arange(0, 3.2, 0.1)
     sim = TwoSite_Real()
-    u=3.5
+    u=2.5
     print(sim.imp_z())
-    sim.selfconsistency(u/2*np.array([2.,.8]),0.7*np.ones(2),u/2.,u)
+    sim.selfconsistency(np.array([3.5,-2.25]),np.array([0.866,0.95689]),u/2.,u)
     wi=sim.omega+sim.mu-sim.GF[r'$\Sigma$']
     rho=dos.bethe_lattice(wi,1.)
     plt.plot(rho.T)
