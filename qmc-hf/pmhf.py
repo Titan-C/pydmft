@@ -136,7 +136,7 @@ def interpol(gt):
     f = interp1d(x, gt)
     tf = np.linspace(0, 1, Lrang+1)
     ngt = f(tf)
-    return np.concatenate((-gt[-1:0:-1], ngt))
+    return np.concatenate((-ngt[-1:0:-1], ngt))
 
 
 neg=interpol(gx[lfak:])
