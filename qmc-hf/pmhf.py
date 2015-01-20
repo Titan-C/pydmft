@@ -22,9 +22,9 @@ def g0(mu=0, beta=16., D=1):
     return w, fg0
 
 
-def g0t(g0):
+def g0t(g0, beta=16.):
     """Fourier transform into time"""
-    g0t = np.fft.fft(g0)/16.
+    g0t = np.fft.fft(g0)/beta
     g0t[::2] *= -1
     g0b = np.roll(g0t.real, Lrang)
     # trick to treat discontinuity
@@ -44,7 +44,7 @@ def extract_g0t(g0t, lfak=32):
 w, g = g0()
 gb = g0t(g)
 g0 = extract_g0t(gb)
-dtau, U = 0.5, 2
+dtau, U = 0.5, 2.5
 lamb = np.arccosh(np.exp(dtau*U/2))
 
 
@@ -130,3 +130,13 @@ def gnew(g, j, sign):
     return g + a * (g[:, j] - np.eye(lfak)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
 
 gx = impurity(g0)
+from scipy.interpolate import interp1d
+def interpol(gt):
+    t = np.linspace(0, 1, gt.size)
+    f = interp1d(x, gt)
+    tf = np.linspace(0, 1, Lrang+1)
+    ngt = f(tf)
+    return np.concatenate((-gt[-1:0:-1], ngt))
+
+
+neg=interpol(gx[lfak:])
