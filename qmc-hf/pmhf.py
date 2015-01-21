@@ -8,29 +8,51 @@ Translation of QMC Hirsch - Fye
 """
 import numpy as np
 from scipy.linalg import solve
+from scipy.interpolate import interp1d
 Lrang = 2**15
 lfak = 32
 
 
-def g0(mu=0, beta=16., D=1):
-    """Initiate green function"""
+def matsubara_freq(beta=16., fer=1):
+    return 1j*np.pi*np.arange(-Lrang+fer, Lrang, 2) / beta
+
+
+def greenF(w, sigma=0, mu=0, beta=16., D=1):
+    """Calculate green function lattice"""
     fg0 = np.zeros(2*Lrang, dtype=np.complex)
-    w = 1j*np.pi*np.arange(-Lrang+1, Lrang, 2) / beta
-    sq = np.sqrt((w - mu)**2 - D)
+    zeta = w - mu - sigma
+    sq = np.sqrt((zeta)**2 - D)
     sig = np.sign(sq.imag*w.imag)
-    fg0[1::2] = 2./(w-mu+sig*sq)
+    fg0[1::2] = 2./(zeta+sig*sq)
     return w, fg0
 
 
-def g0t(g0, beta=16.):
-    """Fourier transform into time"""
-    g0t = np.fft.fft(g0)/beta
-    g0t[::2] *= -1
-    g0b = np.roll(g0t.real, Lrang)
+def FFT(gt,beta):
+    """Fourier transfor into matsubara frequencies"""
     # trick to treat discontinuity
-    g0b[Lrang] += 0.5
-    g0b[0] = -g0b[Lrang]
-    return g0b.real
+    gt[Lrang] -= 0.5
+    gt[0] = -gt[Lrang]
+    gt[::2] *= -1
+    gw = np.fft.fft(gt)*beta/2/Lrang
+
+    return gw
+
+
+def iFFT(gw, beta=16.):
+    """Inverse Fourier transform into time"""
+    gt = np.fft.ifft(gw)*2*Lrang/beta
+    gt[::2] *= -1
+    # trick to treat discontinuity
+    gt[Lrang] += 0.5
+    gt[0] = -gt[Lrang]
+    return gt.real
+
+
+def dyson(g,g0):
+    """Dyson equation for the self energy"""
+    sigma = np.zeros(2*Lrang, dtype=np.complex)
+    sigma[1::2] = 1/g0[1::2] - 1/g[1::2]
+    return sigma
 
 
 def extract_g0t(g0t, lfak=32):
@@ -39,13 +61,7 @@ def extract_g0t(g0t, lfak=32):
     dx = np.int(2.**15 / lfak)
     gt = np.concatenate((g0t[Lrang::dx], [1.-g0t[Lrang]]))
 
-    return np.concatenate((-gt[-1:0:-1], gt))
-
-w, g = g0()
-gb = g0t(g)
-g0 = extract_g0t(gb)
-dtau, U = 0.5, 2.5
-lamb = np.arccosh(np.exp(dtau*U/2))
+    return np.concatenate((-gt[:-1], gt))
 
 
 def ising_v(lamb, polar=0.5):
@@ -55,7 +71,7 @@ def ising_v(lamb, polar=0.5):
     vis[rand>polar] = -1
     return vis*lamb
 
-v=ising_v(lamb)
+
 
 def impurity(g0):
     g0[0] = -g0[lfak]
@@ -129,14 +145,24 @@ def gnew(g, j, sign):
     a = ee/(1. + (1.-g[j, j])*ee)
     return g + a * (g[:, j] - np.eye(lfak)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
 
-gx = impurity(g0)
-from scipy.interpolate import interp1d
+
+
 def interpol(gt):
     t = np.linspace(0, 1, gt.size)
-    f = interp1d(x, gt)
+    f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
     ngt = f(tf)
-    return np.concatenate((-ngt[-1:0:-1], ngt))
+    ngt = np.concatenate((-ngt[:-1], ngt))
 
+    return ngt[:-1]
 
+dtau, U = 0.5, 2.5
+lamb = np.arccosh(np.exp(dtau*U/2))
+w = matsubara_freq()
+Gw = greenF(w)
+G0t = iFFT(Gw)
+g0t = extract_g0t(G0t)
+
+v=ising_v(lamb)
+gx = impurity(g0t)
 neg=interpol(gx[lfak:])
