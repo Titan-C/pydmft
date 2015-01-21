@@ -19,15 +19,15 @@ def matsubara_freq(beta=16., fer=1):
 
 def greenF(w, sigma=0, mu=0, beta=16., D=1):
     """Calculate green function lattice"""
-    fg0 = np.zeros(2*Lrang, dtype=np.complex)
+    Gw = np.zeros(2*Lrang, dtype=np.complex)
     zeta = w - mu - sigma
     sq = np.sqrt((zeta)**2 - D)
     sig = np.sign(sq.imag*w.imag)
-    fg0[1::2] = 2./(zeta+sig*sq)
-    return w, fg0
+    Gw[1::2] = 2./(zeta+sig*sq)
+    return Gw
 
 
-def FFT(gt,beta):
+def FFT(gt, beta=16.):
     """Fourier transfor into matsubara frequencies"""
     # trick to treat discontinuity
     gt[Lrang] -= 0.5
@@ -48,11 +48,17 @@ def iFFT(gw, beta=16.):
     return gt.real
 
 
-def dyson(g,g0):
+def dyson_sigma(g,g0):
     """Dyson equation for the self energy"""
     sigma = np.zeros(2*Lrang, dtype=np.complex)
     sigma[1::2] = 1/g0[1::2] - 1/g[1::2]
     return sigma
+
+def dyson_g0(g, sigma):
+    """Dyson equation for the bare Green function"""
+    g0 = np.zeros(2*Lrang, dtype=np.complex)
+    g0[1::2] = 1/(1/g[1::2] + sigma[1::2])
+    return g0
 
 
 def extract_g0t(g0t, lfak=32):
@@ -159,10 +165,25 @@ def interpol(gt):
 dtau, U = 0.5, 2.5
 lamb = np.arccosh(np.exp(dtau*U/2))
 w = matsubara_freq()
-Gw = greenF(w)
-G0t = iFFT(Gw)
+G0w = greenF(w)
+G0t = iFFT(G0w)
 g0t = extract_g0t(G0t)
 
-v=ising_v(lamb)
-gx = impurity(g0t)
-neg=interpol(gx[lfak:])
+v = ising_v(lamb)
+gt = impurity(g0t)
+for i in range(4):
+
+    Gt = interpol(gt[lfak:])
+    G0t = interpol(g0t[lfak:])
+
+    Gw = FFT(Gt)
+    G0w = FFT(G0t)
+    sigma = dyson_sigma(Gw, G0w)
+
+    Gw = greenF(w, sigma[1::2])
+    G0w = dyson_g0(Gw, sigma)
+    G0t = iFFT(G0w)
+    g0t = extract_g0t(G0t)
+    gt = impurity(g0t)
+    plt.plot(gt, label='it {}'.format(i))
+plt.legend(loc=0)
