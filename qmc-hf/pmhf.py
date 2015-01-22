@@ -170,20 +170,25 @@ G0t = iFFT(G0w)
 g0t = extract_g0t(G0t)
 
 v = ising_v(lamb)
-gt = impurity(g0t)
+
 for i in range(4):
 
-    Gt = interpol(gt[lfak:])
-    G0t = interpol(g0t[lfak:])
-
-    Gw = FFT(Gt)
-    G0w = FFT(G0t)
-    sigma = dyson_sigma(Gw, G0w)
-
-    Gw = greenF(w, sigma[1::2])
-    G0w = dyson_g0(Gw, sigma)
-    G0t = iFFT(G0w)
-    g0t = extract_g0t(G0t)
     gt = impurity(g0t)
     plt.plot(gt, label='it {}'.format(i))
+
+    Gt = interpol(gt[lfak:])
+#    G0t = interpol(g0t[lfak:])
+
+    Gw = FFT(Gt)
+#    G0w = FFT(G0t)
+#    sigma = dyson_sigma(Gw, G0w)
+#
+#    Gw = greenF(w, sigma[1::2])
+#    G0w = dyson_g0(Gw, sigma)
+    G0w = np.zeros(2*Lrang, dtype=np.complex)
+    G0w[1::2] = 1/(w - .25*Gw[1::2])
+
+    G0t = iFFT(G0w)
+    g0t = extract_g0t(G0t)
+
 plt.legend(loc=0)
