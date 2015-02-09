@@ -100,7 +100,7 @@ class TwoSite_Real_Dop(TwoSite_Real):
         return np.sum(self.ocupations())-self.lattice_ocupation()
 
 
-def dmft_loop_dop(u_int, mu):
+def dmft_loop_dop(u_int, mu=None):
     res = []
     sim = TwoSite_Real_Dop()
     sim.e_c = .5

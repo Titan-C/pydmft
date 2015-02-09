@@ -32,6 +32,7 @@ import numpy as np
 from scipy.integrate import quad
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 from slaveparticles.quantum import dos, fermion
+from dmft.common import matsubara_freq, fft, ifft
 
 
 def m2_weight(t):
@@ -180,8 +181,7 @@ def refine_mat_solution(end_solver, u_int):
 
     beta = end_solver.beta
     sim = TwoSite_Matsubara(beta, end_solver.t, beta)
-    bound = 30*beta
-    sim.omega = 1j*np.arange(-bound+1, bound, 2) / sim.beta
+    sim.omega = matsubara_freq(beta)
     sim.mu = end_solver.mu
     sim.solve(u_int/2, u_int, end_solver.hyb_V())
 
@@ -216,8 +216,20 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
     return np.asarray(res)
 
 if __name__ == "__main__":
-    u = np.arange(0, 3.2, 0.1)
-    sim = dmft_loop(u, axis='real')
+    u = [0.1, 1, 2, 2.7, 3.3] # np.arange(0, 3.2, 0.1)
+    sim = dmft_loop(u, beta=100, axis='matsubara')
+    for s in sim:
+        out = refine_mat_solution(s[2], s[0])
+        plt.plot(out.omega.imag, out.GF[r'$\Sigma$'].imag,'+-', label='U={}'.format(s[0]))
+    plt.xlim([-5,5])
+    plt.figure()
+
+    for s in sim:
+        out = refine_mat_solution(s[2], s[0])
+        Gw = np.zeros(2*out.omega.size, dtype=np.complex)
+        Gw[1::2] = out.GF['Imp G']
+        gmt = ifft(Gw, beta=100)
+        plt.semilogy(tau(gmt.size),gmt, label='U={}'.format(s[0]))
 #    filling = np.arange(1, 0.9, -0.025)
 #    for n in filling:
 #        old_e = ecc

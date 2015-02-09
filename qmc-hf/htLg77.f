@@ -352,9 +352,9 @@ c	endif
            write(3,*)real(dtaureal*i),real(gtmp(i))
 	enddo
 
-	do i=1,Lfak
-	write(3,*)v(i)
-	enddo
+c	do i=1,Lfak
+c	write(3,*)v(i)
+c	enddo
 	endif
 
 c**********************

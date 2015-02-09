@@ -39,7 +39,7 @@ extensions = [
     'sphinx.ext.pngmath',
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.ifconfig',
-    'sphinxgallery.gen_rst',
+    'sphinxgallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

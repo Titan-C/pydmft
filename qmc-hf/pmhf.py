@@ -10,39 +10,14 @@ Quantum Monte Carlo algorithm
 import numpy as np
 from scipy.linalg import solve
 from scipy.interpolate import interp1d
-Lrang = 2**15
-lfak = 32
-
-
-def matsubara_freq(beta=16., fer=1, Lrang=2**15):
-    """Calculates an array containing the matsubara frequencies under the
-    formula
-
-    .. math:: i\\omega_n = i\\frac{\\pi(2n + f)}{\\beta}
-
-    where :math:`i` is the imaginary unit and :math:`f=1` in the case of
-    fermions, and zero for bosons
-
-    Parameters
-    ----------
-    beta : float
-            Inverse temperature of the system
-    fer : 0 or 1 integer
-            dealing with fermionic particles
-    Lrang : integer
-            size of the array : amount of matsubara frequencies
-
-    Returns
-    -------
-    out : complex ndarray
-
-    """
-    return 1j*np.pi*np.arange(-Lrang+fer, Lrang, 2) / beta
+import matplotlib.pyplot as plt
+from numba import jit, autojit
+from dmft.common import matsubara_freq, fft, ifft
 
 
 def greenF(w, sigma=0, mu=0, D=1):
     """Calculate green function lattice"""
-    Gw = np.zeros(2*Lrang, dtype=np.complex)
+    Gw = np.zeros(2*w.size, dtype=np.complex)
     zeta = w - mu - sigma
     sq = np.sqrt((zeta)**2 - D)
     sig = np.sign(sq.imag*w.imag)
@@ -50,45 +25,24 @@ def greenF(w, sigma=0, mu=0, D=1):
     return Gw
 
 
-def FFT(gt, beta=16.):
-    """Fourier transfor into matsubara frequencies"""
-    # trick to treat discontinuity
-    gt[Lrang] -= 0.5
-    gt[0] = -gt[Lrang]
-    gt[::2] *= -1
-    gw = np.fft.fft(gt)*beta/2/Lrang
-
-    return gw
-
-
-def iFFT(gw, beta=16.):
-    """Inverse Fourier transform into time"""
-    gt = np.fft.ifft(gw)*2*Lrang/beta
-    gt[::2] *= -1
-    # trick to treat discontinuity
-    gt[Lrang] += 0.5
-    gt[0] = -gt[Lrang]
-    return gt.real
-
-
 def dyson_sigma(g, g0, fer=1):
     """Dyson equation for the self energy"""
-    sigma = np.zeros(2*Lrang, dtype=np.complex)
+    sigma = np.zeros(g.size, dtype=np.complex)
     sigma[fer::2] = 1/g0[fer::2] - 1/g[fer::2]
     return sigma
 
 
 def dyson_g0(g, sigma, fer=1):
     """Dyson equation for the bare Green function"""
-    g0 = np.zeros(2*Lrang, dtype=np.complex)
+    g0 = np.zeros(g.size, dtype=np.complex)
     g0[fer::2] = 1/(1/g[fer::2] + sigma[fer::2])
     return g0
 
 
 def extract_g0t(g0t, lfak=32):
     """Extract a reducted amout of points of g0t"""
-
-    dx = np.int(2.**15 / lfak)
+    Lrang = g0t.size // 2
+    dx = np.int(Lrang / lfak)
     gt = np.concatenate((g0t[Lrang::dx], [1.-g0t[Lrang]]))
 
     return np.concatenate((-gt[:-1], gt))
@@ -122,7 +76,7 @@ def ising_v(lamb, L=32, polar=0.5):
 
 
 
-def hf_solver(g0, L, sweeps):
+def hf_solver(g0, v, sweeps):
     """Impurity solver call.
     Takes the propagator :math:`\\mathcal{G}^0(\\tau)` and transforms it
     into a discretized matrix as
@@ -130,24 +84,25 @@ def hf_solver(g0, L, sweeps):
     .. math:: \\mathcal{G}^0_{ij} = \\mathcal{G}^0(i\\Delta\\tau - j\\Delta\\tau)
 
     """
+    lfak = v.size
     g0[0] = -g0[lfak]
 
     gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
     gx = g0[gind]
 
-    gup = gnewclean(gx, 1.)
-    gdw = gnewclean(gx, -1.)
+    gup = gnewclean(gx, v, 1.)
+    gdw = gnewclean(gx, v, -1.)
 
-    gstup, gstdw = mcs(sweeps, gup, gdw)
+    gstup, gstdw = mcs(sweeps, gup, gdw, v)
 
     return wrapup(gstup, gstdw)
 
 
-
 def wrapup(gstup, gstdw):
+    lfak = gstdw.shape[0]
     xgu = np.zeros(2*lfak+1)
     xgd = np.zeros(2*lfak+1)
-    for i in range(1,lfak):
+    for i in range(1, lfak):
         xgu[i] = np.trace(gstup, offset=lfak-i)
         xgd[i] = np.trace(gstdw, offset=lfak-i)
     for i in range(lfak):
@@ -165,20 +120,21 @@ def wrapup(gstup, gstdw):
     return xg
 
 
-def mcs(sweeps, gup, gdw):
-    gstup, gstdw = np.zeros((lfak,lfak)), np.zeros((lfak,lfak))
+def mcs(sweeps, gup, gdw, v):
+    lfak = v.size
+    gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
 
     for mcs in xrange(sweeps):
         for j in xrange(lfak):
             dv = 2.*v[j]
-            ratup = 1. + (1. - gup[j,j])*(np.exp(-dv)-1.)
-            ratdw = 1. + (1. - gdw[j,j])*(np.exp( dv)-1.)
+            ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
+            ratdw = 1. + (1. - gdw[j, j])*(np.exp( dv)-1.)
             rat = ratup * ratdw
             rat = rat/(1.+rat)
             if rat > np.random.rand():
                 v[j] *= -1.
-                gup = gnew(gup, j, 1.)
-                gdw = gnew(gdw, j, -1.)
+                gup = gnew(gup, v, j, 1.)
+                gdw = gnew(gdw, v, j, -1.)
 
         gstup += gup
         gstdw += gdw
@@ -189,21 +145,22 @@ def mcs(sweeps, gup, gdw):
     return gstup, gstdw
 
 
-def gnewclean(gx, sign):
+def gnewclean(gx, v, sign):
     """Returns the interacting function
 
     .. math:: G'_{ij} = B^{-1}_{ij}G_{ij}
     .. math:: u_j = \\exp(\\sigma v_j) - 1
     .. math:: B_{ij} = \\delta_{ij} - u_j ( G_{ij} - \\delta_{ij}) \\text{no sumation on } j
 
-
     """
     ee = np.exp(sign*v) - 1.
-    b = np.eye(lfak) - ee * (gx-np.eye(lfak))
+    ide = np.eye(v.size)
+    b = ide - ee * (gx-ide)
 
     return solve(b, gx)
 
-def gnew(g, j, sign):
+
+def gnew(g, v, j, sign):
     dv = sign*v[j]*2
     ee = np.exp(dv)-1.
     a = ee/(1. + (1.-g[j, j])*ee)
@@ -211,7 +168,7 @@ def gnew(g, j, sign):
 
 
 
-def interpol(gt):
+def interpol(gt, Lrang):
     t = np.linspace(0, 1, gt.size)
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
@@ -229,21 +186,21 @@ G0w = greenF(w)
 v = ising_v(lamb)
 
 for i in range(4):
-    G0t = iFFT(G0w)
+    G0t = ifft(G0w)
     g0t = extract_g0t(G0t)
-    gt = hf_solver(g0t)
+    gt = hf_solver(g0t, v, 2000)
     plt.plot(gt, label='it {}'.format(i))
 
-    Gt = interpol(gt[lfak:])
+    Gt = interpol(gt[v.size:], 2**15)
 #    G0t = interpol(g0t[lfak:])
 
-    Gw = FFT(Gt)
+    Gw = fft(Gt)
 #    G0w = FFT(G0t)
 #    sigma = dyson_sigma(Gw, G0w)
 #
 #    Gw = greenF(w, sigma[1::2])
 #    G0w = dyson_g0(Gw, sigma)
-    G0w = np.zeros(2*Lrang, dtype=np.complex)
+    G0w = np.zeros(Gw.size, dtype=np.complex)
     G0w[1::2] = 1/(w - .25*Gw[1::2])
 
 
