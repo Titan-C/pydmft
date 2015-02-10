@@ -11,7 +11,6 @@ import numpy as np
 from scipy.linalg import solve
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from numba import jit, autojit
 from dmft.common import matsubara_freq, fft, ifft
 
 
@@ -83,6 +82,9 @@ def hf_solver(g0, v, sweeps):
 
     .. math:: \\mathcal{G}^0_{ij} = \\mathcal{G}^0(i\\Delta\\tau - j\\Delta\\tau)
 
+    Then it creates the interacting Green functions as given by the contribution
+    of the auxiliary discretized spin field.
+
     """
     lfak = v.size
     g0[0] = -g0[lfak]
@@ -146,11 +148,15 @@ def mcs(sweeps, gup, gdw, v):
 
 
 def gnewclean(gx, v, sign):
-    """Returns the interacting function
+    """Returns the interacting function :math:`G_{ij}`
 
     .. math:: G'_{ij} = B^{-1}_{ij}G_{ij}
-    .. math:: u_j = \\exp(\\sigma v_j) - 1
-    .. math:: B_{ij} = \\delta_{ij} - u_j ( G_{ij} - \\delta_{ij}) \\text{no sumation on } j
+
+    where
+
+    .. math::
+        u_j &= \\exp(\\sigma v_j) - 1 \\\\
+        B_{ij} &= \\delta_{ij} - u_j ( G_{ij} - \\delta_{ij}) \\text{  no sumation on } j
 
     """
     ee = np.exp(sign*v) - 1.
@@ -164,18 +170,21 @@ def gnew(g, v, j, sign):
     dv = sign*v[j]*2
     ee = np.exp(dv)-1.
     a = ee/(1. + (1.-g[j, j])*ee)
-    return g + a * (g[:, j] - np.eye(lfak)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
+    return g + a * (g[:, j] - np.eye(v.size)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
 
 
 
 def interpol(gt, Lrang):
+    """This function interpolates :math:`G(\\tau)` to an even numbered anti
+    periodic array for it to be directly used by the fourier transform into
+    matsubara frequencies"""
     t = np.linspace(0, 1, gt.size)
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
     ngt = f(tf)
-    ngt = np.concatenate((-ngt[:-1], ngt))
+    return np.concatenate((-ngt[:-1], ngt[:-1]))
 
-    return ngt[:-1]
+
 
 dtau, U = 0.5, 2.5
 lamb = np.arccosh(np.exp(dtau*U/2))
