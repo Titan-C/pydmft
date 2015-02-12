@@ -5,20 +5,20 @@ import numpy as np
 def plot_qmc(**kwargs):
     input_data = {
         'dtaureal' : 0.5,
-        'U': 2.5,
+        'U': 2.1,
         'D': 1,
-        'nloop': 4,
+        'nloop': 8,
         'dmu': 0.01,
         'nmu': 1,
         'xmu0': 0,
         'if1': 1,
         'du': 1.5,
         'nu': 1,
-        'nsweep': 2000,
-        'nsweep0': 2000,
+        'nsweep': 10000,
+        'nsweep0': 15000,
         'iread': 0,
         'imod': 1,
-        'imet': 1,
+        'imet': 0,
         'ndirty': 500
         }
 

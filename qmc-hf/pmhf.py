@@ -17,10 +17,10 @@ from dmft.common import matsubara_freq, fft, ifft
 def greenF(w, sigma=0, mu=0, D=1):
     """Calculate green function lattice"""
     Gw = np.zeros(2*w.size, dtype=np.complex)
-    zeta = w - mu - sigma
-    sq = np.sqrt((zeta)**2 - D)
-    sig = np.sign(sq.imag*w.imag)
-    Gw[1::2] = 2./(zeta+sig*sq)
+    zeta = w + mu - sigma
+    sq = np.sqrt((zeta)**2 - D**2)
+#    sig = np.sign(sq.imag*w.imag)
+    Gw[1::2] = 2./(zeta+sq)
     return Gw
 
 
