@@ -68,7 +68,7 @@ def greenF(w, sigma=0, mu=0, D=1):
 
 
 
-def forwardFT(gt, tau, iw, beta):
+def gt_fouriertrans(gt, tau, iw, beta):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta]` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff. One
@@ -93,11 +93,12 @@ def forwardFT(gt, tau, iw, beta):
     out : complex ndarray
             Interacting Greens function in matsubara frequencies
     """
-    power = np.exp(iw.reshape(-1,1) * tau)
+    power = np.exp(iw.reshape(-1, 1) * tau)
     gw = np.sum((gt + 0.5) * power, axis=1)*beta/(tau.size-1) + 1/iw
     return gw
 
-def inverseFT(gw, tau, iw, beta):
+
+def gw_invfouriertrans(gw, tau, iw, beta):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -138,13 +139,3 @@ def inverseFT(gw, tau, iw, beta):
     gt = ((gw - 1/iw)*power).real
     gt = np.sum(gt, axis=1)*2/beta - 0.5
     return gt
-
-beta = 50.
-ntau= 1000
-iw = 1j*np.pi*(1+2*np.arange(100)) / beta
-gwr = greenF(iw)[1::2]
-tau = np.linspace(0, beta, ntau+1)
-
-gt = inverseFT(gwr, iw, tau, beta)
-gw = forwardFT(gt, tau, iw, beta)
-plt.plot(gwr.real - gw.real,'*-')
