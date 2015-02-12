@@ -55,3 +55,80 @@ def ifft(gw, beta=16.):
     gt[Lrang] += 0.5
     gt[0] = -gt[Lrang]
     return gt.real
+
+
+def greenF(w, sigma=0, mu=0, D=1):
+    """Calculate green function lattice"""
+    Gw = np.zeros(2*w.size, dtype=np.complex)
+    zeta = w + mu - sigma
+    sq = np.sqrt((zeta)**2 - D**2)
+#    sig = np.sign(sq.imag*w.imag)
+    Gw[1::2] = 2./(zeta+sq)
+    return Gw
+
+
+
+def forwardFT(gt, tau, iw, beta):
+    """Performs a forward fourier transform for the interacting Green function
+    in which only the interval
+    :math:`[0,\\beta]` is required and output to given matsubara frequencies.
+    It includes the correction of the high frequency tails.
+    Array sizes need not match between frequencies and times
+
+    Parameters
+    ----------
+    gt : real float array
+            Imaginary time interacting Green function
+    tau : real float array
+            Imaginary time points
+    iw : complex float array
+            fermionic matsubara frequencies. Only use the positive ones
+    beta : float
+        Inverse temperature of the system
+
+    Returns
+    -------
+    out : complex ndarray
+            Interacting Greens function in matsubara frequencies
+    """
+    power = np.exp(iw.reshape(-1,1) * tau)
+    gw = np.sum((gt + 0.5) * power, axis=1)*beta/(tau.size-1) + 1/iw
+    return gw
+
+def inverseFT(gw, tau, iw, beta):
+    """Performs an inverse fourier transform in which only the imaginary
+    positive matsubara frequencies are used and returns a positive time output.
+    Array sizes need not match between frequencies and times
+
+    .. math:: G(\\tau)
+
+    Parameters
+    ----------
+    gw : real float array
+            Imaginary time interacting Green function
+    tau : real float array
+            Imaginary time points
+    iw : complex float array
+            fermionic matsubara frequencies. Only use the positive ones
+    beta : float
+        Inverse temperature of the system
+
+    Returns
+    -------
+    out : complex ndarray
+            Interacting Greens function in matsubara frequencies"""
+
+    power = np.exp(-iw * tau.reshape(-1, 1))
+    gt = ((gw - 1/iw)*power).real
+    gt = np.sum(gt, axis=1)*2/beta - 0.5
+    return gt
+
+beta = 50.
+ntau= 1000
+iw = 1j*np.pi*(1+2*np.arange(100)) / beta
+gwr = greenF(iw)[1::2]
+tau = np.linspace(0, beta, ntau+1)
+
+gt = inverseFT(gwr, iw, tau, beta)
+gw = forwardFT(gt, tau, iw, beta)
+plt.plot(gwr.real - gw.real,'*-')

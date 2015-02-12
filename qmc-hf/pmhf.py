@@ -11,17 +11,7 @@ import numpy as np
 from scipy.linalg import solve
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from dmft.common import matsubara_freq, fft, ifft
-
-
-def greenF(w, sigma=0, mu=0, D=1):
-    """Calculate green function lattice"""
-    Gw = np.zeros(2*w.size, dtype=np.complex)
-    zeta = w + mu - sigma
-    sq = np.sqrt((zeta)**2 - D**2)
-#    sig = np.sign(sq.imag*w.imag)
-    Gw[1::2] = 2./(zeta+sq)
-    return Gw
+from dmft.common import matsubara_freq, fft, ifft, greenF
 
 
 def dyson_sigma(g, g0, fer=1):
