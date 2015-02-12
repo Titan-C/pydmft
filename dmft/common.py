@@ -69,12 +69,14 @@ def greenF(w, sigma=0, mu=0, D=1):
 
 
 def forwardFT(gt, tau, iw, beta):
-    """Performs a forward fourier transform for the interacting Green function
-    in which only the interval
-    :math:`[0,\\beta]` is required and output to given matsubara frequencies.
-    It includes the correction of the high frequency tails.
+    r"""Performs a forward fourier transform for the interacting Green function
+    in which only the interval :math:`[0,\beta]` is required and output given
+    into positive fermionic matsubara frequencies up to the given cutoff. One
+    benefits includes the correction of the high frequency tails.
     Array sizes need not match between frequencies and times
 
+    .. math:: G(i\omega_n) = \int_0^\beta \left( G(\tau) + \frac{1}{2}\right)
+       e^{i\omega_n \tau} d\tau + \frac{1}{i\omega_n}
     Parameters
     ----------
     gt : real float array
@@ -96,11 +98,21 @@ def forwardFT(gt, tau, iw, beta):
     return gw
 
 def inverseFT(gw, tau, iw, beta):
-    """Performs an inverse fourier transform in which only the imaginary
-    positive matsubara frequencies are used and returns a positive time output.
+    r"""Performs an inverse fourier transform of the green Function in which
+    only the imaginary positive matsubara frequencies
+    :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
+    Output is the real valued positivite imaginary time green function.
+    positive time output :math:`\tau \in [0;\beta]`.
     Array sizes need not match between frequencies and times
 
-    .. math:: G(\\tau)
+    .. math::
+       G(\tau) &= \frac{1}{\beta} \sum_{\omega_n}
+                   G(i\omega_n)e^{-i\omega_n \tau} \\
+       &= \frac{1}{\beta} \sum_{\omega_n}\left( G(i\omega_n)
+          -\frac{1}{i\omega_n}\right) e^{-i\omega_n \tau} +
+          \frac{1}{\beta} \sum_{\omega_n}\frac{1}{i\omega_n}e^{-i\omega_n \tau} \\
+       &= \frac{2}{\beta} \Re e \sum_{\omega_n>0}^{\omega_{max}} \left( G(i\omega_n)
+          -\frac{1}{i\omega_n}\right) e^{-i\omega_n \tau} - \frac{1}{2}
 
     Parameters
     ----------
@@ -116,7 +128,11 @@ def inverseFT(gw, tau, iw, beta):
     Returns
     -------
     out : complex ndarray
-            Interacting Greens function in matsubara frequencies"""
+            Interacting Greens function in matsubara frequencies
+
+    See also
+    --------
+    forwardFT"""
 
     power = np.exp(-iw * tau.reshape(-1, 1))
     gt = ((gw - 1/iw)*power).real

@@ -15,6 +15,15 @@ Contents:
 .. automodule:: dmft.twosite
     :members:
 
+.. currentmodule:: dmft
+
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   dmft.twosite_dop.dmft_loop_dop
+
+
 Indices and tables
 ==================
 
