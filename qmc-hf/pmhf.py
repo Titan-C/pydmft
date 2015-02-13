@@ -187,7 +187,7 @@ class HF_imp(object):
         G0iw = greenF(self.i_omega)
         v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
         """Implementation of the solver"""
-        simulation = {}
+        simulation = []
         for i in range(4):
             G0t = ifft(G0iw)
             g0t = extract_g0t(G0t)
@@ -198,14 +198,14 @@ class HF_imp(object):
             Giw = fft(Gt)
             G0iw = np.zeros(Giw.size, dtype=np.complex)
             G0iw[1::2] = 1/(self.i_omega - .25*Giw[1::2])
-            simulation['iter_{}'.format(i)] = {
-                'G0iw'  : G0iw,
-                'gtau'  : gt}
+            simulation.append({
+                                'G0iw'  : G0iw,
+                                'gtau'  : gt})
         return simulation
 
 
 hf_sol = HF_imp()
 sim = hf_sol.dmft_loop()
-for it, res in sim.iteritems():
-    plt.plot(res['gtau'], label=it)
+for it, res in enumerate(sim):
+    plt.plot(res['gtau'], label='iteration {}'.format(it))
 plt.legend(loc=0)
