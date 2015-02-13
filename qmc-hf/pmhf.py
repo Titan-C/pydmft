@@ -37,18 +37,16 @@ def extract_g0t(g0t, lfak=32):
     return np.concatenate((-gt[:-1], gt))
 
 
-def ising_v(lamb, L=32, polar=0.5):
+def ising_v(L=32, polar=0.5):
     """initialize the vector V of Ising fields
 
-    .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
+    .. math:: V = (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
 
     where the vector entries :math:`\\sigma_n=\\pm 1` are randomized subject
     to a threshold given by polar
 
     Parameters
     ----------
-    lamb : float
-        :math:`\\lambda` factor giving scaling to vector
     L : integer
         length of the array
     polar : float :math:`\\in (0, 1)`
@@ -60,8 +58,8 @@ def ising_v(lamb, L=32, polar=0.5):
     """
     vis = np.ones(L)
     rand = np.random.rand(L)
-    vis[rand>polar] = -1
-    return vis*lamb
+    vis[rand > polar] = -1
+    return vis
 
 
 
@@ -175,32 +173,39 @@ def interpol(gt, Lrang):
     return np.concatenate((-ngt[:-1], ngt[:-1]))
 
 
+class HF_imp(object):
+    """Hirsch and Fye impurity solver in paramagnetic scenario"""
+    def __init__(self, dtau=0.5, n_tau=32, lrang=2**15):
+        """sets up the environment"""
+        self.dtau = dtau
+        self.n_tau = n_tau
+        self.beta = dtau * n_tau
+        self.lrang = lrang
+        self.i_omega = matsubara_freq(self.beta)
 
-dtau, U = 0.5, 2.5
-lamb = np.arccosh(np.exp(dtau*U/2))
-w = matsubara_freq()
-G0w = greenF(w)
+    def dmft_loop(self, U=2., loops=4, mcs=2000):
+        G0iw = greenF(self.i_omega)
+        v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
+        """Implementation of the solver"""
+        simulation = {}
+        for i in range(4):
+            G0t = ifft(G0iw)
+            g0t = extract_g0t(G0t)
+            gt = hf_solver(g0t, v_aux, mcs)
+
+            Gt = interpol(gt[v_aux.size:], self.lrang)
+
+            Giw = fft(Gt)
+            G0iw = np.zeros(Giw.size, dtype=np.complex)
+            G0iw[1::2] = 1/(self.i_omega - .25*Giw[1::2])
+            simulation['iter_{}'.format(i)] = {
+                'G0iw'  : G0iw,
+                'gtau'  : gt}
+        return simulation
 
 
-v = ising_v(lamb)
-
-for i in range(4):
-    G0t = ifft(G0w)
-    g0t = extract_g0t(G0t)
-    gt = hf_solver(g0t, v, 2000)
-    plt.plot(gt, label='it {}'.format(i))
-
-    Gt = interpol(gt[v.size:], 2**15)
-#    G0t = interpol(g0t[lfak:])
-
-    Gw = fft(Gt)
-#    G0w = FFT(G0t)
-#    sigma = dyson_sigma(Gw, G0w)
-#
-#    Gw = greenF(w, sigma[1::2])
-#    G0w = dyson_g0(Gw, sigma)
-    G0w = np.zeros(Gw.size, dtype=np.complex)
-    G0w[1::2] = 1/(w - .25*Gw[1::2])
-
-
+hf_sol = HF_imp()
+sim = hf_sol.dmft_loop()
+for it, res in sim.iteritems():
+    plt.plot(res['gtau'], label=it)
 plt.legend(loc=0)
