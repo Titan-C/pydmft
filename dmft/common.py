@@ -57,10 +57,32 @@ def ifft(gw, beta=16.):
     return gt.real
 
 
-def greenF(w, sigma=0, mu=0, D=1):
-    """Calculate green function lattice"""
-    Gw = np.zeros(2*w.size, dtype=np.complex)
-    zeta = w + mu - sigma
+def greenF(iw, sigma=0, mu=0, D=1):
+    r"""Calculate the Bethe lattice Green function, defined as part of the
+    hilbert transform.
+
+    .. math:: G(i\omega_n) = \frac{2}{i\omega_n + \mu - \Sigma +
+        \sqrt{(i\omega_n + \mu - \Sigma)^2 - D^2}}
+
+    Parameters
+    ----------
+    iw : complex float array
+            fermionic matsubara frequencies.
+    sigma : complex float or array
+            local self-energy
+    mu : real float
+            chemical potential
+    D : real
+        Half-bandwidth of the bethe lattice non-interacting density of states
+
+    Returns
+    -------
+    out : complex ndarray
+            Interacting Greens function in matsubara frequencies, all odd
+            entries are zeros
+    """
+    Gw = np.zeros(2*iw.size, dtype=np.complex)
+    zeta = iw + mu - sigma
     sq = np.sqrt((zeta)**2 - D**2)
 #    sig = np.sign(sq.imag*w.imag)
     Gw[1::2] = 2./(zeta+sq)
