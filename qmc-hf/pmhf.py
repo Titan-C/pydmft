@@ -11,7 +11,7 @@ import numpy as np
 from scipy.linalg import solve
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from dmft.common import matsubara_freq, fft, ifft, greenF
+from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF
 
 
 def dyson_sigma(g, g0, fer=1):
@@ -26,15 +26,6 @@ def dyson_g0(g, sigma, fer=1):
     g0 = np.zeros(g.size, dtype=np.complex)
     g0[fer::2] = 1/(1/g[fer::2] + sigma[fer::2])
     return g0
-
-
-def extract_g0t(g0t, lfak=32):
-    """Extract a reducted amout of points of g0t"""
-    Lrang = g0t.size // 2
-    dx = np.int(Lrang / lfak)
-    gt = np.concatenate((g0t[Lrang::dx], [1.-g0t[Lrang]]))
-
-    return np.concatenate((-gt[:-1], gt))
 
 
 def ising_v(L=32, polar=0.5):
@@ -62,7 +53,6 @@ def ising_v(L=32, polar=0.5):
     return vis
 
 
-
 def hf_solver(g0, v, sweeps):
     """Impurity solver call.
     Takes the propagator :math:`\\mathcal{G}^0(\\tau)` and transforms it
@@ -75,7 +65,6 @@ def hf_solver(g0, v, sweeps):
 
     """
     lfak = v.size
-    g0[0] = -g0[lfak]
 
     gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
     gx = g0[gind]
@@ -100,12 +89,10 @@ def wrapup(gstup, gstdw):
         xgd[i+lfak] = np.trace(gstdw, offset=-i)
 
     xga = (xgu + xgd) / 2.
-    xg = np.zeros(2*lfak+1)
-    xg[lfak+1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
-    xg[1:lfak] = -xg[lfak+1:-1]
-    xg[lfak] = xga[lfak] / lfak
-    xg[0] = -xg[lfak]
-    xg[-1] = 1-xg[lfak]
+    xg = np.zeros(lfak+1)
+    xg[1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
+    xg[0] = xga[lfak] / lfak
+    xg[-1] = 1-xg[0]
 
     return xg
 
@@ -161,6 +148,12 @@ def gnew(g, v, j, sign):
     return g + a * (g[:, j] - np.eye(v.size)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
 
 
+def extract_g0t(g0t, lfak=32):
+    """Extract a reducted amout of points of g0t"""
+    gt = interpol(g0t, lfak)
+
+    return np.concatenate((-gt[:-1], gt))
+
 
 def interpol(gt, Lrang):
     """This function interpolates :math:`G(\\tau)` to an even numbered anti
@@ -169,43 +162,42 @@ def interpol(gt, Lrang):
     t = np.linspace(0, 1, gt.size)
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
-    ngt = f(tf)
-    return np.concatenate((-ngt[:-1], ngt[:-1]))
+    return f(tf)
 
 
 class HF_imp(object):
     """Hirsch and Fye impurity solver in paramagnetic scenario"""
-    def __init__(self, dtau=0.5, n_tau=32, lrang=2**15):
+    def __init__(self, dtau=0.5, n_tau=32, lrang=1000):
         """sets up the environment"""
         self.dtau = dtau
         self.n_tau = n_tau
         self.beta = dtau * n_tau
         self.lrang = lrang
-        self.i_omega = matsubara_freq(self.beta)
 
     def dmft_loop(self, U=2., loops=4, mcs=2000):
-        G0iw = greenF(self.i_omega)
+        i_omega = 1j*np.pi*(1+2*np.arange(self.beta*6*U)) / self.beta
+        fine_tau = np.linspace(0, self.beta, self.lrang + 1)
+        G0iw = greenF(i_omega, mu=0.4)[1::2]
         v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
         """Implementation of the solver"""
         simulation = []
-        for i in range(4):
-            G0t = ifft(G0iw)
-            g0t = extract_g0t(G0t)
-            gt = hf_solver(g0t, v_aux, mcs)
+        for i in range(loops):
+            G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega, self.beta)
+            g0t = extract_g0t(G0t, self.n_tau)
 
-            Gt = interpol(gt[v_aux.size:], self.lrang)
+            gt = hf_solver(-g0t, v_aux, mcs)
 
-            Giw = fft(Gt)
-            G0iw = np.zeros(Giw.size, dtype=np.complex)
-            G0iw[1::2] = 1/(self.i_omega - .25*Giw[1::2])
-            simulation.append({
+            Gt = interpol(-gt, self.lrang)
+            Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
+            G0iw = 1/(i_omega - .25*Giw)
+            simulation.append({ 'iwn'   : i_omega,
                                 'G0iw'  : G0iw,
                                 'gtau'  : gt})
         return simulation
 
 
 hf_sol = HF_imp()
-sim = hf_sol.dmft_loop()
+sim = hf_sol.dmft_loop(loops=4)
 for it, res in enumerate(sim):
     plt.plot(res['gtau'], label='iteration {}'.format(it))
 plt.legend(loc=0)

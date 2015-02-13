@@ -33,7 +33,7 @@ def matsubara_freq(beta=16., fer=1, Lrang=2**15):
     return 1j*np.pi*np.arange(-Lrang+fer, Lrang, 2) / beta
 
 
-def fft(gt, beta=16.):
+def fft(gt, beta):
     """Fourier transform into matsubara frequencies"""
     Lrang = gt.size // 2
     # trick to treat discontinuity
@@ -45,7 +45,7 @@ def fft(gt, beta=16.):
     return gw
 
 
-def ifft(gw, beta=16.):
+def ifft(gw, beta):
     """Inverse Fast Fourier transform into time"""
 
     Lrang = gw.size // 2
