@@ -22,7 +22,7 @@ def test_fourier_trasforms(beta=50., Ntau=1000, Nmatsubara=100):
     gwr = greenF(iw)[1::2]
     tau = np.linspace(0, beta, Ntau+1)
 
-    gt = gw_invfouriertrans(gwr, iw, tau, beta)
+    gt = gw_invfouriertrans(gwr, tau, iw, beta)
     gw = gt_fouriertrans(gt, tau, iw, beta)
     assert (np.abs(gwr - gw) < 5e-13).all()
 

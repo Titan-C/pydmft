@@ -133,7 +133,7 @@ def gw_invfouriertrans(gw, tau, iw, beta):
 
     See also
     --------
-    forwardFT"""
+    gt_fouriertrans"""
 
     power = np.exp(-iw * tau.reshape(-1, 1))
     gt = ((gw - 1/iw)*power).real
