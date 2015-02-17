@@ -101,6 +101,7 @@ def wrapup(gstup, gstdw):
 def mcs(sweeps, gup, gdw, v):
     lfak = v.size
     gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
+    kroneker = np.eye(lfak)
 
     for mcs in range(sweeps):
         for j in range(lfak):
@@ -111,8 +112,10 @@ def mcs(sweeps, gup, gdw, v):
             rat = rat/(1.+rat)
             if rat > np.random.rand():
                 v[j] *= -1.
-                gup = gnew(gup, v, j, 1.)
-                gdw = gnew(gdw, v, j, -1.)
+
+                # quick update matrix
+                gup = gnew(gup, v, j, 1., kroneker)
+                gdw = gnew(gdw, v, j, -1., kroneker)
 
         gstup += gup
         gstdw += gdw
@@ -142,11 +145,11 @@ def gnewclean(gx, v, sign):
     return solve(b, gx)
 
 
-def gnew(g, v, k, sign):
+def gnew(g, v, k, sign, kroneker):
     dv = sign*v[k]*2
     ee = np.exp(dv)-1.
     a = ee/(1. + (1.-g[k, k])*ee)
-    x = g[:, k] - np.eye(v.size)[:, k]
+    x = g[:, k] - kroneker[:, k]
     y = g[k, :]
 
     return dger(a,x,y,1,1,g,1,1,1)
