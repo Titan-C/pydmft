@@ -79,7 +79,7 @@ def hf_solver(g0, v, sweeps):
 
 
 def wrapup_fft(xgu, xgd):
-    lfak = xgu.size
+    lfak = (xgu.size-1)//2
     xga = (xgu + xgd) / 2.
 
     xg = np.zeros(2*lfak+1)
@@ -93,7 +93,7 @@ def wrapup_fft(xgu, xgd):
 
 
 def wrapup_tailrem(xgu, xgd):
-    lfak = xgu.size
+    lfak = (xgu.size-1)//2
     xga = (xgu + xgd) / 2.
     xg = np.zeros(lfak+1)
     xg[1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
@@ -211,7 +211,7 @@ class HF_imp(object):
         simulation = []
         for i in range(4):
             G0t = ifft(G0iw, self.beta)
-            g0t = extract_g0t(G0t)
+            g0t = extract_g0t(G0t[self.n_matsu:])
             gtu, gtd = hf_solver(g0t, v_aux, mcs)
             gt = wrapup_fft(gtu, gtd)
 
@@ -220,8 +220,8 @@ class HF_imp(object):
             Giw = fft(np.concatenate((-Gt, Gt)), self.beta)
             G0iw = np.zeros(Giw.size, dtype=np.complex)
             G0iw[1::2] = 1/(self.i_omega + mu - .25*Giw[1::2])
-            simulation.append({ 'Giw'   : Giw,
-                                'G0iw'  : G0iw,
+            simulation.append({ 'Giw'   : Giw[1::2],
+                                'G0iw'  : G0iw[1::2],
                                 'gtau'  : gt,
                                 'iwn'   : self.i_omega})
         return simulation
@@ -266,13 +266,14 @@ start_time = timeit.default_timer()
 
 sim = hf_sol.dmft_loop(loops=4)
 print(timeit.default_timer() - start_time)
+plt.figure()
 for it, res in enumerate(sim):
     plt.plot(res['gtau'], label='iteration {}'.format(it))
 plt.legend(loc=0)
 plt.figure()
 for it, res in enumerate(sim):
-    plt.plot(res['iwn'].imag, res['G0iw'].real, '*-', label='iter Re {}'.format(it))
-    plt.plot(res['iwn'].imag, res['Giw'].real, '*-', label='iter Im {}'.format(it))
+    plt.plot(res['iwn'].imag, res['G0iw'].imag, '*-', label='iter Re {}'.format(it))
+    plt.plot(res['iwn'].imag, res['Giw'].imag, '*-', label='iter Im {}'.format(it))
 plt.legend(loc=0)
 plt.figure()
 for it, res in enumerate(sim):
