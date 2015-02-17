@@ -174,7 +174,7 @@ class HF_imp(object):
         self.beta = dtau * n_tau
         self.lrang = lrang
 
-    def dmft_loop(self, U=2., mu=0.3, loops=4, mcs=2000):
+    def dmft_loop(self, U=2., mu=0.3, loops=4, mcs=5000):
         """Implementation of the solver"""
         i_omega = 1j*np.pi*(1+2*np.arange(self.beta*6*U)) / self.beta
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
@@ -190,8 +190,8 @@ class HF_imp(object):
             Gt = interpol(-gt, self.lrang)
             Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
             G0iw = 1/(i_omega + mu - .25*Giw)
-            simulation.append({ 'iwn'   : i_omega,
-                                'G0iw'  : G0iw,
+            simulation.append({ 'G0iw'  : G0iw,
+                                'Giw'   : Giw,
                                 'gtau'  : gt})
         return simulation
 
@@ -204,6 +204,11 @@ plt.legend(loc=0)
 plt.figure()
 for it, res in enumerate(sim):
     plt.plot(res['iwn'].imag, res['G0iw'].real, '*-', label='iter Re {}'.format(it))
-    plt.plot(res['iwn'].imag, res['G0iw'].imag, '*-', label='iter Im {}'.format(it))
+    plt.plot(res['iwn'].imag, res['Giw'].real, '*-', label='iter Im {}'.format(it))
 plt.legend(loc=0)
-plt.xlim([-.05,8])
+plt.figure()
+for it, res in enumerate(sim):
+    sig=1/res['G0iw'] - 1/res['Giw']
+    plt.plot(res['iwn'].imag, sig.real, '*-', label='iter Re {}'.format(it))
+    plt.plot(res['iwn'].imag, sig.imag, '*-', label='iter Im {}'.format(it))
+plt.legend(loc=0)

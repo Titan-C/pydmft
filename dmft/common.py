@@ -7,7 +7,7 @@ Created on Mon Feb  9 13:24:24 2015
 import numpy as np
 
 
-def matsubara_freq(beta=16., fer=1, Lrang=2**15):
+def matsubara_freq(beta=16., size=2**15, fer=1, neg=False):
     """Calculates an array containing the matsubara frequencies under the
     formula
 
@@ -20,17 +20,23 @@ def matsubara_freq(beta=16., fer=1, Lrang=2**15):
     ----------
     beta : float
             Inverse temperature of the system
+    size : integer
+            size of the array : amount of matsubara frequencies
     fer : 0 or 1 integer
             dealing with fermionic particles
-    Lrang : integer
-            size of the array : amount of matsubara frequencies
+    neg : bool
+            include negative frequencies
 
     Returns
     -------
     out : complex ndarray
 
     """
-    return 1j*np.pi*np.arange(-Lrang+fer, Lrang, 2) / beta
+    start = fer
+    if neg:
+        start -= size
+
+    return 1j*np.pi*(start+2*np.arange(size)) / beta
 
 
 def fft(gt, beta):
@@ -84,8 +90,8 @@ def greenF(iw, sigma=0, mu=0, D=1):
     Gw = np.zeros(2*iw.size, dtype=np.complex)
     zeta = iw + mu - sigma
     sq = np.sqrt((zeta)**2 - D**2)
-#    sig = np.sign(sq.imag*w.imag)
-    Gw[1::2] = 2./(zeta+sq)
+    sig = np.sign(sq.imag*iw.imag)
+    Gw[1::2] = 2./(zeta + sig*sq)
     return Gw
 
 
