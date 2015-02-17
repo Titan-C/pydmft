@@ -183,8 +183,8 @@ class HF_imp(object):
         self.lrang = lrang
         self.i_omega = matsubara_freq(self.beta)
 
-    def dmft_loop(self, U=2., loops=4, mcs=2000):
-        G0iw = greenF(self.i_omega)
+    def dmft_loop(self, U=2., mu=0., loops=4, mcs=5000):
+        G0iw = greenF(self.i_omega, mu=mu)
         v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
         """Implementation of the solver"""
         simulation = []
@@ -197,8 +197,8 @@ class HF_imp(object):
 
             Giw = fft(Gt)
             G0iw = np.zeros(Giw.size, dtype=np.complex)
-            G0iw[1::2] = 1/(self.i_omega - .25*Giw[1::2])
-            simulation.append({
+            G0iw[1::2] = 1/(self.i_omega + mu - .25*Giw[1::2])
+            simulation.append({ 'Giw'   : Giw,
                                 'G0iw'  : G0iw,
                                 'gtau'  : gt})
         return simulation
@@ -208,4 +208,10 @@ hf_sol = HF_imp()
 sim = hf_sol.dmft_loop()
 for it, res in enumerate(sim):
     plt.plot(res['gtau'], label='iteration {}'.format(it))
+plt.legend(loc=0)
+plt.figure()
+for it, res in enumerate(sim):
+
+    plt.plot(res['Giw'].imag, 'o-', label='iteration {}'.format(it))
+    plt.plot(res['G0iw'].imag, '+-', label='iteration {}'.format(it))
 plt.legend(loc=0)
