@@ -9,6 +9,7 @@ Quantum Monte Carlo algorithm
 """
 import numpy as np
 from scipy.linalg import solve
+from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF
@@ -101,8 +102,8 @@ def mcs(sweeps, gup, gdw, v):
     lfak = v.size
     gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
 
-    for mcs in xrange(sweeps):
-        for j in xrange(lfak):
+    for mcs in range(sweeps):
+        for j in range(lfak):
             dv = 2.*v[j]
             ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
             ratdw = 1. + (1. - gdw[j, j])*(np.exp( dv)-1.)
@@ -141,11 +142,16 @@ def gnewclean(gx, v, sign):
     return solve(b, gx)
 
 
-def gnew(g, v, j, sign):
-    dv = sign*v[j]*2
+def gnew(g, v, k, sign):
+    dv = sign*v[k]*2
     ee = np.exp(dv)-1.
-    a = ee/(1. + (1.-g[j, j])*ee)
-    return g + a * (g[:, j] - np.eye(v.size)[:, j]).reshape(-1, 1) * g[j, :].reshape(1, -1)
+    a = ee/(1. + (1.-g[k, k])*ee)
+    x = g[:, k] - np.eye(v.size)[:, k]
+    y = g[k, :]
+
+    return dger(a,x,y,1,1,g,1,1,1)
+
+
 
 
 def extract_g0t(g0t, lfak=32):
@@ -174,7 +180,7 @@ class HF_imp(object):
         self.beta = dtau * n_tau
         self.lrang = lrang
 
-    def dmft_loop(self, U=2., mu=0.3, loops=4, mcs=5000):
+    def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000):
         """Implementation of the solver"""
         i_omega = 1j*np.pi*(1+2*np.arange(self.beta*6*U)) / self.beta
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
@@ -197,7 +203,11 @@ class HF_imp(object):
 
 
 hf_sol = HF_imp()
+import timeit
+start_time = timeit.default_timer()
+
 sim = hf_sol.dmft_loop(loops=4)
+print(timeit.default_timer() - start_time)
 for it, res in enumerate(sim):
     plt.plot(res['gtau'], label='iteration {}'.format(it))
 plt.legend(loc=0)
