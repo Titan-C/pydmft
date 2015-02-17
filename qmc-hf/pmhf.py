@@ -112,8 +112,6 @@ def mcs(sweeps, gup, gdw, v):
             rat = rat/(1.+rat)
             if rat > np.random.rand():
                 v[j] *= -1.
-
-                # quick update matrix
                 gup = gnew(gup, v, j, 1., kroneker)
                 gdw = gnew(gdw, v, j, -1., kroneker)
 
@@ -146,6 +144,14 @@ def gnewclean(gx, v, sign):
 
 
 def gnew(g, v, k, sign, kroneker):
+    """Quick update of green function matrix after a single spin flip of
+    the auxiliary field. It calculates
+
+    .. math:: \\alpha = \\frac{\\exp(2\\sigma v_j) - 1}
+                        {1 + (1 - G_{jj})(\\exp(2\\sigma v_j) - 1)}
+    .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
+
+    no sumation in the indexes"""
     dv = sign*v[k]*2
     ee = np.exp(dv)-1.
     a = ee/(1. + (1.-g[k, k])*ee)
