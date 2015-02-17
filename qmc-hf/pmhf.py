@@ -12,7 +12,7 @@ from scipy.linalg import solve
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF
+from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  matsubara_freq, fft, ifft
 
 
 def dyson_sigma(g, g0, fer=1):
@@ -75,20 +75,25 @@ def hf_solver(g0, v, sweeps):
 
     gstup, gstdw = mcs(sweeps, gup, gdw, v)
 
-    return wrapup(gstup, gstdw)
+    return avg_g(gstup), avg_g(gstdw)
 
 
-def wrapup(gstup, gstdw):
-    lfak = gstdw.shape[0]
-    xgu = np.zeros(2*lfak+1)
-    xgd = np.zeros(2*lfak+1)
-    for i in range(1, lfak):
-        xgu[i] = np.trace(gstup, offset=lfak-i)
-        xgd[i] = np.trace(gstdw, offset=lfak-i)
-    for i in range(lfak):
-        xgu[i+lfak] = np.trace(gstup, offset=-i)
-        xgd[i+lfak] = np.trace(gstdw, offset=-i)
+def wrapup_fft(xgu, xgd):
+    lfak = xgu.size
+    xga = (xgu + xgd) / 2.
 
+    xg = np.zeros(2*lfak+1)
+    xg[lfak+1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
+    xg[1:lfak] = -xg[lfak+1:-1]
+    xg[lfak] = xga[lfak] / lfak
+    xg[0] = -xg[lfak]
+    xg[-1] = 1-xg[lfak]
+
+    return xg
+
+
+def wrapup_tailrem(xgu, xgd):
+    lfak = xgu.size
     xga = (xgu + xgd) / 2.
     xg = np.zeros(lfak+1)
     xg[1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
@@ -97,6 +102,14 @@ def wrapup(gstup, gstdw):
 
     return xg
 
+def avg_g(gmat):
+    lfak = gmat.shape[0]
+    xgu = np.zeros(2*lfak+1)
+    for i in range(1, lfak):
+        xgu[i] = np.trace(gmat, offset=lfak-i)
+    for i in range(lfak):
+        xgu[i+lfak] = np.trace(gmat, offset=-i)
+    return xgu
 
 def mcs(sweeps, gup, gdw, v):
     lfak = v.size
@@ -179,8 +192,42 @@ def interpol(gt, Lrang):
     tf = np.linspace(0, 1, Lrang+1)
     return f(tf)
 
-
 class HF_imp(object):
+    """Hirsch and Fye impurity solver in paramagnetic scenario"""
+    def __init__(self, dtau=0.5, n_tau=32, n_matsu=2**15, aux_tau=2**15):
+        """sets up the environment"""
+        self.dtau = dtau
+        self.n_tau = n_tau
+        self.beta = dtau * n_tau
+        self.n_matsu = n_matsu
+        self.aux_tau = aux_tau
+        self.i_omega = None
+
+    def dmft_loop(self, U=2., mu=0., loops=4, mcs=5000):
+        """Implementation of the solver"""
+        self.i_omega = matsubara_freq(self.beta, neg=True)
+        G0iw = greenF(self.i_omega, mu=mu)
+        v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
+        simulation = []
+        for i in range(4):
+            G0t = ifft(G0iw, self.beta)
+            g0t = extract_g0t(G0t)
+            gtu, gtd = hf_solver(g0t, v_aux, mcs)
+            gt = wrapup_fft(gtu, gtd)
+
+            Gt = interpol(gt[v_aux.size:], self.n_matsu)[:-1]
+
+            Giw = fft(np.concatenate((-Gt, Gt)), self.beta)
+            G0iw = np.zeros(Giw.size, dtype=np.complex)
+            G0iw[1::2] = 1/(self.i_omega + mu - .25*Giw[1::2])
+            simulation.append({ 'Giw'   : Giw,
+                                'G0iw'  : G0iw,
+                                'gtau'  : gt,
+                                'iwn'   : self.i_omega})
+        return simulation
+
+
+class HF_imp_tail(object):
     """Hirsch and Fye impurity solver in paramagnetic scenario"""
     def __init__(self, dtau=0.5, n_tau=32, lrang=1000):
         """sets up the environment"""
@@ -191,7 +238,7 @@ class HF_imp(object):
 
     def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000):
         """Implementation of the solver"""
-        i_omega = 1j*np.pi*(1+2*np.arange(self.beta*6*U)) / self.beta
+        i_omega = matsubara_freq(self.beta, self.beta*6*U)
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
         G0iw = greenF(i_omega, mu=mu)[1::2]
         v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
@@ -200,18 +247,20 @@ class HF_imp(object):
             G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega, self.beta)
             g0t = extract_g0t(G0t, self.n_tau)
 
-            gt = hf_solver(-g0t, v_aux, mcs)
+            gtu, gtd = hf_solver(-g0t, v_aux, mcs)
+            gt = wrapup_tailrem(gtu, gtd)
 
             Gt = interpol(-gt, self.lrang)
             Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
             G0iw = 1/(i_omega + mu - .25*Giw)
             simulation.append({ 'G0iw'  : G0iw,
                                 'Giw'   : Giw,
-                                'gtau'  : gt})
+                                'gtau'  : gt,
+                                'iwn'   : i_omega})
         return simulation
 
 
-hf_sol = HF_imp()
+hf_sol = HF_imp_tail()
 import timeit
 start_time = timeit.default_timer()
 
