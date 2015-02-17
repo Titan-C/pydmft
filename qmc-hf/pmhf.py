@@ -174,11 +174,11 @@ class HF_imp(object):
         self.beta = dtau * n_tau
         self.lrang = lrang
 
-    def dmft_loop(self, U=2., mu=0.0, loops=4, mcs=2000):
+    def dmft_loop(self, U=2., mu=0.3, loops=4, mcs=2000):
         """Implementation of the solver"""
         i_omega = 1j*np.pi*(1+2*np.arange(self.beta*6*U)) / self.beta
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
-        G0iw = greenF(i_omega, mu)[1::2]
+        G0iw = greenF(i_omega, mu=mu)[1::2]
         v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
         simulation = []
         for i in range(loops):
