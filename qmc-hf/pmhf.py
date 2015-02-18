@@ -29,16 +29,22 @@ def dyson_g0(g, sigma, fer=1):
     return g0
 
 
-def ising_v(L=32, polar=0.5):
+def ising_v(dtau, U, L=32, polar=0.5):
     """initialize the vector V of Ising fields
 
-    .. math:: V = (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
+    .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
 
     where the vector entries :math:`\\sigma_n=\\pm 1` are randomized subject
-    to a threshold given by polar
+    to a threshold given by polar. And
+
+    .. math:: \\cosh(\\lambda) = \\exp(\\Delta \\tau \\frac{U}{2})
 
     Parameters
     ----------
+    dtau : float
+        time spacing :math::`\\Delta\\Tau`
+    U : float
+        local Coulomb repulsion
     L : integer
         length of the array
     polar : float :math:`\\in (0, 1)`
@@ -48,10 +54,11 @@ def ising_v(L=32, polar=0.5):
     -------
     out : single dimension ndarray
     """
+    lam = np.arccosh(np.exp(dtau*U/2))
     vis = np.ones(L)
     rand = np.random.rand(L)
     vis[rand > polar] = -1
-    return vis
+    return vis*lam
 
 
 def hf_solver(g0, v, sweeps):
@@ -189,7 +196,7 @@ class HF_imp(object):
         """Implementation of the solver"""
         self.i_omega = matsubara_freq(self.beta, neg=True)
         G0iw = greenF(self.i_omega, mu=mu)
-        v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
+        v_aux = ising_v(self.dtau, U, self.n_tau)
         simulation = []
         for i in range(4):
             G0t = ifft(G0iw, self.beta)
@@ -223,7 +230,7 @@ class HF_imp_tail(object):
         i_omega = matsubara_freq(self.beta, self.beta*6*U)
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
         G0iw = greenF(i_omega, mu=mu)[1::2]
-        v_aux = np.arccosh(np.exp(self.dtau*U/2)) * ising_v(self.n_tau)
+        v_aux = ising_v(self.dtau, U, self.n_tau)
         simulation = []
         for i in range(loops):
             G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega, self.beta)
