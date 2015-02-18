@@ -73,7 +73,7 @@ def hf_solver(g0, v, sweeps):
     gup = gnewclean(gx, v, 1.)
     gdw = gnewclean(gx, v, -1.)
 
-    gstup, gstdw = mcs(sweeps, gup, gdw, v)
+    gstup, gstdw = mcs(sweeps, 500, gup, gdw, v)
 
     return avg_g(gstup), avg_g(gstdw)
 
@@ -91,12 +91,12 @@ def avg_g(gmat):
     return xg
 
 
-def mcs(sweeps, gup, gdw, v):
+def mcs(sweeps, therm, gup, gdw, v):
     lfak = v.size
     gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
     kroneker = np.eye(lfak)
 
-    for mcs in range(sweeps):
+    for mcs in range(sweeps+therm):
         for j in range(lfak):
             dv = 2.*v[j]
             ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
@@ -108,8 +108,10 @@ def mcs(sweeps, gup, gdw, v):
                 gup = gnew(gup, v, j, 1., kroneker)
                 gdw = gnew(gdw, v, j, -1., kroneker)
 
-        gstup += gup
-        gstdw += gdw
+        if mcs > therm:
+
+            gstup += gup
+            gstdw += gdw
 
     gstup = gstup/sweeps
     gstdw = gstdw/sweeps
