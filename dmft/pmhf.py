@@ -97,7 +97,6 @@ def avg_g(gmat):
 
     return xg
 
-
 def mcs(sweeps, therm, gup, gdw, v):
     lfak = v.size
     gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
@@ -126,28 +125,27 @@ def mcs(sweeps, therm, gup, gdw, v):
     return gstup, gstdw
 
 
-def gnewclean(gx, v, sign):
-    """Returns the interacting function :math:`G_{ij}`
+def gnewclean(g0t, v, sign):
+    """Returns the interacting function :math:`G_{ij}` for the non-interacting
+    propagator :math:`\\mathcal{G}^0_{ij}`
 
-    .. math:: G'_{ij} = B^{-1}_{ij}G_{ij}
+    .. math:: G_{ij} = B^{-1}_{ij}\\mathcal{G}^0_{ij}
 
     where
 
     .. math::
         u_j &= \\exp(\\sigma v_j) - 1 \\\\
-        B_{ij} &= \\delta_{ij} - u_j ( G_{ij} - \\delta_{ij}) \\text{  no sumation on } j
-
+        B_{ij} &= \\delta_{ij} - u_j ( \\mathcal{G}^0_{ij} - \\delta_{ij}) \\text{  no sumation on } j
     """
     ee = np.exp(sign*v) - 1.
     ide = np.eye(v.size)
-    b = ide - ee * (gx-ide)
+    b = ide - ee * (g0t-ide)
 
-    return solve(b, gx)
-
+    return solve(b, g0t)
 
 def gnew(g, v, k, sign, kroneker):
-    """Quick update of green function matrix after a single spin flip of
-    the auxiliary field. It calculates
+    """Quick update of the interacting Green function matrix after a single
+    spin flip of the auxiliary field. It calculates
 
     .. math:: \\alpha = \\frac{\\exp(2\\sigma v_j) - 1}
                         {1 + (1 - G_{jj})(\\exp(2\\sigma v_j) - 1)}
@@ -160,9 +158,7 @@ def gnew(g, v, k, sign, kroneker):
     x = g[:, k] - kroneker[:, k]
     y = g[k, :]
 
-    return dger(a,x,y,1,1,g,1,1,1)
-
-
+    return dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
 def extract_g0t(g0t, lfak=32):
@@ -180,6 +176,7 @@ def interpol(gt, Lrang):
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
     return f(tf)
+
 
 class HF_imp(object):
     """Hirsch and Fye impurity solver in paramagnetic scenario"""
@@ -247,26 +244,3 @@ class HF_imp_tail(object):
                                 'gtau'  : gt,
                                 'iwn'   : i_omega})
         return simulation
-
-
-hf_sol = HF_imp_tail()
-import timeit
-start_time = timeit.default_timer()
-
-sim = hf_sol.dmft_loop(loops=4)
-print(timeit.default_timer() - start_time)
-plt.figure()
-for it, res in enumerate(sim):
-    plt.plot(res['gtau'], label='iteration {}'.format(it))
-plt.legend(loc=0)
-plt.figure()
-for it, res in enumerate(sim):
-    plt.plot(res['iwn'].imag, res['G0iw'].imag, '*-', label='iter Re {}'.format(it))
-    plt.plot(res['iwn'].imag, res['Giw'].imag, '*-', label='iter Im {}'.format(it))
-plt.legend(loc=0)
-plt.figure()
-for it, res in enumerate(sim):
-    sig=1/res['G0iw'] - 1/res['Giw']
-    plt.plot(res['iwn'].imag, sig.real, '*-', label='iter Re {}'.format(it))
-    plt.plot(res['iwn'].imag, sig.imag, '*-', label='iter Im {}'.format(it))
-plt.legend(loc=0)
