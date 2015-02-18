@@ -78,38 +78,18 @@ def hf_solver(g0, v, sweeps):
     return avg_g(gstup), avg_g(gstdw)
 
 
-def wrapup_fft(xgu, xgd):
-    lfak = (xgu.size-1)//2
-    xga = (xgu + xgd) / 2.
+def avg_g(gmat):
+    lfak = gmat.shape[0]
+    xga = np.zeros(2*lfak+1)
+    for i in range(1, 2*lfak):
+        xga[i] = np.trace(gmat, offset=lfak-i)
 
-    xg = np.zeros(2*lfak+1)
-    xg[lfak+1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
-    xg[1:lfak] = -xg[lfak+1:-1]
-    xg[lfak] = xga[lfak] / lfak
-    xg[0] = -xg[lfak]
-    xg[-1] = 1-xg[lfak]
-
-    return xg
-
-
-def wrapup_tailrem(xgu, xgd):
-    lfak = (xgu.size-1)//2
-    xga = (xgu + xgd) / 2.
     xg = np.zeros(lfak+1)
-    xg[1:-1] = (xga[lfak+1:-1]-xga[1:lfak]) / lfak
-    xg[0] = xga[lfak] / lfak
+    xg[:-1] = (xga[lfak:-1]-xga[:lfak]) / lfak
     xg[-1] = 1-xg[0]
 
     return xg
 
-def avg_g(gmat):
-    lfak = gmat.shape[0]
-    xgu = np.zeros(2*lfak+1)
-    for i in range(1, lfak):
-        xgu[i] = np.trace(gmat, offset=lfak-i)
-    for i in range(lfak):
-        xgu[i+lfak] = np.trace(gmat, offset=-i)
-    return xgu
 
 def mcs(sweeps, gup, gdw, v):
     lfak = v.size
@@ -213,9 +193,9 @@ class HF_imp(object):
             G0t = ifft(G0iw, self.beta)
             g0t = extract_g0t(G0t[self.n_matsu:])
             gtu, gtd = hf_solver(g0t, v_aux, mcs)
-            gt = wrapup_fft(gtu, gtd)
+            gt = (gtu + gtd) / 2
 
-            Gt = interpol(gt[v_aux.size:], self.n_matsu)[:-1]
+            Gt = interpol(gt, self.n_matsu)[:-1]
 
             Giw = fft(np.concatenate((-Gt, Gt)), self.beta)
             G0iw = np.zeros(Giw.size, dtype=np.complex)
@@ -248,7 +228,7 @@ class HF_imp_tail(object):
             g0t = extract_g0t(G0t, self.n_tau)
 
             gtu, gtd = hf_solver(-g0t, v_aux, mcs)
-            gt = wrapup_tailrem(gtu, gtd)
+            gt = (gtu + gtd) / 2
 
             Gt = interpol(-gt, self.lrang)
             Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
