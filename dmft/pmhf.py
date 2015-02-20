@@ -244,3 +244,10 @@ class HF_imp_tail(object):
                                 'gtau'  : gt,
                                 'iwn'   : i_omega})
         return simulation
+
+import timeit
+hf_sol = hf.HF_imp_tail()
+start_time = timeit.default_timer()
+
+sim = hf_sol.dmft_loop(loops=12)
+print(timeit.default_timer() - start_time)
