@@ -95,8 +95,7 @@ def greenF(iw, sigma=0, mu=0, D=1):
     return Gw
 
 
-
-def gt_fouriertrans(gt, tau, iw, beta):
+def gt_fouriertrans(g_tau, tau, iwn, beta):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta]` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff. One
@@ -107,11 +106,11 @@ def gt_fouriertrans(gt, tau, iw, beta):
        e^{i\omega_n \tau} d\tau + \frac{1}{i\omega_n}
     Parameters
     ----------
-    gt : real float array
+    g_tau : real float array
             Imaginary time interacting Green function
     tau : real float array
             Imaginary time points
-    iw : complex float array
+    iwn : complex float array
             fermionic matsubara frequencies. Only use the positive ones
     beta : float
         Inverse temperature of the system
@@ -121,12 +120,12 @@ def gt_fouriertrans(gt, tau, iw, beta):
     out : complex ndarray
             Interacting Greens function in matsubara frequencies
     """
-    power = np.exp(iw.reshape(-1, 1) * tau)
-    gw = np.sum((gt + 0.5) * power, axis=1)*beta/(tau.size-1) + 1/iw
-    return gw
+    power = np.exp(iwn.reshape(-1, 1) * tau)
+    g_iwn = np.sum((g_tau + 0.5) * power, axis=1)*beta/(tau.size-1) + 1/iwn
+    return g_iwn
 
 
-def gw_invfouriertrans(gw, tau, iw, beta):
+def gw_invfouriertrans(g_iwn, tau, iwn, beta):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -145,11 +144,11 @@ def gw_invfouriertrans(gw, tau, iw, beta):
 
     Parameters
     ----------
-    gw : real float array
+    g_iwn : real float array
             Imaginary time interacting Green function
     tau : real float array
             Imaginary time points
-    iw : complex float array
+    iwn : complex float array
             fermionic matsubara frequencies. Only use the positive ones
     beta : float
         Inverse temperature of the system
@@ -163,7 +162,7 @@ def gw_invfouriertrans(gw, tau, iw, beta):
     --------
     gt_fouriertrans"""
 
-    power = np.exp(-iw * tau.reshape(-1, 1))
-    gt = ((gw - 1/iw)*power).real
-    gt = np.sum(gt, axis=1)*2/beta - 0.5
-    return gt
+    power = np.exp(-iwn * tau.reshape(-1, 1))
+    g_tau = ((g_iwn - 1/iwn)*power).real
+    g_tau = np.sum(g_tau, axis=1)*2/beta - 0.5
+    return g_tau
