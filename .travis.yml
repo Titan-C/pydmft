@@ -15,6 +15,7 @@ install:
     - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
       matplotlib pytest coverage sphinx setuptools
     - source activate testenv
+    - pip install slaveparticles sphinx-gallery
     - python setup.py install
 
 script:

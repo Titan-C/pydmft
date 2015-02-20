@@ -5,12 +5,12 @@ import numpy as np
 def plot_qmc(**kwargs):
     input_data = {
         'dtaureal' : 0.5,
-        'U': 2.1,
+        'U': 2.,
         'D': 1,
-        'nloop': 8,
+        'nloop': 4,
         'dmu': 0.01,
         'nmu': 1,
-        'xmu0': 0,
+        'xmu0': 0.3,
         'if1': 1,
         'du': 1.5,
         'nu': 1,
@@ -42,7 +42,7 @@ imet=1 makes a metallic seed
 
     with open('fort.50', 'w') as f:
         f.write(text)
-    exe = call(['./qmc'])
+#    exe = call(['./qmc'])
 
     f, (ax1, ax2) = plt.subplots(2, sharex=True)
 
@@ -64,7 +64,7 @@ imet=1 makes a metallic seed
     ax2.legend()
 
     ax2.set_xlabel(r'$i\omega_n$')
-    ax2.set_xlim([-4, 8])
+#    ax2.set_xlim([-4, 8])
     f.tight_layout()
 #    ax2.set_ylim([-0.8,0])
 

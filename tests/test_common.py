@@ -10,9 +10,10 @@ from dmft.common import greenF, gw_invfouriertrans, gt_fouriertrans,\
  matsubara_freq, fft, ifft
 import numpy as np
 
+
 def test_fast_fourier_transforms(beta=50.):
     """Test the fast fourier transforms"""
-    iomega_n = matsubara_freq(beta)
+    iomega_n = matsubara_freq(beta, neg=True)
     gwr = greenF(iomega_n, mu=0.5)
 
     g_tau = ifft(gwr, beta)
@@ -22,7 +23,7 @@ def test_fast_fourier_transforms(beta=50.):
 
 def test_fourier_trasforms(beta=50., n_tau=1000, n_matsubara=100):
     """Test the tail improved fourier transforms"""
-    iomega_n = 1j*np.pi*(1+2*np.arange(n_matsubara)) / beta
+    iomega_n = matsubara_freq(beta, n_matsubara)
     gwr = greenF(iomega_n)[1::2]
     tau = np.linspace(0, beta, n_tau+1)
 

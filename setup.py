@@ -5,6 +5,7 @@ Installing packages on code for DMFT
 """
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+import dmft
 import sys
 
 class PyTest(TestCommand):
@@ -21,9 +22,9 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 setup(
-    name="DMFT Learning code",
+    name="dmft-learn",
     description="Educative code on DMFT",
-    version="0.2",
+    version=dmft.__version__,
     packages=find_packages(),
     author="Óscar Nájera",
     author_email='najera.oscar@gmail.com',
