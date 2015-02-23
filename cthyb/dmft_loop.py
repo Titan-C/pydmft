@@ -16,30 +16,6 @@ import pyalps.cthyb as cthyb  # the solver module
 import pyalps.mpi as mpi     # MPI library (required)
 from pyalps.hdf5 import archive
 
-# specify solver parameters
-beta = 16.
-U = 2.5
-
-parms = {
-    'SWEEPS'              : 100000000,
-    'THERMALIZATION'      : 1000,
-    'N_MEAS'              : 50,
-    'MAX_TIME'            : 1,
-    'N_HISTOGRAM_ORDERS'  : 50,
-    'SEED'                : 0,
-
-    'N_ORBITALS'          : 2,
-    'DELTA'               : "delta.h5",
-    'DELTA_IN_HDF5'       : 1,
-    'BASENAME'            : 'PM_b{}_U{}'.format(beta,U),
-
-    'U'                   : U,
-    'MU'                  : U/2.,
-    'N_TAU'               : 1000,
-    'N_MATSUBARA'         : 200,
-    'BETA'                : beta,
-    'VERBOSE'             : 1,
-}
 
 def save_pm_delta(gtau):
     save_delta = archive(parms['DELTA'], 'w')
@@ -56,14 +32,13 @@ def recover_g_tau(parms):
     del iteration
     return np.asarray(gtau)
 
-def save_iter_step(iter_count, g):
-    save = archive('steps.h5', 'w')
+def save_iter_step(parms, iter_count, g):
+    save = archive(parms['BASENAME']+'steps.h5', 'w')
     for i in range(2):
         save['iter_{}/G_tau/{}/'.format(iter_count, i)] = g[i]
     del save
 
-
-if mpi.rank == 0:
+def start_delta():
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
@@ -72,29 +47,65 @@ if mpi.rank == 0:
 
     save_pm_delta(np.asarray((gtau, gtau)))
 
-mpi.world.barrier()
-# solve the impurity model
-
 ## DMFT loop
-gt_old=np.zeros(parms['N_TAU']+1)
-term = False
-for n in range(12):
-    cthyb.solve(parms)
-    if mpi.rank == 0:
-        g_tau = recover_g_tau(parms)
-        save_iter_step(n, g_tau)
-        gt_new = g_tau.mean(axis=0)
-        # inverting for AFM self-consistency
-        save_pm_delta(g_tau)
-        conv = np.abs(gt_old - gt_new).max() < 0.005
-        gt_old = gt_new
-        term = mpi.broadcast(value=conv, root=0)
-    else:
-        term = mpi.broadcast(root=0)
+def dmft_loop(parms):
+    gt_old=np.zeros(parms['N_TAU']+1)
+    term = False
+    for n in range(20):
+        cthyb.solve(parms)
+        if mpi.rank == 0:
+            g_tau = recover_g_tau(parms)
+            save_iter_step(n, g_tau)
+            gt_new = g_tau.mean(axis=0)
+            # inverting for AFM self-consistency
+            save_pm_delta(g_tau)
+            conv = np.abs(gt_old - gt_new).max() < 0.001
+            gt_old = gt_new
+            term = mpi.broadcast(value=conv, root=0)
+        else:
+            term = mpi.broadcast(root=0)
 
-    mpi.world.barrier() # wait until solver input is written
+        mpi.world.barrier() # wait until solver input is written
 
-    if term:
-        print('end on iterartion: ', n)
-        break
+        if term:
+            print('end on iterartion: ', n)
+            break
 
+
+# specify solver parameters
+beta = 16.
+U = 2.5
+
+## master looping
+BETA = [7, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+U = np.arange(1, 7, 0.4)
+for beta in BETA:
+    for u_int in U:
+        parms = {
+    'SWEEPS'              : 100000000,
+    'THERMALIZATION'      : 1000,
+    'N_MEAS'              : 50,
+    'MAX_TIME'            : 1,
+    'N_HISTOGRAM_ORDERS'  : 50,
+    'SEED'                : 0,
+
+    'N_ORBITALS'          : 2,
+    'DELTA'               : "delta.h5",
+    'DELTA_IN_HDF5'       : 1,
+    'BASENAME'            : 'PM_b{}_U{}'.format(beta,u_int),
+
+    'U'                   : u_int,
+    'MU'                  : u_int/2.,
+    'N_TAU'               : 1000,
+    'N_MATSUBARA'         : 250,
+    'BETA'                : beta,
+    'VERBOSE'             : 1,
+}
+
+        if mpi.rank == 0:
+            start_delta()
+            print('write delta'+parms['BASENAME'])
+
+        mpi.world.barrier()  # wait until starting input file is written
+
+        dmft_loop(parms)
