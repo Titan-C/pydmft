@@ -17,6 +17,9 @@ import pyalps.mpi as mpi     # MPI library (required)
 from pyalps.hdf5 import archive
 
 # specify solver parameters
+beta = 8.
+U = 4.5
+
 parms = {
     'SWEEPS'              : 100000000,
     'THERMALIZATION'      : 1000,
@@ -28,12 +31,13 @@ parms = {
     'N_ORBITALS'          : 2,
     'DELTA'               : "delta.h5",
     'DELTA_IN_HDF5'       : 1,
+    'BASENAME'            : 'PM_b{}_U{}'.format(beta,U),
 
-    'U'                   : 2.0,
-    'MU'                  : 1.0,
+    'U'                   : U,
+    'MU'                  : U/2.,
     'N_TAU'               : 1000,
     'N_MATSUBARA'         : 200,
-    'BETA'                : 45,
+    'BETA'                : beta,
     'VERBOSE'             : 1,
 }
 
@@ -44,8 +48,8 @@ def save_pm_delta(gtau):
     save_delta['/Delta_1'] = gtau
     del save_delta
 
-def recover_g_tau():
-    iteration = archive('results.out.h5', 'r')
+def recover_g_tau(parms):
+    iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
     gtau = []
     for i in range(2):
         gtau.append(iteration['G_tau/{}/mean/value'.format(i)])
@@ -72,12 +76,22 @@ mpi.world.barrier()
 # solve the impurity model
 
 ## DMFT loop
-for n in range(4):
+gt_old=np.zeros(parms['N_TAU']+1)
+term = False
+for n in range(9):
     cthyb.solve(parms)
     if mpi.rank == 0:
-        g_tau = recover_g_tau()
+        g_tau = recover_g_tau(parms)
         save_iter_step(n, g_tau)
+        gt_new = gtau.mean(axis=0)
         # inverting for AFM self-consistency
         save_pm_delta(g_tau)
+        term = np.max(gt_old - gt_new) < 0.005
+        gt_old = gt_new
 
     mpi.world.barrier() # wait until solver input is written
+
+    if term:
+        print('end on iterartion: ', n)
+        n=9
+
