@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from dmft.common import matsubara_freq, greenF, gw_invfouriertrans
 
-sys.path.append('/usr/lib')
+sys.path.append('/home/oscar/libs/lib')
 
 import pyalps.cthyb as cthyb  # the solver module
 import pyalps.mpi as mpi     # MPI library (required)

@@ -11,7 +11,7 @@ import sys
 import numpy as np
 from dmft.common import matsubara_freq, greenF, gw_invfouriertrans
 import shutil
-sys.path.append('/usr/lib')
+sys.path.append('/home/oscar/libs/lib')
 
 import pyalps.cthyb as cthyb  # the solver module
 import pyalps.mpi as mpi     # MPI library (required)
@@ -57,7 +57,7 @@ mpi.world.barrier()
 # solve the impurity model
 
 ## DMFT loop
-for n in range(4)
+for n in range(4):
     cthyb.solve(parms)
     if mpi.rank == 0:
         shutil.copy('Gt.dat', 'Gt_{}.dat'.format(n))
