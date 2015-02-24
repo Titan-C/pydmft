@@ -85,7 +85,7 @@ def plot_end(filename):
     gw0 = gt_fouriertrans(sim['G_tau/0/mean/value'], tau, iwn, parms['BETA'])
     plt.plot(iwn.imag, gw0.real, '+-', label='RE')
     plt.plot(iwn.imag, gw0.imag, 's-', label='IM')
-    plt.xlim([0, cut])
+    plt.xlim([0, 6.5])
     plt.ylim([gw0.imag[:cut].min()*1.1, 0])
     plt.legend(loc=0)
     plt.ylabel(r'$G(i\omega_n)$')
@@ -99,7 +99,7 @@ def plot_end(filename):
     sig = iwn + parms['MU'] - gw0 -1/gw0
     plt.plot(iwn.imag, sig.real, '+-', label='RE')
     plt.plot(iwn.imag, sig.imag, 's-', label='IM')
-    plt.xlim([0, cut])
+    plt.xlim([0, 6.5])
     plt.ylim([sig.imag[:cut].min()*1.1, 0])
     plt.legend(loc=0)
     plt.ylabel(r'$\Sigma(i\omega_n)$')
