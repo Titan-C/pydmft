@@ -18,7 +18,7 @@ from pyalps.hdf5 import archive
 
 
 def save_pm_delta(gtau):
-    save_delta = archive(parms['DELTA'], 'w')
+    save_delta = archive('delta.h5', 'w')
     gtau = gtau.mean(axis=0)
     save_delta['/Delta_0'] = gtau
     save_delta['/Delta_1'] = gtau
@@ -38,12 +38,12 @@ def save_iter_step(parms, iter_count, g):
         save['iter_{}/G_tau/{}/'.format(iter_count, i)] = g[i]
     del save
 
-def start_delta():
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+def start_delta(beta):
+    iwn = matsubara_freq(beta, 250)
+    tau = np.linspace(0, beta, 1001)
 
     giw = greenF(iwn, mu=0.)[1::2]
-    gtau = gw_invfouriertrans(giw, tau, iwn, parms['BETA'])
+    gtau = gw_invfouriertrans(giw, tau, iwn, beta)
 
     save_pm_delta(np.asarray((gtau, gtau)))
 
@@ -54,13 +54,13 @@ def dmft_loop(parms):
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
+            print('dmft loop ',n)
             g_tau = recover_g_tau(parms)
-            save_iter_step(n, g_tau)
-            gt_new = g_tau.mean(axis=0)
+            save_iter_step(parms, n, g_tau)
             # inverting for AFM self-consistency
             save_pm_delta(g_tau)
-            conv = np.abs(gt_old - gt_new).max() < 0.001
-            gt_old = gt_new
+            conv = np.abs(gt_old - g_tau).mean() < 0.0025
+            gt_old = g_tau
             term = mpi.broadcast(value=conv, root=0)
         else:
             term = mpi.broadcast(root=0)
@@ -77,9 +77,13 @@ beta = 16.
 U = 2.5
 
 ## master looping
-BETA = [7, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+BETA = [8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
 U = np.arange(1, 7, 0.4)
 for beta in BETA:
+    if mpi.rank == 0:
+        start_delta(beta)
+        print('write delta at beta ',str(beta))
+
     for u_int in U:
         parms = {
     'SWEEPS'              : 100000000,
@@ -101,11 +105,6 @@ for beta in BETA:
     'BETA'                : beta,
     'VERBOSE'             : 1,
 }
-
-        if mpi.rank == 0:
-            start_delta()
-            print('write delta'+parms['BASENAME'])
-
         mpi.world.barrier()  # wait until starting input file is written
 
         dmft_loop(parms)

@@ -26,7 +26,7 @@ def plot_gt_iter(basename, iteration):
     for n in range(iteration):
         gtau = steps['iter_{}/G_tau/'.format(n)]
         for i in range(2):
-            plt.plot(tau, gtau[i], label='it {}, sp {}'.format(n, i))
+            plt.semilogy(tau, -gtau[i], label='it {}, sp {}'.format(n, i))
     plt.legend(loc=0)
     plt.ylabel(r'$G(\tau)$')
     plt.xlabel(r'$\tau$')
