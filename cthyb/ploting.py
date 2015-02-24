@@ -65,41 +65,46 @@ def plot_gw_iter(basename, iteration):
 
 
 def plot_end(filename):
-    sim = archive('PM_b50_U2.2.out.h5')
+    sim = archive(filename)
     parms = sim['parameters']
-    tau = np.linspace(0, parms['BETA'], 'N_TAU'+1)
+    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     fig_gt = plt.figure()
     for i in range(parms['N_ORBITALS']):
         plt.errorbar(tau, sim['G_tau/{}/mean/value'.format(i)],
-                     yerr=sim['G_tau/{}/mean/error'].format(i))
+                     yerr=sim['G_tau/{}/mean/error'.format(i)], label='spin{}'.format(i))
     plt.legend(loc=0)
     plt.ylabel(r'$G(\tau)$')
     plt.xlabel(r'$\tau$')
-    plt.title('imaginary time green function beta {} U {}'.format(parms['BETA'], parms['U']))
+    plt.title(r'$G(\tau)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
     fig_gt.savefig('G_tau'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     fig_gw = plt.figure()
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    cut = int(6.5*parms['BETA']/np.pi)
     gw0 = gt_fouriertrans(sim['G_tau/0/mean/value'], tau, iwn, parms['BETA'])
     plt.plot(iwn.imag, gw0.real, '+-', label='RE')
     plt.plot(iwn.imag, gw0.imag, 's-', label='IM')
+    plt.xlim([0, cut])
+    plt.ylim([gw0.imag[:cut].min()*1.1, 0])
     plt.legend(loc=0)
     plt.ylabel(r'$G(i\omega_n)$')
     plt.xlabel(r'$i\omega_n$')
-    plt.title('Matusubara frequency green function beta {} U {}'.format(parms['BETA'], parms['U']))
+    plt.title(r'$G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
 
     fig_gw.savefig('G_iwn'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     fig_siw = plt.figure()
-    sig=iwn + parms['MU'] - gw0 -1/gw0
-    plt.plot(iwn.imag, sig.real, '+-')
-    plt.plot(iwn.imag, sig.imag, 's-')
+    sig = iwn + parms['MU'] - gw0 -1/gw0
+    plt.plot(iwn.imag, sig.real, '+-', label='RE')
+    plt.plot(iwn.imag, sig.imag, 's-', label='IM')
+    plt.xlim([0, cut])
+    plt.ylim([sig.imag[:cut].min()*1.1, 0])
     plt.legend(loc=0)
     plt.ylabel(r'$\Sigma(i\omega_n)$')
     plt.xlabel(r'$i\omega_n$')
-    plt.title('Matusubara frequency Self-Energy beta {} U {}'.format(parms['BETA'], parms['U']))
+    plt.title(r'$\Sigma(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
     fig_siw.savefig('Sig_iwn'+parms['BASENAME']+'.png', format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
 
