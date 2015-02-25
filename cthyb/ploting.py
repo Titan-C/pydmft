@@ -36,6 +36,7 @@ def plot_gt_iter(basename, iteration):
 
     del final
     del steps
+    plt.close('all')
 
 
 def plot_gw_iter(basename, iteration):
@@ -62,6 +63,7 @@ def plot_gw_iter(basename, iteration):
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
     del final
     del steps
+    plt.close('all')
 
 
 def plot_end(filename):
@@ -79,26 +81,29 @@ def plot_end(filename):
     fig_gt.savefig('G_tau'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
-    fig_gw = plt.figure()
+    fig_gw, gw_ax = plt.subplots()
+    fig_siw, sw_ax = plt.subplots()
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     cut = int(6.5*parms['BETA']/np.pi)
-    gw0 = gt_fouriertrans(sim['G_tau/0/mean/value'], tau, iwn, parms['BETA'])
-    plt.plot(iwn.imag, gw0.real, '+-', label='RE')
-    plt.plot(iwn.imag, gw0.imag, 's-', label='IM')
-    plt.xlim([0, 6.5])
-    plt.ylim([gw0.imag[:cut].min()*1.1, 0])
-    plt.legend(loc=0)
-    plt.ylabel(r'$G(i\omega_n)$')
-    plt.xlabel(r'$i\omega_n$')
-    plt.title(r'$G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
+    for i in range(parms['N_ORBITALS']):
+        gw = gt_fouriertrans(sim['G_tau/{}/mean/value'.format(i)], tau, iwn, parms['BETA'])
+        gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
+        gw_ax.plot(iwn.imag, gw.imag, 's-', label='IM, sp{}'.format(i))
+
+        sig = iwn + parms['MU'] - gw -1/gw
+        sw_ax.plot(iwn.imag, sig.real, '+-', label='RE, sp{}'.format(i))
+        sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, sp{}'.format(i))
+
+    gw_ax.set_xlim([0, 6.5])
+    gw_ax.set_ylim([gw.imag[:cut].min()*1.1, 0])
+    gw_ax.legend(loc=0)
+    gw_ax.set_ylabel(r'$G(i\omega_n)$')
+    gw_ax.set_xlabel(r'$i\omega_n$')
+    gw_ax.set_title(r'$G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
 
     fig_gw.savefig('G_iwn'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
-    fig_siw = plt.figure()
-    sig = iwn + parms['MU'] - gw0 -1/gw0
-    plt.plot(iwn.imag, sig.real, '+-', label='RE')
-    plt.plot(iwn.imag, sig.imag, 's-', label='IM')
     plt.xlim([0, 6.5])
     plt.ylim([sig.imag[:cut].min()*1.1, 0])
     plt.legend(loc=0)
@@ -108,4 +113,5 @@ def plot_end(filename):
     fig_siw.savefig('Sig_iwn'+parms['BASENAME']+'.png', format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
 
+    plt.close('all')
     del sim
