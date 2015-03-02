@@ -9,10 +9,10 @@ Quantum Monte Carlo algorithm in the hybridization expansion
 """
 from __future__ import division, absolute_import, print_function
 import sys
-import numpy as np
-from dmft.common import matsubara_freq, greenF, gw_invfouriertrans
 sys.path.append('/home/oscar/libs/lib')
 
+import numpy as np
+from dmft.common import matsubara_freq, greenF, gw_invfouriertrans, gt_fouriertrans
 import pyalps.cthyb as cthyb  # the solver module
 import pyalps.mpi as mpi     # MPI library (required)
 from pyalps.hdf5 import archive
@@ -21,6 +21,7 @@ from pyalps.hdf5 import archive
 def save_pm_delta(parms, gtau):
     save_delta = archive(parms["DELTA"], 'w')
     gtau = parms['t']**2 * gtau.mean(axis=0)
+    gtau = (gtau + gtau[::-1]) / 2
     save_delta['/Delta_0'] = gtau
     save_delta['/Delta_1'] = gtau
     del save_delta
@@ -43,15 +44,18 @@ def start_delta(parms):
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
-    giw = greenF(iwn, mu=0., D=2*parms['t'])[1::2]
+    giw = greenF(iwn, mu=0., D=2*parms['t'])
     gtau = gw_invfouriertrans(giw, tau, iwn, beta)
 
     save_pm_delta(parms, np.asarray((gtau, gtau)))
 
+
 ## DMFT loop
 def dmft_loop(parms):
-    gt_old = np.zeros(parms['N_TAU']+1)
+    gw_old = np.zeros(parms['N_MATSUBARA'])
     term = False
+    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
@@ -59,9 +63,10 @@ def dmft_loop(parms):
             g_tau = recover_g_tau(parms)
             save_iter_step(parms, n, g_tau)
             # inverting for AFM self-consistency
-            save_pm_delta(g_tau)
-            conv = np.abs(gt_old - g_tau).mean() < 0.0025
-            gt_old = g_tau
+            save_pm_delta(parms, g_tau)
+            g_w = gt_fouriertrans(g_tau.mean(axis=0), tau, iwn, parms['BETA'])
+            conv = np.abs(gw_old - g_w).max() < 0.0025
+            gw_old = g_w
             term = mpi.broadcast(value=conv, root=0)
         else:
             term = mpi.broadcast(root=0)
@@ -75,7 +80,7 @@ def dmft_loop(parms):
 
 ## master looping
 if __name__ == "__main__":
-    BETA = [20.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+    BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
     U =[5.1]# np.arange(1, 7, 0.4)
     for beta in BETA:
         for u_int in U:
@@ -90,13 +95,14 @@ if __name__ == "__main__":
                 'N_ORBITALS'          : 2,
                 'DELTA'               : "delta_b{}_U{}.h5".format(beta, u_int),
                 'DELTA_IN_HDF5'       : 1,
-                'BASENAME'            : 'PM_b{}_U{}'.format(beta, u_int),
+                'BASENAME'            : 'PH_b{}_U{}'.format(beta, u_int),
 
-                't'                   : 1.
+                't'                   : 1.,
                 'U'                   : u_int,
                 'MU'                  : u_int/2.,
                 'N_TAU'               : 1000,
                 'N_MATSUBARA'         : 250,
+                'MEASURE_freq'        : 1,
                 'BETA'                : beta,
                 'VERBOSE'             : 1,
             }

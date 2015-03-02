@@ -25,8 +25,6 @@ parms = {
     'N_HISTOGRAM_ORDERS'  : 50,
     'SEED'                : 0,
 
-    'ANTIFERROMAGNET'     : 1,
-    'SYMMETRIZATION'      : 0,
     'N_ORBITALS'          : 2,
     'DELTA'               : "delta.dat",
 
@@ -35,6 +33,7 @@ parms = {
     'MU'                  : 1.0,
     'N_TAU'               : 1000,
     'N_MATSUBARA'         : 200,
+    'MEASURE_freq'        : 1,
     'BETA'                : 45,
     'TEXT_OUTPUT'         : 1,
     'VERBOSE'             : 1,
@@ -45,10 +44,10 @@ if mpi.rank == 0:
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
-    giw_u = greenF(iwn, mu=0.5)[1::2]
+    giw_u = greenF(iwn, mu=parms['MU'], D=2*parms['t'])
     gtau_u = gw_invfouriertrans(giw_u, tau, iwn, parms['BETA'])
 
-    giw_d = greenF(iwn, mu=-0.5)[1::2]
+    giw_d = greenF(iwn, mu=-parms['MU'], D=2*parms['t'])
     gtau_d = gw_invfouriertrans(giw_d, tau, iwn, parms['BETA'])
 
     np.savetxt('delta.dat', np.asarray((tau, gtau_u, gtau_d)).T)
