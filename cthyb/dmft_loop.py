@@ -19,7 +19,7 @@ from pyalps.hdf5 import archive
 
 
 def save_pm_delta(parms, gtau):
-    save_delta = archive('delta.h5', 'w')
+    save_delta = archive(parms["DELTA"], 'w')
     gtau = parms['t']**2 * gtau.mean(axis=0)
     save_delta['/Delta_0'] = gtau
     save_delta['/Delta_1'] = gtau
@@ -43,10 +43,10 @@ def start_delta(parms):
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
-    giw = greenF(iwn, mu=0., D=parms['t'])[1::2]
+    giw = greenF(iwn, mu=0., D=2*parms['t'])[1::2]
     gtau = gw_invfouriertrans(giw, tau, iwn, beta)
 
-    save_pm_delta(np.asarray((gtau, gtau)))
+    save_pm_delta(parms, np.asarray((gtau, gtau)))
 
 ## DMFT loop
 def dmft_loop(parms):
@@ -88,7 +88,7 @@ if __name__ == "__main__":
                 'SEED'                : 0,
 
                 'N_ORBITALS'          : 2,
-                'DELTA'               : "delta.h5",
+                'DELTA'               : "delta_b{}_U{}.h5".format(beta, u_int),
                 'DELTA_IN_HDF5'       : 1,
                 'BASENAME'            : 'PM_b{}_U{}'.format(beta, u_int),
 

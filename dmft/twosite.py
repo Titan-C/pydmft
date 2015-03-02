@@ -32,7 +32,7 @@ import numpy as np
 from scipy.integrate import quad
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize, expected_value
 from slaveparticles.quantum import dos, fermion
-from dmft.common import matsubara_freq, fft, ifft
+from dmft.common import matsubara_freq, gw_invfouriertrans
 
 
 def m2_weight(t):
@@ -224,12 +224,12 @@ if __name__ == "__main__":
     plt.xlim([-5,5])
     plt.figure()
 
+    tau = np.linspace(0, 100, 1001)
     for s in sim:
         out = refine_mat_solution(s[2], s[0])
-        Gw = np.zeros(2*out.omega.size, dtype=np.complex)
-        Gw[1::2] = out.GF['Imp G']
-        gmt = ifft(Gw, beta=100)
-        plt.semilogy(tau(gmt.size),gmt, label='U={}'.format(s[0]))
+        Gw = out.GF['Imp G']
+        gmt = gw_invfouriertrans(Gw, tau, out.omega, beta=100)
+        plt.semilogy(tau, -gmt, label='U={}'.format(s[0]))
 #    filling = np.arange(1, 0.9, -0.025)
 #    for n in filling:
 #        old_e = ecc

@@ -11,9 +11,9 @@ import dmft.pmhf as hf
 import dmft.common as gf
 
 
-def test_u(beta=12., d_tau=0.5, n_tau=1000):
-    iwn = gf.matsubara_freq(10, 300)
-    giw = gf.greenF(iwn)[1::2]
+def test_hf_fast_updatecond(beta=12., d_tau=0.5, n_tau=1000):
+    iwn = gf.matsubara_freq(beta, 300)
+    giw = gf.greenF(iwn)
     tau = np.linspace(0, beta, n_tau+1)
     g0t = gf.gw_invfouriertrans(giw, tau, iwn, beta)
 

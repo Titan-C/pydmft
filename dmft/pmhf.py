@@ -12,21 +12,7 @@ from scipy.linalg import solve
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  matsubara_freq, fft, ifft
-
-
-def dyson_sigma(g, g0, fer=1):
-    """Dyson equation for the self energy"""
-    sigma = np.zeros(g.size, dtype=np.complex)
-    sigma[fer::2] = 1/g0[fer::2] - 1/g[fer::2]
-    return sigma
-
-
-def dyson_g0(g, sigma, fer=1):
-    """Dyson equation for the bare Green function"""
-    g0 = np.zeros(g.size, dtype=np.complex)
-    g0[fer::2] = 1/(1/g[fer::2] + sigma[fer::2])
-    return g0
+from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  matsubara_freq
 
 
 def ising_v(dtau, U, L=32, polar=0.5):
@@ -62,15 +48,14 @@ def ising_v(dtau, U, L=32, polar=0.5):
 
 
 def hf_solver(g0, v, sweeps):
-    """Impurity solver call.
-    Takes the propagator :math:`\\mathcal{G}^0(\\tau)` and transforms it
+    r"""Impurity solver call.
+    Takes the propagator :math:`\mathcal{G}^0(\tau)` and transforms it
     into a discretized matrix as
 
-    .. math:: \\mathcal{G}^0_{ij} = \\mathcal{G}^0(i\\Delta\\tau - j\\Delta\\tau)
+    .. math:: \mathcal{G}^0_{ij} = \mathcal{G}^0(i\Delta\tau - j\Delta\tau)
 
-    Then it creates the interacting Green functions as given by the contribution
+    Then it creates the interacting Green function as given by the contribution
     of the auxiliary discretized spin field.
-
     """
     lfak = v.size
 
@@ -178,41 +163,6 @@ def interpol(gt, Lrang):
     return f(tf)
 
 
-class HF_imp(object):
-    """Hirsch and Fye impurity solver in paramagnetic scenario"""
-    def __init__(self, dtau=0.5, n_tau=32, n_matsu=2**15, aux_tau=2**15):
-        """sets up the environment"""
-        self.dtau = dtau
-        self.n_tau = n_tau
-        self.beta = dtau * n_tau
-        self.n_matsu = n_matsu
-        self.aux_tau = aux_tau
-        self.i_omega = None
-
-    def dmft_loop(self, U=2., mu=0., loops=4, mcs=5000):
-        """Implementation of the solver"""
-        self.i_omega = matsubara_freq(self.beta, neg=True)
-        G0iw = greenF(self.i_omega, mu=mu)
-        v_aux = ising_v(self.dtau, U, self.n_tau)
-        simulation = []
-        for i in range(4):
-            G0t = ifft(G0iw, self.beta)
-            g0t = extract_g0t(G0t[self.n_matsu:])
-            gtu, gtd = hf_solver(g0t, v_aux, mcs)
-            gt = (gtu + gtd) / 2
-
-            Gt = interpol(gt, self.n_matsu)[:-1]
-
-            Giw = fft(np.concatenate((-Gt, Gt)), self.beta)
-            G0iw = np.zeros(Giw.size, dtype=np.complex)
-            G0iw[1::2] = 1/(self.i_omega + mu - .25*Giw[1::2])
-            simulation.append({ 'Giw'   : Giw[1::2],
-                                'G0iw'  : G0iw[1::2],
-                                'gtau'  : gt,
-                                'iwn'   : self.i_omega})
-        return simulation
-
-
 class HF_imp_tail(object):
     """Hirsch and Fye impurity solver in paramagnetic scenario"""
     def __init__(self, dtau=0.5, n_tau=32, lrang=1000):
@@ -224,9 +174,9 @@ class HF_imp_tail(object):
 
     def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000):
         """Implementation of the solver"""
-        i_omega = matsubara_freq(self.beta, self.beta*6*U)
+        i_omega = matsubara_freq(self.beta, 3*self.beta*U/np.pi)
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
-        G0iw = greenF(i_omega, mu=mu)[1::2]
+        G0iw = greenF(i_omega, mu=mu)
         v_aux = ising_v(self.dtau, U, self.n_tau)
         simulation = []
         for i in range(loops):

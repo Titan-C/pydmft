@@ -7,7 +7,7 @@ Created on Mon Feb  9 13:24:24 2015
 import numpy as np
 
 
-def matsubara_freq(beta=16., size=2**15, fer=1, neg=False):
+def matsubara_freq(beta=16., size=250, fer=1):
     """Calculates an array containing the matsubara frequencies under the
     formula
 
@@ -32,35 +32,8 @@ def matsubara_freq(beta=16., size=2**15, fer=1, neg=False):
     out : complex ndarray
 
     """
-    start = fer
-    if neg:
-        start -= size
 
-    return 1j*np.pi*(start+2*np.arange(size)) / beta
-
-
-def fft(gt, beta):
-    """Fourier transform into matsubara frequencies"""
-    Lrang = gt.size // 2
-    # trick to treat discontinuity
-    gt[Lrang] -= 0.5
-    gt[0] = -gt[Lrang]
-    gt[::2] *= -1
-    gw = np.fft.fft(gt)*beta/2/Lrang
-
-    return gw
-
-
-def ifft(gw, beta):
-    """Inverse Fast Fourier transform into time"""
-
-    Lrang = gw.size // 2
-    gt = np.fft.ifft(gw)*2*Lrang/beta
-    gt[::2] *= -1
-    # trick to treat discontinuity
-    gt[Lrang] += 0.5
-    gt[0] = -gt[Lrang]
-    return gt.real
+    return 1j*np.pi*(fer+2*np.arange(size)) / beta
 
 
 def greenF(iw, sigma=0, mu=0, D=1):
@@ -87,13 +60,10 @@ def greenF(iw, sigma=0, mu=0, D=1):
             Interacting Greens function in matsubara frequencies, all odd
             entries are zeros
     """
-    Gw = np.zeros(2*iw.size, dtype=np.complex)
     zeta = iw + mu - sigma
     sq = np.sqrt((zeta)**2 - D**2)
     sig = np.sign(sq.imag*iw.imag)
-    Gw[1::2] = 2./(zeta + sig*sq)
-    return Gw
-
+    return 2./(zeta + sig*sq)
 
 def gt_fouriertrans(g_tau, tau, iwn, beta):
     r"""Performs a forward fourier transform for the interacting Green function
