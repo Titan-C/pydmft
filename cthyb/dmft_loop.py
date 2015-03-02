@@ -49,12 +49,12 @@ def start_delta(beta):
 
 ## DMFT loop
 def dmft_loop(parms):
-    gt_old=np.zeros(parms['N_TAU']+1)
+    gt_old = np.zeros(parms['N_TAU']+1)
     term = False
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
-            print('dmft loop ',n)
+            print('dmft loop ', n)
             g_tau = recover_g_tau(parms)
             save_iter_step(parms, n, g_tau)
             # inverting for AFM self-consistency
@@ -72,39 +72,36 @@ def dmft_loop(parms):
             break
 
 
-# specify solver parameters
-beta = 16.
-U = 2.5
-
 ## master looping
-BETA = [8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-U = np.arange(1, 7, 0.4)
-for beta in BETA:
-    if mpi.rank == 0:
-        start_delta(beta)
-        print('write delta at beta ',str(beta))
+if __name__ == "__main__":
+    BETA = [20.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+    U =[5.1]# np.arange(1, 7, 0.4)
+    for beta in BETA:
+        if mpi.rank == 0:
+            start_delta(beta)
+            print('write delta at beta ', str(beta))
 
-    for u_int in U:
-        parms = {
-    'SWEEPS'              : 100000000,
-    'THERMALIZATION'      : 1000,
-    'N_MEAS'              : 50,
-    'MAX_TIME'            : 1,
-    'N_HISTOGRAM_ORDERS'  : 50,
-    'SEED'                : 0,
+        for u_int in U:
+            parms = {
+        'SWEEPS'              : 100000000,
+        'THERMALIZATION'      : 1000,
+        'N_MEAS'              : 50,
+        'MAX_TIME'            : 1,
+        'N_HISTOGRAM_ORDERS'  : 50,
+        'SEED'                : 0,
 
-    'N_ORBITALS'          : 2,
-    'DELTA'               : "delta.h5",
-    'DELTA_IN_HDF5'       : 1,
-    'BASENAME'            : 'PM_b{}_U{}'.format(beta,u_int),
+        'N_ORBITALS'          : 2,
+        'DELTA'               : "delta.h5",
+        'DELTA_IN_HDF5'       : 1,
+        'BASENAME'            : 'PM_b{}_U{}'.format(beta, u_int),
 
-    'U'                   : u_int,
-    'MU'                  : u_int/2.,
-    'N_TAU'               : 1000,
-    'N_MATSUBARA'         : 250,
-    'BETA'                : beta,
-    'VERBOSE'             : 1,
-}
-        mpi.world.barrier()  # wait until starting input file is written
+        'U'                   : u_int,
+        'MU'                  : u_int/2.,
+        'N_TAU'               : 1000,
+        'N_MATSUBARA'         : 250,
+        'BETA'                : beta,
+        'VERBOSE'             : 1,
+    }
+            mpi.world.barrier()
 
-        dmft_loop(parms)
+            dmft_loop(parms)

@@ -36,7 +36,6 @@ def plot_gt_iter(basename, iteration):
 
     del final
     del steps
-    plt.close('all')
 
 
 def plot_gw_iter(basename, iteration):
@@ -50,7 +49,7 @@ def plot_gw_iter(basename, iteration):
 
     for n in range(iteration):
         gtau = steps['iter_{}/G_tau/'.format(n)]
-        gw = gt_fouriertrans(gtau[0], tau, iwn, parms['BETA'])
+        gw = gt_fouriertrans(gtau[1], tau, iwn, parms['BETA'])
         plt.plot(iwn.imag, gw.real, '+-', label='Re ')
         plt.plot(iwn.imag, gw.imag, 's-', label='Im ')
     plt.plot(iwn.imag, (1/iwn).imag, '-', label='high w tail ')
@@ -63,7 +62,6 @@ def plot_gw_iter(basename, iteration):
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
     del final
     del steps
-    plt.close('all')
 
 
 def plot_end(filename):
@@ -113,5 +111,4 @@ def plot_end(filename):
     fig_siw.savefig('Sig_iwn'+parms['BASENAME']+'.png', format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
 
-    plt.close('all')
     del sim
