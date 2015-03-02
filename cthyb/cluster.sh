@@ -5,7 +5,7 @@
 #$ -S /bin/bash
 
 #$ -q theo-ox.q
-#$ -pe mpi 10
+#$ -pe mpi 12
 #$ -N oscardmft
 
 

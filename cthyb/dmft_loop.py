@@ -20,10 +20,9 @@ from pyalps.hdf5 import archive
 
 def save_pm_delta(parms, gtau):
     save_delta = archive(parms["DELTA"], 'w')
-    gtau = parms['t']**2 * gtau.mean(axis=0)
-    gtau = (gtau + gtau[::-1]) / 2
-    save_delta['/Delta_0'] = gtau
-    save_delta['/Delta_1'] = gtau
+    delta = parms['t']**2 * gtau
+    save_delta['/Delta_0'] = delta[1]
+    save_delta['/Delta_1'] = delta[0]
     del save_delta
 
 def recover_g_tau(parms):
@@ -33,6 +32,14 @@ def recover_g_tau(parms):
         gtau.append(iteration['G_tau/{}/mean/value'.format(i)])
     del iteration
     return np.asarray(gtau)
+
+def recover_g_iwn(parms):
+    iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
+    giwn = []
+    for i in range(2):
+        giwn.append(iteration['G_omega/{}/mean/value'.format(i)])
+    del iteration
+    return np.asarray(giwn)
 
 def save_iter_step(parms, iter_count, g):
     save = archive(parms['BASENAME']+'steps.h5', 'w')
@@ -64,7 +71,7 @@ def dmft_loop(parms):
             save_iter_step(parms, n, g_tau)
             # inverting for AFM self-consistency
             save_pm_delta(parms, g_tau)
-            g_w = gt_fouriertrans(g_tau.mean(axis=0), tau, iwn, parms['BETA'])
+            g_w = recover_g_iwn(parms)[0]
             conv = np.abs(gw_old - g_w).max() < 0.0025
             gw_old = g_w
             term = mpi.broadcast(value=conv, root=0)
@@ -81,7 +88,7 @@ def dmft_loop(parms):
 ## master looping
 if __name__ == "__main__":
     BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U =[5.1]# np.arange(1, 7, 0.4)
+    U =[5.2]# np.arange(1, 7, 0.4)
     for beta in BETA:
         for u_int in U:
             parms = {
@@ -95,7 +102,7 @@ if __name__ == "__main__":
                 'N_ORBITALS'          : 2,
                 'DELTA'               : "delta_b{}_U{}.h5".format(beta, u_int),
                 'DELTA_IN_HDF5'       : 1,
-                'BASENAME'            : 'PH_b{}_U{}'.format(beta, u_int),
+                'BASENAME'            : 'AF_b{}_U{}'.format(beta, u_int),
 
                 't'                   : 1.,
                 'U'                   : u_int,
