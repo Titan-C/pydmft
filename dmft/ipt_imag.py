@@ -43,7 +43,7 @@ beta = 50
 t = 0.5
 tau = np.linspace(0, beta, 1001)
 iwn = matsubara_freq(beta, 400)
-g_iwn = greenF(iwn, D=2*t)[1::2]
+g_iwn = greenF(iwn, D=2*t)
 plt.figure()
 g_iwn = dmft_loop(25, 4, g_iwn)
 plt.plot(iwn.imag, (1/iwn).imag)
