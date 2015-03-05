@@ -20,31 +20,23 @@ from pyalps.hdf5 import archive
 
 def save_pm_delta(parms, gtau):
     save_delta = archive(parms["DELTA"], 'w')
-    delta = parms['t']**2 * gtau
-    save_delta['/Delta_0'] = delta[1]
-    save_delta['/Delta_1'] = delta[0]
+    delta = parms['t']**2 * gtau.mean(axis=0)
+    save_delta['/Delta_0'] = delta
+    save_delta['/Delta_1'] = delta
     del save_delta
 
-def recover_g_tau(parms):
+def recover_measurement(parms, measure):
     iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
-    gtau = []
-    for i in range(2):
-        gtau.append(iteration['G_tau/{}/mean/value'.format(i)])
+    data = []
+    for i in range(parms['N_ORBITALS']):
+        data.append(iteration[measure+'/{}/mean/value'.format(i)])
     del iteration
-    return np.asarray(gtau)
+    return np.asarray(data)
 
-def recover_g_iwn(parms):
-    iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
-    giwn = []
-    for i in range(2):
-        giwn.append(iteration['G_omega/{}/mean/value'.format(i)])
-    del iteration
-    return np.asarray(giwn)
-
-def save_iter_step(parms, iter_count, g):
+def save_iter_step(parms, iter_count, measure, data):
     save = archive(parms['BASENAME']+'steps.h5', 'w')
-    for i in range(2):
-        save['iter_{}/G_tau/{}/'.format(iter_count, i)] = g[i]
+    for i, data_vector in enumerate(data):
+        save['iter_{}/{}/{}/'.format(iter_count, measure, i)] = data_vector
     del save
 
 def start_delta(parms):
@@ -67,11 +59,11 @@ def dmft_loop(parms):
         cthyb.solve(parms)
         if mpi.rank == 0:
             print('dmft loop ', n)
-            g_tau = recover_g_tau(parms)
-            save_iter_step(parms, n, g_tau)
+            g_tau = recover_measurement(parms, 'G_tau')
+            save_iter_step(parms, n, 'G_tau', g_tau)
             # inverting for AFM self-consistency
             save_pm_delta(parms, g_tau)
-            g_w = recover_g_iwn(parms)[0]
+            g_w = recover_measurement(parms, 'G_omega')[0]
             conv = np.abs(gw_old - g_w).max() < 0.0025
             gw_old = g_w
             term = mpi.broadcast(value=conv, root=0)
@@ -82,27 +74,32 @@ def dmft_loop(parms):
 
         if term:
             print('end on iterartion: ', n)
+            print('running longer time final avg')
+            parms['MAX_TIME'] = 300
+            cthyb.solve(parms)
+            g_tau = recover_measurement(parms, 'G_tau')
+            save_pm_delta(parms, g_tau)
             break
 
 
 ## master looping
 if __name__ == "__main__":
     BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U =[5.2]# np.arange(1, 7, 0.4)
+    U = np.arange(1, 7, 0.4)
     for beta in BETA:
         for u_int in U:
             parms = {
                 'SWEEPS'              : 100000000,
                 'THERMALIZATION'      : 1000,
-                'N_MEAS'              : 50,
-                'MAX_TIME'            : 1,
+                'N_MEAS'              : 100,
+                'MAX_TIME'            : 60,
                 'N_HISTOGRAM_ORDERS'  : 50,
-                'SEED'                : 0,
+                'SEED'                : 5,
 
                 'N_ORBITALS'          : 2,
                 'DELTA'               : "delta_b{}_U{}.h5".format(beta, u_int),
                 'DELTA_IN_HDF5'       : 1,
-                'BASENAME'            : 'AF_b{}_U{}'.format(beta, u_int),
+                'BASENAME'            : 'PM_MI_b{}_U{}'.format(beta, u_int),
 
                 't'                   : 1.,
                 'U'                   : u_int,
@@ -112,6 +109,7 @@ if __name__ == "__main__":
                 'MEASURE_freq'        : 1,
                 'BETA'                : beta,
                 'VERBOSE'             : 1,
+                'SPINFLIP'            : 1,
             }
             if mpi.rank == 0 and u_int == U[0]:
                 start_delta(parms)
