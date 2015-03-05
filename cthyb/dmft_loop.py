@@ -63,8 +63,10 @@ def dmft_loop(parms):
             save_iter_step(parms, n, 'G_tau', g_tau)
             # inverting for AFM self-consistency
             save_pm_delta(parms, g_tau)
-            g_w = recover_measurement(parms, 'G_omega')[0]
-            conv = np.abs(gw_old - g_w).max() < 0.0025
+            g_w = recover_measurement(parms, 'G_omega').mean(axis=0)
+            dev = np.abs(gw_old - g_w)[:20].max()
+            print('conv criterion', dev)
+            conv = dev < 0.01
             gw_old = g_w
             term = mpi.broadcast(value=conv, root=0)
         else:
@@ -79,6 +81,7 @@ def dmft_loop(parms):
             cthyb.solve(parms)
             g_tau = recover_measurement(parms, 'G_tau')
             save_pm_delta(parms, g_tau)
+            mpi.world.barrier() # wait until solver input is written
             break
 
 
@@ -91,13 +94,13 @@ if __name__ == "__main__":
             parms = {
                 'SWEEPS'              : 100000000,
                 'THERMALIZATION'      : 1000,
-                'N_MEAS'              : 100,
-                'MAX_TIME'            : 60,
+                'N_MEAS'              : 50,
+                'MAX_TIME'            : 1,
                 'N_HISTOGRAM_ORDERS'  : 50,
                 'SEED'                : 5,
 
                 'N_ORBITALS'          : 2,
-                'DELTA'               : "delta_b{}_U{}.h5".format(beta, u_int),
+                'DELTA'               : "delta_b{}.h5".format(beta, u_int),
                 'DELTA_IN_HDF5'       : 1,
                 'BASENAME'            : 'PM_MI_b{}_U{}'.format(beta, u_int),
 
