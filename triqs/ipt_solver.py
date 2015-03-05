@@ -4,13 +4,14 @@
 Created on Tue Oct 28 16:33:14 2014
 """
 from __future__ import division, absolute_import, print_function
-
+import matplotlib.pyplot as plt
+import sys
+sys.path.append('/home/oscar/libs/lib/python2.7/site-packages')
 from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
     inverse, Omega, iOmega_n, Wilson, SemiCircular,InverseFourier, Fourier
 
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.plot.mpl_interface import subplots
-import matplotlib.pyplot as plt
 
 class IPTSolver(object):
 
@@ -30,16 +31,16 @@ class IPTSolver(object):
 
     def solve(self):
 
-        self.g0t <<= InverseFourier(self.g0)
-        self.sigmat <<= (self.U**2) * self.g0t * self.g0t * self.g0t
-        self.sigma <<= Fourier(self.sigmat)
+        self.g0t << InverseFourier(self.g0)
+        self.sigmat << (self.U**2) * self.g0t * self.g0t * self.g0t
+        self.sigma << Fourier(self.sigmat)
 
         # Dyson equation to get G
-        self.g <<= self.g0 * inverse(1.0 - self.sigma * self.g0)
+        self.g << self.g0 * inverse(1.0 - self.sigma * self.g0)
 
     def dmft_loop(self, n_loops, t):
         for i in range(n_loops):
-            self.g0 <<= inverse( iOmega_n - t**2 * self.g)
+            self.g0 << inverse( iOmega_n - t**2 * self.g)
             self.solve()
 
 def ev_on_loops(n_loops, U, beta, t):
@@ -50,7 +51,7 @@ def ev_on_loops(n_loops, U, beta, t):
 
     for loop in n_loops:
         S = IPTSolver(U = U, beta = beta)
-        S.g <<= SemiCircular(2*t)
+        S.g << SemiCircular(2*t)
         S.dmft_loop(loop, t)
         ax1.oplot(S.sigma, RI='I', x_window  = (0,2), label = "nloop={}".format(loop))
         ax1.set_ylabel('$\Sigma(i\omega_n)$')
@@ -68,14 +69,14 @@ def ev_on_interaction(n_loops, U, beta, t):
 
     for u_int in U:
         S = IPTSolver(U = u_int, beta = beta)
-        S.g <<= SemiCircular(2*t)
+        S.g << SemiCircular(2*t)
         S.dmft_loop(n_loops, t)
         oplot(S.g, label = "U={}".format(u_int))
 
     plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $loop=%.2f$".format(beta,n_loops))
 
 if __name__ == "__main__":
-    ev_on_loops([1,2,5,10,20,30,40,50], 2.6, 20, 0.5)
+    ev_on_loops([1,2,5,10, 20], 3, 20, 0.5)
 
 
             # Get the real-axis with Pade approximants
