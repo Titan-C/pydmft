@@ -6,6 +6,8 @@ ploting the data
 import matplotlib.pyplot as plt
 import numpy as np
 from dmft.common import matsubara_freq, gw_invfouriertrans, gt_fouriertrans
+import h5py
+
 import sys
 sys.path.append('/home/oscar/libs/lib/')
 import pyalps
@@ -13,20 +15,25 @@ import pyalps.plot
 from pyalps.hdf5 import archive
 
 
-
-
-def plot_gt_iter(basename, iteration):
+def open_iterations(basename):
     final = archive(basename + '.out.h5')
     parms = final['parameters']
-    steps = archive(basename+'steps.h5', 'r')
+    del final
+
+    return parms, h5py.File(basename+'steps.h5', 'r')
+
+
+
+def plot_gt_iter(basename):
+    parms, steps = open_iterations(basename)
 
     fig_gt = plt.figure()
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
-    for n in range(iteration):
-        gtau = steps['iter_{}/G_tau/'.format(n)]
-        for i in range(2):
-            plt.semilogy(tau, -gtau[i], label='it {}, sp {}'.format(n, i))
+    for it, data in steps.iteritems():
+        gtau = data['G_tau/']
+        for sp, g in gtau.iteritems():
+            plt.semilogy(tau, -g.value, label='{}, sp {}'.format(it, sp))
     plt.legend(loc=0)
     plt.ylabel(r'$G(\tau)$')
     plt.xlabel(r'$\tau$')
@@ -34,22 +41,19 @@ def plot_gt_iter(basename, iteration):
     fig_gt.savefig('G_tau.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
-    del final
     del steps
 
 
-def plot_gw_iter(basename, iteration):
-    final = archive(basename + '.out.h5')
-    parms = final['parameters']
-    steps = archive(basename+'steps.h5', 'r')
+def plot_gw_iter(basename):
+    parms, steps = open_iterations(basename)
 
     fig_gw = plt.figure()
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
 
-    for n in range(iteration):
-        gtau = steps['iter_{}/G_tau/'.format(n)]
-        gw = gt_fouriertrans(gtau[1], tau, iwn, parms['BETA'])
+    for it, data in steps.iteritems():
+        gtau = data['G_tau/0'].value
+        gw = gt_fouriertrans(gtau, tau, iwn, parms['BETA'])
         plt.plot(iwn.imag, gw.real, '+-', label='Re ')
         plt.plot(iwn.imag, gw.imag, 's-', label='Im ')
     plt.plot(iwn.imag, (1/iwn).imag, '-', label='high w tail ')
@@ -60,7 +64,6 @@ def plot_gw_iter(basename, iteration):
     plt.title('Matusubara frequency green function')
     fig_gw.savefig('G_iwn.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
-    del final
     del steps
 
 
@@ -84,7 +87,7 @@ def plot_end(filename):
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     cut = int(6.5*parms['BETA']/np.pi)
     for i in range(parms['N_ORBITALS']):
-        gw = gt_fouriertrans(sim['G_tau/{}/mean/value'.format(i)], tau, iwn, parms['BETA'])
+        gw = sim['G_omega/{}/mean/value'.format(i)]
         gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
         gw_ax.plot(iwn.imag, gw.imag, 's-', label='IM, sp{}'.format(i))
 
