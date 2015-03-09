@@ -8,8 +8,7 @@ import numpy as np
 from dmft.common import matsubara_freq, gw_invfouriertrans, gt_fouriertrans
 import h5py
 
-import sys
-sys.path.append('/home/oscar/libs/lib/')
+
 import pyalps
 import pyalps.plot
 from pyalps.hdf5 import archive
