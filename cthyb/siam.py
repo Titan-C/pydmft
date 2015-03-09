@@ -53,4 +53,9 @@ if mpi.rank == 0:
     np.savetxt('delta.dat', np.asarray((tau, gtau_u, gtau_d)).T)
 
 # solve the impurity model
-cthyb.solve(parms)
+mpi.world.barrier()
+for t in [1, 60, 300]:
+    parms['MAX_TIME'] = t
+    parms['BASENAME'] = 'imp_time{}'.format(t)
+    cthyb.solve(parms)
+    mpi.world.barrier()
