@@ -76,12 +76,6 @@ def dmft_loop(parms):
 
         if term:
             print('end on iterartion: ', n)
-            print('running longer time final avg')
-            parms['MAX_TIME'] = 300
-            cthyb.solve(parms)
-            g_tau = recover_measurement(parms, 'G_tau')
-            save_pm_delta(parms, g_tau)
-            mpi.world.barrier() # wait until solver input is written
             break
 
 
