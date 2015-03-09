@@ -5,8 +5,6 @@ Created on Tue Oct 28 16:33:14 2014
 """
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
-import sys
-sys.path.append('/home/oscar/libs/lib/python2.7/site-packages')
 from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
     inverse, Omega, iOmega_n, Wilson, SemiCircular,InverseFourier, Fourier
 

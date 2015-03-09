@@ -38,7 +38,7 @@ def recover_measurement(parms, measure):
 def save_iter_step(parms, iter_count, measure, data):
     save = archive(parms['BASENAME']+'steps.h5', 'w')
     for i, data_vector in enumerate(data):
-        save['iter_{}/{}/{}/'.format(iter_count, measure, i)] = data_vector
+        save['iter_{:0>2}/{}/{}/'.format(iter_count, measure, i)] = data_vector
     del save
 
 
@@ -60,7 +60,7 @@ def dmft_loop(parms):
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
-            print('*'*80, '\n', 'Dmft loop ', n)
+            print('*'*80, '\n', 'End Dmft loop ', n)
             g_tau = recover_measurement(parms, 'G_tau')
             save_iter_step(parms, n, 'G_tau', g_tau)
 
