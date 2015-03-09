@@ -18,4 +18,4 @@ export LD_LIBRARY_PATH=/home/oscar/libs/lib:$LD_LIBRARY_PATH
 export PATH=~/miniconda/bin:$PATH
 
 source activate alps
-$MPI_DIR/bin/mpirun -np $NSLOTS python dmft_loop.py
+$MPI_DIR/bin/mpirun -np $NSLOTS python $1
