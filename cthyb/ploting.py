@@ -37,7 +37,7 @@ def plot_gt_iter(basename):
     plt.legend(loc=0)
     plt.ylabel(r'$G(\tau)$')
     plt.xlabel(r'$\tau$')
-    plt.title('imaginary time green function iterations')
+    plt.title(r'DMFT Iterations of $G(\tau)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
     fig_gt.savefig('G_tau.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
@@ -61,7 +61,7 @@ def plot_gw_iter(basename):
     plt.legend(loc=0)
     plt.ylabel(r'$G(i\omega_n)$')
     plt.xlabel(r'$i\omega_n$')
-    plt.title('Matusubara frequency green function')
+    plt.title(r'DMFT Iterations of $G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
     fig_gw.savefig('G_iwn.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
     del steps
