@@ -23,18 +23,17 @@ def open_iterations(basename):
 
 
 
-def plot_gt_iter(basename):
+def plot_gt_iter(basename, orb):
     parms, steps = open_iterations(basename)
 
     fig_gt = plt.figure()
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
     for it in sorted(steps):
-        gtau = steps[it+'/G_tau/']
-        for sp, g in gtau.iteritems():
-            plt.semilogy(tau, -g.value, label='{}, sp {}'.format(it, sp))
+        gtau = steps[it+'/G_tau/'+str(orb)].value
+        plt.semilogy(tau, -gtau, label=it)
     plt.legend(loc=0)
-    plt.ylabel(r'$G(\tau)$')
+    plt.ylabel(r'$G(\tau) sp{}$'.format(orb))
     plt.xlabel(r'$\tau$')
     plt.title(r'DMFT Iterations of $G(\tau)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
     fig_gt.savefig('G_tau.png', format='png',
@@ -43,7 +42,7 @@ def plot_gt_iter(basename):
     del steps
 
 
-def plot_gw_iter(basename):
+def plot_gw_iter(basename, orb):
     parms, steps = open_iterations(basename)
 
     fig_gw, (ax_re, ax_im) = plt.subplots(2, sharex=True)
@@ -52,13 +51,13 @@ def plot_gw_iter(basename):
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
 
     for it in sorted(steps):
-        gtau = steps[it+'/G_tau/0'].value
+        gtau = steps[it+'/G_tau/'+str(orb)].value
         gw = gt_fouriertrans(gtau, tau, iwn, parms['BETA'])
-        ax_re.plot(iwn.imag, gw.real, '+-', label='{}'.format(it))
-        ax_im.plot(iwn.imag, gw.imag, 's-', label='{}'.format(it))
+        ax_re.plot(iwn.imag, gw.real, '+-', label=it)
+        ax_im.plot(iwn.imag, gw.imag, 's-', label=it)
     plt.legend(loc=4)
-    ax_re.set_ylabel(r'$\Re G(i\omega_n)$')
-    ax_im.set_ylabel(r'$\Im G(i\omega_n)$')
+    ax_re.set_ylabel(r'$\Re G(i\omega_n) sp{}$'.format(orb))
+    ax_im.set_ylabel(r'$\Im G(i\omega_n) sp{}$'.format(orb))
     plt.xlim([0, 4.5])
     plt.xlabel(r'$i\omega_n$')
     ax_re.set_title(r'DMFT Iterations of $G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
@@ -96,7 +95,7 @@ def plot_end(filename):
         sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, sp{}'.format(i))
 
     gw_ax.set_xlim([0, 6.5])
-    gw_ax.set_ylim([gw.imag[:cut].min()*1.1, 0])
+#    gw_ax.set_ylim([gw.imag[:cut].min()*1.1, 0])
     gw_ax.legend(loc=4)
     gw_ax.set_ylabel(r'$G(i\omega_n)$')
     gw_ax.set_xlabel(r'$i\omega_n$')
@@ -106,7 +105,7 @@ def plot_end(filename):
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     plt.xlim([0, 6.5])
-    plt.ylim([sig.imag[:cut].min()*1.1, 0])
+#    plt.ylim([sig.imag[:cut].min()*1.1, 0])
     plt.legend(loc=4)
     plt.ylabel(r'$\Sigma(i\omega_n)$')
     plt.xlabel(r'$i\omega_n$')
