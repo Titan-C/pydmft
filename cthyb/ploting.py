@@ -84,7 +84,6 @@ def plot_end(filename):
     fig_gw, gw_ax = plt.subplots()
     fig_siw, sw_ax = plt.subplots()
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    cut = int(6.5*parms['BETA']/np.pi)
     for i in range(parms['N_ORBITALS']):
         gw = sim['G_omega/{}/mean/value'.format(i)]
         gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
@@ -95,7 +94,6 @@ def plot_end(filename):
         sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, sp{}'.format(i))
 
     gw_ax.set_xlim([0, 6.5])
-#    gw_ax.set_ylim([gw.imag[:cut].min()*1.1, 0])
     gw_ax.legend(loc=4)
     gw_ax.set_ylabel(r'$G(i\omega_n)$')
     gw_ax.set_xlabel(r'$i\omega_n$')
@@ -105,7 +103,6 @@ def plot_end(filename):
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     plt.xlim([0, 6.5])
-#    plt.ylim([sig.imag[:cut].min()*1.1, 0])
     plt.legend(loc=4)
     plt.ylabel(r'$\Sigma(i\omega_n)$')
     plt.xlabel(r'$i\omega_n$')

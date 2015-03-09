@@ -80,7 +80,8 @@ def dmft_loop(parms):
         mpi.world.barrier()  # wait until solver input is written
 
         if term:
-            print('End on iterartion: ', n)
+            if mpi.rank == 0:
+                print('End on iterartion: ', n)
             break
 
 
