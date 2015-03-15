@@ -172,14 +172,18 @@ class HF_imp_tail(object):
         self.beta = dtau * n_tau
         self.lrang = lrang
 
-    def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000):
+    def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000, gw=None):
         """Implementation of the solver"""
-        i_omega = matsubara_freq(self.beta, 3*self.beta*U/np.pi)
+        i_omega = matsubara_freq(self.beta, 64)
         fine_tau = np.linspace(0, self.beta, self.lrang + 1)
-        G0iw = greenF(i_omega, mu=mu)
+        if gw is None:
+            Giw = greenF(i_omega, mu=mu)
+        else:
+            Giw = gw
         v_aux = ising_v(self.dtau, U, self.n_tau)
         simulation = []
         for i in range(loops):
+            G0iw = 1/(i_omega - .25*Giw)
             G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega, self.beta)
             g0t = extract_g0t(G0t, self.n_tau)
 
@@ -188,7 +192,6 @@ class HF_imp_tail(object):
 
             Gt = interpol(-gt, self.lrang)
             Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
-            G0iw = 1/(i_omega + mu - .25*Giw)
             simulation.append({ 'G0iw'  : G0iw,
                                 'Giw'   : Giw,
                                 'gtau'  : gt,
