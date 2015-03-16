@@ -7,7 +7,7 @@ Created on Tue Nov 25 12:44:23 2014
 
 from __future__ import division, absolute_import, print_function
 import numpy as np
-import dmft.pmhf as hf
+import dmft.hirschfye as hf
 import dmft.common as gf
 
 
