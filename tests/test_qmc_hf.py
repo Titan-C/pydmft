@@ -15,7 +15,7 @@ def test_hf_fast_updatecond(beta=12., d_tau=0.5, n_tau=1000):
     iwn = gf.matsubara_freq(beta, 300)
     giw = gf.greenF(iwn)
     tau = np.linspace(0, beta, n_tau+1)
-    g0t = gf.gw_invfouriertrans(giw, tau, iwn, beta)
+    g0t = gf.gw_invfouriertrans(giw, tau, iwn)
 
     v = hf.ising_v(d_tau, 2, L=beta/d_tau)
     lfak = v.size

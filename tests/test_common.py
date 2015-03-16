@@ -17,6 +17,6 @@ def test_fourier_trasforms(beta=50., n_tau=1000, n_matsubara=100):
     gwr = greenF(iomega_n)
     tau = np.linspace(0, beta, n_tau+1)
 
-    g_tau = gw_invfouriertrans(gwr, tau, iomega_n, beta)
-    g_iomega = gt_fouriertrans(g_tau, tau, iomega_n, beta)
+    g_tau = gw_invfouriertrans(gwr, tau, iomega_n)
+    g_iomega = gt_fouriertrans(g_tau, tau, iomega_n)
     assert np.allclose(gwr, g_iomega)
