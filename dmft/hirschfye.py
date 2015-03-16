@@ -11,8 +11,6 @@ import numpy as np
 from scipy.linalg import solve
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  matsubara_freq
 
 
 def ising_v(dtau, U, L=32, polar=0.5):
@@ -47,7 +45,7 @@ def ising_v(dtau, U, L=32, polar=0.5):
     return vis*lam
 
 
-def hf_solver(g0, v, sweeps):
+def imp_solver(g0, v, sweeps):
     r"""Impurity solver call.
     Takes the propagator :math:`\mathcal{G}^0(\tau)` and transforms it
     into a discretized matrix as
@@ -120,11 +118,13 @@ def gnewclean(g0t, v, sign):
 
     .. math::
         u_j &= \\exp(\\sigma v_j) - 1 \\\\
-        B_{ij} &= \\delta_{ij} - u_j ( \\mathcal{G}^0_{ij} - \\delta_{ij}) \\text{  no sumation on } j
+        B_{ij} &= \\delta_{ij} - u_j ( \\mathcal{G}^0_{ij} - \\delta_{ij})
+
+    no sumation on :math:`j`
     """
-    ee = np.exp(sign*v) - 1.
+    u_j = np.exp(sign*v) - 1.
     ide = np.eye(v.size)
-    b = ide - ee * (g0t-ide)
+    b = ide - u_j * (g0t-ide)
 
     return solve(b, g0t)
 
@@ -161,39 +161,3 @@ def interpol(gt, Lrang):
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
     return f(tf)
-
-
-class HF_imp_tail(object):
-    """Hirsch and Fye impurity solver in paramagnetic scenario"""
-    def __init__(self, dtau=0.5, n_tau=32, lrang=1000):
-        """sets up the environment"""
-        self.dtau = dtau
-        self.n_tau = n_tau
-        self.beta = dtau * n_tau
-        self.lrang = lrang
-
-    def dmft_loop(self, U=2., mu=0.0, loops=8, mcs=5000, gw=None):
-        """Implementation of the solver"""
-        i_omega = matsubara_freq(self.beta, 64)
-        fine_tau = np.linspace(0, self.beta, self.lrang + 1)
-        if gw is None:
-            Giw = greenF(i_omega, mu=mu)
-        else:
-            Giw = gw
-        v_aux = ising_v(self.dtau, U, self.n_tau)
-        simulation = []
-        for i in range(loops):
-            G0iw = 1/(i_omega - .25*Giw)
-            G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega, self.beta)
-            g0t = extract_g0t(G0t, self.n_tau)
-
-            gtu, gtd = hf_solver(-g0t, v_aux, mcs)
-            gt = (gtu + gtd) / 2
-
-            Gt = interpol(-gt, self.lrang)
-            Giw = gt_fouriertrans(Gt, fine_tau, i_omega, self.beta)
-            simulation.append({ 'G0iw'  : G0iw,
-                                'Giw'   : Giw,
-                                'gtau'  : gt,
-                                'iwn'   : i_omega})
-        return simulation

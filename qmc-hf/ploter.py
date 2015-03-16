@@ -23,8 +23,7 @@ def plot_qmc(**kwargs):
         }
 
     if kwargs is not None:
-        for key, value in kwargs.iteritems():
-            input_data[key] = value
+        input_data.update(kwargs)
 
     text = """
 
