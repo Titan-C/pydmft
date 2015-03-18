@@ -45,10 +45,10 @@ if mpi.rank == 0:
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
     giw_u = greenF(iwn, mu=parms['MU'], D=2*parms['t'])
-    gtau_u = gw_invfouriertrans(giw_u, tau, iwn, parms['BETA'])
+    gtau_u = gw_invfouriertrans(giw_u, tau, iwn)
 
     giw_d = greenF(iwn, mu=-parms['MU'], D=2*parms['t'])
-    gtau_d = gw_invfouriertrans(giw_d, tau, iwn, parms['BETA'])
+    gtau_d = gw_invfouriertrans(giw_d, tau, iwn)
 
     np.savetxt('delta.dat', np.asarray((tau, gtau_u, gtau_d)).T)
 

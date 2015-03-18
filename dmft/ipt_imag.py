@@ -20,9 +20,9 @@ from dmft.common import gt_fouriertrans, gw_invfouriertrans
 
 def solver(u_int, g_0_iwn, iwn, tau):
 
-    g_0_tau = gw_invfouriertrans(g_0_iwn, tau, iwn, tau[-1])
+    g_0_tau = gw_invfouriertrans(g_0_iwn, tau, iwn)
     sigma_tau = u_int**2 * g_0_tau**3
-    sigma_iwn = gt_fouriertrans(sigma_tau, tau, iwn, tau[-1])
+    sigma_iwn = gt_fouriertrans(sigma_tau, tau, iwn)
     g_iwn = g_0_iwn / (1 - sigma_iwn * g_0_iwn)
 
     return g_iwn

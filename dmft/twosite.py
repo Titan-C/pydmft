@@ -228,7 +228,7 @@ if __name__ == "__main__":
     for s in sim:
         out = refine_mat_solution(s[2], s[0])
         Gw = out.GF['Imp G']
-        gmt = gw_invfouriertrans(Gw, tau, out.omega, beta=100)
+        gmt = gw_invfouriertrans(Gw, tau, out.omega)
         plt.semilogy(tau, -gmt, label='U={}'.format(s[0]))
 #    filling = np.arange(1, 0.9, -0.025)
 #    for n in filling:

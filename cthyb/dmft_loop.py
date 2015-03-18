@@ -48,7 +48,7 @@ def start_delta(parms):
 
     giw = greenF(iwn, mu=0., D=2*parms['t'])
     giw = ipt_imag.dmft_loop(25, parms['U'], parms['t'], giw, iwn, tau)[-1]
-    gtau = gw_invfouriertrans(giw, tau, iwn, parms['BETA'])
+    gtau = gw_invfouriertrans(giw, tau, iwn)
 
     save_pm_delta(parms, np.asarray((gtau, gtau)))
 

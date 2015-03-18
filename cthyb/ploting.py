@@ -52,7 +52,7 @@ def plot_gw_iter(basename, orb):
 
     for it in sorted(steps):
         gtau = steps[it+'/G_tau/'+str(orb)].value
-        gw = gt_fouriertrans(gtau, tau, iwn, parms['BETA'])
+        gw = gt_fouriertrans(gtau, tau, iwn)
         ax_re.plot(iwn.imag, gw.real, '+-', label=it)
         ax_im.plot(iwn.imag, gw.imag, 's-', label=it)
     plt.legend(loc=4)
