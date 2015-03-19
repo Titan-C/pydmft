@@ -18,7 +18,9 @@ import pyalps.mpi as mpi     # MPI library (required)
 from pyalps.hdf5 import archive
 
 
-def save_pm_delta(parms, gtau):
+def save_pm_delta_tau(parms, gtau):
+    """Saves to file and returns the imaginary time hybridization function
+    enforcing paramagnetism"""
     save_delta = archive(parms["DELTA"], 'w')
     delta = parms['t']**2 * gtau.mean(axis=0)
     delta[delta > -1e-5] = -1e-5
@@ -31,6 +33,7 @@ def save_pm_delta(parms, gtau):
 
 
 def recover_measurement(parms, measure):
+    """Recovers a specific measurement from the output file"""
     iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
     data = []
     for i in range(parms['N_ORBITALS']):
@@ -40,6 +43,7 @@ def recover_measurement(parms, measure):
 
 
 def save_iter_step(parms, iter_count, measure, data):
+    """Saves the measurement results to log DMFT iterations"""
     save = archive(parms['BASENAME']+'steps.h5', 'w')
     for i, data_vector in enumerate(data):
         save['iter_{:0>2}/{}/{}/'.format(iter_count, measure, i)] = data_vector
@@ -47,6 +51,9 @@ def save_iter_step(parms, iter_count, measure, data):
 
 
 def start_delta(parms):
+    """Provides a starting guess for the hybridization function given the
+    cthyb impurity solvers parameters. Guess is based on the IPT solution"""
+
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
@@ -54,15 +61,16 @@ def start_delta(parms):
     giw = ipt_imag.dmft_loop(25, parms['U'], parms['t'], giw, iwn, tau)[-1]
     gtau = gw_invfouriertrans(giw, tau, iwn)
 
-    return save_pm_delta(parms, np.asarray((gtau, gtau)))
+    return save_pm_delta_tau(parms, np.asarray((gtau, gtau)))
 
 
 ## DMFT loop
 def dmft_loop(parms, delta_in):
-    gw_old = delta_in / parms['t']**2
     term = False
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    gw_old = gt_fouriertrans(delta_in / parms['t']**2, tau, iwn)
+
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
@@ -77,10 +85,13 @@ def dmft_loop(parms, delta_in):
             print('conv criterion', dev)
             conv = dev < 0.01
             gw_old = g_w
-            delta_out = save_pm_delta(parms, g_tau)
+            delta_out = save_pm_delta_tau(parms, g_tau)
+
             term = mpi.broadcast(value=conv, root=0)
+            delta_out = mpi.broadcast(value=delta_out, root=0)
         else:
             term = mpi.broadcast(root=0)
+            delta_out = mpi.broadcast(root=0)
 
         mpi.world.barrier()  # wait until solver input is written
 
