@@ -15,7 +15,7 @@ the contribution of the Hartree-term is not included here as it is cancelled
 from __future__ import division, absolute_import, print_function
 
 from dmft.common import gt_fouriertrans, gw_invfouriertrans
-
+import numpy as np
 
 
 def solver(u_int, g_0_iwn, iwn, tau):
@@ -25,10 +25,10 @@ def solver(u_int, g_0_iwn, iwn, tau):
     sigma_iwn = gt_fouriertrans(sigma_tau, tau, iwn)
     g_iwn = g_0_iwn / (1 - sigma_iwn * g_0_iwn)
 
-    return g_iwn
+    return g_iwn, sigma_iwn
 
 
-def dmft_loop(loops, u_int, t, g_iwn, iwn, tau):
+def dmft_loop(loops, u_int, t, g_iwn, iwn, tau, conv=1e-3):
     """Performs the paramagnetic(spin degenerate) self-consistent loop in a
     bethe lattice given the input
 
@@ -53,9 +53,11 @@ def dmft_loop(loops, u_int, t, g_iwn, iwn, tau):
             Interacting Greens function in matsubara frequencies in every
             loop step"""
 
-    g_iwn_log = []
+    g_iwn_log = [g_iwn]
     for i in range(loops):
         g_0_iwn = 1. / (iwn - t**2 * g_iwn)
-        g_iwn = solver(u_int, g_0_iwn, iwn, tau)
+        g_iwn, sigma_iwn = solver(u_int, g_0_iwn, iwn, tau)
+        if np.abs(g_iwn_log[-1] - g_iwn)[:20].max() < conv:
+            break
         g_iwn_log.append(g_iwn)
-    return g_iwn_log
+    return np.asarray(g_iwn_log), sigma_iwn
