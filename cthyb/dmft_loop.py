@@ -21,6 +21,8 @@ from pyalps.hdf5 import archive
 def save_pm_delta(parms, gtau):
     save_delta = archive(parms["DELTA"], 'w')
     delta = parms['t']**2 * gtau.mean(axis=0)
+    delta[delta > -1e-5] = -1e-5
+
     save_delta['/Delta_0'] = delta
     save_delta['/Delta_1'] = delta
     del save_delta
@@ -57,15 +59,16 @@ def start_delta(parms):
 def dmft_loop(parms):
     gw_old = np.zeros(parms['N_MATSUBARA'])
     term = False
+    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     for n in range(20):
         cthyb.solve(parms)
         if mpi.rank == 0:
-            print('*'*80, '\n', 'End Dmft loop ', n)
+            print('*'*80, '\n', 'End Dmft loop ', n, 'at beta', parms['BETA'])
             g_tau = recover_measurement(parms, 'G_tau')
             save_iter_step(parms, n, 'G_tau', g_tau)
 
-            g_iwn = recover_measurement(parms, 'G_omega')
-            save_iter_step(parms, n, 'G_omega', g_iwn)
+            g_iwn = np.array([gt_fouriertrans(gt, tau, iwn) for gt in g_tau])
 
             g_w = g_iwn.mean(axis=0)
             dev = np.abs(gw_old - g_w)[:20].max()
@@ -87,15 +90,15 @@ def dmft_loop(parms):
 
 ## master looping
 if __name__ == "__main__":
-    BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U = [5.4]
+    BETA = [80.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+    U = np.arange(0.2, 7, 0.2)
     for beta in BETA:
         for u_int in U:
             parms = {
                 'SWEEPS'              : 100000000,
                 'THERMALIZATION'      : 1000,
                 'N_MEAS'              : 50,
-                'MAX_TIME'            : 1,
+                'MAX_TIME'            : 30,
                 'N_HISTOGRAM_ORDERS'  : 50,
                 'SEED'                : 5,
 
@@ -109,7 +112,7 @@ if __name__ == "__main__":
                 'MU'                  : u_int/2.,
                 'N_TAU'               : 1024,
                 'N_MATSUBARA'         : 256,
-                'MEASURE_freq'        : 1,
+                'MEASURE_freq'        : 0,
                 'BETA'                : beta,
                 'VERBOSE'             : 1,
                 'SPINFLIP'            : 1,
