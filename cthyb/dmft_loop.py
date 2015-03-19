@@ -23,7 +23,7 @@ def dmft_loop(parms, delta_in):
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     gw_old = gt_fouriertrans(delta_in / parms['t']**2, tau, iwn)
 
-    for n in range(20):
+    for n in range(25):
         cthyb.solve(parms)
         if mpi.rank == 0:
             print('*'*80, '\n', 'End Dmft loop ', n, 'at beta', parms['BETA'])
@@ -32,7 +32,7 @@ def dmft_loop(parms, delta_in):
 
             g_iwn = np.array([gt_fouriertrans(gt, tau, iwn) for gt in g_tau])
 
-            g_w = g_iwn.mean(axis=0)
+            g_w = g_iwn.mean(axis=0)*.6 + 0.4*g_w
             dev = np.abs(gw_old - g_w)[:20].max()
             print('conv criterion', dev)
             conv = dev < 0.01
@@ -57,14 +57,14 @@ def dmft_loop(parms, delta_in):
 
 ## master looping
 if __name__ == "__main__":
-    BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U = np.arange(1, 6.5, 0.2)
+    BETA = np.floor(np.logspace(1.1, 2.7, 10))
+    U = np.arange(0, 6.5, 0.2)
     for beta in BETA:
         for u_int in U:
             parms = {
                 'SWEEPS'              : 100000000,
-                'THERMALIZATION'      : 1000,
-                'N_MEAS'              : 50,
+                'THERMALIZATION'      : 5000,
+                'N_MEAS'              : 100,
                 'MAX_TIME'            : 30,
                 'N_HISTOGRAM_ORDERS'  : 50,
                 'SEED'                : 5,

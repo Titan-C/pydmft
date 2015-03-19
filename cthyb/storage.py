@@ -49,7 +49,7 @@ def start_delta(parms):
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
     giw = greenF(iwn, mu=0., D=2*parms['t'])
-    giw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)[-1]
-    gtau = gw_invfouriertrans(giw, tau, iwn)
+    giw, siw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)
+    gtau = gw_invfouriertrans(giw[-1], tau, iwn)
 
     return save_pm_delta_tau(parms, np.asarray((gtau, gtau)))
