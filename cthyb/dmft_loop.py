@@ -27,6 +27,8 @@ def save_pm_delta(parms, gtau):
     save_delta['/Delta_1'] = delta
     del save_delta
 
+    return delta
+
 
 def recover_measurement(parms, measure):
     iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
@@ -52,12 +54,12 @@ def start_delta(parms):
     giw = ipt_imag.dmft_loop(25, parms['U'], parms['t'], giw, iwn, tau)[-1]
     gtau = gw_invfouriertrans(giw, tau, iwn)
 
-    save_pm_delta(parms, np.asarray((gtau, gtau)))
+    return save_pm_delta(parms, np.asarray((gtau, gtau)))
 
 
 ## DMFT loop
-def dmft_loop(parms):
-    gw_old = np.zeros(parms['N_MATSUBARA'])
+def dmft_loop(parms, delta_in):
+    gw_old = delta_in / parms['t']**2
     term = False
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
@@ -75,7 +77,7 @@ def dmft_loop(parms):
             print('conv criterion', dev)
             conv = dev < 0.01
             gw_old = g_w
-            save_pm_delta(parms, g_tau)
+            delta_out = save_pm_delta(parms, g_tau)
             term = mpi.broadcast(value=conv, root=0)
         else:
             term = mpi.broadcast(root=0)
@@ -87,11 +89,13 @@ def dmft_loop(parms):
                 print('End on iterartion: ', n)
             break
 
+    return delta_out
+
 
 ## master looping
 if __name__ == "__main__":
-    BETA = [80.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U = np.arange(0.2, 7, 0.2)
+    BETA = [20.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+    U = np.arange(4, 7, 0.2)
     for beta in BETA:
         for u_int in U:
             parms = {
@@ -103,7 +107,7 @@ if __name__ == "__main__":
                 'SEED'                : 5,
 
                 'N_ORBITALS'          : 2,
-                'DELTA'               : "delta_b{}.h5".format(beta, u_int),
+                'DELTA'               : "delta_b{}.h5".format(beta),
                 'DELTA_IN_HDF5'       : 1,
                 'BASENAME'            : 'PM_MI_b{}_U{}'.format(beta, u_int),
 
@@ -118,9 +122,12 @@ if __name__ == "__main__":
                 'SPINFLIP'            : 1,
             }
             if mpi.rank == 0 and u_int == U[0]:
-                start_delta(parms)
+                delta_start = start_delta(parms)
                 print('write delta at beta ', str(beta))
+                delta_start = mpi.broadcast(value=delta_start, root=0)
+            else:
+                delta_start = mpi.broadcast(root=0)
 
             mpi.world.barrier()
 
-            dmft_loop(parms)
+            delta_start = dmft_loop(parms, delta_start)

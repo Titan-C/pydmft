@@ -85,7 +85,10 @@ def plot_end(filename):
     fig_siw, sw_ax = plt.subplots()
     iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     for i in range(parms['N_ORBITALS']):
-        gw = sim['G_omega/{}/mean/value'.format(i)]
+        try:
+            gw = sim['G_omega/{}/mean/value'.format(i)]
+        except:
+            gw = gt_fouriertrans(sim['G_tau/{}/mean/value'.format(i)], tau, iwn)
         gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
         gw_ax.plot(iwn.imag, gw.imag, 's-', label='IM, sp{}'.format(i))
 
