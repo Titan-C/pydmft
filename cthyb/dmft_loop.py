@@ -58,7 +58,7 @@ def start_delta(parms):
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
 
     giw = greenF(iwn, mu=0., D=2*parms['t'])
-    giw = ipt_imag.dmft_loop(25, parms['U'], parms['t'], giw, iwn, tau)[-1]
+    giw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)[-1]
     gtau = gw_invfouriertrans(giw, tau, iwn)
 
     return save_pm_delta_tau(parms, np.asarray((gtau, gtau)))
@@ -136,7 +136,7 @@ if __name__ == "__main__":
                 delta_start = start_delta(parms)
                 print('write delta at beta ', str(beta))
                 delta_start = mpi.broadcast(value=delta_start, root=0)
-            else:
+            elif u_int == U[0]:
                 delta_start = mpi.broadcast(root=0)
 
             mpi.world.barrier()

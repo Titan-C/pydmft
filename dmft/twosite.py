@@ -152,6 +152,20 @@ class TwoSite_Real(TwoSite):
         else:
             return zet
 
+
+def matsubara_Z(im_sigma, beta):
+
+    """Calculates the impurity quasiparticle weight from the imaginary
+    part of the self energy in the matsubara frequencies"""
+
+    if im_sigma[1] > im_sigma[0]:
+        return 0.
+
+    dw = 1/beta
+    zet = 1/(1 - im_sigma[0]/dw)
+    return zet
+
+
 class TwoSite_Matsubara(TwoSite):
     """DMFT solver on the matsubara frequency axis"""
 
@@ -162,16 +176,7 @@ class TwoSite_Matsubara(TwoSite):
         self.solve(0, 0, 0)
 
     def imp_z(self):
-        """Calculates the impurity quasiparticle weight from the imaginary
-        part of the self energy"""
-        im_sigma = self.GF[r'$\Sigma$'].imag
-
-        if im_sigma[1] > im_sigma[0]:
-            return 0.
-
-        dw = 1/self.beta
-        zet = 1/(1 - im_sigma[0]/dw)
-        return zet
+        return matsubara_Z(self.GF[r'$\Sigma$'].imag, self.beta)
 
 
 def refine_mat_solution(end_solver, u_int):
