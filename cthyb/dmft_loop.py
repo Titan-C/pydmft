@@ -9,59 +9,11 @@ Quantum Monte Carlo algorithm in the hybridization expansion
 """
 from __future__ import division, absolute_import, print_function
 
-import numpy as np
-from dmft.common import matsubara_freq, greenF, gw_invfouriertrans, gt_fouriertrans
-from dmft import ipt_imag
+from cthyb.storage import *
+from dmft.common import gt_fouriertrans
 
 import pyalps.cthyb as cthyb  # the solver module
 import pyalps.mpi as mpi     # MPI library (required)
-from pyalps.hdf5 import archive
-
-
-def save_pm_delta_tau(parms, gtau):
-    """Saves to file and returns the imaginary time hybridization function
-    enforcing paramagnetism"""
-    save_delta = archive(parms["DELTA"], 'w')
-    delta = parms['t']**2 * gtau.mean(axis=0)
-    delta[delta > -1e-5] = -1e-5
-
-    save_delta['/Delta_0'] = delta
-    save_delta['/Delta_1'] = delta
-    del save_delta
-
-    return delta
-
-
-def recover_measurement(parms, measure):
-    """Recovers a specific measurement from the output file"""
-    iteration = archive(parms['BASENAME'] + '.out.h5', 'r')
-    data = []
-    for i in range(parms['N_ORBITALS']):
-        data.append(iteration[measure+'/{}/mean/value'.format(i)])
-    del iteration
-    return np.asarray(data)
-
-
-def save_iter_step(parms, iter_count, measure, data):
-    """Saves the measurement results to log DMFT iterations"""
-    save = archive(parms['BASENAME']+'steps.h5', 'w')
-    for i, data_vector in enumerate(data):
-        save['iter_{:0>2}/{}/{}/'.format(iter_count, measure, i)] = data_vector
-    del save
-
-
-def start_delta(parms):
-    """Provides a starting guess for the hybridization function given the
-    cthyb impurity solvers parameters. Guess is based on the IPT solution"""
-
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
-
-    giw = greenF(iwn, mu=0., D=2*parms['t'])
-    giw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)[-1]
-    gtau = gw_invfouriertrans(giw, tau, iwn)
-
-    return save_pm_delta_tau(parms, np.asarray((gtau, gtau)))
 
 
 ## DMFT loop
@@ -105,8 +57,8 @@ def dmft_loop(parms, delta_in):
 
 ## master looping
 if __name__ == "__main__":
-    BETA = [20.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
-    U = np.arange(4, 7, 0.2)
+    BETA = [50.]#[8, 9, 13, 15, 18, 20, 25, 30, 40, 50]
+    U = np.arange(1, 6.5, 0.2)
     for beta in BETA:
         for u_int in U:
             parms = {

@@ -5,7 +5,8 @@ ploting the data
 
 import matplotlib.pyplot as plt
 import numpy as np
-from dmft.common import matsubara_freq, gw_invfouriertrans, gt_fouriertrans
+from dmft.common import matsubara_freq, gt_fouriertrans
+from cthyb.storage import recover_measurement
 import h5py
 
 
@@ -92,9 +93,18 @@ def plot_end(filename):
         gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
         gw_ax.plot(iwn.imag, gw.imag, 's-', label='IM, sp{}'.format(i))
 
-        sig = iwn + parms['MU'] - gw -1/gw
+        sig = iwn + parms['MU'] - gw - 1/gw
         sw_ax.plot(iwn.imag, sig.real, '+-', label='RE, sp{}'.format(i))
         sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, sp{}'.format(i))
+
+    # PM AVG
+    gt_pm = recover_measurement(parms, 'G_tau').mean(axis=0)
+    gw_pm = gt_fouriertrans(gt_pm, tau, iwn)
+    gw_ax.plot(iwn.imag, gw_pm.real, '+-', label='RE, pm')
+    gw_ax.plot(iwn.imag, gw_pm.imag, 's-', label='IM, pm')
+    sig = iwn + parms['MU'] - gw_pm - 1/gw_pm
+    sw_ax.plot(iwn.imag, sig.real, '+-', label='RE, pm')
+    sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, pm')
 
     gw_ax.set_xlim([0, 6.5])
     gw_ax.legend(loc=4)
