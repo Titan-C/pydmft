@@ -7,10 +7,12 @@ import cthyb.ploting as pt
 import matplotlib.pyplot as plt
 import numpy as np
 from dmft.twosite import matsubara_Z
+import glob
 
+results = glob.glob('mi/PM_*.out.h5')
 
-for u_int in  np.arange(1, 6.5, 0.2):
-    pt.plot_end('PM_MI_b{}_U{}.out.h5'.format(50.0, u_int))
+for data in  results:
+    pt.plot_end(data)
     pt.plt.close('all')
 
 zet = []

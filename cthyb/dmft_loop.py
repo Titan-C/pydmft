@@ -32,12 +32,13 @@ def dmft_loop(parms, delta_in):
 
             g_iwn = np.array([gt_fouriertrans(gt, tau, iwn) for gt in g_tau])
 
-            g_w = g_iwn.mean(axis=0)*.6 + 0.4*g_w
+            g_w = g_iwn.mean(axis=0)*.6 + 0.4*gw_old
             dev = np.abs(gw_old - g_w)[:20].max()
             print('conv criterion', dev)
-            conv = dev < 0.01
+            conv = dev < 0.005
             gw_old = g_w
-            delta_out = save_pm_delta_tau(parms, g_tau)
+            g_mix = gw_invfouriertrans(1j*(g_w.imag), tau, iwn)
+            delta_out = save_pm_delta_tau(parms, g_mix)
 
             term = mpi.broadcast(value=conv, root=0)
             delta_out = mpi.broadcast(value=delta_out, root=0)
@@ -58,7 +59,7 @@ def dmft_loop(parms, delta_in):
 ## master looping
 if __name__ == "__main__":
     BETA = np.floor(np.logspace(1.1, 2.7, 10))
-    U = np.arange(0, 6.5, 0.2)
+    U = np.concatenate((np.arange(3.8, 6.3, 0.1),np.arange(6.25, 3.8, -0.1)))
     for beta in BETA:
         for u_int in U:
             parms = {
@@ -66,19 +67,19 @@ if __name__ == "__main__":
                 'THERMALIZATION'      : 5000,
                 'N_MEAS'              : 100,
                 'MAX_TIME'            : 30,
-                'N_HISTOGRAM_ORDERS'  : 50,
-                'SEED'                : 5,
+                'N_HISTOGRAM_ORDERS'  : int(2*beta),
+                'SEED'                : 13,
 
                 'N_ORBITALS'          : 2,
                 'DELTA'               : "delta_b{}.h5".format(beta),
                 'DELTA_IN_HDF5'       : 1,
-                'BASENAME'            : 'PM_MI_b{}_U{}'.format(beta, u_int),
+                'BASENAME'            : 'PM_HF_b{}_U{}'.format(beta, u_int),
 
                 't'                   : 1.,
                 'U'                   : u_int,
                 'MU'                  : u_int/2.,
                 'N_TAU'               : 1024,
-                'N_MATSUBARA'         : 256,
+                'N_MATSUBARA'         : int(10*beta/np.pi),
                 'MEASURE_freq'        : 0,
                 'BETA'                : beta,
                 'VERBOSE'             : 1,

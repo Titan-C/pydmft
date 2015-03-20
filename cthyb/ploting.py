@@ -123,13 +123,19 @@ def plot_end(filename):
     fig_siw.savefig('Sig_iwn'+parms['BASENAME']+'.png', format='png',
                     transparent=False, bbox_inches='tight', pad_inches=0.05)
 
+    del sim
+
+
+def plot_order(filename):
+    sim = archive(filename)
+    parms = sim['parameters']
     fig_order = plt.figure()
     hist = 'simulation/results/order_histogram_'
     for i in range(parms['N_ORBITALS']):
         plt.errorbar(np.arange(parms['N_HISTOGRAM_ORDERS']), sim[hist + '{}/mean/value'.format(i)],
                      yerr=sim[hist + '{}/mean/error'.format(i)], label='spin{}'.format(i))
 
-    plt.title(r'Expansion order at $\beta= {}$, $U= {}$\n'.format(parms['BETA'], parms['U']) + 'with {} MC sweeps and avg Sign {}'.format(sim['simulation/results/Sign/count'], sim['simulation/results/Sign/mean/value']))
+    plt.title(r'Expansion order at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']) + '\nwith {} MC sweeps and avg Sign {}'.format(sim['simulation/results/Sign/count'], sim['simulation/results/Sign/mean/value']))
     plt.legend(loc=0)
 
 
