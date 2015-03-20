@@ -5,13 +5,11 @@ ploting the data
 
 import matplotlib.pyplot as plt
 import numpy as np
-from dmft.common import matsubara_freq, gt_fouriertrans
-from cthyb.storage import recover_measurement
+from dmft.common import gt_fouriertrans
+from cthyb.storage import recover_measurement, tau_iwn_setup
 import h5py
 
 
-import pyalps
-import pyalps.plot
 from pyalps.hdf5 import archive
 
 
@@ -28,7 +26,7 @@ def plot_gt_iter(basename, orb):
     parms, steps = open_iterations(basename)
 
     fig_gt = plt.figure()
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    tau, iwn = tau_iwn_setup(parms)
 
     for it in sorted(steps):
         gtau = steps[it+'/G_tau/'+str(orb)].value
@@ -48,8 +46,7 @@ def plot_gw_iter(basename, orb):
 
     fig_gw, (ax_re, ax_im) = plt.subplots(2, sharex=True)
     fig_gw.subplots_adjust(hspace=0)
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    tau, iwn = tau_iwn_setup(parms)
 
     for it in sorted(steps):
         gtau = steps[it+'/G_tau/'+str(orb)].value
@@ -70,7 +67,7 @@ def plot_gw_iter(basename, orb):
 def plot_end(filename):
     sim = archive(filename)
     parms = sim['parameters']
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    tau, iwn = tau_iwn_setup(parms)
     fig_gt = plt.figure()
     for i in range(parms['N_ORBITALS']):
         plt.errorbar(tau, sim['G_tau/{}/mean/value'.format(i)],
@@ -84,7 +81,6 @@ def plot_end(filename):
 
     fig_gw, gw_ax = plt.subplots()
     fig_siw, sw_ax = plt.subplots()
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     for i in range(parms['N_ORBITALS']):
         try:
             gw = sim['G_omega/{}/mean/value'.format(i)]

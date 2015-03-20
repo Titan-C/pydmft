@@ -19,8 +19,7 @@ import pyalps.mpi as mpi     # MPI library (required)
 ## DMFT loop
 def dmft_loop(parms, delta_in):
     term = False
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    tau, iwn = tau_iwn_setup(parms)
     gw_old = gt_fouriertrans(delta_in / parms['t']**2, tau, iwn)
 
     for n in range(25):

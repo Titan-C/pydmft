@@ -10,7 +10,7 @@ Quantum Monte Carlo algorithm in the hybridization expansion
 import sys
 import numpy as np
 from dmft.common import matsubara_freq, greenF, gw_invfouriertrans
-
+from cthyb.ploting import tau_iwn_setup
 sys.path.append('/home/oscar/libs/lib')
 
 import pyalps.cthyb as cthyb  # the solver module
@@ -41,8 +41,7 @@ parms = {
 
 
 if mpi.rank == 0:
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    tau, iwn = tau_iwn_setup(parms)
 
     giw_u = greenF(iwn, mu=parms['MU'], D=2*parms['t'])
     gtau_u = gw_invfouriertrans(giw_u, tau, iwn)

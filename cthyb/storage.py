@@ -9,12 +9,18 @@ import numpy as np
 from pyalps.hdf5 import archive
 
 
+def tau_iwn_setup(parms):
+    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    return tau, iwn
+
+
 def save_pm_delta_tau(parms, gtau):
     """Saves to file and returns the imaginary time hybridization function
     enforcing paramagnetism"""
     save_delta = archive(parms["DELTA"], 'w')
     delta = parms['t']**2 * gtau
-    delta[delta>-1e-4] = -1e-4
+    delta[delta > -1e-4] = -1e-4
 
     save_delta['/Delta_0'] = delta
     save_delta['/Delta_1'] = delta
@@ -45,8 +51,7 @@ def start_delta(parms):
     """Provides a starting guess for the hybridization function given the
     cthyb impurity solvers parameters. Guess is based on the IPT solution"""
 
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
+    tau, iwn = tau_iwn_setup(parms)
 
     giw = greenF(iwn, mu=0., D=2*parms['t'])
     giw, siw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)
