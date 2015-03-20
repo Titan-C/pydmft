@@ -35,7 +35,7 @@ def plot_gt_iter(basename, orb):
     plt.ylabel(r'$G(\tau) sp{}$'.format(orb))
     plt.xlabel(r'$\tau$')
     plt.title(r'DMFT Iterations of $G(\tau)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
-    fig_gt.savefig('G_tau.png', format='png',
+    fig_gt.savefig('G_tau_it_'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     del steps
@@ -53,13 +53,14 @@ def plot_gw_iter(basename, orb):
         gw = gt_fouriertrans(gtau, tau, iwn)
         ax_re.plot(iwn.imag, gw.real, '+-', label=it)
         ax_im.plot(iwn.imag, gw.imag, 's-', label=it)
+
     plt.legend(loc=4)
     ax_re.set_ylabel(r'$\Re G(i\omega_n) sp{}$'.format(orb))
     ax_im.set_ylabel(r'$\Im G(i\omega_n) sp{}$'.format(orb))
     plt.xlim([0, 4.5])
     plt.xlabel(r'$i\omega_n$')
     ax_re.set_title(r'DMFT Iterations of $G(i\omega_n)$ at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']))
-    fig_gw.savefig('G_iwn.png', format='png',
+    fig_gw.savefig('G_iwn_it_'+parms['BASENAME']+'.png', format='png',
                    transparent=False, bbox_inches='tight', pad_inches=0.05)
     del steps
 
@@ -72,6 +73,7 @@ def plot_end(filename):
     for i in range(parms['N_ORBITALS']):
         plt.errorbar(tau, sim['G_tau/{}/mean/value'.format(i)],
                      yerr=sim['G_tau/{}/mean/error'.format(i)], label='spin{}'.format(i))
+
     plt.legend(loc=0)
     plt.ylabel(r'$G(\tau)$')
     plt.xlabel(r'$\tau$')
@@ -133,6 +135,7 @@ def plot_order(filename):
 
     plt.title(r'Expansion order at $\beta= {}$, $U= {}$'.format(parms['BETA'], parms['U']) + '\nwith {} MC sweeps and avg Sign {}'.format(sim['simulation/results/Sign/count'], sim['simulation/results/Sign/mean/value']))
     plt.legend(loc=0)
-
+    fig_order.savefig('order'+parms['BASENAME']+'.png', format='png',
+                    transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     del sim

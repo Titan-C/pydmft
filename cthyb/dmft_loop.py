@@ -59,7 +59,7 @@ def dmft_loop(parms, delta_in):
 
 ## master looping
 if __name__ == "__main__":
-    BETA = np.floor(np.logspace(1.1, 2.7, 10))
+    BETA = np.array([332.])
     U = np.concatenate((np.arange(3.8, 6.3, 0.1),np.arange(6.25, 3.8, -0.1)))
     for beta in BETA:
         for u_int in U:
@@ -67,7 +67,7 @@ if __name__ == "__main__":
                 'SWEEPS'              : 100000000,
                 'THERMALIZATION'      : 5000,
                 'N_MEAS'              : 100,
-                'MAX_TIME'            : 30,
+                'MAX_TIME'            : 1,
                 'N_HISTOGRAM_ORDERS'  : int(2*beta),
                 'SEED'                : 13,
 
