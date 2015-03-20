@@ -13,8 +13,8 @@ def save_pm_delta_tau(parms, gtau):
     """Saves to file and returns the imaginary time hybridization function
     enforcing paramagnetism"""
     save_delta = archive(parms["DELTA"], 'w')
-    delta = parms['t']**2 * gtau.mean(axis=0)
-    delta[delta > -1e-5] = -1e-5
+    delta = parms['t']**2 * gtau
+    delta[delta>-1e-4] = -1e-4
 
     save_delta['/Delta_0'] = delta
     save_delta['/Delta_1'] = delta
@@ -52,4 +52,4 @@ def start_delta(parms):
     giw, siw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)
     gtau = gw_invfouriertrans(giw[-1], tau, iwn)
 
-    return save_pm_delta_tau(parms, np.asarray((gtau, gtau)))
+    return save_pm_delta_tau(parms, gtau)

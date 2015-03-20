@@ -31,14 +31,16 @@ def dmft_loop(parms, delta_in):
             save_iter_step(parms, n, 'G_tau', g_tau)
 
             g_iwn = np.array([gt_fouriertrans(gt, tau, iwn) for gt in g_tau])
-
-            g_w = g_iwn.mean(axis=0)*.6 + 0.4*gw_old
-            dev = np.abs(gw_old - g_w)[:20].max()
+            g_iwn = g_iwn.mean(axis=0)
+            dev = np.abs(gw_old - g_iwn)[:20].max()
             print('conv criterion', dev)
             conv = dev < 0.005
-            gw_old = g_w
+
+
+            g_w = g_iwn*.6 + 0.4*gw_old
             g_mix = gw_invfouriertrans(1j*(g_w.imag), tau, iwn)
             delta_out = save_pm_delta_tau(parms, g_mix)
+            gw_old = g_w
 
             term = mpi.broadcast(value=conv, root=0)
             delta_out = mpi.broadcast(value=delta_out, root=0)
