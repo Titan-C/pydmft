@@ -10,43 +10,37 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 
 from __future__ import division, absolute_import, print_function
 
-import numpy as np
-
 import matplotlib.pyplot as plt
 import dmft.hirschfye as hf
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  tau_wn_setup
+from dmft.common import gt_fouriertrans, gw_invfouriertrans
 
 
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'dtau_mc':     0.5,
-                   'n_tau_mc':    32,
+                   'n_tau_mc':    40,
                    'BETA':        16,
                    'N_TAU':    2**11,
                    'N_MATSUBARA': 64,
                    'U':           2,
-                   'mu':          0,
-                   'loops':       8,
+                   'MU':          0,
+                   'loops':       2,
                    'sweeps':      15000,
                   }
-    parameters['BETA'] = parameters['dtau_mc'] * parameters['n_tau_mc']
+
+    tau, w_n, __, Giw, v_aux = hf.setup_PM_sim(parameters)
 
     simulation = {'parameters': parameters}
-    v_aux = hf.ising_v(parameters['dtau_mc'], parameters['U'], parameters['n_tau_mc'])
 
-    tau, w_n = tau_wn_setup(parameters)
-    if gw is None:
-        Giw = greenF(w_n, mu=parameters['mu'])
-    else:
+    if gw is not None:
         Giw = gw
 
     for iter_count in range(parameters['loops']):
-        G0iw = 1/(1j*w_n + parameters['mu'] - .25*Giw)
+        G0iw = 1/(1j*w_n + parameters['MU'] - .25*Giw)
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.interpol(G0t, parameters['n_tau_mc'])
 
-        gtu, gtd = hf.imp_solver(-g0t, v_aux, parameters['sweeps'])
+        gtu, gtd = hf.imp_solver(g0t, v_aux, parameters['sweeps'])
         gt = -0.5 * (gtu+gtd)
 
         Gt = hf.interpol(gt, parameters['N_TAU'])
@@ -64,7 +58,7 @@ if __name__ == "__main__":
     for it in sorted(sim1):
         if 'it' in it:
 #            plt.plot(s['Giw'].real.T, label=it)
-            plt.plot(sim1[it]['Giw'].imag,'o-', label=it)
+            plt.plot(sim1[it]['gtau'], label=it)
     plt.legend()
 #    plt.figure()
 #    for it in sorted(sim2):

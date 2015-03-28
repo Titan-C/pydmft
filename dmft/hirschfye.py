@@ -7,10 +7,13 @@ QMC Hirsch - Fye Impurity solver
 To treat the Anderson impurity model and solve it using the Hirsch - Fye
 Quantum Monte Carlo algorithm
 """
+from __future__ import division, absolute_import, print_function
 import numpy as np
 from scipy.linalg import solve
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
+
+from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 
 
 def ising_v(dtau, U, L=32, polar=0.5):
@@ -158,3 +161,14 @@ def interpol(gt, Lrang):
     f = interp1d(t, gt)
     tf = np.linspace(0, 1, Lrang+1)
     return f(tf)
+
+
+def setup_PM_sim(parms):
+    tau, w_n = tau_wn_setup(parms)
+    gw = greenF(w_n, mu=parms['MU'])
+    gt = gw_invfouriertrans(gw, tau, w_n)
+    gt = interpol(gt, parms['n_tau_mc'])
+    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
+    v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
+
+    return tau, w_n, gt, gw, v
