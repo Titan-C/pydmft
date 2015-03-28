@@ -7,16 +7,18 @@ Created on Tue Nov 25 12:44:23 2014
 
 from __future__ import division, absolute_import, print_function
 from dmft.common import greenF, gw_invfouriertrans, gt_fouriertrans,\
- matsubara_freq
+ tau_wn_setup
 import numpy as np
+import pytest
 
-
-def test_fourier_trasforms(beta=50., n_tau=1000, n_matsubara=100):
+@pytest.mark.parametrize("chempot", [ 0, 0.5, -0.8])
+def test_fourier_trasforms(chempot, beta=50., n_tau=2**11, n_matsubara=64):
     """Test the tail improved fourier transforms"""
-    iomega_n = matsubara_freq(beta, n_matsubara)
-    gwr = greenF(iomega_n)
-    tau = np.linspace(0, beta, n_tau+1)
+    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara}
+    tau, w_n = tau_wn_setup(parms)
+    gw = greenF(w_n, mu=chempot)
 
-    g_tau = gw_invfouriertrans(gwr, tau, iomega_n)
-    g_iomega = gt_fouriertrans(g_tau, tau, iomega_n)
-    assert np.allclose(gwr, g_iomega)
+    for gwr in [gw, np.array([gw, gw])]:
+        g_tau = gw_invfouriertrans(gwr, tau, w_n)
+        g_iomega = gt_fouriertrans(g_tau, tau, w_n)
+        assert np.allclose(gwr, g_iomega)
