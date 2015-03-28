@@ -116,7 +116,7 @@ def mcs(sweeps, therm, gup, gdw, v):
     return gstup, gstdw
 
 
-def gnewclean(g0t, v, sign):
+def gnewclean(g0t, v, sign, kroneker):
     """Returns the interacting function :math:`G_{ij}` for the non-interacting
     propagator :math:`\\mathcal{G}^0_{ij}`
 
@@ -131,8 +131,7 @@ def gnewclean(g0t, v, sign):
     no sumation on :math:`j`
     """
     u_j = np.exp(sign*v) - 1.
-    ide = np.eye(v.size)
-    b = ide - u_j * (g0t-ide)
+    b = kroneker - u_j * (g0t-kroneker)
 
     return solve(b, g0t)
 
