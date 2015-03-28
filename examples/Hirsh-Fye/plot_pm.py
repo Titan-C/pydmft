@@ -14,7 +14,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import dmft.hirschfye as hf
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  matsubara_freq
+from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF,  tau_wn_setup
 
 
 def dmft_loop_pm(gw=None, **kwargs):
@@ -22,37 +22,35 @@ def dmft_loop_pm(gw=None, **kwargs):
     parameters = {
                    'dtau_mc':     0.5,
                    'n_tau_mc':    32,
-                   'beta':        16,
-                   'tau_rang':    1024,
-                   'n_matsubara': 64,
+                   'BETA':        16,
+                   'N_TAU':    2**11,
+                   'N_MATSUBARA': 64,
                    'U':           2,
-                   'mu':          0.0,
+                   'mu':          0,
                    'loops':       8,
-                   'sweeps':      5000,
+                   'sweeps':      15000,
                   }
-    parameters['beta'] = parameters['dtau_mc'] * parameters['n_tau_mc']
+    parameters['BETA'] = parameters['dtau_mc'] * parameters['n_tau_mc']
 
-    i_omega = matsubara_freq(parameters['beta'],
-                             parameters['n_matsubara'])
-    fine_tau = np.linspace(0, parameters['beta'],
-                              parameters['tau_rang'] + 1)
+    simulation = {'parameters': parameters}
+    v_aux = hf.ising_v(parameters['dtau_mc'], parameters['U'], parameters['n_tau_mc'])
+
+    tau, w_n = tau_wn_setup(parameters)
     if gw is None:
-        Giw = greenF(i_omega, parameters['mu'])
+        Giw = greenF(w_n, mu=parameters['mu'])
     else:
         Giw = gw
-    v_aux = hf.ising_v(parameters['dtau_mc'], parameters['U'], parameters['n_tau_mc'])
-    simulation = {'parameters': parameters}
 
     for iter_count in range(parameters['loops']):
-        G0iw = 1/(i_omega - .25*Giw)
-        G0t = gw_invfouriertrans(G0iw, fine_tau, i_omega)
+        G0iw = 1/(1j*w_n + parameters['mu'] - .25*Giw)
+        G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.extract_g0t(G0t, parameters['n_tau_mc'])
 
         gtu, gtd = hf.imp_solver(-g0t, v_aux, parameters['sweeps'])
-        gt = (gtu + gtd) / 2
+        gt = -0.5 * (gtu+gtd)
 
-        Gt = hf.interpol(-gt, parameters['tau_rang'])
-        Giw = gt_fouriertrans(Gt, fine_tau, i_omega)
+        Gt = hf.interpol(gt, parameters['N_TAU'])
+        Giw = gt_fouriertrans(Gt, tau, w_n)
         simulation['it{:0>2}'.format(iter_count)] = {
                             'G0iw': G0iw,
                             'Giw':  Giw,
@@ -61,12 +59,18 @@ def dmft_loop_pm(gw=None, **kwargs):
     return simulation
 
 if __name__ == "__main__":
-    sim = dmft_loop_pm(3.5)
-    for it, s in sim.iteritems():
+    sim1 = dmft_loop_pm()
+    for it in sorted(sim2):
         if 'it' in it:
-            plt.plot(s['Giw'].real, label=it)
-            plt.plot(s['Giw'].imag, label=it)
-
+#            plt.plot(s['Giw'].real.T, label=it)
+            plt.plot(sim2[it]['Giw'].imag,'o-', label=it)
+    plt.legend()
+#    plt.figure()
+#    for it in sorted(sim2):
+#        if 'it' in it:
+##            plt.plot(s['Giw'].real.T, label=it)
+#            plt.plot(sim2[it]['Giw'].mean(axis=0).T.imag, 's-', label=it)
+#    plt.legend()
 #    sim2=hf.dmft_loop(3.9, gw=sim[-1]['Giw'])
 #    plt.figure()
 #    sim3=hf.dmft_loop(2.8, gw=sim2[-1]['Giw'])
