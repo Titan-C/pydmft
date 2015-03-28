@@ -44,7 +44,7 @@ def dmft_loop_pm(gw=None, **kwargs):
     for iter_count in range(parameters['loops']):
         G0iw = 1/(1j*w_n + parameters['mu'] - .25*Giw)
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
-        g0t = hf.extract_g0t(G0t, parameters['n_tau_mc'])
+        g0t = hf.interpol(G0t, parameters['n_tau_mc'])
 
         gtu, gtd = hf.imp_solver(-g0t, v_aux, parameters['sweeps'])
         gt = -0.5 * (gtu+gtd)
@@ -60,10 +60,11 @@ def dmft_loop_pm(gw=None, **kwargs):
 
 if __name__ == "__main__":
     sim1 = dmft_loop_pm()
-    for it in sorted(sim2):
+    plt.figure()
+    for it in sorted(sim1):
         if 'it' in it:
 #            plt.plot(s['Giw'].real.T, label=it)
-            plt.plot(sim2[it]['Giw'].imag,'o-', label=it)
+            plt.plot(sim1[it]['Giw'].imag,'o-', label=it)
     plt.legend()
 #    plt.figure()
 #    for it in sorted(sim2):

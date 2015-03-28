@@ -46,20 +46,11 @@ def ising_v(dtau, U, L=32, polar=0.5):
 
 
 def imp_solver(g0, v, sweeps):
-    r"""Impurity solver call.
-    Takes the propagator :math:`\mathcal{G}^0(\tau)` and transforms it
-    into a discretized matrix as
-
-    .. math:: \mathcal{G}^0_{ij} = \mathcal{G}^0(i\Delta\tau - j\Delta\tau)
-
-    Then it creates the interacting Green function as given by the contribution
-    of the auxiliary discretized spin field.
+    r"""Impurity solver call. Calcutaltes the interacting Green function
+    as given by the contribution of the auxiliary discretized spin field.
     """
-    lfak = v.size
 
-    gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
-    gx = g0[gind]
-
+    gx = ret_weiss(g0)
     gup = gnewclean(gx, v, 1.)
     gdw = gnewclean(gx, v, -1.)
 
@@ -67,6 +58,19 @@ def imp_solver(g0, v, sweeps):
 
     return avg_g(gstup), avg_g(gstdw)
 
+
+def ret_weiss(g0tau):
+    r"""
+    Takes the propagator :math:`\mathcal{G}^0(\tau)` and transforms it
+    into the discretized matrix of the retarded weiss field as
+
+    .. math:: \mathcal{G}^0_{ij} = \mathcal{G}^0(i\Delta\tau - j\Delta\tau)
+    Because of the Hirsch-Fye algorithm a minus sign is included
+    """
+    lfak = g0tau.shape[-1]-1
+
+    gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
+    return np.concatenate((g0tau[:-1], -g0tau))[gind]
 
 def avg_g(gmat):
     lfak = gmat.shape[0]
@@ -144,13 +148,6 @@ def gnew(g, v, k, sign, kroneker):
     y = g[k, :]
 
     return dger(a, x, y, 1, 1, g, 1, 1, 1)
-
-
-def extract_g0t(g0t, lfak=32):
-    """Extract a reducted amout of points of g0t"""
-    gt = interpol(g0t, lfak)
-
-    return np.concatenate((-gt[:-1], gt))
 
 
 def interpol(gt, Lrang):
