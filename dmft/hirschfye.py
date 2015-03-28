@@ -14,6 +14,7 @@ from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
+import hffast
 
 
 def ising_v(dtau, U, L=32, polar=0.5):
@@ -87,10 +88,10 @@ def avg_g(gmat):
 
     return xg
 
+
 def mcs(sweeps, therm, gup, gdw, v):
     lfak = v.size
     gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
-    kroneker = np.eye(lfak)
 
     for mcs in range(sweeps+therm):
         for j in range(lfak):
@@ -101,8 +102,8 @@ def mcs(sweeps, therm, gup, gdw, v):
             rat = rat/(1.+rat)
             if rat > np.random.rand():
                 v[j] *= -1.
-                gup = gnew(gup, v[j], j, 1.)
-                gdw = gnew(gdw, v[j], j, -1.)
+                gup = hffast.gnew(gup, v[j], j, 1.)
+                gdw = hffast.gnew(gdw, v[j], j, -1.)
 
         if mcs > therm:
 
