@@ -13,7 +13,7 @@ before_install:
 
 install:
     - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
-      matplotlib pytest coverage sphinx setuptools
+      matplotlib pytest coverage sphinx setuptools cython
     - source activate testenv
     - pip install slaveparticles sphinx-gallery
     - python setup.py install

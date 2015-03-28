@@ -5,8 +5,12 @@ Installing packages on code for DMFT
 """
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+from Cython.Distutils import Extension
+from Cython.Distutils import build_ext
+
 import dmft
 import sys
+import numpy as np
 
 class PyTest(TestCommand):
     """Test class to do test coverage analysis"""
@@ -31,7 +35,11 @@ setup(
     license="GNU General Public License v3 (GPLv3)",
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles'],
-    setup_requires=['Sphinx'],
+    setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
-    cmdclass={'test': PyTest},
+    cmdclass={'test': PyTest, 'build_ext': build_ext},
+    ext_modules =[Extension('hffast', ['dmft/hirschfye_cy.pyx'],
+                            include_dirs=[np.get_include()],
+                            libraries=['cblas', 'gsl']),
+                  ],
 )
