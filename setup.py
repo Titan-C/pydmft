@@ -40,6 +40,6 @@ setup(
     cmdclass={'test': PyTest, 'build_ext': build_ext},
     ext_modules =[Extension('hffast', ['dmft/hirschfye_cy.pyx'],
                             include_dirs=[np.get_include()],
-                            libraries=['cblas', 'gsl']),
+                            libraries=['openblas', 'gsl']),
                   ],
 )

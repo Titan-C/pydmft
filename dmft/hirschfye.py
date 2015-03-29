@@ -89,8 +89,8 @@ def update(gup, gdw, v):
         rat = rat/(1.+rat)
         if rat > np.random.rand():
             v[j] *= -1.
-            hffast.gnew(gup, v[j], j, 1.)
-            hffast.gnew(gdw, v[j], j, -1.)
+            gnew(gup, v[j], j, 1.)
+            gnew(gdw, v[j], j, -1.)
 
 
 def ret_weiss(g0tau):
