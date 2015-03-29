@@ -27,11 +27,14 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
     v[flip] *= -1
 
     g_flip = hf.gnewclean(g0ttp, v, 1, kroneker)
-    g_fast_flip = hf.gnew(np.copy(groot), v[flip], flip, 1)
+    g_fast_flip = np.copy(groot)
+    hf.gnew(g_fast_flip, v[flip], flip, 1)
 
     assert np.allclose(g_flip, g_fast_flip)
 
-    g_ffast_flip = hffast.gnew(np.copy(groot), v[flip], flip, 1)
+    g_ffast_flip = np.copy(groot)
+    hffast.gnew(g_ffast_flip, v[flip], flip, 1)
+
     assert np.allclose(g_flip, g_ffast_flip)
 
 

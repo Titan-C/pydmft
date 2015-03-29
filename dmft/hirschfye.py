@@ -89,8 +89,8 @@ def update(gup, gdw, v):
         rat = rat/(1.+rat)
         if rat > np.random.rand():
             v[j] *= -1.
-            gup = hffast.gnew(gup, v[j], j, 1.)
-            gdw = hffast.gnew(gdw, v[j], j, -1.)
+            hffast.gnew(gup, v[j], j, 1.)
+            hffast.gnew(gdw, v[j], j, -1.)
 
 
 def ret_weiss(g0tau):
@@ -154,8 +154,7 @@ def gnew(g, v, k, sign):
     x = g[:, k].copy()
     x[k] -= 1
     y = g[k, :].copy()
-
-    return dger(a, x, y, 1, 1, g, 1, 1, 1)
+    g = dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
 def interpol(gt, Lrang):

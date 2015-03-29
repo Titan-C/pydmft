@@ -24,4 +24,3 @@ cpdef gnew(np.ndarray[np.float64_t, ndim=2] g, double v, int k, double sign):
     x[k] -= 1.
     lib_dger(CblasColMajor, N, N, alpha,
             &x[0], 1, &y[0], 1, &g[0,0], N)
-    return g
