@@ -57,4 +57,4 @@ def test_solver(chempot, u_int, gend):
     g0t = hf.interpol(G0t, parms['n_tau_mc'])
     gtu, gtd = hf.imp_solver(g0t, g0t, v, parms['sweeps'])
     g = -0.5 * (gtu+gtd)
-    assert np.allclose(gend, g, atol=5e-3)
+    assert np.allclose(gend, g, atol=6e-3)

@@ -63,7 +63,7 @@ def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
     gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
 
     for mcs in range(sweeps+therm):
-        update(gup, gdw, v)
+        hffast.update(gup, gdw, v)
 
         if mcs % therm == 0:
             gup = gnewclean(gxu, v, 1., kroneker)
