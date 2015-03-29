@@ -49,18 +49,48 @@ def ising_v(dtau, U, L=32, polar=0.5):
     return vis*lam
 
 
-def imp_solver(g0, v, sweeps):
+def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
     r"""Impurity solver call. Calcutaltes the interacting Green function
     as given by the contribution of the auxiliary discretized spin field.
     """
 
-    gx = ret_weiss(g0)
-    gup = gnewclean(gx, v, 1.)
-    gdw = gnewclean(gx, v, -1.)
+    gxu = ret_weiss(g0up)
+    gxd = ret_weiss(g0dw)
+    kroneker = np.eye(v.size)
+    gup = gnewclean(gxu, v, 1., kroneker)
+    gdw = gnewclean(gxd, v, -1., kroneker)
 
-    gstup, gstdw = mcs(sweeps, 500, gup, gdw, v)
+    gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
+
+    for mcs in range(sweeps+therm):
+        update(gup, gdw, v)
+
+        if mcs % therm == 0:
+            gup = gnewclean(gxu, v, 1., kroneker)
+            gdw = gnewclean(gxd, v, -1., kroneker)
+
+        if mcs > therm:
+
+            gstup += gup
+            gstdw += gdw
+
+    gstup = gstup/sweeps
+    gstdw = gstdw/sweeps
 
     return avg_g(gstup), avg_g(gstdw)
+
+
+def update(gup, gdw, v):
+    for j in range(v.size):
+        dv = 2.*v[j]
+        ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
+        ratdw = 1. + (1. - gdw[j, j])*(np.exp( dv)-1.)
+        rat = ratup * ratdw
+        rat = rat/(1.+rat)
+        if rat > np.random.rand():
+            v[j] *= -1.
+            gup = hffast.gnew(gup, v[j], j, 1.)
+            gdw = hffast.gnew(gdw, v[j], j, -1.)
 
 
 def ret_weiss(g0tau):
@@ -76,6 +106,7 @@ def ret_weiss(g0tau):
     gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
     return np.concatenate((g0tau[:-1], -g0tau))[gind]
 
+
 def avg_g(gmat):
     lfak = gmat.shape[0]
     xga = np.zeros(2*lfak+1)
@@ -87,33 +118,6 @@ def avg_g(gmat):
     xg[-1] = 1-xg[0]
 
     return xg
-
-
-def mcs(sweeps, therm, gup, gdw, v):
-    lfak = v.size
-    gstup, gstdw = np.zeros((lfak, lfak)), np.zeros((lfak, lfak))
-
-    for mcs in range(sweeps+therm):
-        for j in range(lfak):
-            dv = 2.*v[j]
-            ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
-            ratdw = 1. + (1. - gdw[j, j])*(np.exp( dv)-1.)
-            rat = ratup * ratdw
-            rat = rat/(1.+rat)
-            if rat > np.random.rand():
-                v[j] *= -1.
-                gup = hffast.gnew(gup, v[j], j, 1.)
-                gdw = hffast.gnew(gdw, v[j], j, -1.)
-
-        if mcs > therm:
-
-            gstup += gup
-            gstdw += gdw
-
-    gstup = gstup/sweeps
-    gstdw = gstdw/sweeps
-
-    return gstup, gstdw
 
 
 def gnewclean(g0t, v, sign, kroneker):
