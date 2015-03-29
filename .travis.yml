@@ -1,12 +1,16 @@
 language: python
 
+addons:
+  apt_packages:
+  - gcc
+  - libopenblas-dev
+  - libgsl0-dev
+
 env:
     - PYTHON_VERSION="2.7"
     - PYTHON_VERSION="3.4"
 
 before_install:
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq gcc libopenblas-dev libgsl0-dev
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
