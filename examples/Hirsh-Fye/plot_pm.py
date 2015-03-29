@@ -24,8 +24,8 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'N_MATSUBARA': 64,
                    'U':           2,
                    'MU':          0,
-                   'loops':       2,
-                   'sweeps':      15000,
+                   'loops':       8,
+                   'sweeps':      20000,
                   }
 
     tau, w_n, __, Giw, v_aux = hf.setup_PM_sim(parameters)
@@ -40,7 +40,7 @@ def dmft_loop_pm(gw=None, **kwargs):
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.interpol(G0t, parameters['n_tau_mc'])
 
-        gtu, gtd = hf.imp_solver(g0t, v_aux, parameters['sweeps'])
+        gtu, gtd = hf.imp_solver(g0t, g0t, v_aux, parameters['sweeps'])
         gt = -0.5 * (gtu+gtd)
 
         Gt = hf.interpol(gt, parameters['N_TAU'])
