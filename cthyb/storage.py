@@ -4,15 +4,9 @@ Helper file to deal with HDF5 files generated with the ALPS Library
 """
 
 from dmft import ipt_imag
-from dmft.common import matsubara_freq, greenF, gw_invfouriertrans
+from dmft.common import tau_wn_setup, greenF, gw_invfouriertrans
 import numpy as np
 from pyalps.hdf5 import archive
-
-
-def tau_iwn_setup(parms):
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
-    iwn = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    return tau, iwn
 
 
 def save_pm_delta_tau(parms, gtau):
@@ -51,7 +45,7 @@ def start_delta(parms):
     """Provides a starting guess for the hybridization function given the
     cthyb impurity solvers parameters. Guess is based on the IPT solution"""
 
-    tau, iwn = tau_iwn_setup(parms)
+    tau, iwn = tau_wn_setup(parms)
 
     giw = greenF(iwn, mu=0., D=2*parms['t'])
     giw, siw = ipt_imag.dmft_loop(30, parms['U'], parms['t'], giw, iwn, tau)

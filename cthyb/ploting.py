@@ -5,8 +5,8 @@ ploting the data
 
 import matplotlib.pyplot as plt
 import numpy as np
-from dmft.common import gt_fouriertrans
-from cthyb.storage import recover_measurement, tau_iwn_setup
+from dmft.common import gt_fouriertrans, tau_wn_setup
+from cthyb.storage import recover_measurement
 import h5py
 
 
@@ -26,7 +26,7 @@ def plot_gt_iter(basename, orb):
     parms, steps = open_iterations(basename)
 
     fig_gt = plt.figure()
-    tau, iwn = tau_iwn_setup(parms)
+    tau, wn = tau_wn_setup(parms)
 
     for it in sorted(steps):
         gtau = steps[it+'/G_tau/'+str(orb)].value
@@ -46,13 +46,13 @@ def plot_gw_iter(basename, orb):
 
     fig_gw, (ax_re, ax_im) = plt.subplots(2, sharex=True)
     fig_gw.subplots_adjust(hspace=0)
-    tau, iwn = tau_iwn_setup(parms)
+    tau, w_n = tau_wn_setup(parms)
 
     for it in sorted(steps):
         gtau = steps[it+'/G_tau/'+str(orb)].value
-        gw = gt_fouriertrans(gtau, tau, iwn)
-        ax_re.plot(iwn.imag, gw.real, '+-', label=it)
-        ax_im.plot(iwn.imag, gw.imag, 's-', label=it)
+        gw = gt_fouriertrans(gtau, tau, w_n)
+        ax_re.plot(w_n, gw.real, '+-', label=it)
+        ax_im.plot(w_n, gw.imag, 's-', label=it)
 
     plt.legend(loc=4)
     ax_re.set_ylabel(r'$\Re G(i\omega_n) sp{}$'.format(orb))
@@ -68,7 +68,7 @@ def plot_gw_iter(basename, orb):
 def plot_end(filename):
     sim = archive(filename)
     parms = sim['parameters']
-    tau, iwn = tau_iwn_setup(parms)
+    tau, w_n = tau_wn_setup(parms)
     fig_gt = plt.figure()
     for i in range(parms['N_ORBITALS']):
         plt.errorbar(tau, sim['G_tau/{}/mean/value'.format(i)],
@@ -87,22 +87,22 @@ def plot_end(filename):
         try:
             gw = sim['G_omega/{}/mean/value'.format(i)]
         except:
-            gw = gt_fouriertrans(sim['G_tau/{}/mean/value'.format(i)], tau, iwn)
-        gw_ax.plot(iwn.imag, gw.real, '+-', label='RE, sp{}'.format(i))
-        gw_ax.plot(iwn.imag, gw.imag, 's-', label='IM, sp{}'.format(i))
+            gw = gt_fouriertrans(sim['G_tau/{}/mean/value'.format(i)], tau, w_n)
+        gw_ax.plot(w_n, gw.real, '+-', label='RE, sp{}'.format(i))
+        gw_ax.plot(w_n, gw.imag, 's-', label='IM, sp{}'.format(i))
 
-        sig = iwn + parms['MU'] - gw - 1/gw
-        sw_ax.plot(iwn.imag, sig.real, '+-', label='RE, sp{}'.format(i))
-        sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, sp{}'.format(i))
+        sig = 1j*w_n + parms['MU'] - gw - 1/gw
+        sw_ax.plot(w_n, sig.real, '+-', label='RE, sp{}'.format(i))
+        sw_ax.plot(w_n, sig.imag, 's-', label='IM, sp{}'.format(i))
 
     # PM AVG
     gt_pm = recover_measurement(parms, 'G_tau').mean(axis=0)
-    gw_pm = gt_fouriertrans(gt_pm, tau, iwn)
-    gw_ax.plot(iwn.imag, gw_pm.real, '+-', label='RE, pm')
-    gw_ax.plot(iwn.imag, gw_pm.imag, 's-', label='IM, pm')
-    sig = iwn + parms['MU'] - gw_pm - 1/gw_pm
-    sw_ax.plot(iwn.imag, sig.real, '+-', label='RE, pm')
-    sw_ax.plot(iwn.imag, sig.imag, 's-', label='IM, pm')
+    gw_pm = gt_fouriertrans(gt_pm, tau, w_n)
+    gw_ax.plot(w_n, gw_pm.real, '+-', label='RE, pm')
+    gw_ax.plot(w_n, gw_pm.imag, 's-', label='IM, pm')
+    sig = 1j*w_n + parms['MU'] - gw_pm - 1/gw_pm
+    sw_ax.plot(w_n, sig.real, '+-', label='RE, pm')
+    sw_ax.plot(w_n, sig.imag, 's-', label='IM, pm')
 
     gw_ax.set_xlim([0, 6.5])
     gw_ax.legend(loc=4)
