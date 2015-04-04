@@ -20,10 +20,10 @@ from dmft.common import greenF, tau_wn_setup
 import numpy as np
 import matplotlib.pylab as plt
 
-parms = {'BETA': 50, 'MU': 0, 'U': 3.2, 't': 0.5, 'N_TAU': 2**10, 'N_MATSUBARA': 64}
+parms = {'BETA': 50, 'MU': 0, 'U': 3, 't': 0.5, 'N_TAU': 2**10, 'N_MATSUBARA': 64}
 tau, w_n = tau_wn_setup(parms)
 g_iwn0 = greenF(w_n, D=2*parms['t'])
-g_iwn_log, sigma_iwn = ipt_imag.dmft_loop(25, parms['U'], parms['t'], g_iwn0, w_n, tau)
+g_iwn_log, sigma_iwn = ipt_imag.dmft_loop(100, parms['U'], parms['t'], g_iwn0, w_n, tau)
 g_iwn = g_iwn_log[-1]
 
 fig_gw, gw_ax = plt.subplots()

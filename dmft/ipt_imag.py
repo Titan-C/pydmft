@@ -59,7 +59,7 @@ def dmft_loop(loops, u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
     for i in range(loops):
         g_0_iwn = 1. / (1j*w_n - t**2 * g_iwn_log[-1])
         g_iwn, sigma_iwn = solver(u_int, g_0_iwn, w_n, tau)
-        if np.abs(g_iwn_log[-1] - g_iwn)[:20].max() < conv:
+        if np.abs(g_iwn_log[-1] - g_iwn)[:32].max() < conv:
             break
         g_iwn = mix * g_iwn + (1 - mix) * g_iwn_log[-1]
         g_iwn_log.append(g_iwn)
