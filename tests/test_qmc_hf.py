@@ -16,6 +16,7 @@ import hffast
 def test_hf_fast_updatecond(chempot, u_int, beta=16.,
                             n_tau=2**11, n_matsubara=64):
     parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
+             't': 0.5,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
     tau, w_n, g0t, __, v = hf.setup_PM_sim(parms)
 
@@ -49,6 +50,7 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
        -0.105, -0.114, -0.127, -0.144, -0.172, -0.222, -0.322, -0.549]))])
 def test_solver(chempot, u_int, gend):
     parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
+             't': 0.5,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
              'sweeps': 5000}
     tau, w_n, g0t, Giw, v = hf.setup_PM_sim(parms)
