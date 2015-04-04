@@ -172,7 +172,7 @@ class TwoSite_Matsubara(TwoSite):
     def __init__(self, beta=100, t=1, nfreq=20):
         super(TwoSite_Matsubara, self).__init__(beta, t)
 
-        self.omega = 1j*np.arange(1, nfreq, 2) / self.beta
+        self.omega = 1j*matsubara_freq(beta, nfreq)
         self.solve(0, 0, 0)
 
     def imp_z(self):
@@ -186,7 +186,7 @@ def refine_mat_solution(end_solver, u_int):
 
     beta = end_solver.beta
     sim = TwoSite_Matsubara(beta, end_solver.t, beta)
-    sim.omega = matsubara_freq(beta)
+    sim.omega = 1j*matsubara_freq(beta)
     sim.mu = end_solver.mu
     sim.solve(u_int/2, u_int, end_solver.hyb_V())
 
@@ -222,18 +222,18 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
 if __name__ == "__main__":
     u = [0.1, 1, 2, 2.7, 3.3] # np.arange(0, 3.2, 0.1)
-    sim = dmft_loop(u, beta=100, axis='matsubara')
+    sim = dmft_loop(u, beta=50, axis='matsubara')
     for s in sim:
         out = refine_mat_solution(s[2], s[0])
         plt.plot(out.omega.imag, out.GF[r'$\Sigma$'].imag,'+-', label='U={}'.format(s[0]))
     plt.xlim([-5,5])
     plt.figure()
 
-    tau = np.linspace(0, 100, 1001)
+    tau = np.linspace(0, 50, 1001)
     for s in sim:
         out = refine_mat_solution(s[2], s[0])
         Gw = out.GF['Imp G']
-        gmt = gw_invfouriertrans(Gw, tau, out.omega)
+        gmt = gw_invfouriertrans(Gw, tau, out.omega.imag)
         plt.semilogy(tau, -gmt, label='U={}'.format(s[0]))
 #    filling = np.arange(1, 0.9, -0.025)
 #    for n in filling:
