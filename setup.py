@@ -25,9 +25,14 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+
+with open('README.rst') as f:
+    long_description = f.read()
+
 setup(
     name="dmft-learn",
     description="Educative code on DMFT",
+    long_description=long_description,
     version=dmft.__version__,
     packages=find_packages(),
     author="Óscar Nájera",
@@ -38,8 +43,8 @@ setup(
     setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest, 'build_ext': build_ext},
-    ext_modules =[Extension('hffast', ['dmft/hirschfye_cy.pyx'],
-                            include_dirs=[np.get_include()],
-                            libraries=['blas', 'gsl']),
-                  ],
+    ext_modules=[Extension('hffast', ['dmft/hirschfye_cy.pyx'],
+                           include_dirs=[np.get_include()],
+                           libraries=['blas', 'gsl']),
+                ],
 )
