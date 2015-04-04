@@ -17,7 +17,7 @@ from dmft.twosite import refine_mat_solution
 
 axis = 'matsubara'
 du = 0.05
-beta = 1e3
+beta = 50
 u_int = [2., 4.5, 5.85, 6.]
 
 out_file = axis+'_halffill_b{}_dU{}'.format(beta, du)
@@ -40,8 +40,8 @@ for u in u_int:
     ax1.set_xlim([w.min(), w.max()])
 
     ax2.plot(w, s.imag, 'b+')
-    bound = s.imag.max() * 1.2
-    ax2.set_ylim([np.max([-bound, -25]), np.min([bound, 25])])
+    bound = s.imag.min() * 1.2
+    ax2.set_ylim([np.max([bound, -25]), 0])
 
     ax1.set_ylabel(r'$\Im m G_{imp}(\omega)$', color='b')
     ax2.set_ylabel(r'$\Im m \Sigma(\omega)$', color='b')

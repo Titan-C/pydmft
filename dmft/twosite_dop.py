@@ -106,9 +106,7 @@ def dmft_loop_dop(u_int, mu=None):
     sim.e_c = .5
     sim.solve(-15, u_int, 1.)
     if mu is None:
-        mu_max = 2.0
-        if u_int <= 6:
-            mu_max = u_int/2.
+        mu_max = u_int/2. if u_int <= 6 else 1.99
         mu = np.linspace(-1.95, mu_max, 80)
 
     for fmu in mu:
