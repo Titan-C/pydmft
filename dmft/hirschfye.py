@@ -169,7 +169,7 @@ def interpol(gt, Lrang):
 
 def setup_PM_sim(parms):
     tau, w_n = tau_wn_setup(parms)
-    gw = greenF(w_n, mu=parms['MU'])
+    gw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
     gt = gw_invfouriertrans(gw, tau, w_n)
     gt = interpol(gt, parms['n_tau_mc'])
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
