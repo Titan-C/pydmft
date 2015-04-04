@@ -319,7 +319,7 @@ In Matsubara frequencies
 The twosite DMFT can also be treated in the imaginary axis using the Matsubara
 frequencies. Since one is only treating the analytic continuation into the
 imaginary axis, all equations are kept the same one only needs to change
-:math:`\omega \rightarrow i\omega_n`, where :math:`\omega_n = (2n+1)/\beta`.
+:math:`\omega \rightarrow i\omega_n`, where :math:`\omega_n = \pi(2n+1)/\beta`.
 The most substantial change comes from the
 definition of the quasiparticle weight were it becomes
 

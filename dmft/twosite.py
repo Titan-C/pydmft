@@ -161,7 +161,7 @@ def matsubara_Z(im_sigma, beta):
     if im_sigma[1] > im_sigma[0]:
         return 0.
 
-    dw = 1/beta
+    dw = np.pi/beta
     zet = 1/(1 - im_sigma[0]/dw)
     return zet
 
