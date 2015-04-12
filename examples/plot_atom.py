@@ -13,14 +13,19 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 from dmft.common import matsubara_freq
-
-
-# Constuct matrix hamiltonian
 from slaveparticles.quantum import fermion
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize
 
+
 def hamiltonian(U, mu):
-    r""" :math:`-\frac{U}{2}(n_\uparrow - n_\downarrow)^2 - \mu(n_\uparrow + n_\downarrow)`"""
+    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
+    symmetry. Include chemical potential for grand Canonical calculations
+
+    .. math::
+        \mathcal{H} - \mu N = -\frac{U}{2}(n_\uparrow - n_\downarrow)^2
+        - \mu(n_\uparrow + n_\downarrow)
+
+    """
     d_up, d_dw = [fermion.destruct(2, sigma) for sigma in range(2)]
     sigma_z = d_up.T*d_up - d_dw.T*d_dw
     H = - U/2 * sigma_z * sigma_z - mu * (d_up.T*d_up + d_dw.T*d_dw)
@@ -28,7 +33,7 @@ def hamiltonian(U, mu):
 
 
 def gf(w, U, mu, beta):
-
+    """Calculate by Lehmann representation the green function"""
     H, d_up, d_dw = hamiltonian(U, mu)
     e, v = diagonalize(H.todense())
     g_up = gf_lehmann(e, v, d_up.T, beta, w)
