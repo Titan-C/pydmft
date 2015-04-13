@@ -41,6 +41,7 @@ def gf(w, U, mu, beta):
 
 
 beta = 50
+U = 1.
 mu_v = np.array([0, 0.2, 0.45, 0.5, 0.65])
 c_v = ['b', 'g', 'r', 'k', 'm']
 
@@ -48,7 +49,7 @@ f, axw = plt.subplots(2, sharex=True)
 f.subplots_adjust(hspace=0)
 w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
 for mu, c in zip(mu_v, c_v):
-    gw = gf(w, 1, mu, beta)
+    gw = gf(w, U, mu, beta)
     axw[0].plot(w.real, gw.real, c, label=r'$\mu={}$'.format(mu))
     axw[1].plot(w.real, -1*gw.imag/np.pi, c)
 axw[0].legend()
@@ -62,7 +63,7 @@ g, axwn = plt.subplots(2, sharex=True)
 g.subplots_adjust(hspace=0)
 wn = matsubara_freq(beta, 40)
 for mu, c in zip(mu_v, c_v):
-    giw = gf(1j*wn, 1., mu, beta)
+    giw = gf(1j*wn, U, mu, beta)
     axwn[0].plot(wn, giw.real, c+'s-', label=r'$\mu={}$'.format(mu))
     axwn[1].plot(wn, giw.imag, c+'o-')
 axwn[0].legend()
