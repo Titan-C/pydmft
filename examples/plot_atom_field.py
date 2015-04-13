@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from dmft.common import matsubara_freq
 from slaveparticles.quantum import fermion
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize
+from scipy.integrate import romb
 
 
 def hamiltonian(M, mu):
@@ -76,10 +77,10 @@ axw[1].set_xlabel(r'$\omega$')
 #axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
 
 ## analytical GF
-beta = 40.
+beta = 26.
 U = 1.
-tau = np.linspace(0, beta, 100)
-M = np.linspace(-2.1*U, 2.1*U, 500)
+tau = np.linspace(0, beta, 200)
+M = np.linspace(-2.1*U, 2.1*U, 513)
 mu = 0.
 z=1+np.exp(beta*(M+mu))+np.exp(-beta*(M+mu))+np.exp(2*beta*mu)
 Z=np.sqrt(2*np.pi*U)*(1+2*np.exp(beta*(U/2+mu))+np.exp(2*beta*mu))
@@ -87,8 +88,12 @@ w=np.exp(-beta*M**2/(2*U))*z
 #plt.plot(M, w/Z)
 G_up=np.exp(tau.reshape((-1,1))*(M+mu))*(1-1/(np.exp(-beta*(M+mu))+1))
 #plt.plot(tau, G_up)
+plt.figure()
 plt.imshow(G_up)
 G_dw=np.exp(tau.reshape((-1,1))*(-M+mu))*(1-1/(np.exp(-beta*(-M+mu))+1))
-isup=simps(G_up*w/Z, M)
-isdw=simps(G_dw*w/Z, M)
-plt.plot(tau, isup, tau, isdw, '--')
+dM=M[1]-M[0]
+isup=romb(G_up*w/Z, dM)
+isdw=romb(G_dw*w/Z, dM)
+plt.plot(tau, isup, tau, isdw, 's-')
+
+wn = matsubara_freq(beta, 40)
