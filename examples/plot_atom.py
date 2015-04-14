@@ -12,7 +12,7 @@ the atomic Green function as given by the Lehmann Representation.
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
-from dmft.common import matsubara_freq
+from dmft.common import matsubara_freq, gw_invfouriertrans
 from slaveparticles.quantum import fermion
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize
 
@@ -59,15 +59,27 @@ axw[1].set_ylabel(r'$A(\omega)$')
 axw[1].set_xlabel(r'$\omega$')
 
 
-g, axwn = plt.subplots(2, sharex=True)
-g.subplots_adjust(hspace=0)
-wn = matsubara_freq(beta, 40)
+gwp, axwn = plt.subplots(2, sharex=True)
+gwp.subplots_adjust(hspace=0)
+gtp, axt = plt.subplots()
+wn = matsubara_freq(beta, 64)
+tau = np.linspace(0, beta, 2**10)
 for mu, c in zip(mu_v, c_v):
     giw = gf(1j*wn, U, mu, beta)
     axwn[0].plot(wn, giw.real, c+'s-', label=r'$\mu={}$'.format(mu))
     axwn[1].plot(wn, giw.imag, c+'o-')
+
+    gt = gw_invfouriertrans(giw, tau, wn)
+    axt.plot(tau, gt, label=r'$\mu={}$'.format(mu))
+
 axwn[0].legend()
 axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
 axwn[1].set_xlabel(r'$\omega_n$')
 axwn[0].set_ylabel(r'$\Re e G(i\omega_n)$')
 axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
+
+axt.set_ylim(top=0.05)
+axt.legend(loc=0)
+axt.set_title(r'Imaginary time Green functions, $\beta={}$'.format(beta))
+axt.set_xlabel(r'$\tau$')
+axt.set_ylabel(r'$G(\tau)$')
