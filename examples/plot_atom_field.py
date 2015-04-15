@@ -23,13 +23,13 @@ def hamiltonian(M, mu):
     symmetry. Include chemical potential for grand Canonical calculations
 
     .. math::
-        \mathcal{H} - \mu N = -M(n_\uparrow - n_\downarrow)
+        \mathcal{H} - \mu N = M(n_\uparrow - n_\downarrow)
         - \mu(n_\uparrow + n_\downarrow)
 
     """
     d_up, d_dw = [fermion.destruct(2, sigma) for sigma in range(2)]
     sigma_z = d_up.T*d_up - d_dw.T*d_dw
-    H = - M * sigma_z - mu * (d_up.T*d_up + d_dw.T*d_dw)
+    H = M * sigma_z - mu * (d_up.T*d_up + d_dw.T*d_dw)
     return H, d_up, d_dw
 
 
@@ -77,23 +77,43 @@ axw[1].set_xlabel(r'$\omega$')
 #axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
 
 ## analytical GF
-beta = 10.
+beta = 50.
 U = 1.
 tau = np.linspace(0, beta, 200)
-M = np.linspace(-2.1*U, 2.1*U, 257)
+#jump = tau>beta/2.
+#tau[jump] -= beta
+#tau[tau<0] += beta
+M = np.linspace(-2.1*U, 2.1*U, 9)
 mu = 0.0
-z=1+np.exp(beta*(M+mu))+np.exp(-beta*(M+mu))+np.exp(2*beta*mu)
-Z=np.sqrt(U/beta)*(1+2*np.exp(beta*(U/2+mu))+np.exp(2*beta*mu))
+z = 1+np.exp(beta*(M+mu))+np.exp(-beta*(M-mu))+np.exp(2*beta*mu)
+Z = 1+2*np.exp(beta*(U/2+mu))+np.exp(2*beta*mu)
 w=np.exp(-beta*M**2/(2*U))*z/Z
+#plt.figure()
 #plt.plot(M, w/Z)
-G_up=np.exp(tau.reshape((-1,1))*(M+mu))*(1-1/(np.exp(-beta*(M+mu))+1))
+nup = 1/(np.exp(beta*(M-mu))+1)
+#nup[jump==False] = 1-nup[jump==False]
+G_up=np.exp(-tau.reshape((-1,1))*(M-mu))*(1-nup)
 #plt.plot(tau, G_up)
 plt.figure()
-#plt.imshow(G_up)
-G_dw=np.exp(tau.reshape((-1,1))*(-M+mu))*(1-1/(np.exp(-beta*(-M+mu))+1))
-dM=M[1]-M[0]
-isup=romb(G_up*w, dM)
-isdw=romb(G_dw*w, dM)
-plt.plot(tau, isup, tau, isdw, 's-')
+plt.imshow(G_up)
+plt.colorbar()
+#G_dw=np.exp(tau.reshape((-1,1))*(M+mu))*(1-1/(np.exp(beta*(-M+mu))+1))
+#dM=M[1]-M[0]
+#isup=romb(G_up*w, dM)
+#isdw=romb(G_dw*w, dM)
+
+#tau[tau<0] += beta
+#plt.plot(tau, isup, tau, isdw, 's-')
 
 wn = matsubara_freq(beta, 40)
+
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import cm
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+tau[tau<0] += beta
+x,y = np.meshgrid(M, tau)
+ax.plot_surface(x,y,np.clip(G_up,0,4), cmap=cm.jet, linewidth=0.2)
+
+plt.show()
