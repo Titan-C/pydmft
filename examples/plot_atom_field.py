@@ -63,18 +63,18 @@ axw[1].set_ylabel(r'$A(\omega)$')
 axw[1].set_xlabel(r'$\omega$')
 
 
-#g, axwn = plt.subplots(2, sharex=True)
-#g.subplots_adjust(hspace=0)
-#wn = matsubara_freq(beta, 40)
-#for mu, c in zip(mu_v, c_v):
-#    giw = gf(1j*wn, 1., mu, beta)
-#    axwn[0].plot(wn, giw.real, c+'s-', label=r'$\mu={}$'.format(mu))
-#    axwn[1].plot(wn, giw.imag, c+'o-')
-#axwn[0].legend()
-#axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
-#axwn[1].set_xlabel(r'$\omega_n$')
-#axwn[0].set_ylabel(r'$\Re e G(i\omega_n)$')
-#axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
+g, axwn = plt.subplots(2, sharex=True)
+g.subplots_adjust(hspace=0)
+wn = matsubara_freq(beta, 40)
+for mu, c in zip(mu_v, c_v):
+    giw = gf(1j*wn, 1., mu, beta)[0]
+    axwn[0].plot(wn, giw.real, c+'s-', label=r'$\mu={}$'.format(mu))
+    axwn[1].plot(wn, giw.imag, c+'o-')
+axwn[0].legend()
+axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
+axwn[1].set_xlabel(r'$\omega_n$')
+axwn[0].set_ylabel(r'$\Re e G(i\omega_n)$')
+axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
 
 ## analytical GF
 beta = 50.
@@ -83,7 +83,7 @@ tau = np.linspace(0, beta, 200)
 #jump = tau>beta/2.
 #tau[jump] -= beta
 #tau[tau<0] += beta
-M = np.linspace(-2.1*U, 2.1*U, 9)
+M = np.linspace(-2.1*U, 2.1*U, 5)
 mu = 0.0
 z = 1+np.exp(beta*(M+mu))+np.exp(-beta*(M-mu))+np.exp(2*beta*mu)
 Z = 1+2*np.exp(beta*(U/2+mu))+np.exp(2*beta*mu)
