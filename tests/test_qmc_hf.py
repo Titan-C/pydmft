@@ -39,6 +39,21 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
     assert np.allclose(g_flip, g_ffast_flip)
 
 
+@pytest.mark.parametrize("u_int", [1, 2, 2.5])
+def test_solver_atom(u_int):
+    parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    40,
+             'sweeps': 5000}
+    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
+    v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
+    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
+
+    g0t = -.5 * np.ones(parms['n_tau_mc']+1)
+    gtu, gtd = hf.imp_solver(g0t, g0t, v,  parms['sweeps'])
+    g = 0.5 * (gtu+gtd)
+    result = np.polyfit(tau[:10], np.log(g[:10]), 1)
+    assert np.allclose(result, [-u_int/2., np.log(.5)], atol=0.01)
+
+
 @pytest.mark.parametrize("chempot, u_int, gend",
  [(0, 2, np.array([-0.5  , -0.335, -0.246, -0.196, -0.164, -0.144, -0.129,
        -0.118, -0.11 , -0.104, -0.099, -0.095, -0.092, -0.09 , -0.089, -0.087,
