@@ -30,6 +30,6 @@ extern "C"
      #include <cblas.h>
 }
 
-void cgnew(size_t N, double *g, double v, int k, double sign);
+void cgnew(size_t N, double *g, double dv, int k);
 
 #endif // HFC_H
