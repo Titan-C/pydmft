@@ -89,8 +89,8 @@ def update(gup, gdw, v):
         rat = rat/(1.+rat)
         if rat > np.random.rand():
             v[j] *= -1.
-            gnew(gup, v[j], j, 1.)
-            gnew(gdw, v[j], j, -1.)
+            gnew(gup, -dv, j)
+            gnew(gdw,  dv, j)
 
 
 def ret_weiss(g0tau):
@@ -139,7 +139,7 @@ def gnewclean(g0t, v, sign, kroneker):
 
     return solve(b, g0t)
 
-def gnew(g, v, k, sign):
+def gnew(g, dv, k):
     """Quick update of the interacting Green function matrix after a single
     spin flip of the auxiliary field. It calculates
 
@@ -148,7 +148,6 @@ def gnew(g, v, k, sign):
     .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
 
     no sumation in the indexes"""
-    dv = sign*v*2
     ee = np.exp(dv)-1.
     a = ee/(1. + (1.-g[k, k])*ee)
     x = g[:, k].copy()

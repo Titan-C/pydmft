@@ -6,11 +6,11 @@ import cython
 from libc.math cimport exp
 
 cdef extern from "hfc.h":
-    void cgnew(size_t N, double *g, double v, int k, double sign)
+    void cgnew(size_t N, double *g, double dv, int k)
 
-def gnew(np.ndarray[np.float64_t, ndim=2] g, double v, int k, double sign):
+def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
     cdef int N=g.shape[0]
-    cgnew(N, &g[0,0], v, k, sign)
+    cgnew(N, &g[0,0], dv, k)
 
 
 cdef extern from "gsl/gsl_rng.h":
@@ -40,5 +40,5 @@ cpdef update(np.ndarray[np.float64_t, ndim=2] gup,
         rat = rat/(1.+rat)
         if rat > uniform(r):
             v[j] *= -1.
-            cgnew(N, &gup[0,0], v[j], j, 1.)
-            cgnew(N, &gdw[0,0], v[j], j, -1.)
+            cgnew(N, &gup[0,0], -dv, j)
+            cgnew(N, &gdw[0,0],  dv, j)

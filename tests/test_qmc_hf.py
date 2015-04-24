@@ -29,14 +29,29 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
 
     g_flip = hf.gnewclean(g0ttp, v, 1, kroneker)
     g_fast_flip = np.copy(groot)
-    hf.gnew(g_fast_flip, v[flip], flip, 1)
+    hf.gnew(g_fast_flip, 2*v[flip], flip)
 
     assert np.allclose(g_flip, g_fast_flip)
 
     g_ffast_flip = np.copy(groot)
-    hffast.gnew(g_ffast_flip, v[flip], flip, 1)
+    hffast.gnew(g_ffast_flip, 2*v[flip], flip)
 
     assert np.allclose(g_flip, g_ffast_flip)
+
+
+@pytest.mark.parametrize("u_int", [1, 2, 2.5])
+def test_solver_atom(u_int):
+    parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    40,
+             'sweeps': 5000}
+    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
+    v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
+    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
+
+    g0t = -.5 * np.ones(parms['n_tau_mc']+1)
+    gtu, gtd = hf.imp_solver(g0t, g0t, v,  parms['sweeps'])
+    g = 0.5 * (gtu+gtd)
+    result = np.polyfit(tau[:10], np.log(g[:10]), 1)
+    assert np.allclose(result, [-u_int/2., np.log(.5)], atol=0.01)
 
 
 @pytest.mark.parametrize("chempot, u_int, gend",

@@ -19,10 +19,9 @@
 
 #include "hfc.h"
 
-void cgnew(size_t N, double *g, double v, int k, double sign){
-    double dv, ee, a;
+void cgnew(size_t N, double *g, double dv, int k){
+    double ee, a;
 
-    dv = sign*v*2;
     ee = exp(dv)-1.;
     a = ee/(1. + (1.-g[k*N + k])*ee);
 
