@@ -49,7 +49,7 @@ def ising_v(dtau, U, L=32, polar=0.5):
     return vis*lam
 
 
-def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
+def imp_solver(g0up, g0dw, v, parms):
     r"""Impurity solver call. Calcutaltes the interacting Green function
     as given by the contribution of the auxiliary discretized spin field.
     """
@@ -62,20 +62,20 @@ def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
 
     gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
 
-    for mcs in range(sweeps+therm):
+    for mcs in range(parms['sweeps'] + parms['therm']):
         hffast.updateDHS(gup, gdw, v)
 
-        if mcs % therm == 0:
+        if mcs % parms['therm'] == 0:
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
 
-        if mcs > therm:
+        if mcs > parms['therm']:
 
             gstup += gup
             gstdw += gdw
 
-    gstup = gstup/sweeps
-    gstdw = gstdw/sweeps
+    gstup = gstup/parms['sweeps']
+    gstdw = gstdw/parms['sweeps']
 
     return avg_g(gstup), avg_g(gstdw)
 

@@ -29,6 +29,7 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'MU':          0,
                    'loops':       1,
                    'sweeps':      8000,
+                   'therm':       1000,
                   }
 
     tau, w_n, __, Giw, v_aux = hf.setup_PM_sim(parameters)
