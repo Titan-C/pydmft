@@ -63,7 +63,7 @@ def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
     gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
 
     for mcs in range(sweeps+therm):
-        hffast.update(gup, gdw, v)
+        hffast.updateDHS(gup, gdw, v)
 
         if mcs % therm == 0:
             gup = gnewclean(gxu, v, 1., kroneker)
@@ -80,7 +80,7 @@ def imp_solver(g0up, g0dw, v, sweeps, therm = 1000):
     return avg_g(gstup), avg_g(gstdw)
 
 
-def update(gup, gdw, v):
+def updateDHS(gup, gdw, v):
     for j in range(v.size):
         dv = 2.*v[j]
         ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
@@ -143,8 +143,8 @@ def gnew(g, dv, k):
     """Quick update of the interacting Green function matrix after a single
     spin flip of the auxiliary field. It calculates
 
-    .. math:: \\alpha = \\frac{\\exp(2\\sigma v_j) - 1}
-                        {1 + (1 - G_{jj})(\\exp(2\\sigma v_j) - 1)}
+    .. math:: \\alpha = \\frac{\\exp(v'_j - v_j) - 1}
+                        {1 + (1 - G_{jj})(\\exp(v'_j v_j) - 1)}
     .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
 
     no sumation in the indexes"""

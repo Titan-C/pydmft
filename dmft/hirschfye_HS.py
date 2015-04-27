@@ -9,9 +9,9 @@ Quantum Monte Carlo algorithm
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
-from scipy.linalg.blas import dger
 
 import dmft.hirschfye as hf
+import hffast
 
 
 def ising_v(dtau, U, L=32):
@@ -52,7 +52,7 @@ def imp_solver(g0up, g0dw, v, parms, therm=1000):
 
     gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
     for mcs in range(parms['sweeps']+therm):
-        update(gup, gdw, v, parms['U'], parms['dtau_mc'])
+        hffast.updateCHS(gup, gdw, v, parms['U'], parms['dtau_mc'])
 
         if mcs % therm == 0:
             gup = hf.gnewclean(gxu, v, 1., kroneker)
@@ -69,7 +69,7 @@ def imp_solver(g0up, g0dw, v, parms, therm=1000):
     return hf.avg_g(gstup), hf.avg_g(gstdw)
 
 
-def update(gup, gdw, v, U, dtau):
+def updateCHS(gup, gdw, v, U, dtau):
     for j in range(v.size):
         Vjp = - dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
         dv = Vjp - v[j]
@@ -80,22 +80,5 @@ def update(gup, gdw, v, U, dtau):
         rat = rat/(gauss_weight+rat)
         if rat > np.random.rand():
             v[j] = Vjp
-            gnew(gup, dv, j)
-            gnew(gdw,-dv, j)
-
-
-def gnew(g, dv, k):
-    """Quick update of the interacting Green function matrix after a single
-    spin flip of the auxiliary field. It calculates
-
-    .. math:: \\alpha = \\frac{\\exp(v'_j - v_j) - 1}
-                        {1 + (1 - G_{jj})(\\exp(v'_j v_j) - 1)}
-    .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
-
-    no sumation in the indexes"""
-    ee = np.exp(dv)-1.
-    a = ee/(1. + (1.-g[k, k])*ee)
-    x = g[:, k].copy()
-    x[k] -= 1
-    y = g[k, :].copy()
-    g = dger(a, x, y, 1, 1, g, 1, 1, 1)
+            hffast.gnew(gup, dv, j)
+            hffast.gnew(gdw,-dv, j)
