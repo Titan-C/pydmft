@@ -64,6 +64,8 @@ def imp_solver(g0up, g0dw, v, parms):
     meas = 0
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
+            if parms['global_flip']:
+                v *=  -1
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
 
