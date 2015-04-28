@@ -61,6 +61,7 @@ def imp_solver(g0up, g0dw, v, parms):
     gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
     vlog = []
     ar = []
+    meas = 0
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             gup = gnewclean(gxu, v, 1., kroneker)
@@ -76,16 +77,18 @@ def imp_solver(g0up, g0dw, v, parms):
         else:
             if parms['updater'] == 'discrete':
                 hffast.updateDHS(gup, gdw, v)
-            if parms['updater'] == 'continuous':
+            elif parms['updater'] == 'continuous':
                 hffast.updateCHS(gup, gdw, v, parms)
+            else:
+                raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
         if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
-
+            meas += 1
             gstup += gup
             gstdw += gdw
 
-    gstup = gstup/parms['sweeps']
-    gstdw = gstdw/parms['sweeps']
+    gstup = gstup/meas
+    gstdw = gstdw/meas
 
     if parms['save_logs']:
         return avg_g(gstup), avg_g(gstdw), np.asarray(vlog), np.asarray(ar)
