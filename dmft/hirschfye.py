@@ -118,6 +118,8 @@ def updateCHS(gup, gdw, v, parms):
 
 
 def updateDHS(gup, gdw, v):
+    vlog = []
+    acc = 0
     for j in range(v.size):
         dv = 2.*v[j]
         ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
@@ -125,9 +127,12 @@ def updateDHS(gup, gdw, v):
         rat = ratup * ratdw
         rat = rat/(1.+rat)
         if rat > np.random.rand():
+            acc += 1
             v[j] *= -1.
             gnew(gup, -dv, j)
             gnew(gdw,  dv, j)
+        vlog.append(v.copy())
+    return np.array(vlog), acc
 
 
 def ret_weiss(g0tau):
