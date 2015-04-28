@@ -49,10 +49,16 @@ def ising_v(dtau, U, L=32, polar=0.5):
     return vis*lam
 
 
-def imp_solver(g0up, g0dw, v, parms):
+def imp_solver(g0up, g0dw, v, parms_user):
     r"""Impurity solver call. Calcutaltes the interacting Green function
     as given by the contribution of the auxiliary discretized spin field.
     """
+
+    ## Set up default values
+    parms = {'global_flip': False,
+                'save_logs': False,
+                }
+    parms.update(parms_user)
 
     gxu = ret_weiss(g0up)
     gxd = ret_weiss(g0dw)
