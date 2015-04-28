@@ -54,9 +54,11 @@ cpdef updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
 cpdef updateCHS(np.ndarray[np.float64_t, ndim=2] gup,
              np.ndarray[np.float64_t, ndim=2] gdw,
              np.ndarray[np.float64_t, ndim=1] v,
-             double U, double dtau):
+             parms):
     cdef double Vjp, dv, ratup, ratdw, rat, gauss_weight
     cdef int j, i, up, dw, pair, N=v.shape[0]
+    cdef double U, dtau
+    U, dtau = parms['U'], parms['dtau_mc']
     for j in range(N):
         Vjp = -1.* dtau * normal(r, sqrt(U/dtau) )
         dv = Vjp - v[j]

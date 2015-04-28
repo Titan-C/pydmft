@@ -57,19 +57,29 @@ def imp_solver(g0up, g0dw, v, parms):
     gxu = ret_weiss(g0up)
     gxd = ret_weiss(g0dw)
     kroneker = np.eye(v.size)
-    gup = gnewclean(gxu, v, 1., kroneker)
-    gdw = gnewclean(gxd, v, -1., kroneker)
 
-    gstup, gstdw = np.zeros_like(gup), np.zeros_like(gdw)
-
+    gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
+    vlog = []
+    ar = []
     for mcs in range(parms['sweeps'] + parms['therm']):
-        hffast.updateDHS(gup, gdw, v)
-
         if mcs % parms['therm'] == 0:
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
 
-        if mcs > parms['therm']:
+        if parms['save_logs']:
+            if parms['updater'] == 'discrete':
+                vl, acc = updateDHS(gup, gdw, v)
+            if parms['updater'] == 'continuous':
+                vl, acc = updateCHS(gup, gdw, v, parms)
+            vlog.append(vl)
+            ar.append(acc)
+        else:
+            if parms['updater'] == 'discrete':
+                hffast.updateDHS(gup, gdw, v)
+            if parms['updater'] == 'continuous':
+                hffast.updateCHS(gup, gdw, v, parms)
+
+        if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
 
             gstup += gup
             gstdw += gdw
@@ -77,7 +87,31 @@ def imp_solver(g0up, g0dw, v, parms):
     gstup = gstup/parms['sweeps']
     gstdw = gstdw/parms['sweeps']
 
-    return avg_g(gstup), avg_g(gstdw)
+    if parms['save_logs']:
+        return avg_g(gstup), avg_g(gstdw), np.asarray(vlog), np.asarray(ar)
+    else:
+        return avg_g(gstup), avg_g(gstdw)
+
+
+def updateCHS(gup, gdw, v, parms):
+    vlog = []
+    acc = 0
+    U, dtau = parms['U'], parms['dtau_mc']
+    for j in range(v.size):
+        Vjp = - dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
+        dv = Vjp - v[j]
+        ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
+        ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
+        rat = ratup * ratdw
+        gauss_weight = np.exp((Vjp**2-v[j]**2)/(2*U*dtau))
+        rat = rat/(gauss_weight+rat)
+        if rat > np.random.rand():
+            acc += 1
+            v[j] = Vjp
+            hffast.gnew(gup, dv, j)
+            hffast.gnew(gdw,-dv, j)
+        vlog.append(v.copy())
+    return np.array(vlog), acc
 
 
 def updateDHS(gup, gdw, v):
