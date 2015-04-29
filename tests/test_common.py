@@ -11,8 +11,9 @@ from dmft.common import greenF, gw_invfouriertrans, gt_fouriertrans,\
 import numpy as np
 import pytest
 
-@pytest.mark.parametrize("chempot", [ 0, 0.5, -0.8])
-def test_fourier_trasforms(chempot, beta=50., n_tau=2**11, n_matsubara=64):
+
+@pytest.mark.parametrize("chempot", [0, 0.5, -0.8, 4.])
+def test_fourier_trasforms(chempot, beta=50., n_tau=2**11, n_matsubara=115):
     """Test the tail improved fourier transforms"""
     parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara}
     tau, w_n = tau_wn_setup(parms)
