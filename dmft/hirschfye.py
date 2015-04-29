@@ -109,7 +109,7 @@ def updateCHS(gup, gdw, v, parms):
     acc = 0
     U, dtau = parms['U'], parms['dtau_mc']
     for j in range(v.size):
-        Vjp = - dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
+        Vjp = dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
         dv = Vjp - v[j]
         ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
@@ -129,16 +129,16 @@ def updateDHS(gup, gdw, v):
     vlog = []
     acc = 0
     for j in range(v.size):
-        dv = 2.*v[j]
-        ratup = 1. + (1. - gup[j, j])*(np.exp(-dv)-1.)
-        ratdw = 1. + (1. - gdw[j, j])*(np.exp( dv)-1.)
+        dv = -2.*v[j]
+        ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
+        ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
         rat = ratup * ratdw
         rat = rat/(1.+rat)
         if rat > np.random.rand():
             acc += 1
             v[j] *= -1.
-            gnew(gup, -dv, j)
-            gnew(gdw,  dv, j)
+            gnew(gup,  dv, j)
+            gnew(gdw, -dv, j)
         vlog.append(v.copy())
     return np.array(vlog), acc
 
