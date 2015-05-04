@@ -75,25 +75,20 @@ def imp_solver(g0up, g0dw, v, parms_user):
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
 
-        if parms['save_logs']:
-            if parms['updater'] == 'discrete':
-                vl, acc = updateDHS(gup, gdw, v)
-            if parms['updater'] == 'continuous':
-                vl, acc = updateCHS(gup, gdw, v, parms)
-            vlog.append(vl)
-            ar.append(acc)
+        if parms['updater'] == 'discrete':
+            acc = hffast.updateDHS(gup, gdw, v)
+        elif parms['updater'] == 'continuous':
+            acc = hffast.updateCHS(gup, gdw, v, parms)
         else:
-            if parms['updater'] == 'discrete':
-                hffast.updateDHS(gup, gdw, v)
-            elif parms['updater'] == 'continuous':
-                hffast.updateCHS(gup, gdw, v, parms)
-            else:
-                raise ValueError("Unrecognized updater {}".format(parms['updater']))
+            raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
         if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
             meas += 1
             gstup += gup
             gstdw += gdw
+            if parms['save_logs']:
+                vlog.append(v.copy())
+                ar.append(acc)
 
     gstup = gstup/meas
     gstdw = gstdw/meas
