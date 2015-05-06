@@ -9,7 +9,7 @@ Quantum Monte Carlo algorithm
 """
 from __future__ import division, absolute_import, print_function
 import numpy as np
-from scipy.linalg import solve
+import scipy.linalg as la
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 
@@ -62,23 +62,27 @@ def imp_solver(g0up, g0dw, v, parms_user):
 
     gxu = ret_weiss(g0up)
     gxd = ret_weiss(g0dw)
-    kroneker = np.eye(v.size)
+    kroneker = np.eye(parms_user['n_tau_mc'])
 
     gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
     vlog = []
     ar = []
     meas = 0
+
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
                 v *=  -1
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
+            dgup, dgdw = la.det(gup), la.det(gdw)
 
         if parms['updater'] == 'discrete':
             acc = hffast.updateDHS(gup, gdw, v)
         elif parms['updater'] == 'continuous':
             acc = hffast.updateCHS(gup, gdw, v, parms)
+        elif parms['updater'] == 'continuousMF':
+            dgup, dgdw, acc = updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw)
         else:
             raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
@@ -87,7 +91,7 @@ def imp_solver(g0up, g0dw, v, parms_user):
             gstup += gup
             gstdw += gdw
             if parms['save_logs']:
-                vlog.append(v.copy())
+                vlog.append(np.copy(v))
                 ar.append(acc)
 
     gstup = gstup/meas
@@ -99,12 +103,38 @@ def imp_solver(g0up, g0dw, v, parms_user):
         return avg_g(gstup), avg_g(gstdw)
 
 
+def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
+    acc = 0
+    U, dtau = parms['U'], parms['dtau_mc']
+    Vjp = dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
+    dv = Vjp - v
+    gnu = gnewclean(gup, dv, 1, kroneker)
+    gnd = gnewclean(gdw, dv, -1, kroneker)
+    dgnu = la.det(gnu)
+    dgnd = la.det(gnd)
+    ratup = dgnu/dgup
+    ratdw = dgnd/dgdw
+    rat = ratup * ratdw
+    gauss_weight = np.exp((Vjp**2-v**2)/(2*U*dtau)*parms['n_tau_mc'])
+    rat = rat/(gauss_weight+rat)
+
+    if rat > np.random.rand():
+#        import pdb; pdb.set_trace()
+        acc = 1
+        v[:] = Vjp[:]
+        gup = gnu
+        gdw = gnd
+        dgup = dgnu
+        dgdw = dgnd
+    return dgup, dgdw, acc
+
+
 def updateCHS(gup, gdw, v, parms):
     vlog = []
     acc = 0
     U, dtau = parms['U'], parms['dtau_mc']
     for j in range(v.size):
-        Vjp = dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
+        Vjp = dtau *( np.random.rand(1)-.5) # normal(0, np.sqrt(U/dtau), 1)
         dv = Vjp - v[j]
         ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
@@ -182,7 +212,7 @@ def gnewclean(g0t, v, sign, kroneker):
     u_j = np.exp(sign*v) - 1.
     b = kroneker - u_j * (g0t-kroneker)
 
-    return solve(b, g0t)
+    return la.solve(b, g0t)
 
 def gnew(g, dv, k):
     """Quick update of the interacting Green function matrix after a single
@@ -220,3 +250,22 @@ def setup_PM_sim(parms):
     v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
 
     return tau, w_n, gt, gw, v
+
+if __name__ == "__main__":
+    parms = {'sweeps': 5500, 'therm': 1000,
+         'U': 2,
+         'BETA': 16,
+         'N_meas': 1,
+         'n_tau_mc': 20,
+         'save_logs': True,
+#         'global_flip': True,
+         'updater': 'continuous'
+         }
+    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
+    g0t = -0.5 * np.ones(parms['n_tau_mc']+1)
+    v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
+    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
+    gu, gd, vl, ar = imp_solver(g0t, g0t, v, parms)
+    g=(gu+gd)/2
+    plt.plot(vl)
+    print(np.polyfit(tau[:parms['n_tau_mc']//3], np.log(g[:parms['n_tau_mc']//3]), 1))
