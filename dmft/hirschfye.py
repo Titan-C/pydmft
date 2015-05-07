@@ -106,7 +106,7 @@ def imp_solver(g0up, g0dw, v, parms_user):
 def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
     acc = 0
     U, dtau = parms['U'], parms['dtau_mc']
-    Vjp = dtau * np.random.normal(0, np.sqrt(U/dtau), 1)
+    Vjp = dtau * np.random.normal(0, np.sqrt(U/parms['BETA']), 1)
     dv = Vjp - v
     gnu = gnewclean(gup, dv, 1, kroneker)
     gnd = gnewclean(gdw, dv, -1, kroneker)
@@ -122,8 +122,8 @@ def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
 #        import pdb; pdb.set_trace()
         acc = 1
         v[:] = Vjp[:]
-        gup = gnu
-        gdw = gnd
+        gup[:] = gnu[:]
+        gdw[:] = gnd[:]
         dgup = dgnu
         dgdw = dgnd
     return dgup, dgdw, acc
@@ -256,10 +256,10 @@ if __name__ == "__main__":
          'U': 2,
          'BETA': 16,
          'N_meas': 1,
-         'n_tau_mc': 20,
+         'n_tau_mc': 128,
          'save_logs': True,
 #         'global_flip': True,
-         'updater': 'continuous'
+         'updater': 'discrete'
          }
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
     g0t = -0.5 * np.ones(parms['n_tau_mc']+1)
@@ -267,5 +267,11 @@ if __name__ == "__main__":
     tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
     gu, gd, vl, ar = imp_solver(g0t, g0t, v, parms)
     g=(gu+gd)/2
-    plt.plot(vl)
+    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
+    nu_n = gf.matsubara_freq(parms['BETA'], parms['n_tau_mc']*2, 0)
+    vle=np.zeros((5499,parms['n_tau_mc']+1))
+    vle[:,:-1]=vl
+    vle[:,-1]=vl[:,0]
+    m = gf.gt_fouriertrans(vle, tau, nu_n)
+#    plt.plot(vl)
     print(np.polyfit(tau[:parms['n_tau_mc']//3], np.log(g[:parms['n_tau_mc']//3]), 1))
