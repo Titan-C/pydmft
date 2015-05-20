@@ -54,10 +54,10 @@ def imp_solver(g0up, g0dw, v, parms_user):
     as given by the contribution of the auxiliary discretized spin field.
     """
 
-    ## Set up default values
+    # Set up default values
     parms = {'global_flip': False,
-                'save_logs': False,
-                }
+             'save_logs': False,
+             }
     parms.update(parms_user)
 
     gxu = ret_weiss(g0up)
@@ -72,17 +72,17 @@ def imp_solver(g0up, g0dw, v, parms_user):
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
-                v *=  -1
+                v *= -1
             gup = gnewclean(gxu, v, 1., kroneker)
             gdw = gnewclean(gxd, v, -1., kroneker)
-            dgup, dgdw = la.det(gup), la.det(gdw)
 
         if parms['updater'] == 'discrete':
             acc = hffast.updateDHS(gup, gdw, v)
         elif parms['updater'] == 'continuous':
             acc = hffast.updateCHS(gup, gdw, v, parms)
-        elif parms['updater'] == 'continuousMF':
-            dgup, dgdw, acc = updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw)
+#        elif parms['updater'] == 'continuousMF':
+#            dgup, dgdw = la.det(gup), la.det(gdw)
+#            dgup, dgdw, acc = updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw)
         else:
             raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
@@ -102,70 +102,30 @@ def imp_solver(g0up, g0dw, v, parms_user):
     else:
         return avg_g(gstup), avg_g(gstdw)
 
-
-def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
-    acc = 0
-    U, dtau = parms['U'], parms['dtau_mc']
-    Vjp = dtau * np.random.normal(0, np.sqrt(U/parms['BETA']), 1)
-    dv = Vjp - v
-    gnu = gnewclean(gup, dv, 1, kroneker)
-    gnd = gnewclean(gdw, dv, -1, kroneker)
-    dgnu = la.det(gnu)
-    dgnd = la.det(gnd)
-    ratup = dgnu/dgup
-    ratdw = dgnd/dgdw
-    rat = ratup * ratdw
-    gauss_weight = np.exp((Vjp**2-v**2)/(2*U*dtau)*parms['n_tau_mc'])
-    rat = rat/(gauss_weight+rat)
-
-    if rat > np.random.rand():
-#        import pdb; pdb.set_trace()
-        acc = 1
-        v[:] = Vjp[:]
-        gup[:] = gnu[:]
-        gdw[:] = gnd[:]
-        dgup = dgnu
-        dgdw = dgnd
-    return dgup, dgdw, acc
-
-
-def updateCHS(gup, gdw, v, parms):
-    vlog = []
-    acc = 0
-    U, dtau = parms['U'], parms['dtau_mc']
-    for j in range(v.size):
-        Vjp = dtau *( np.random.rand(1)-.5) # normal(0, np.sqrt(U/dtau), 1)
-        dv = Vjp - v[j]
-        ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
-        ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
-        rat = ratup * ratdw
-        gauss_weight = np.exp((Vjp**2-v[j]**2)/(2*U*dtau))
-        rat = rat/(gauss_weight+rat)
-        if rat > np.random.rand():
-            acc += 1
-            v[j] = Vjp
-            hffast.gnew(gup, dv, j)
-            hffast.gnew(gdw,-dv, j)
-        vlog.append(v.copy())
-    return np.array(vlog), acc
-
-
-def updateDHS(gup, gdw, v):
-    vlog = []
-    acc = 0
-    for j in range(v.size):
-        dv = -2.*v[j]
-        ratup = 1. + (1. - gup[j, j])*(np.exp( dv)-1.)
-        ratdw = 1. + (1. - gdw[j, j])*(np.exp(-dv)-1.)
-        rat = ratup * ratdw
-        rat = rat/(1.+rat)
-        if rat > np.random.rand():
-            acc += 1
-            v[j] *= -1.
-            gnew(gup,  dv, j)
-            gnew(gdw, -dv, j)
-        vlog.append(v.copy())
-    return np.array(vlog), acc
+# Global update on mean field
+#def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
+#    acc = 0
+#    U, dtau = parms['U'], parms['dtau_mc']
+#    Vjp = dtau * np.random.normal(0, np.sqrt(U/parms['BETA']), 1)
+#    dv = Vjp - v
+#    gnu = gnewclean(gup, dv, 1, kroneker)
+#    gnd = gnewclean(gdw, dv, -1, kroneker)
+#    dgnu = la.det(gnu)
+#    dgnd = la.det(gnd)
+#    ratup = dgnu/dgup
+#    ratdw = dgnd/dgdw
+#    rat = ratup * ratdw
+#    gauss_weight = np.exp((Vjp**2-v**2)/(2*U*dtau)*parms['n_tau_mc'])
+#    rat = rat/(gauss_weight+rat)
+#
+#    if rat > np.random.rand():
+#        acc = 1
+#        v[:] = Vjp[:]
+#        gup[:] = gnu[:]
+#        gdw[:] = gnd[:]
+#        dgup = dgnu
+#        dgdw = dgnd
+#    return dgup, dgdw, acc
 
 
 def ret_weiss(g0tau):
@@ -250,28 +210,3 @@ def setup_PM_sim(parms):
     v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
 
     return tau, w_n, gt, gw, v
-
-if __name__ == "__main__":
-    parms = {'sweeps': 5500, 'therm': 1000,
-         'U': 2,
-         'BETA': 16,
-         'N_meas': 1,
-         'n_tau_mc': 128,
-         'save_logs': True,
-#         'global_flip': True,
-         'updater': 'discrete'
-         }
-    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
-    g0t = -0.5 * np.ones(parms['n_tau_mc']+1)
-    v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
-    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
-    gu, gd, vl, ar = imp_solver(g0t, g0t, v, parms)
-    g=(gu+gd)/2
-    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
-    nu_n = gf.matsubara_freq(parms['BETA'], parms['n_tau_mc']*2, 0)
-    vle=np.zeros((5499,parms['n_tau_mc']+1))
-    vle[:,:-1]=vl
-    vle[:,-1]=vl[:,0]
-    m = gf.gt_fouriertrans(vle, tau, nu_n)
-#    plt.plot(vl)
-    print(np.polyfit(tau[:parms['n_tau_mc']//3], np.log(g[:parms['n_tau_mc']//3]), 1))

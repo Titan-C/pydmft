@@ -43,7 +43,8 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
 def test_solver_atom(u_int):
     parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    40,
              'sweeps': 5000, 'therm': 1000, 'N_meas': 1,
-             'save_logs': False, 'updater': 'discrete'}
+             'save_logs': False, 'updater': 'discrete',
+             'global_flip': True}
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
     v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
     tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
