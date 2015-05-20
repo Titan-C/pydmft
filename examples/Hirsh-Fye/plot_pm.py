@@ -12,21 +12,26 @@ from __future__ import division, absolute_import, print_function
 
 import matplotlib.pyplot as plt
 import dmft.hirschfye as hf
+import numpy as np
 from dmft.common import gt_fouriertrans, gw_invfouriertrans
 
 
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'n_tau_mc':    40,
+                   'n_tau_mc':    64,
                    'BETA':        16,
                    'N_TAU':    2**11,
                    'N_MATSUBARA': 64,
-                   'U':           2,
+                   'U':           3,
                    't':           0.5,
                    'MU':          0,
-                   'loops':       8,
-                   'sweeps':      20000,
+                   'loops':       6,
+                   'sweeps':      8000,
+                   'therm':       1000,
+                   'N_meas':      4,
+                   'save_logs':   False,
+                   'updater':     'discrete'
                   }
 
     tau, w_n, __, Giw, v_aux = hf.setup_PM_sim(parameters)
@@ -41,7 +46,7 @@ def dmft_loop_pm(gw=None, **kwargs):
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.interpol(G0t, parameters['n_tau_mc'])
 
-        gtu, gtd = hf.imp_solver(g0t, g0t, v_aux, parameters['sweeps'])
+        gtu, gtd = hf.imp_solver(g0t, g0t, v_aux, parameters)
         gt = -0.5 * (gtu+gtd)
 
         Gt = hf.interpol(gt, parameters['N_TAU'])
@@ -56,11 +61,13 @@ def dmft_loop_pm(gw=None, **kwargs):
 if __name__ == "__main__":
     sim1 = dmft_loop_pm()
     plt.figure()
+    tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
     for it in sorted(sim1):
         if 'it' in it:
 #            plt.plot(s['Giw'].real.T, label=it)
-            plt.plot(sim1[it]['gtau'], label=it)
+            plt.semilogy(tau,-sim1[it]['gtau'], 'o', label=it)
     plt.legend()
+    print(np.polyfit(tau[:10], np.log(-sim1['it00']['gtau'][:10]), 1))
 #    plt.figure()
 #    for it in sorted(sim2):
 #        if 'it' in it:

@@ -42,13 +42,14 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
 @pytest.mark.parametrize("u_int", [1, 2, 2.5])
 def test_solver_atom(u_int):
     parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    40,
-             'sweeps': 5000}
+             'sweeps': 5000, 'therm': 1000, 'N_meas': 1,
+             'save_logs': False, 'updater': 'discrete'}
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
     v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
     tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
 
     g0t = -.5 * np.ones(parms['n_tau_mc']+1)
-    gtu, gtd = hf.imp_solver(g0t, g0t, v,  parms['sweeps'])
+    gtu, gtd = hf.imp_solver(g0t, g0t, v,  parms)
     g = 0.5 * (gtu+gtd)
     result = np.polyfit(tau[:10], np.log(g[:10]), 1)
     assert np.allclose(result, [-u_int/2., np.log(.5)], atol=0.01)
@@ -67,11 +68,13 @@ def test_solver(chempot, u_int, gend):
     parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
              't': 0.5,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
-             'sweeps': 5000}
+             'sweeps': 5000, 'therm': 1000, 'N_meas': 1,
+             'save_logs': False, 'updater': 'discrete'}
     tau, w_n, g0t, Giw, v = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
     G0t = hf.gw_invfouriertrans(G0iw, tau, w_n)
     g0t = hf.interpol(G0t, parms['n_tau_mc'])
-    gtu, gtd = hf.imp_solver(g0t, g0t, v, parms['sweeps'])
+    gtu, gtd = hf.imp_solver(g0t, g0t, v, parms)
     g = -0.5 * (gtu+gtd)
     assert np.allclose(gend, g, atol=6e-3)
+
