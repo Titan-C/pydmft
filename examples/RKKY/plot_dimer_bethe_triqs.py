@@ -48,3 +48,34 @@ g_iw['B', 'A'] = -tab
 g_iw['B', 'B'] = iOmega_n + mu
 g_iw << g_iw + t2 * SemiCircular(2*t)
 g_iw.invert()
+
+from pytriqs.gf.local import GfReFreq, Omega, SemiCircular
+from pytriqs.plot.mpl_interface import oplot
+mu, t = 0.0, 0.5
+t2 = t**2
+tab = 0.1
+beta = 50.
+
+g_iw = GfReFreq(indices=['A', 'B'], window=(-3,3), n_points = 2**9)
+gmix = g_iw.copy()
+
+plt.figure()
+g_iw << 0.
+for gam in [0.1, 0.01, 0.001]:
+    gmix['A', 'A'] = Omega + mu + 1j * gam
+    gmix['A', 'B'] = -0.2
+    gmix['B', 'A'] = -0.2
+    gmix['B', 'B'] = Omega + mu + 1j * gam
+
+
+#g_iw << SemiCircular(2*t)
+#g_iw << 0.
+    for i in xrange(200):
+        g_iw << gmix - t2 * g_iw
+        #
+        g_iw.invert()
+
+    oplot(g_iw['A','A'])
+oplot(g_iw['B','B'])
+
+#oplot(g_iw)
