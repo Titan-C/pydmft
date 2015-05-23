@@ -43,8 +43,19 @@ t2 = t**2
 tab = 0.2
 beta = 100.
 
-g_iw = GfImFreq(indices=['A', 'B'], beta=beta)
+g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=2**9)
 gmix = g_iw.copy()
+
+w_n = gf.matsubara_freq(50., 512)
+G1 = gf.greenF(w_n, mu=mu-tab, D=2*t)
+G2 = gf.greenF(w_n, mu=mu+tab, D=2*t)
+Gd = .5*(G1 + G2)
+Gc = .5*(G1 - G2)
+g_iw['A', 'A'].data[:,0,0] = Gd
+g_iw['A', 'B'].data[:,0,0] = Gc
+g_iw['B', 'A'] << g_iw['A', 'B']
+g_iw['B', 'B'] << g_iw['A', 'A']
+
 gmix['A', 'A'] = iOmega_n + mu
 gmix['A', 'B'] = -tab
 gmix['B', 'A'] = -tab
