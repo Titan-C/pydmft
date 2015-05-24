@@ -95,22 +95,28 @@ for tab in [0, 0.25, 0.5, 0.75, 1.1]:
     g_iw.invert()
     oplot(1, g_iw['A', 'A'], RI='I', label=r'$t_c={}$'.format(tab))
 plt.xlim([0, 6.5])
+plt.ylabel(r'$A(\omega)$')
+plt.title(u'Spectral functions of dimer Bethe lattice at $\\beta/D=100$ and $U/D=0$.\n Analitical continuation Padé approximant')
 
 # Matsubara interacting self-consistency
-tab = 1.1
-S = IPT_dimer_Solver(U=0, beta=beta, n_points=len(w_n))
-gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, mu, tab)
+w_n = gf.matsubara_freq(beta, 1024)
+for tab in [0, 0.25, 0.5, 0.75, 1.1]:
 
-init_gf(S.g_iw, w_n, mu, tab, t)
+    S = IPT_dimer_Solver(U=1.5, beta=beta, n_points=len(w_n))
+    gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, mu, tab)
 
-for i in xrange(10):
-    # Bethe lattice bath
-    S.g0_iw << gmix - t2 * S.g_iw
-    S.g0_iw.invert()
+    init_gf(S.g_iw, w_n, mu, tab, t)
 
-    S.solve()
-#    oplot(1, S.g_iw['A', 'A'], RI='I', label=r'$iter {}$'.format(i))
+    for i in xrange(100):
+        # Bethe lattice bath
+        S.g0_iw << gmix - t2 * S.g_iw
+        S.g0_iw.invert()
 
-greal = GfReFreq(indices=[1], window=(-4.0, 4.0), n_points=400)
-greal.set_from_pade(S.g_iw['A', 'A'], 200, 0.0)
-oplot(2, greal, RI='S', label=r'$t_c={}$'.format(tab))
+        S.solve()
+    #    oplot(1, S.g_iw['A', 'A'], RI='I', label=r'$iter {}$'.format(i))
+
+    greal = GfReFreq(indices=[1], window=(-4.0, 4.0), n_points=400)
+    greal.set_from_pade(S.g_iw['A', 'A'], 200, 0.0)
+    oplot(3, greal, RI='S', label=r'$t_c={}$'.format(tab))
+plt.ylabel(r'$A(\omega)$')
+plt.title(u'Spectral functions of dimer Bethe lattice at $\\beta/D=100$ and $U/D=1.5$.\n Analitical continuation Padé approximant')
