@@ -22,7 +22,8 @@ class IPT_dimer_Solver:
         self.U = params['U']
         self.beta = params['beta']
 
-        self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta)
+        self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta,
+                             n_points=params['n_points'])
         self.g0_iw = self.g_iw.copy()
         self.sigma_iw = self.g_iw.copy()
 
@@ -72,7 +73,7 @@ plt.figure(2)
 w = 1e-3j+np.linspace(-3, 3, 2**9)
 
 for tab in [0, 0.25, 0.5, 0.75, 1.1]:
-    g_re = GfReFreq(indices=['A', 'B'], window=(-3, 3), n_points=2**9)
+    g_re = GfReFreq(indices=['A', 'B'], window=(-3, 3), n_points=len(w))
     gmix_re = mix_gf_dimer(g_re.copy(), Omega + 1e-3j, mu, tab)
 
     init_gf(g_re, -1j*w, mu, tab, t)
@@ -86,7 +87,7 @@ for tab in [0, 0.25, 0.5, 0.75, 1.1]:
 plt.figure(1)
 w_n = gf.matsubara_freq(beta, 512)
 for tab in [0, 0.25, 0.5, 0.75, 1.1]:
-    g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=2**9)
+    g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=len(w_n))
     gmix = mix_gf_dimer(g_iw.copy(), iOmega_n, mu, tab)
 
     init_gf(g_iw, w_n, mu, tab, t)
@@ -94,3 +95,22 @@ for tab in [0, 0.25, 0.5, 0.75, 1.1]:
     g_iw.invert()
     oplot(1, g_iw['A', 'A'], RI='I', label=r'$t_c={}$'.format(tab))
 plt.xlim([0, 6.5])
+
+# Matsubara interacting self-consistency
+tab = 1.1
+S = IPT_dimer_Solver(U=0, beta=beta, n_points=len(w_n))
+gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, mu, tab)
+
+init_gf(S.g_iw, w_n, mu, tab, t)
+
+for i in xrange(10):
+    # Bethe lattice bath
+    S.g0_iw << gmix - t2 * S.g_iw
+    S.g0_iw.invert()
+
+    S.solve()
+#    oplot(1, S.g_iw['A', 'A'], RI='I', label=r'$iter {}$'.format(i))
+
+greal = GfReFreq(indices=[1], window=(-4.0, 4.0), n_points=400)
+greal.set_from_pade(S.g_iw['A', 'A'], 200, 0.0)
+oplot(2, greal, RI='S', label=r'$t_c={}$'.format(tab))
