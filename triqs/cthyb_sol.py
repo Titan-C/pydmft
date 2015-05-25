@@ -5,7 +5,6 @@ Created on Mon Nov 10 11:18:35 2014
 """
 #from __future__ import division, absolute_import, print_function
 from pytriqs.gf.local import *
-from pytriqs.gf.local import *
 from pytriqs.operators import *
 from pytriqs.archive import *
 import pytriqs.utility.mpi as mpi
@@ -19,11 +18,11 @@ n_loops = 5
 
 # Construct the CTQMC solver
 from pytriqs.applications.impurity_solvers.cthyb import Solver
-S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]})
+S = Solver(beta=beta, gf_struct={'up': [0, 1], 'down': [0, 1]})
 
 # Set the solver parameters
 params = {}
-params['n_cycles'] = 1000               # Number of QMC cycles
+params['n_cycles'] = 100000               # Number of QMC cycles
 params['length_cycle'] = 200                # Length of one cycle
 params['n_warmup_cycles'] = 10000           # Warmup cycles
 

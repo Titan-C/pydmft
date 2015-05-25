@@ -106,7 +106,7 @@ for tab in [0, 0.25, 0.5, 0.75, 1.1]:
 
     init_gf(S.g_iw, w_n, mu, tab, t)
 
-    for i in xrange(20):
+    for i in xrange(100):
         # Bethe lattice bath
         S.g0_iw << gmix - t2 * S.g_iw
         S.g0_iw.invert()
