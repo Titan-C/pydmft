@@ -141,16 +141,15 @@ def dimer(S, gmix, R):
     R[u_step+'g0_tau'] = S.g0_tau
     R[u_step+'S_iw'] = S.sigma_iw
 
-ur=np.arange(0,0.2,0.05)
+ur=np.arange(0,4,0.025)
+
 loop_u(ur,1.1,0.5,150)
 
-#def dimhelp(args): return dimer(*args)
+def dimhelp(tab): return dimer(ur, tab, 0.5, 150)
 
-#p=Pool(4)
-#conf=[(u,0.5,0.5,150) for u in [0., 0.05, 0.1, 0.15, 0.2, 0.25]]
-#
-#conf=[(1.5, tab,0.5,150) for tab in [0., 0.25, 0.5, 0.75, 1.]]
-#ou = p.map(dimhelp, conf)
+p=Pool(12)
+tabra=np.arange(0, 1.3, 0.1)
+ou = p.map(dimhelp, tabra)
 #
 
 def plot_re(filen, U):
