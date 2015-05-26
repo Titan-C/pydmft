@@ -100,14 +100,26 @@ plt.xlim([0, 6.5])
 plt.ylabel(r'$A(\omega)$')
 plt.title(u'Spectral functions of dimer Bethe lattice at $\\beta/D=100$ and $U/D=0$.\n Analitical continuation Padé approximant')
 
-# Matsubara interacting self-consistency
 
-def dimer(tab, t, beta):
+# Matsubara interacting self-consistency
+def loop_u(urange, tab, t, beta):
     w_n = gf.matsubara_freq(beta, 1025)
     S = IPT_dimer_Solver(U=0, beta=beta, n_points=len(w_n))
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
-
     init_gf(S.g_iw, w_n, 0, tab, t)
+    S.setup.update({'t': t, 'tab': tab, 'beta': beta})
+
+    file_name = 'uloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
+    for u_int in urange:
+        R = HDFArchive(file_name, 'a')
+        S.U = u_int
+        dimer(S, gmix, R)
+        del R
+
+    return True
+
+
+def dimer(S, gmix, R):
 
     converged = False
     loops = 0
@@ -120,31 +132,32 @@ def dimer(tab, t, beta):
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-5)
         loops += 1
 
+    S.setup.update({'U':S.U, 'loops': loops})
     # Store
-    S.setup.update({'U': U, 't': t, 'tab': tab, 'beta': beta, 'loops': loops})
+    u_step = '/U{U}/'.format(**S.setup)
 
-    groupname = 'U{U}_t{t}_tab{tab}_B{beta}_c{loops}.h5'.format(**S.setup)
-    R = HDFArchive(groupname, 'w')
-    R['g0_tau'] = S.g0_tau
-    R['G_iw'] = S.g_iw
-    R['S_iw'] = S.sigma_iw
-    R['setup'] = S.setup
-    del R
+    R[u_step+'setup'] = S.setup
+    R[u_step+'G_iw'] = S.g_iw
+    R[u_step+'g0_tau'] = S.g0_tau
+    R[u_step+'S_iw'] = S.sigma_iw
 
-    return True
+ur=np.arange(0,0.2,0.05)
+loop_u(ur,1.1,0.5,150)
 
-def dimhelp(args): return dimer(*args)
+#def dimhelp(args): return dimer(*args)
 
-p=Pool(4)
-conf=[(u,0.5,0.5,150) for u in [0., 0.05, 0.1, 0.15, 0.2, 0.25]]
+#p=Pool(4)
+#conf=[(u,0.5,0.5,150) for u in [0., 0.05, 0.1, 0.15, 0.2, 0.25]]
+#
+#conf=[(1.5, tab,0.5,150) for tab in [0., 0.25, 0.5, 0.75, 1.]]
+#ou = p.map(dimhelp, conf)
+#
 
-conf=[(1.5, tab,0.5,150) for tab in [0., 0.25, 0.5, 0.75, 1.]]
-ou = p.map(dimhelp, conf)
-
-
-def plot_re(filen):
+def plot_re(filen, U):
     R = HDFArchive(filen, 'r')
 #
     greal = GfReFreq(indices=[1], window=(-4.0, 4.0), n_points=256)
-    greal.set_from_pade(R['G_iw']['A', 'A'], 100, 0.0)
+    greal.set_from_pade(R['U{}'.format(U)]['G_iw']['A', 'A'], 100, 0.0)
     oplot(-1*greal, RI='I', label=r'$t_c={}$'.format(tab), num=4)
+
+    del R
