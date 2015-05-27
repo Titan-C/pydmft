@@ -11,6 +11,8 @@ from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.plot.mpl_interface import subplots
 import numpy as np
+from dmft.twosite import matsubara_Z
+import matplotlib.pyplot as plt
 
 class IPTSolver(object):
 
@@ -75,14 +77,27 @@ def ev_on_loops(max_loops, U, beta, t):
 def ev_on_interaction(U, beta, t, max_loops=300):
     """Studies change of Green's function depending on DMFT interaction"""
 
-
+    u_zet = []
     for u_int in U:
         S = IPTSolver(U = u_int, beta = beta)
         S.g << SemiCircular(2*t)
-        S.dmft_loop(t, max_loops)
-        oplot(S.g, label = "U={}".format(u_int))
+        nloop = S.dmft_loop(t, max_loops)
+        u_zet.append(matsubara_Z(S.sigma.data[:,0, 0].imag, beta))
+#        oplot(S.g, label = "U={}".format(u_int))
 
-    plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $loop=%.2f$".format(beta,n_loops))
+#    plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$".format(beta))
+    return u_zet
+
 
 if __name__ == "__main__":
-    ev_on_loops([1,2,5,10, 20], 3, 200, 0.5)
+#    ev_on_loops([1,2,5,10, 20], 3, 200, 0.5)
+    U = np.linspace(0, 3.4, 40)
+    U = np.concatenate((U, U[-2:11:-1]))
+
+    for beta in [16, 25, 50, 80, 150]:
+        zet=ev_on_interaction(U, beta, 0.5)
+        plt.plot(U, zet, label='$\\beta={}$'.format(beta))
+    plt.title('Hysteresis loop of the quasiparticle weigth')
+    plt.legend()
+    plt.ylabel('Z')
+    plt.xlabel('U/D')
