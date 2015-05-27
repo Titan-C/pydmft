@@ -10,6 +10,7 @@ from pytriqs.gf.local import GfImFreq, GfImTime, GfReFreq, \
 
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.plot.mpl_interface import subplots
+import numpy as np
 
 class IPTSolver(object):
 
@@ -36,61 +37,52 @@ class IPTSolver(object):
         # Dyson equation to get G
         self.g << self.g0 * inverse(1.0 - self.sigma * self.g0)
 
-    def dmft_loop(self, n_loops, t):
-        for i in range(n_loops):
+    def dmft_loop(self, t, max_loops):
+        converged = False
+        loops = 0
+        while not converged:
+            oldg = self.g.data.copy()
             self.g0 << inverse( iOmega_n - t**2 * self.g)
             self.solve()
+            converged = np.allclose(self.g.data, oldg, atol=1e-3)
+            loops += 1
+            if loops > max_loops:
+                converged = True
 
-def ev_on_loops(n_loops, U, beta, t):
+        return loops
+
+
+def ev_on_loops(max_loops, U, beta, t):
     """Studies change of Green's function depending on DMFT loop count"""
 # open 2 panels top (t) and bottom (b)
 
     f, (ax1, ax2, ax3) = subplots( 3,1)
 
-    for loop in n_loops:
+    for loop in max_loops:
         S = IPTSolver(U = U, beta = beta)
         S.g << SemiCircular(2*t)
-        S.dmft_loop(loop, t)
-        ax1.oplot(S.sigma, RI='I', x_window  = (0,2), label = "nloop={}".format(loop))
+        nloop = S.dmft_loop(t, loop)
+        ax1.oplot(S.sigma, RI='I', x_window  = (0,2), label = "nloop={}".format(nloop))
         ax1.set_ylabel('$\Sigma(i\omega_n)$')
-        ax2.oplot(S.g, RI='I', x_window  = (0,2), label = "nloop={}".format(loop))
+        ax2.oplot(S.g, RI='I', x_window  = (0,2), label = "nloop={}".format(nloop))
         greal = GfReFreq(indices=[1], window=(-4,4), n_points=400)
         greal.set_from_pade(S.g,201,0.0)
-        ax3.oplot(greal,RI='I', label = "nloop={}".format(loop))
+        ax3.oplot(greal,RI='I', label = "nloop={}".format(nloop))
 
     ax1.set_title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$"%(beta,U))
 
 
-def ev_on_interaction(n_loops, U, beta, t):
+def ev_on_interaction(U, beta, t, max_loops=300):
     """Studies change of Green's function depending on DMFT interaction"""
 
 
     for u_int in U:
         S = IPTSolver(U = u_int, beta = beta)
         S.g << SemiCircular(2*t)
-        S.dmft_loop(n_loops, t)
+        S.dmft_loop(t, max_loops)
         oplot(S.g, label = "U={}".format(u_int))
 
     plt.title("Matsubara Green's functions, IPT, Bethe lattice, $\\beta=%.2f$, $loop=%.2f$".format(beta,n_loops))
 
 if __name__ == "__main__":
-    ev_on_loops([1,2,5,10, 20], 3, 20, 0.5)
-
-
-            # Get the real-axis with Pade approximants
-#        greal = GfReFreq(indices = [1], window = (-4.0,4.0), n_points = 400)
-#        greal.set_from_pade(S.g, 201, 0.0)
-
-        # Generate the plot
-
-
-#    plt.xlim(-4,4)
-#    plt.ylim(0,0.7)
-#    plt.ylabel("$A(\omega)$")
-#    plt.title("Local DOS, IPT, Bethe lattice, $\\beta=%.2f$, $U=%.2f$"%(beta,U))
-
-#    # Save the plot in a file
-#    fig.savefig("dos_%s"%U, format="png", transparent=False)
-#    dos_files.append("dos_%s"%U)
-#    plt.close(fig)
-
+    ev_on_loops([1,2,5,10, 20], 3, 200, 0.5)
