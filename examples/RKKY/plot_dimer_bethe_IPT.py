@@ -10,11 +10,10 @@ import sys
 sys.path.append('/home/oscar/libs/lib/python2.7/site-packages')
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, iOmega_n, inverse
-from pytriqs.gf.local import GfReFreq, Omega
+from pytriqs.gf.local import GfReFreq
 from pytriqs.plot.mpl_interface import oplot
 import dmft.common as gf
 import numpy as np
-import matplotlib.pyplot as plt
 from multiprocessing import Pool
 from pytriqs.archive import HDFArchive
 from plot_dimer_bethe_triqs import mix_gf_dimer, init_gf
@@ -79,6 +78,8 @@ def dimer(S, gmix):
         S.solve()
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
+        if loops > 300:
+            converged = True
 
     S.setup.update({'U':S.U, 'loops': loops})
 
