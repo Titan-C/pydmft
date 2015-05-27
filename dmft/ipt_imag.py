@@ -28,18 +28,16 @@ def solver(u_int, g_0_iwn, w_n, tau):
     return g_iwn, sigma_iwn
 
 
-def dmft_loop(loops, u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
+def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
     """Performs the paramagnetic(spin degenerate) self-consistent loop in a
     bethe lattice given the input
 
     Parameters
     ----------
-    loops : int
-        amount of dmft loops
     u_int : float
         Local interation strength
     t : float
-        Hopping amplitudue between bethe lattice nearest neightbours
+        Hopping amplitude between bethe lattice nearest neightbours
     g_iwn : comples float ndarray
             Matsubara frequencies starting guess Green function
     tau : real float ndarray
@@ -52,15 +50,18 @@ def dmft_loop(loops, u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
     Returns
     -------
     out : complex ndarray
-            Interacting Greens function in matsubara frequencies in every
-            loop step"""
+            Interacting Greens function in matsubara frequencies"""
 
-    g_iwn_log = [g_iwn]
-    for i in range(loops):
-        g_0_iwn = 1. / (1j*w_n - t**2 * g_iwn_log[-1])
+    converged = False
+    loops = 0
+    iw_n = 1j*w_n
+    while not converged:
+        g_iwn_old = g_iwn.copy()
+        g_0_iwn = 1. / (iw_n - t**2 * g_iwn_old)
         g_iwn, sigma_iwn = solver(u_int, g_0_iwn, w_n, tau)
-        if np.abs(g_iwn_log[-1] - g_iwn)[:32].max() < conv:
-            break
-        g_iwn = mix * g_iwn + (1 - mix) * g_iwn_log[-1]
-        g_iwn_log.append(g_iwn)
-    return np.asarray(g_iwn_log), sigma_iwn
+        converged = np.allclose(g_iwn_old, g_iwn, conv)
+        loops += 1
+        if loops > 300:
+            converged = True
+        g_iwn = mix * g_iwn + (1 - mix) * g_iwn_old
+    return g_iwn, sigma_iwn

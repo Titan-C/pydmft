@@ -21,7 +21,7 @@ import matplotlib.pylab as plt
 U = np.linspace(0, 2.7, 36)
 U = np.concatenate((U, U[-2:11:-1]))
 
-parms = {'MU': 0, 't': 0.5, 'N_TAU': 2**10, 'N_MATSUBARA': 2**7}
+parms = {'MU': 0, 't': 0.5, 'N_TAU': 2**10, 'N_MATSUBARA': 2**9}
 lop_g=[]
 for beta in [16, 25, 50]:
     u_zet = []
@@ -30,9 +30,8 @@ for beta in [16, 25, 50]:
     g_iwn0 = greenF(w_n, D=2*parms['t'])
     for u_int in U:
         mix = 0.4 if u_int > 1.5 else 1
-        g_iwn_log, sigma = ipt_imag.dmft_loop(100, u_int, parms['t'], g_iwn0, w_n, tau, mix)
-        g_iwn0 = g_iwn_log[-1]
-        lop_g.append(g_iwn_log)
+        g_iwn, sigma = ipt_imag.dmft_loop(u_int, parms['t'], g_iwn0, w_n, tau, mix)
+        lop_g.append(g_iwn)
         u_zet.append(matsubara_Z(sigma.imag, beta))
 
     plt.plot(U, u_zet, label='$\\beta={}$'.format(beta))
