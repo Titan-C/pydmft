@@ -48,15 +48,14 @@ class IPT_dimer_Solver:
 
 # Matsubara interacting self-consistency
 def loop_u(urange, tab, t, beta):
-    w_n = gf.matsubara_freq(beta, 2**12)
+    w_n = gf.matsubara_freq(beta, 1025)
     S = IPT_dimer_Solver(U=0, beta=beta, n_points=len(w_n))
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
     init_gf(S.g_iw, w_n, 0, tab, t)
+    S.setup.update({'t': t, 'tab': tab, 'beta': beta})
 
     for u_int in urange:
-        S = IPT_dimer_Solver(U=u_int, beta=beta, n_points=len(w_n))
-        S.setup.update({'t': t, 'tab': tab, 'beta': beta})
-        init_gf(S.g_iw, w_n, 0, tab, t)
+        S.U = u_int
         dimer(S, gmix)
 
     return True
@@ -66,9 +65,9 @@ def dimer(S, gmix):
 
     converged = False
     loops = 0
-    t2 = S.setup['t']*2
+    t2 = S.setup['t']**2
     while not converged:
-        S.g_iw.data.real=0.
+#        S.g_iw.data.real=0.
         oldg = S.g_iw.data.copy()
         # Bethe lattice bath
         S.g0_iw << gmix - t2 * S.g_iw
@@ -86,7 +85,7 @@ def dimer(S, gmix):
 
 def store_sim(S):
     u_step = '/U{U}/'.format(**S.setup)
-    file_name = 'gffltuloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
+    file_name = 'uloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
     R = HDFArchive(file_name, 'a')
     R[u_step+'setup'] = S.setup
     R[u_step+'G_iw'] = S.g_iw
@@ -97,13 +96,13 @@ def store_sim(S):
 #ur=np.arange(0, 4, 0.025)
 #
 ur = np.linspace(0, 1.5, 16)
+#loop_u([0.], 0.0, 0.5, 150)
 #ur = np.concatenate((ur, np.linspace(3.8, 2.3, 16)-0.05))
-loop_u([0.], 0.81, 0.5, 150)
-#def dimhelp(tab): return loop_u(ur, tab, 0.5, 150)
+def dimhelp(tab): return loop_u(ur, tab, 0.5, 150)
 #
-#p = Pool(12)
-#tabra = np.arange(0, 1.3, 0.1)
-#ou = p.map(dimhelp, tabra.tolist())
+p = Pool(6)
+tabra = np.arange(0, 1.3, 0.1)
+ou = p.map(dimhelp, tabra.tolist())
 
 
 def plot_re(filen, U):
