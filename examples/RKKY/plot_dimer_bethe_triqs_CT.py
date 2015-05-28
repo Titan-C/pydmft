@@ -47,7 +47,7 @@ parms = {'n_cycles': 100000,
 # Matsubara interacting self-consistency
 
 w_n = gf.matsubara_freq(beta, 1025)
-g_iw = GfImFreq(indices=['A', 'B'], beta=50, n_points=1025)
+g_iw = GfImFreq(indices=['A', 'B'], beta=50, n_points=len(w_n))
 gmix = mix_gf_dimer(g_iw.copy(), iOmega_n, mu, tab)
 
 S = Solver(beta=beta, gf_struct={'up': [0, 1], 'down': [0, 1]})

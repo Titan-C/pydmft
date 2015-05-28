@@ -79,6 +79,8 @@ def ev_on_interaction(U, beta, t, max_loops=300):
 
     u_zet = []
     for u_int in U:
+#        S.U = u_int
+
         S = IPTSolver(U = u_int, beta = beta)
         S.g << SemiCircular(2*t)
         nloop = S.dmft_loop(t, max_loops)
@@ -91,10 +93,10 @@ def ev_on_interaction(U, beta, t, max_loops=300):
 
 if __name__ == "__main__":
 #    ev_on_loops([1,2,5,10, 20], 3, 200, 0.5)
-    U = np.linspace(0, 3.4, 40)
-    U = np.concatenate((U, U[-2:11:-1]))
+    U = np.linspace(0, 4, 50)
+#    U = np.concatenate((U, U[-2:11:-1]))
 
-    for beta in [16, 25, 50, 80, 150]:
+    for beta in [150, 300.]:
         zet=ev_on_interaction(U, beta, 0.5)
         plt.plot(U, zet, label='$\\beta={}$'.format(beta))
     plt.title('Hysteresis loop of the quasiparticle weigth')
