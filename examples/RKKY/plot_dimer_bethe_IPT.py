@@ -56,6 +56,8 @@ def loop_u(urange, tab, t, beta):
 
     for u_int in urange:
         S.U = u_int
+
+#        init_gf(S.g_iw, w_n, 0, tab, t)
         dimer(S, gmix)
 
     return True
@@ -67,7 +69,7 @@ def dimer(S, gmix):
     loops = 0
     t2 = S.setup['t']**2
     while not converged:
-#        S.g_iw.data.real=0.
+        S.g_iw.data[:,[0,1],[0,1]]=1j*S.g_iw.data[:,[0,1],[0,1]].imag
         oldg = S.g_iw.data.copy()
         # Bethe lattice bath
         S.g0_iw << gmix - t2 * S.g_iw
@@ -95,12 +97,13 @@ def store_sim(S):
 
 #ur=np.arange(0, 4, 0.025)
 #
-ur = np.linspace(0, 1.5, 16)
+ur = np.linspace(0, 4, 41)
+#loop_u(ur, 0., 0.5, 150)
 #loop_u([0.], 0.0, 0.5, 150)
 #ur = np.concatenate((ur, np.linspace(3.8, 2.3, 16)-0.05))
 def dimhelp(tab): return loop_u(ur, tab, 0.5, 150)
 #
-p = Pool(6)
+p = Pool(12)
 tabra = np.arange(0, 1.3, 0.1)
 ou = p.map(dimhelp, tabra.tolist())
 
