@@ -16,9 +16,22 @@ import dmft.common as gf
 import numpy as np
 from pytriqs.archive import *
 import pytriqs.utility.mpi as mpi
-from plot_dimer_bethe_triqs import mix_gf_dimer, init_gf
+from plot_dimer_bethe_triqs import mix_gf_dimer
 
 from pytriqs.applications.impurity_solvers.cthyb import Solver
+
+def init_gf(g_iw, omega, mu, tab, t):
+    G1 = gf.greenF(omega, mu=mu-tab, D=2*t)
+    G2 = gf.greenF(omega, mu=mu+tab, D=2*t)
+
+    Gd = .5*(G1 + G2)
+    Gc = .5*(G1 - G2)
+
+    g_iw.data[:, 0, 0] = Gd
+    g_iw.data[:, 0, 1] = Gc
+    g_iw.data[:, 0, 1] = Gc
+    g_iw.data[:, 1, 1] = Gd
+
 
 t = 0.5
 D = 2*t
@@ -33,13 +46,13 @@ parms = {'n_cycles': 100000,
          'n_warmup_cycles': 1000}
 # Matsubara interacting self-consistency
 
-w_n = gf.matsubara_freq(beta, 512)
-g_iw = GfImFreq(indices=['A', 'B'], beta=50, n_points=512)
+w_n = gf.matsubara_freq(beta, 1025)
+g_iw = GfImFreq(indices=['A', 'B'], beta=50, n_points=1025)
 gmix = mix_gf_dimer(g_iw.copy(), iOmega_n, mu, tab)
 
 S = Solver(beta=beta, gf_struct={'up': [0, 1], 'down': [0, 1]})
 
-w_n = gf.matsubara_freq(beta, 1025)
+
 if mpi.is_master_node():
 
     init_gf(S.G_iw['up'], w_n, mu,.0, t)
@@ -48,15 +61,15 @@ if mpi.is_master_node():
 converged = False
 loops = 0
 #
-#if mpi.is_master_node():
-#    newg = 0.5 * (S.G_iw['up'] + S.G_iw['down'])
-#print('uea')
-#while not converged:
-#    # Bethe lattice PM bath
-#    if mpi.is_master_node():
-#        oldg = newg.data.copy()
-#        for na in ['up', 'down']:
-#            S.G0_iw[na] << gmix - t2 * newg
+if mpi.is_master_node():
+    g_new = 0.5 * Fourier(S.G_tau['up'] + S.G_tau['down'])
+print('uea')
+while not converged:
+    # Bethe lattice PM bath
+    if mpi.is_master_node():
+        oldg = newg.data.copy()
+        for na in ['up', 'down']:
+            S.G0_iw[na] << gmix - t2 * g_new
 #        S.G0_iw.invert()
 #    S.G0_iw << mpi.bcast(S.G0_iw)
 ##
