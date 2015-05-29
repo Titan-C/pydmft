@@ -11,10 +11,8 @@ import dmft.common as gf
 from plot_dimer_bethe_triqs import mix_gf_dimer, init_gf_met, init_gf_ins
 from RKKY_dimer_IPT import Dimer_Solver, dimer
 
-from pytriqs.archive import HDFArchive
-from pytriqs.gf.local import GfReFreq, iOmega_n
+from pytriqs.gf.local import iOmega_n
 
-from multiprocessing import Pool
 import numpy as np
 
 # Matsubara interacting self-consistency
@@ -25,6 +23,7 @@ def loop_u(urange, tab, t, beta, imet):
 
     S.setup.update({'t': t, 'tab': tab, 'beta': beta})
     file_label = '_uloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
+    filename = None
     if imet == 'metal':
         init_gf_met(S.g_iw, w_n, 0, tab, t)
         filename = 'met'+file_label
@@ -40,30 +39,9 @@ def loop_u(urange, tab, t, beta, imet):
 
     return True
 
-
-def plot_re(filen, U):
-    R = HDFArchive(filen, 'r')
 #
-    greal = GfReFreq(indices=[1], window=(-4.0, 4.0), n_points=256)
-    greal.set_from_pade(R['U{}'.format(U)]['G_iw']['A', 'A'], 100, 0.0)
-    oplot(-1*greal, RI='I', label=r'$U={}$'.format(U), num=4)
-
-    del R
-
-#
-p = Pool(6)
 tabra = np.arange(0, 1.3, 0.1)
-ur = np.arange(0, 6, 0.05)
-def dim_met(tab):
-    return loop_u(ur, tab, 0.5, 150, 'metal')
 
+#met = [loop_u(np.arange(0, 6, 0.05), tab, 0.5, 150, 'metal') for tab in tabra]
 
-met = p.map(dim_met, tabra.tolist())
-#
-#
-## insulating
-ur = np.arange(4.5, 0, -0.05)
-def dim_ins(tab):
-    return loop_u(ur, tab, 0.5, 150, 'insulator')
-
-ins = p.map(dim_ins, tabra.tolist())
+ins = [loop_u(np.arange(6, 0, -0.05), tab, 0.5, 150, 'ins') for tab in tabra]
