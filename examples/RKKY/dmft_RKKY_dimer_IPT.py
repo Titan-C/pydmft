@@ -22,7 +22,7 @@ def loop_u(urange, tab, t, beta, imet):
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
 
     S.setup.update({'t': t, 'tab': tab, 'beta': beta})
-    file_label = '_uloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
+    file_label = '_fuloop_t{t}_tab{tab}_B{beta}.h5'.format(**S.setup)
     filename = None
     if imet == 'metal':
         init_gf_met(S.g_iw, w_n, 0, tab, t)
@@ -40,8 +40,8 @@ def loop_u(urange, tab, t, beta, imet):
     return True
 
 #
-tabra = np.arange(0, 1.3, 0.1)
+tabra = np.arange(0, 1.3, 0.05)
 
-#met = [loop_u(np.arange(0, 6, 0.05), tab, 0.5, 150, 'metal') for tab in tabra]
+met = [loop_u(np.arange(0, 6, 0.01), tab, 0.5, 150, 'metal') for tab in tabra]
 
-ins = [loop_u(np.arange(6, 0, -0.05), tab, 0.5, 150, 'ins') for tab in tabra]
+#ins = [loop_u(np.arange(6, 0, -0.01), tab, 0.5, 150, 'ins') for tab in tabra]

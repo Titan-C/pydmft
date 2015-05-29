@@ -56,10 +56,15 @@ def dimer(S, gmix, filename, step):
         S.g0_iw << gmix - t2 * S.g_iw
         S.g0_iw.invert()
         S.solve()
+
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
-        if loops > 300:
+        if loops > 600:
             converged = True
+
+        #Finer loop of complicated region
+        if S.setup['tab'] > 0.5 and S.U > 2.7:
+            S.g_iw.data[:] = (S.g_iw.data + oldg)/2.
 
     S.setup.update({'U': S.U, 'loops': loops})
 
