@@ -10,6 +10,43 @@ from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, inverse
 import numpy as np
 from pytriqs.archive import HDFArchive
+import dmft.common as gf
+
+
+def mix_gf_dimer(gmix, omega, mu, tab):
+    gmix['A', 'A'] = omega + mu
+    gmix['A', 'B'] = -tab
+    gmix['B', 'A'] = -tab
+    gmix['B', 'B'] = omega + mu
+    return gmix
+
+
+def init_gf_met(g_iw, omega, mu, tab, t):
+    G1 = gf.greenF(omega, mu=mu-tab, D=2*t)
+    G2 = gf.greenF(omega, mu=mu+tab, D=2*t)
+
+    Gd = .5*(G1 + G2)
+    Gc = .5*(G1 - G2)
+
+    g_iw['A', 'A'].data[:, 0, 0] = Gd
+    g_iw['A', 'B'].data[:, 0, 0] = Gc
+    g_iw['B', 'A'] << g_iw['A', 'B']
+    g_iw['B', 'B'] << g_iw['A', 'A']
+
+
+def init_gf_ins(g_iw, omega, mu, tab, U):
+    G1 = 1./(1j*omega - tab + U / 2.)
+    G2 = 1./(1j*omega + tab - U / 2.)
+
+    Gd = .5*(G1 + G2)
+    Gc = .5*(G1 - G2)
+
+    g_iw['A', 'A'].data[:, 0, 0] = Gd
+    g_iw['A', 'B'].data[:, 0, 0] = Gc
+    g_iw['B', 'A'] << g_iw['A', 'B']
+    g_iw['B', 'B'] << g_iw['A', 'A']
+
+
 
 class Dimer_Solver:
 
@@ -74,8 +111,10 @@ def dimer(S, gmix, filename, step):
     store_sim(S, filename, step)
 
 
-def store_sim(S, filename, step):
-    R = HDFArchive(filename, 'a')
+def store_sim(S, file_str, step_str):
+    file_name = file_str.format(**S.setup)
+    step = step_str.format(**S.setup)
+    R = HDFArchive(file_name, 'a')
     R[step+'setup'] = S.setup
     R[step+'G_iw'] = S.g_iw
     R[step+'g0_tau'] = S.g0_tau
