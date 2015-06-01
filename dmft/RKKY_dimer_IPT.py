@@ -102,9 +102,9 @@ def dimer(S, gmix, filename, step):
         if loops > 600:
             converged = True
 
-        #Finer loop of complicated region
-        if S.setup['tab'] > 0.5 and S.U > 1.:
-            S.g_iw.data[:] = (S.g_iw.data + oldg)/2.
+#        #Finer loop of complicated region
+#        if S.setup['tab'] > 0.5 and S.U > 1.:
+        S.g_iw.data[:] = 0.9*S.g_iw.data + 0.1*oldg
 
     S.setup.update({'U': S.U, 'loops': loops})
 

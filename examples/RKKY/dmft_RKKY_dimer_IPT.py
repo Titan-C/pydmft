@@ -37,11 +37,11 @@ def loop_u(urange, tab, t, beta, file_str):
 
 #ins = [loop_u(np.arange(6, 0, -0.01), tab, 0.5, 20., 'ins') for tab in tabra]
 def dimhelp(tab):
-    return loop_u(np.arange(0, 4.5, 0.05), tab, 0.5, 100., 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+    return loop_u(np.arange(0, 4.5, 0.01), tab, 0.5, 150., 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
 
 
 p = Pool(6)
-tabra = np.arange(0, 1.3, 0.05)
+tabra = np.arange(0, 1.3, 0.025)
 
 
 ou = p.map(dimhelp, tabra.tolist())
