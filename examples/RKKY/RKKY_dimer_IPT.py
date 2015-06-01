@@ -31,8 +31,11 @@ class Dimer_Solver:
     def solve(self):
 
         self.g0_tau << InverseFourier(self.g0_iw)
-        for name in [('A', 'A'), ('A', 'B'), ('B', 'A'), ('B', 'B')]:
+        for name in [('A', 'A'), ('B', 'B')]:
             self.sigma_tau[name] << (self.U**2) * self.g0_tau[name] * self.g0_tau[name] * self.g0_tau[name]
+        for name in [('A', 'B'), ('B', 'A')]:
+            self.sigma_tau[name] << -(self.U**2) * self.g0_tau[name] * self.g0_tau[name] * self.g0_tau[name]
+
         self.sigma_iw << Fourier(self.sigma_tau)
 
         # Dyson equation to get G
@@ -63,7 +66,7 @@ def dimer(S, gmix, filename, step):
             converged = True
 
         #Finer loop of complicated region
-        if S.setup['tab'] > 0.5 and S.U > 2.7:
+        if S.setup['tab'] > 0.5 and S.U > 1.:
             S.g_iw.data[:] = (S.g_iw.data + oldg)/2.
 
     S.setup.update({'U': S.U, 'loops': loops})

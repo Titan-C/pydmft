@@ -17,7 +17,7 @@ import numpy as np
 
 # Matsubara interacting self-consistency
 def loop_u(urange, tab, t, beta, imet):
-    w_n = gf.matsubara_freq(beta, 1025)
+    w_n = gf.matsubara_freq(beta, 2025)
     S = Dimer_Solver(U=0, beta=beta, n_points=len(w_n))
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
 
@@ -42,6 +42,6 @@ def loop_u(urange, tab, t, beta, imet):
 #
 tabra = np.arange(0, 1.3, 0.05)
 
-met = [loop_u(np.arange(0, 6, 0.01), tab, 0.5, 150, 'metal') for tab in tabra]
+met = [loop_u(np.arange(0, 6, 0.01), tab, 0.5, 20., 'metal') for tab in tabra]
 
-#ins = [loop_u(np.arange(6, 0, -0.01), tab, 0.5, 150, 'ins') for tab in tabra]
+#ins = [loop_u(np.arange(6, 0, -0.01), tab, 0.5, 20., 'ins') for tab in tabra]
