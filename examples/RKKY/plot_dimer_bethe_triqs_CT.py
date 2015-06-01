@@ -6,8 +6,6 @@ Dimer Bethe lattice
 Non interacting dimer of a Bethe lattice
 """
 #from __future__ import division, print_function, absolute_import
-import sys
-sys.path.append('/home/oscar/libs/lib/python2.7/site-packages/')
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, iOmega_n, inverse
 from pytriqs.operators import n
@@ -16,7 +14,6 @@ import dmft.common as gf
 import numpy as np
 from pytriqs.archive import *
 import pytriqs.utility.mpi as mpi
-from plot_dimer_bethe_triqs import mix_gf_dimer
 
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 
@@ -32,6 +29,13 @@ def init_gf(g_iw, omega, mu, tab, t):
     g_iw.data[:, 0, 1] = Gc
     g_iw.data[:, 1, 1] = Gd
 
+
+def mix_gf_dimer(gmix, omega, mu, tab):
+    gmix['A', 'A'] = omega + mu
+    gmix['A', 'B'] = -tab
+    gmix['B', 'A'] = -tab
+    gmix['B', 'B'] = omega + mu
+    return gmix
 
 t = 0.5
 D = 2*t
@@ -58,11 +62,14 @@ if mpi.is_master_node():
     init_gf(S.G_iw['up'], w_n, mu,.0, t)
     S.G_iw['down'] << S.G_iw['up']
 
+S.G0_iw << mpi.bcast(S.G0_iw)
+
 converged = False
 loops = 0
 #
 if mpi.is_master_node():
     g_new = 0.5 * Fourier(S.G_tau['up'] + S.G_tau['down'])
+g_new = mpi.bcast(g_new)
 print('uea')
 while not converged:
     # Bethe lattice PM bath
