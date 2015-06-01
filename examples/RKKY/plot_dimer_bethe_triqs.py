@@ -6,48 +6,13 @@ Dimer Bethe lattice
 Non interacting dimer of a Bethe lattice
 """
 from __future__ import division, print_function, absolute_import
-import sys
-sys.path.append('/home/oscar/libs/lib/python2.7/site-packages')
 from pytriqs.gf.local import GfImFreq, iOmega_n
 from pytriqs.gf.local import GfReFreq, Omega
 from pytriqs.plot.mpl_interface import oplot
-import dmft.common as gf
 import numpy as np
 import matplotlib.pyplot as plt
-
-
-def mix_gf_dimer(gmix, omega, mu, tab):
-    gmix['A', 'A'] = omega + mu
-    gmix['A', 'B'] = -tab
-    gmix['B', 'A'] = -tab
-    gmix['B', 'B'] = omega + mu
-    return gmix
-
-
-def init_gf_met(g_iw, omega, mu, tab, t):
-    G1 = gf.greenF(omega, mu=mu-tab, D=2*t)
-    G2 = gf.greenF(omega, mu=mu+tab, D=2*t)
-
-    Gd = .5*(G1 + G2)
-    Gc = .5*(G1 - G2)
-
-    g_iw['A', 'A'].data[:, 0, 0] = Gd
-    g_iw['A', 'B'].data[:, 0, 0] = Gc
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
-
-
-def init_gf_ins(g_iw, omega, mu, tab, U):
-    G1 = 1./(1j*omega - tab + U / 2.)
-    G2 = 1./(1j*omega + tab - U / 2.)
-
-    Gd = .5*(G1 + G2)
-    Gc = .5*(G1 - G2)
-
-    g_iw['A', 'A'].data[:, 0, 0] = Gd
-    g_iw['A', 'B'].data[:, 0, 0] = Gc
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
+from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met
+import dmft.common as gf
 
 
 if __name__ == "__main__":
@@ -78,7 +43,7 @@ if __name__ == "__main__":
         init_gf_met(g_iw, w_n, mu, tab, t)
         g_iw << gmix - t2 * g_iw
         g_iw.invert()
-        oplot(g_iw['A', 'A'], RI='I', label=r'$t_{{ab}}={}$'.format(tab), num=2)
+        oplot(g_iw['A', 'A'], '+-', RI='I', label=r'$t_{{ab}}={}$'.format(tab), num=2)
     plt.xlim([0, 6.5])
     plt.ylabel(r'$A(\omega)$')
     plt.title(u'Spectral functions of dimer Bethe lattice at ' +
