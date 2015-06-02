@@ -11,7 +11,7 @@ import numpy as np
 from multiprocessing import Pool
 from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, init_gf_ins, \
     Dimer_Solver, dimer
-
+import argparse
 
 # Matsubara interacting self-consistency
 def loop_u(urange, tab, t, beta, file_str):
@@ -33,15 +33,25 @@ def loop_u(urange, tab, t, beta, file_str):
 
 #
 
-#met = [loop_u(np.arange(0, 6, 0.1), tab, 0.5, 64., 'metal') for tab in tabra]
-
-#ins = [loop_u(np.arange(6, 0, -0.01), tab, 0.5, 20., 'ins') for tab in tabra]
-def dimhelp(tab):
-    return loop_u(np.arange(0, 4.5, 0.01), tab, 0.5, 150., 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
+parser.add_argument('beta', metavar='B', type=float,
+                    default=150., help='The inverse temperature')
 
 
-p = Pool(6)
 tabra = np.arange(0, 1.3, 0.025)
+args = parser.parse_args()
+BETA = np.array(args.beta)
 
 
-ou = p.map(dimhelp, tabra.tolist())
+def dimhelp_m(tab):
+    return loop_u(np.arange(0, 4.5, 0.01), tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+
+
+def dimhelp_i(tab):
+    return loop_u(np.arange(4.5, 0, -0.01), tab, 0.5, BETA, 'ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
+
+
+p = Pool()
+
+ou = p.map(dimhelp_m, tabra.tolist())
+ou = p.map(dimhelp_i, tabra.tolist())

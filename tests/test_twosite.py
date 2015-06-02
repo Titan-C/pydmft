@@ -30,7 +30,7 @@ def test_mit(axis, atol):
 def test_doping():
     e_c_ref = np.array([-0.98208, -0.23627, 0.38745, 0.95069, 1.48207])
     V_ref = np.array([0.96091, 0.92330, 0.87213, 0.81438, 0.76532])
-    n_ref = np.array([0.39486, 0.54847, 0.69036, 0.81363, 0.91498])
+    n_ref = np.array([0.39464, 0.54847, 0.69036, 0.81363, 0.91498])
     res = dmft_loop_dop(u_int=4, mu=[-.5, 0, 0.5, 1, 1.5])
 
     e_c = [sim.e_c for sim in res[:, 1]]
