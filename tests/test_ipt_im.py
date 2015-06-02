@@ -31,7 +31,7 @@ def test_ipt_pm_g(u_int, result, beta=50., n_tau=2**11, n_matsubara=64):
              }
     tau, w_n = tau_wn_setup(parms)
     g_iwn0 = greenF(w_n, D=2*parms['t'])
-    g_iwn_log, sigma_iwn = ipt_imag.dmft_loop(100, parms['U'], parms['t'], g_iwn0, w_n, tau)
+    g_iwn_log, sigma_iwn = ipt_imag.dmft_loop(parms['U'], parms['t'], g_iwn0, w_n, tau)
 
     assert np.allclose(result, g_iwn_log[-1][32:], atol=1e-3 )
 

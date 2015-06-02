@@ -38,7 +38,7 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
         Local interation strength
     t : float
         Hopping amplitude between bethe lattice nearest neightbours
-    g_iwn : comples float ndarray
+    g_iwn : complex float ndarray
             Matsubara frequencies starting guess Green function
     tau : real float ndarray
             Imaginary time points. Only use the positive range
