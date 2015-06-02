@@ -4,6 +4,7 @@ Dimer Bethe lattice
 ===================
 
 Non interacting dimer of a Bethe lattice
+Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
 #from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
