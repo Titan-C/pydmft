@@ -130,15 +130,23 @@ def store_sim(S, file_str, step_str):
     del R
 
 
-def total_energy(Giw, Siw, beta, tab, t):
+def total_energy(file_str, beta, tab, t):
 
-    w_n = gf.matsubara_freq(beta, len(Giw.mesh))
-    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=len(Giw.mesh))
+    results = HDFArchive(file_str, 'r')
+
+    w_n = gf.matsubara_freq(beta, 1025)
+    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=1025)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)
 
-    energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
     mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
                           args=(1., tab, t, beta))[0]
 
-    return energ.total_density() + mean_free_ekin
+    total_e = []
+    for uint in results:
+        Giw = results[uint]['Giw']
+        Siw = results[uint]['Siw']
+        energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
+        total_e.append(energ.total_density() + mean_free_ekin)
+
+    return np.asarray(total_e)
