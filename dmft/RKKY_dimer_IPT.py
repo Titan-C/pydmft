@@ -8,10 +8,12 @@ Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
 #from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
-    Fourier, inverse, TailGf
+    Fourier, inverse, TailGf, iOmega_n
 import numpy as np
 from pytriqs.archive import HDFArchive
 import dmft.common as gf
+import slaveparticles.quantum.dos as dos
+from scipy.integrate import quad
 
 
 def mix_gf_dimer(gmix, omega, mu, tab):
@@ -126,3 +128,17 @@ def store_sim(S, file_str, step_str):
     R[step+'g0_tau'] = S.g0_tau
     R[step+'S_iw'] = S.sigma_iw
     del R
+
+
+def total_energy(Giw, Siw, beta, tab, t):
+
+    w_n = gf.matsubara_freq(beta, len(Giw.mesh))
+    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=len(Giw.mesh))
+    om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
+    init_gf_met(Gfree, w_n, 0, tab, t)
+
+    energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
+    mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
+                          args=(1., tab, t, beta))[0]
+
+    return energ.total_density() + mean_free_ekin
