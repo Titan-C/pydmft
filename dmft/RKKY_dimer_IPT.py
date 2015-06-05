@@ -14,6 +14,7 @@ from pytriqs.archive import HDFArchive
 import dmft.common as gf
 import slaveparticles.quantum.dos as dos
 from scipy.integrate import quad
+from dmft.twosite import matsubara_Z
 
 
 def mix_gf_dimer(gmix, omega, mu, tab):
@@ -132,7 +133,7 @@ def store_sim(S, file_str, step_str):
 
 def total_energy(file_str, beta, tab, t):
 
-    results = HDFArchive(file_str, 'r')
+    results = HDFArchive(file_str, 'a')
 
     w_n = gf.matsubara_freq(beta, 1025)
     Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=1025)
@@ -144,9 +145,58 @@ def total_energy(file_str, beta, tab, t):
 
     total_e = []
     for uint in results:
-        Giw = results[uint]['Giw']
-        Siw = results[uint]['Siw']
+        Giw = results[uint]['G_iw']
+        Siw = results[uint]['S_iw']
         energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
         total_e.append(energ.total_density() + mean_free_ekin)
 
-    return np.asarray(total_e)
+    total_e = np.asarray(total_e)
+    results['/data_process/total_energy'] = total_energy
+    del results
+
+    return total_e
+
+
+def complexity(file_str):
+    results = HDFArchive(file_str, 'a')
+    dif = []
+    for uint in results:
+        dif.append(results[uint]['setup']['loops'])
+    dif = np.asarray(dif)
+    results['/data_process/complexity'] = dif
+    del results
+    return dif
+
+
+def quasiparticle(file_str, beta):
+    results = HDFArchive(file_str, 'a')
+    zet = []
+    for uint in results:
+        zet.append(matsubara_Z(results[uint]['S_iw'].data[:, 0, 0].imag, beta))
+    zet = np.asarray(zet)
+    results['/data_process/quasiparticle_res'] = zet
+    del results
+    return zet
+
+
+def fit_dos(w_n, g):
+    n = len(w_n)
+    gfit = g.data[:n, 0, 0].imag
+    pf = np.polyfit(w_n, gfit, 2)
+    return np.poly1d(pf)
+
+
+def fermi_level_dos(file_str, beta, n=5):
+    results = HDFArchive(file_str, 'a')
+    fl_dos = []
+    w_n = gf.matsubara_freq(beta, n)
+    for uint in results:
+        fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
+    fl_dos = np.asarray(fl_dos)
+    results['data_process/Fermi_level'] = fl_dos
+    del results
+    return fl_dos
+
+import os
+os.chdir('/home/oscar/dev/dmft-learn/examples/RKKY/')
+complexity('met_fuloop_t0.5_tab0.025_B150.0.h5')
