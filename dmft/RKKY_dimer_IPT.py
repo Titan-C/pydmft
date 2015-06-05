@@ -8,7 +8,7 @@ Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
 #from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
-    Fourier, inverse
+    Fourier, inverse, TailGf
 import numpy as np
 from pytriqs.archive import HDFArchive
 import dmft.common as gf
@@ -33,6 +33,11 @@ def init_gf_met(g_iw, omega, mu, tab, t):
     g_iw['A', 'B'].data[:, 0, 0] = Gc
     g_iw['B', 'A'] << g_iw['A', 'B']
     g_iw['B', 'B'] << g_iw['A', 'A']
+
+    fixed_co = TailGf(2, 2, 4, -1)
+    fixed_co[1] = np.array([[1, 0], [0, 1]])
+    fixed_co[2] = tab*np.array([[0, 1], [1, 0]])
+    g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
 
 
 def init_gf_ins(g_iw, omega, mu, tab, U):
