@@ -133,8 +133,8 @@ def store_sim(S, file_str, step_str):
 
 def total_energy(file_str, beta, tab, t):
 
-    results = HDFArchive(file_str, 'a')
-    n_max=results['U0.01']['G_iw'].mesh.size
+    results = HDFArchive(file_str, 'r')
+    n_max = len(results['U0.01']['G_iw'].mesh)
 
     w_n = gf.matsubara_freq(beta, n_max)
     Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=n_max)
@@ -157,7 +157,7 @@ def total_energy(file_str, beta, tab, t):
 
 
 def complexity(file_str):
-    results = HDFArchive(file_str, 'a')
+    results = HDFArchive(file_str, 'r')
     dif = []
     for uint in results:
         dif.append(results[uint]['setup']['loops'])
@@ -166,7 +166,7 @@ def complexity(file_str):
 
 
 def quasiparticle(file_str, beta):
-    results = HDFArchive(file_str, 'a')
+    results = HDFArchive(file_str, 'r')
     zet = []
     for uint in results:
         S_iw = results[uint]['S_iw']
