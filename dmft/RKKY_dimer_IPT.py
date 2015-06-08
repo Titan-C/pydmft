@@ -131,13 +131,15 @@ def store_sim(S, file_str, step_str):
     del R
 
 
-def total_energy(file_str, beta, tab, t):
+def total_energy(file_str):
 
     results = HDFArchive(file_str, 'r')
-    n_max = len(results['U0.01']['G_iw'].mesh)
+    setup = results['U0.01']['setup']
+    beta, tab, t = setup['beta'], setup['tab'], setup['t']
+    n_max = len(results['U0.1']['G_iw'].mesh)
 
+    Gfree = results['U0.01']['G_iw']
     w_n = gf.matsubara_freq(beta, n_max)
-    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=n_max)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)
 
