@@ -42,13 +42,13 @@ tabra = np.arange(0, 1.3, 0.025)
 args = parser.parse_args()
 BETA = np.array(args.beta)
 
-
+ur = np.arange(0, 4.5, 0.01)
 def dimhelp_m(tab):
-    return loop_u(np.arange(0, 4.5, 0.01), tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+    return loop_u(ur, tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
 
 
 def dimhelp_i(tab):
-    return loop_u(np.arange(4.5, 0, -0.01), tab, 0.5, BETA, 'ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
+    return loop_u(ur[::-1], tab, 0.5, BETA, 'ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
 
 
 p = Pool()

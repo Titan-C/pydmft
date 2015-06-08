@@ -134,9 +134,10 @@ def store_sim(S, file_str, step_str):
 def total_energy(file_str, beta, tab, t):
 
     results = HDFArchive(file_str, 'a')
+    n_max=results['U0.01']['G_iw'].mesh.size
 
-    w_n = gf.matsubara_freq(beta, 1025)
-    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=1025)
+    w_n = gf.matsubara_freq(beta, n_max)
+    Gfree = GfImFreq(indices=['A', 'B'], beta=beta, n_points=n_max)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)
 
