@@ -44,8 +44,8 @@ def init_gf_met(g_iw, omega, mu, tab, t):
 
 
 def init_gf_ins(g_iw, omega, mu, tab, U):
-    G1 = 1./(1j*omega - tab + U / 2.)
-    G2 = 1./(1j*omega + tab - U / 2.)
+    G1 = 1./(1j*omega - tab + U**2 / 4j/omega)
+    G2 = 1./(1j*omega + tab - U**2 / 4j/omega)
 
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
@@ -134,11 +134,11 @@ def store_sim(S, file_str, step_str):
 def total_energy(file_str):
 
     results = HDFArchive(file_str, 'r')
-    setup = results['U0.01']['setup']
+    setup = results['U0.1']['setup']
     beta, tab, t = setup['beta'], setup['tab'], setup['t']
     n_max = len(results['U0.1']['G_iw'].mesh)
 
-    Gfree = results['U0.01']['G_iw']
+    Gfree = results['U0.1']['G_iw']
     w_n = gf.matsubara_freq(beta, n_max)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)

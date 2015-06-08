@@ -15,10 +15,11 @@ import argparse
 
 # Matsubara interacting self-consistency
 def loop_u(urange, tab, t, beta, file_str):
-    w_n = gf.matsubara_freq(beta, 1025)
-    S = Dimer_Solver(U=0, beta=beta, n_points=len(w_n))
+    n_freq = int(15.*beta/np.pi)
+    w_n = gf.matsubara_freq(beta, n_freq)
+    S = Dimer_Solver(U=0, beta=beta, n_points=n_freq)
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
-    S.setup.update({'t': t, 'tab': tab, 'beta': beta})
+    S.setup.update({'t': t, 'tab': tab, 'beta': beta, 'n_freq': n_freq})
 
     if file_str.startswith('met'):
         init_gf_met(S.g_iw, w_n, 0, tab, t)
@@ -38,7 +39,7 @@ parser.add_argument('beta', metavar='B', type=float,
                     default=150., help='The inverse temperature')
 
 
-tabra = np.arange(0, 1.3, 0.025)
+tabra = np.hstack((np.arange(0, 0.5, 0.01), np.arange(0.5, 1.3, 0.025)))
 args = parser.parse_args()
 BETA = np.array(args.beta)
 
