@@ -150,11 +150,9 @@ def total_energy(file_str, beta, tab, t):
         energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
         total_e.append(energ.total_density() + mean_free_ekin)
 
-    total_e = np.asarray(total_e)
-    results['/data_process/total_energy'] = total_energy
     del results
 
-    return total_e
+    return np.asarray(total_e)
 
 
 def complexity(file_str):
@@ -162,21 +160,18 @@ def complexity(file_str):
     dif = []
     for uint in results:
         dif.append(results[uint]['setup']['loops'])
-    dif = np.asarray(dif)
-    results['/data_process/complexity'] = dif
     del results
-    return dif
+    return np.asarray(dif)
 
 
 def quasiparticle(file_str, beta):
     results = HDFArchive(file_str, 'a')
     zet = []
     for uint in results:
-        zet.append(matsubara_Z(results[uint]['S_iw'].data[:, 0, 0].imag, beta))
-    zet = np.asarray(zet)
-    results['/data_process/quasiparticle_res'] = zet
+        S_iw = results[uint]['S_iw']
+        zet.append(matsubara_Z(S_iw.data[:, 0, 0].imag, beta))
     del results
-    return zet
+    return np.asarray(zet)
 
 
 def fit_dos(w_n, g):
@@ -192,11 +187,5 @@ def fermi_level_dos(file_str, beta, n=5):
     w_n = gf.matsubara_freq(beta, n)
     for uint in results:
         fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
-    fl_dos = np.asarray(fl_dos)
-    results['data_process/Fermi_level'] = fl_dos
     del results
-    return fl_dos
-
-import os
-os.chdir('/home/oscar/dev/dmft-learn/examples/RKKY/')
-complexity('met_fuloop_t0.5_tab0.025_B150.0.h5')
+    return np.asarray(fl_dos)
