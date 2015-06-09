@@ -144,14 +144,17 @@ def total_energy(file_str):
     init_gf_met(Gfree, w_n, 0, tab, t)
 
     mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
-                          args=(1., tab, t, beta))[0]
+                          args=(1., tab, t, beta))[0] \
+                  -tab*quad(dos.bethe_fermi, -tab, tab,
+                          args=(1., 0., t, beta))[0]
+
 
     total_e = []
     for uint in results:
         Giw = results[uint]['G_iw']
         Siw = results[uint]['S_iw']
         energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
-        total_e.append(energ.total_density() + mean_free_ekin)
+        total_e.append(energ.total_density() + 2*mean_free_ekin)
 
     del results
 
