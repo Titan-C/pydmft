@@ -215,12 +215,12 @@ def proc_files(tabra, beta, fi_str):
     filelist = [fi_str.format(tab, beta) for tab in tabra]
     p = Pool()
 
-    dif = p.map(complexity, filelist)
-    zet = p.map(quasiparticle, filelist)
-    imet = p.map(fermi_level_dos, filelist)
-    H = p.map(total_energy, filelist)
+    dif = np.asarray(p.map(complexity, filelist))
+    zet = np.asarray(p.map(quasiparticle, filelist))
+    imet = np.asarray(p.map(fermi_level_dos, filelist))
+    H = np.asarray(p.map(total_energy, filelist))
 
-    return np.asarray(dif), np.asarray(zet), np.asarray(imet), np.asarray(H)
+    return dif, zet, imet, H
 
 
 def result_pros(tabra, beta):
