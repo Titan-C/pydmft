@@ -184,12 +184,12 @@ def complexity(file_str):
     return np.asarray(dif)
 
 
-def quasiparticle(file_str, beta):
+def quasiparticle(file_str):
     results = HDFArchive(file_str, 'r')
     zet = []
     for uint in results:
         S_iw = results[uint]['S_iw']
-        zet.append(matsubara_Z(S_iw.data[:, 0, 0].imag, beta))
+        zet.append(matsubara_Z(S_iw.data[:, 0, 0].imag, S_iw.beta))
     del results
     return np.asarray(zet)
 
@@ -201,10 +201,10 @@ def fit_dos(w_n, g):
     return np.poly1d(pf)
 
 
-def fermi_level_dos(file_str, beta, n=5):
+def fermi_level_dos(file_str, n=5):
     results = HDFArchive(file_str, 'r')
     fl_dos = []
-    w_n = gf.matsubara_freq(beta, n)
+    w_n = gf.matsubara_freq(results['U0.0']['G_iw'].beta, n)
     for uint in results:
         fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
     del results
@@ -215,12 +215,9 @@ def proc_files(tabra, beta, fi_str):
     filelist = [fi_str.format(tab, beta) for tab in tabra]
     p = Pool()
 
-    czet = lambda f: quasiparticle(f, beta)
-    cfld = lambda f: fermi_level_dos(f, beta)
-
     dif = p.map(complexity, filelist)
-    zet = p.map(czet, filelist)
-    imet = p.map(cfld, filelist)
+    zet = p.map(quasiparticle, filelist)
+    imet = p.map(fermi_level_dos, filelist)
     H = p.map(total_energy, filelist)
 
     return np.asarray(dif), np.asarray(zet), np.asarray(imet), np.asarray(H)
