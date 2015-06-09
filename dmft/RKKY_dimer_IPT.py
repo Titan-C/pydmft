@@ -15,6 +15,7 @@ import dmft.common as gf
 import slaveparticles.quantum.dos as dos
 from scipy.integrate import quad
 from dmft.twosite import matsubara_Z
+from multiprocessing import Pool
 
 
 def mix_gf_dimer(gmix, omega, mu, tab):
@@ -93,6 +94,7 @@ def dimer(S, gmix, filename, step):
     converged = False
     loops = 0
     t2 = S.setup['t']**2
+    mix = 1.
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
@@ -108,12 +110,23 @@ def dimer(S, gmix, filename, step):
 
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
-        if loops > 600:
+        if loops < 5:
+            mix = 0.9
+        elif loops < 50:
+            mix = 0.8
+        elif loops < 250:
+            mix = 0.7
+        elif loops < 500:
+            mix = 0.5
+        elif loops < 1000:
+            mix = 0.3
+        elif loops > 2000:
             converged = True
+        print(mix, converged)
 
 #        #Finer loop of complicated region
 #        if S.setup['tab'] > 0.5 and S.U > 1.:
-        S.g_iw.data[:] = 0.9*S.g_iw.data + 0.1*oldg
+        S.g_iw.data[:] = mix*S.g_iw.data + (1-mix)*oldg
 
     S.setup.update({'U': S.U, 'loops': loops})
 
@@ -165,7 +178,8 @@ def complexity(file_str):
     results = HDFArchive(file_str, 'r')
     dif = []
     for uint in results:
-        dif.append(results[uint]['setup']['loops'])
+        nl = results[uint]['setup']
+        dif.append(nl['loops'])
     del results
     return np.asarray(dif)
 
@@ -188,10 +202,33 @@ def fit_dos(w_n, g):
 
 
 def fermi_level_dos(file_str, beta, n=5):
-    results = HDFArchive(file_str, 'a')
+    results = HDFArchive(file_str, 'r')
     fl_dos = []
     w_n = gf.matsubara_freq(beta, n)
     for uint in results:
         fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
     del results
     return np.asarray(fl_dos)
+
+
+def proc_files(tabra, beta, fi_str):
+    filelist = [fi_str.format(tab, beta) for tab in tabra]
+    p = Pool()
+
+    czet = lambda f: quasiparticle(f, beta)
+    cfld = lambda f: fermi_level_dos(f, beta)
+
+    dif = p.map(complexity, filelist)
+    zet = p.map(czet, filelist)
+    imet = p.map(cfld, filelist)
+    H = p.map(total_energy, filelist)
+
+    return np.asarray(dif), np.asarray(zet), np.asarray(imet), np.asarray(H)
+
+
+def result_pros(tabra, beta):
+    met_sol = proc_files(tabra, beta, 'met_fuloop_t0.5_tab{}_B{}.h5')
+    ins_sol = proc_files(tabra, beta, 'ins_fuloop_t0.5_tab{}_B{}.h5')
+    np.savez('results_fuloop_t0.5_B{}'.format(beta),
+         difm=met_sol[0], zetm=met_sol[1], imetm=met_sol[2], Hm=met_sol[3],
+         difi=ins_sol[0], zeti=ins_sol[1], imeti=ins_sol[2], Hi=ins_sol[3])

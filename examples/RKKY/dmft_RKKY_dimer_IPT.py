@@ -10,7 +10,7 @@ import dmft.common as gf
 import numpy as np
 from multiprocessing import Pool
 from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, init_gf_ins, \
-    Dimer_Solver, dimer
+    Dimer_Solver, dimer, result_pros
 import argparse
 
 # Matsubara interacting self-consistency
@@ -56,3 +56,8 @@ p = Pool()
 
 ou = p.map(dimhelp_m, tabra.tolist())
 ou = p.map(dimhelp_i, tabra.tolist())
+try:
+    result_pros(tabra, BETA)
+except:
+    pass
+
