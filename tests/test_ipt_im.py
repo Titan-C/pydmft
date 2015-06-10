@@ -12,7 +12,6 @@ from dmft.common import greenF, tau_wn_setup
 from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, \
     Dimer_Solver, dimer
 from pytriqs.gf.local import iOmega_n
-from pytriqs.archive import HDFArchive
 import pytest
 import tempfile
 import os

@@ -67,4 +67,4 @@ ur = np.arange(0, 4.5, 0.5)
 tabra = np.arange(0, 0.5, 0.01)[::-1]
 Parallel(n_jobs=2, verbose=5)(delayed(loop_tab)(u,
          tabra, 0.5, BETA, 'ins_tloop_t{t}_U{U}_B{beta}.h5')
-         for u in np.arange(2, 4.5, 0.5))
+         for u in np.arange(2, 4.5, 0.01))
