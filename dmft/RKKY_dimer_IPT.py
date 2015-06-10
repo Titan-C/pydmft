@@ -94,7 +94,6 @@ def dimer(S, gmix, filename, step):
     converged = False
     loops = 0
     t2 = S.setup['t']**2
-    mix = 1.
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
@@ -110,19 +109,9 @@ def dimer(S, gmix, filename, step):
 
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
-        if loops < 5:
-            mix = 0.9
-        elif loops < 50:
-            mix = 0.8
-        elif loops < 250:
-            mix = 0.7
-        elif loops < 500:
-            mix = 0.5
-        elif loops < 1000:
-            mix = 0.3
-        elif loops > 2000:
+        mix = mixer(loops)
+        if loops > 2000:
             converged = True
-        print(mix, converged)
 
 #        #Finer loop of complicated region
 #        if S.setup['tab'] > 0.5 and S.U > 1.:
@@ -131,6 +120,21 @@ def dimer(S, gmix, filename, step):
     S.setup.update({'U': S.U, 'loops': loops})
 
     store_sim(S, filename, step)
+
+
+def mixer(loops):
+    if loops < 10:
+        return 1.
+    elif loops < 50:
+        return 0.9
+    elif loops < 250:
+        return 0.8
+    elif loops < 500:
+        return 0.7
+    elif loops < 1000:
+        return 0.5
+    elif loops < 2000:
+        return 0.3
 
 
 def store_sim(S, file_str, step_str):
@@ -147,11 +151,12 @@ def store_sim(S, file_str, step_str):
 def total_energy(file_str):
 
     results = HDFArchive(file_str, 'r')
-    setup = results['U0.1']['setup']
+    ftr_key = results.keys()[0]
+    setup = results[ftr_key]['setup']
     beta, tab, t = setup['beta'], setup['tab'], setup['t']
-    n_max = len(results['U0.1']['G_iw'].mesh)
+    n_max = len(results[ftr_key]['G_iw'].mesh)
 
-    Gfree = results['U0.1']['G_iw']
+    Gfree = results[ftr_key]['G_iw']
     w_n = gf.matsubara_freq(beta, n_max)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)
@@ -203,16 +208,28 @@ def fit_dos(w_n, g):
 
 def fermi_level_dos(file_str, n=5):
     results = HDFArchive(file_str, 'r')
+    ftr_key = results.keys()[0]
     fl_dos = []
-    w_n = gf.matsubara_freq(results['U0.0']['G_iw'].beta, n)
+    w_n = gf.matsubara_freq(results[ftr_key]['G_iw'].beta, n)
     for uint in results:
         fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
     del results
     return np.asarray(fl_dos)
 
 
-def proc_files(tabra, beta, fi_str):
-    filelist = [fi_str.format(tab, beta) for tab in tabra]
+def proc_files(filelist):
+    """Extracts the diffulty, quasiparticle weigth, fermi_lev dos, and Energy
+
+    Parameters
+    ----------
+    filelist:
+        list that contains the paths to files to be processed
+
+    Returns
+    -------
+    4-tuple of 2D ndarrays. First axis corresponds to filelist, second to file
+    data. Keep in mind H5 files return keys in alphabetical and not write order
+    """
     p = Pool()
 
     dif = np.asarray(p.map(complexity, filelist))
@@ -224,8 +241,11 @@ def proc_files(tabra, beta, fi_str):
 
 
 def result_pros(tabra, beta):
-    met_sol = proc_files(tabra, beta, 'met_fuloop_t0.5_tab{}_B{}.h5')
-    ins_sol = proc_files(tabra, beta, 'ins_fuloop_t0.5_tab{}_B{}.h5')
+    filelist = ['met_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta) for it in tabra]
+    met_sol = proc_files(filelist)
+    filelist = ['ins_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta) for it in tabra]
+    ins_sol = proc_files(filelist)
+
     np.savez('results_fuloop_t0.5_B{}'.format(beta),
-         difm=met_sol[0], zetm=met_sol[1], imetm=met_sol[2], Hm=met_sol[3],
-         difi=ins_sol[0], zeti=ins_sol[1], imeti=ins_sol[2], Hi=ins_sol[3])
+             difm=met_sol[0], zetm=met_sol[1], imetm=met_sol[2], Hm=met_sol[3],
+             difi=ins_sol[0], zeti=ins_sol[1], imeti=ins_sol[2], Hi=ins_sol[3])

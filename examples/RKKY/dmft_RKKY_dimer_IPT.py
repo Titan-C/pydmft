@@ -8,10 +8,10 @@ Created on Fri May 29 13:51:22 2015
 from pytriqs.gf.local import iOmega_n
 import dmft.common as gf
 import numpy as np
-from multiprocessing import Pool
 from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, init_gf_ins, \
-    Dimer_Solver, dimer, result_pros
+    Dimer_Solver, dimer
 import argparse
+from joblib import Parallel, delayed
 
 # Matsubara interacting self-consistency
 def loop_u(urange, tab, t, beta, file_str):
@@ -32,7 +32,21 @@ def loop_u(urange, tab, t, beta, file_str):
 
     return True
 
-#
+# Matsubara interacting self-consistency
+def loop_tab(uint, tabr, t, beta, file_str):
+    n_freq = int(15.*beta/np.pi)
+    w_n = gf.matsubara_freq(beta, n_freq)
+    S = Dimer_Solver(U=uint, beta=beta, n_points=n_freq)
+    S.setup.update({'t': t, 'U': uint, 'beta': beta, 'n_freq': n_freq})
+
+    init_gf_ins(S.g_iw, w_n, 0, tabr[0], uint)
+
+    for tab in tabr:
+        S.setup['tab'] = tab
+        gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
+        dimer(S, gmix, file_str, '/tab{tab}/')
+
+    return True
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
 parser.add_argument('beta', metavar='B', type=float,
@@ -41,23 +55,16 @@ parser.add_argument('beta', metavar='B', type=float,
 
 tabra = np.hstack((np.arange(0, 0.5, 0.01), np.arange(0.5, 1.3, 0.025)))
 args = parser.parse_args()
-BETA = np.array(args.beta)
+BETA = args.beta
 
-ur = np.arange(0, 4.5, 0.01)
-def dimhelp_m(tab):
-    return loop_u(ur, tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+ur = np.arange(0, 4.5, 0.5)
 
+#print(BETA)
+#Parallel(n_jobs=2, verbose=5)(delayed(loop_u)(ur,
+#         tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+#         for tab in [0.1, 0.2])
 
-def dimhelp_i(tab):
-    return loop_u(ur[::-1], tab, 0.5, BETA, 'ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
-
-
-p = Pool()
-
-ou = p.map(dimhelp_m, tabra.tolist())
-ou = p.map(dimhelp_i, tabra.tolist())
-try:
-    result_pros(tabra, BETA)
-except:
-    pass
-
+tabra = np.arange(0, 0.5, 0.01)[::-1]
+Parallel(n_jobs=2, verbose=5)(delayed(loop_tab)(u,
+         tabra, 0.5, BETA, 'ins_tloop_t{t}_U{U}_B{beta}.h5')
+         for u in np.arange(2, 4.5, 0.5))
