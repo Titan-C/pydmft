@@ -57,6 +57,14 @@ def init_gf_ins(g_iw, omega, mu, tab, U):
     g_iw['B', 'B'] << g_iw['A', 'A']
 
 
+def load_gf(g_iw, g_iwd, g_iwo):
+
+    g_iw['A', 'A'] << g_iwd
+    g_iw['B', 'B'] << g_iwd
+    g_iw['A', 'B'] << g_iwo
+    g_iw['B', 'A'] << g_iwo
+
+
 
 class Dimer_Solver:
 
@@ -144,9 +152,10 @@ def store_sim(S, file_str, step_str):
     step = step_str.format(**S.setup)
     R = HDFArchive(file_name, 'a')
     R[step+'setup'] = S.setup
-    R[step+'G_iw'] = S.g_iw
-    R[step+'g0_tau'] = S.g0_tau
-    R[step+'S_iw'] = S.sigma_iw
+    R[step+'G_iwd'] = S.g_iw['A', 'A']
+    R[step+'G_iwo'] = S.g_iw['A', 'B']
+    R[step+'S_iwd'] = S.sigma_iw['A', 'A']
+    R[step+'S_iwo'] = S.sigma_iw['A', 'B']
     del R
 
 
@@ -195,7 +204,7 @@ def quasiparticle(file_str):
     results = HDFArchive(file_str, 'r')
     zet = []
     for uint in results:
-        S_iw = results[uint]['S_iw']
+        S_iw = results[uint]['S_iwd']
         zet.append(matsubara_Z(S_iw.data[:, 0, 0].imag, S_iw.beta))
     del results
     return np.asarray(zet)
@@ -212,9 +221,9 @@ def fermi_level_dos(file_str, n=5):
     results = HDFArchive(file_str, 'r')
     ftr_key = results.keys()[0]
     fl_dos = []
-    w_n = gf.matsubara_freq(results[ftr_key]['G_iw'].beta, n)
+    w_n = gf.matsubara_freq(results[ftr_key]['G_iwd'].beta, n)
     for uint in results:
-        fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iw'])(0.)))
+        fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iwd'])(0.)))
     del results
     return np.asarray(fl_dos)
 

@@ -63,9 +63,9 @@ ur = np.arange(0, 4.5, 0.025)
 #Parallel(n_jobs=2, verbose=5)(delayed(loop_u)(ur,
 #         tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
 #         for tab in [0.1, 0.2])
-Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
-         tab, 0.5, BETA, 'ins_nm_fuloop_t{t}_tab{tab}_B{beta}.h5')
-         for tab in tabra)
+#Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
+#         tab, 0.5, BETA, 'ins_nm_fuloop_t{t}_tab{tab}_B{beta}.h5')
+#         for tab in tabra)
 
 tabra = np.arange(0, 0.5, 0.01)[::-1]
 #Parallel(n_jobs=-1, verbose=5)(delayed(loop_tab)(u,
