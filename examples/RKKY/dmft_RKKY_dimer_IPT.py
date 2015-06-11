@@ -53,7 +53,7 @@ parser.add_argument('beta', metavar='B', type=float,
                     default=150., help='The inverse temperature')
 
 
-tabra = np.hstack((np.arange(0, 0.5, 0.01), np.arange(0.5, 1.3, 0.025)))
+tabra = np.hstack((np.arange(0, 0.5, 0.02), np.arange(0.5, 1.1, 0.05)))
 args = parser.parse_args()
 BETA = args.beta
 
