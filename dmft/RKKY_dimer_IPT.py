@@ -183,8 +183,8 @@ def total_energy(file_str):
     Giw = Gfree.copy()
     Siw = Gfree.copy()
     for uint in results:
-        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iw'])
-        load_gf(Giw, results[uint]['S_iwd'], results[uint]['S_iw'])
+        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iwo'])
+        load_gf(Siw, results[uint]['S_iwd'], results[uint]['S_iwo'])
         energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
         total_e.append(energ.total_density() + 2*mean_free_ekin)
 
