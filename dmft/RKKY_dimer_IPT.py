@@ -15,7 +15,7 @@ import dmft.common as gf
 import slaveparticles.quantum.dos as dos
 from scipy.integrate import quad
 from dmft.twosite import matsubara_Z
-from multiprocessing import Pool
+from joblib import Parallel, delayed
 
 
 def mix_gf_dimer(gmix, omega, mu, tab):
@@ -244,12 +244,11 @@ def proc_files(filelist):
     4-tuple of 2D ndarrays. First axis corresponds to filelist, second to file
     data. Keep in mind H5 files return keys in alphabetical and not write order
     """
-    p = Pool()
 
-    dif = np.asarray(p.map(complexity, filelist))
-    zet = np.asarray(p.map(quasiparticle, filelist))
-    imet = np.asarray(p.map(fermi_level_dos, filelist))
-    H = np.asarray(p.map(total_energy, filelist))
+    dif = np.asarray(Parallel(n_jobs=-1)(delayed(complexity)(f) for f in filelist))
+    zet = np.asarray(Parallel(n_jobs=-1)(delayed(quasiparticle)(f) for f in filelist))
+    imet = np.asarray(Parallel(n_jobs=-1)(delayed(fermi_level_dos)(f) for f in filelist))
+    H = np.asarray(Parallel(n_jobs=-1)(delayed(total_energy)(f) for f in filelist))
 
     return dif, zet, imet, H
 
