@@ -131,6 +131,42 @@ def dimer(S, gmix, filename, step):
 
     store_sim(S, filename, step)
 
+def dimer_tx(S, gmix, filename, step):
+
+    converged = False
+    loops = 0
+    t2 = S.setup['t']**2
+    t_hop = np.matrix([[S.setup['t'], S.setup['tx']],[S.setup['tx'], S.setup['t']]])
+    while not converged:
+        # Enforce DMFT Paramagnetic, IPT conditions
+        # Pure imaginary GF in diagonals
+#        S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
+#        S.g_iw['B', 'B']<<S.g_iw['A', 'A']
+        # Pure real GF in off-diagonals
+#        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
+#        S.g_iw['B', 'A']<<S.g_iw['A', 'B']
+
+        oldg = S.g_iw.data.copy()
+        # Bethe lattice bath
+        S.g0_iw << gmix - t_hop * S.g_iw * t_hop
+        S.g0_iw.invert()
+        S.solve()
+#        import pdb; pdb.set_trace()
+
+        converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
+        loops += 1
+#        mix = mixer(loops)
+        if loops > 2000:
+            converged = True
+
+#        #Finer loop of complicated region
+#        if S.setup['tab'] > 0.5 and S.U > 1.:
+        S.g_iw.data[:] = S.g_iw.data
+
+    S.setup.update({'U': S.U, 'loops': loops})
+
+    store_sim(S, filename, step)
+
 
 def mixer(loops):
     if loops < 10:
