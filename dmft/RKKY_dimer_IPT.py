@@ -165,10 +165,11 @@ def total_energy(file_str):
     ftr_key = results.keys()[0]
     setup = results[ftr_key]['setup']
     beta, tab, t = setup['beta'], setup['tab'], setup['t']
-    n_max = len(results[ftr_key]['G_iw'].mesh)
+    n_freq = len(results[ftr_key]['G_iwd'].mesh)
 
-    Gfree = results[ftr_key]['G_iw']
-    w_n = gf.matsubara_freq(beta, n_max)
+    Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
+                             n_points=n_freq)
+    w_n = gf.matsubara_freq(beta, n_freq)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0, tab, t)
 
@@ -179,9 +180,11 @@ def total_energy(file_str):
 
 
     total_e = []
+    Giw = Gfree.copy()
+    Siw = Gfree.copy()
     for uint in results:
-        Giw = results[uint]['G_iw']
-        Siw = results[uint]['S_iw']
+        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iw'])
+        load_gf(Giw, results[uint]['S_iwd'], results[uint]['S_iw'])
         energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
         total_e.append(energ.total_density() + 2*mean_free_ekin)
 
