@@ -57,14 +57,17 @@ tabra = np.hstack((np.arange(0, 0.5, 0.01), np.arange(0.5, 1.3, 0.025)))
 args = parser.parse_args()
 BETA = args.beta
 
-ur = np.arange(0, 4.5, 0.5)
+ur = np.arange(0, 4.5, 0.025)
 
 #print(BETA)
 #Parallel(n_jobs=2, verbose=5)(delayed(loop_u)(ur,
 #         tab, 0.5, BETA, 'met_fuloop_t{t}_tab{tab}_B{beta}.h5')
 #         for tab in [0.1, 0.2])
+Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
+         tab, 0.5, BETA, 'ins_nm_fuloop_t{t}_tab{tab}_B{beta}.h5')
+         for tab in tabra)
 
 tabra = np.arange(0, 0.5, 0.01)[::-1]
-Parallel(n_jobs=2, verbose=5)(delayed(loop_tab)(u,
-         tabra, 0.5, BETA, 'ins_tloop_t{t}_U{U}_B{beta}.h5')
-         for u in np.arange(2, 4.5, 0.01))
+#Parallel(n_jobs=-1, verbose=5)(delayed(loop_tab)(u,
+#         tabra, 0.5, BETA, 'ins_tloop_t{t}_U{U}_B{beta}.h5')
+#         for u in np.arange(2, 4.5, 0.01))

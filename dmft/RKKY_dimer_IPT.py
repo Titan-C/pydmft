@@ -97,9 +97,11 @@ def dimer(S, gmix, filename, step):
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
-        S.g_iw.data[:, [0, 1], [0, 1]] = 1j*S.g_iw.data[:, [0, 1], [0, 1]].imag
+        S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
+        S.g_iw['B', 'B']<<S.g_iw['A', 'A']
         # Pure real GF in off-diagonals
-        S.g_iw.data[:, [0, 1], [1, 0]] = S.g_iw.data[:, [0, 1], [1, 0]].real
+        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
+        S.g_iw['B', 'A']<<S.g_iw['A', 'B']
 
         oldg = S.g_iw.data.copy()
         # Bethe lattice bath
@@ -109,13 +111,13 @@ def dimer(S, gmix, filename, step):
 
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
-        mix = mixer(loops)
+#        mix = mixer(loops)
         if loops > 2000:
             converged = True
 
 #        #Finer loop of complicated region
 #        if S.setup['tab'] > 0.5 and S.U > 1.:
-        S.g_iw.data[:] = mix*S.g_iw.data + (1-mix)*oldg
+        S.g_iw.data[:] = S.g_iw.data
 
     S.setup.update({'U': S.U, 'loops': loops})
 
