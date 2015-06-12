@@ -45,6 +45,7 @@ def init_gf_met(g_iw, omega, mu, tab, t):
         g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
 
 
+
 def init_gf_ins(g_iw, omega, mu, tab, U):
     G1 = 1./(1j*omega - tab + U**2 / 4j/omega)
     G2 = 1./(1j*omega + tab - U**2 / 4j/omega)
