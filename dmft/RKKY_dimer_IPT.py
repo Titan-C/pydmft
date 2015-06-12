@@ -6,7 +6,7 @@ Dimer Bethe lattice
 Non interacting dimer of a Bethe lattice
 Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
-#from __future__ import division, print_function, absolute_import
+from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, inverse, TailGf, iOmega_n
 import numpy as np
@@ -38,10 +38,11 @@ def init_gf_met(g_iw, omega, mu, tab, t):
     g_iw['B', 'A'] << g_iw['A', 'B']
     g_iw['B', 'B'] << g_iw['A', 'A']
 
-    fixed_co = TailGf(2, 2, 4, -1)
-    fixed_co[1] = np.array([[1, 0], [0, 1]])
-    fixed_co[2] = tab*np.array([[0, 1], [1, 0]])
-    g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
+    if isinstance(g_iw, GfImFreq):
+        fixed_co = TailGf(2, 2, 4, -1)
+        fixed_co[1] = np.array([[1, 0], [0, 1]])
+        fixed_co[2] = tab*np.array([[0, 1], [1, 0]])
+        g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
 
 
 def init_gf_ins(g_iw, omega, mu, tab, U):
@@ -153,7 +154,7 @@ def dimer_tx(S, gmix, filename, step):
         S.solve()
 #        import pdb; pdb.set_trace()
 
-        converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
+        converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
 #        mix = mixer(loops)
         if loops > 2000:
