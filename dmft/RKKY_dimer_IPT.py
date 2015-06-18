@@ -88,10 +88,11 @@ class Dimer_Solver:
     def solve(self):
 
         self.g0_tau << InverseFourier(self.g0_iw)
-        for name in [('A', 'A'), ('B', 'B')]:
-            self.sigma_tau[name] << (self.U**2) * self.g0_tau[name] * self.g0_tau[name] * self.g0_tau[name]
-        for name in [('A', 'B'), ('B', 'A')]:
-            self.sigma_tau[name] << -(self.U**2) * self.g0_tau[name] * self.g0_tau[name] * self.g0_tau[name]
+        for name in [('A', 'A'), ('A', 'B'), ('B', 'A'), ('B', 'B')]:
+            self.sigma_tau[name].data[:] = self.U**2 * \
+                                           self.g0_tau[name].data * \
+                                           self.g0_tau[name].data * \
+                                           self.g0_tau[name].data[::-1]
 
         self.sigma_iw << Fourier(self.sigma_tau)
 
@@ -137,7 +138,6 @@ def dimer_tx(S, gmix, filename, step):
 
     converged = False
     loops = 0
-    t2 = S.setup['t']**2
     t_hop = np.matrix([[S.setup['t'], S.setup['tx']],[S.setup['tx'], S.setup['t']]])
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions

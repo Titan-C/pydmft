@@ -74,8 +74,9 @@ if __name__ == "__main__":
         gmix = mix_gf_dimer(g_iw.copy(), iOmega_n, 0., 0.)
 
         a = True
-        t_hop = np.matrix([[t, 0.52], [0.52, t]])
-        init_gf_met_tx(g_iw, w_n, 0., 0.01, t)
+        tc = 0.49
+        t_hop = np.matrix([[t, tc], [tc, t]])
+        init_gf_met_tx(g_iw, w_n, 0., tc, t)
         g_re.set_from_pade(g_iw,200)
         oplot(g_re['A','A'],RI='S')
 #        import pdb; pdb.set_trace()
