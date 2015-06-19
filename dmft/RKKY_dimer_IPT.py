@@ -26,10 +26,9 @@ def mix_gf_dimer(gmix, omega, mu, tab):
     return gmix
 
 
-def init_gf_met(g_iw, omega, mu, tab, t):
-    G1 = gf.greenF(omega, mu=mu-tab, D=2*t)
-    G2 = gf.greenF(omega, mu=mu+tab, D=2*t)
-
+def init_gf_met(g_iw, omega, mu, tab, tn, t):
+    G1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
+    G2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
 
@@ -41,14 +40,13 @@ def init_gf_met(g_iw, omega, mu, tab, t):
     if isinstance(g_iw, GfImFreq):
         fixed_co = TailGf(2, 2, 4, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
-        fixed_co[2] = tab*np.array([[0, 1], [1, 0]])
-        g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
+        g_iw.fit_tail(fixed_co, 8, int(0.6*len(omega)), int(0.8*len(omega)))
 
 
 
-def init_gf_ins(g_iw, omega, mu, tab, U):
-    G1 = 1./(1j*omega - tab + U**2 / 4j/omega)
-    G2 = 1./(1j*omega + tab - U**2 / 4j/omega)
+def init_gf_ins(g_iw, omega, U):
+    G1 = 1./(1j*omega + U**2 / 4j/omega)
+    G2 = 1./(1j*omega - U**2 / 4j/omega)
 
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
@@ -104,49 +102,16 @@ def dimer(S, gmix, filename, step):
 
     converged = False
     loops = 0
-    t2 = S.setup['t']**2
+    t_hop = np.matrix([[S.setup['t'], S.setup['tn']],[S.setup['tn'], S.setup['t']]])
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
         S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
         S.g_iw['B', 'B']<<S.g_iw['A', 'A']
         # Pure real GF in off-diagonals
-        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
-        S.g_iw['B', 'A']<<S.g_iw['A', 'B']
-
-        oldg = S.g_iw.data.copy()
-        # Bethe lattice bath
-        S.g0_iw << gmix - t2 * S.g_iw
-        S.g0_iw.invert()
-        S.solve()
-
-        converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
-        loops += 1
-#        mix = mixer(loops)
-        if loops > 2000:
-            converged = True
-
-#        #Finer loop of complicated region
-#        if S.setup['tab'] > 0.5 and S.U > 1.:
-        S.g_iw.data[:] = S.g_iw.data
-
-    S.setup.update({'U': S.U, 'loops': loops})
-
-    store_sim(S, filename, step)
-
-def dimer_tx(S, gmix, filename, step):
-
-    converged = False
-    loops = 0
-    t_hop = np.matrix([[S.setup['t'], S.setup['tx']],[S.setup['tx'], S.setup['t']]])
-    while not converged:
-        # Enforce DMFT Paramagnetic, IPT conditions
-        # Pure imaginary GF in diagonals
-#        S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
-#        S.g_iw['B', 'B']<<S.g_iw['A', 'A']
-        # Pure real GF in off-diagonals
 #        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
-#        S.g_iw['B', 'A']<<S.g_iw['A', 'B']
+        S.g_iw['B', 'A']<< 0.5*(S.g_iw['A', 'B'] + S.g_iw['B', 'A'])
+        S.g_iw['A', 'B']<<S.g_iw['B', 'A']
 
         oldg = S.g_iw.data.copy()
         # Bethe lattice bath

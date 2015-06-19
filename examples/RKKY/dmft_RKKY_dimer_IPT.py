@@ -9,28 +9,36 @@ from pytriqs.gf.local import iOmega_n
 import dmft.common as gf
 import numpy as np
 from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, init_gf_ins, \
-    Dimer_Solver, dimer, dimer_tx
+    Dimer_Solver, dimer
 import argparse
 from joblib import Parallel, delayed
 
-# Matsubara interacting self-consistency
-def loop_u(urange, tab, t, beta, file_str):
+
+def matsubara_setup(urange, tab, t, tn, beta, file_str):
     n_freq = int(15.*beta/np.pi)
     w_n = gf.matsubara_freq(beta, n_freq)
     S = Dimer_Solver(U=0, beta=beta, n_points=n_freq)
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
-    S.setup.update({'t': t, 'tab': tab, 'beta': beta, 'n_freq': n_freq})
+    S.setup.update({'t': t, 'tn': tn, 'tab': tab, 'beta': beta,
+                    'n_freq': n_freq})
 
     if file_str.startswith('met'):
-        init_gf_met(S.g_iw, w_n, 0, tab, t)
+        init_gf_met(S.g_iw, w_n, 0, tab, tn, t)
     else:
-        init_gf_ins(S.g_iw, w_n, 0, tab, urange[0])
+        init_gf_ins(S.g_iw, w_n, urange[0])
 
+    return S, gmix
+
+
+# Matsubara interacting self-consistency
+def loop_u(urange, tab, t, tn, beta, file_str):
+    S, gmix = matsubara_setup(urange, tab, t, tn, beta, file_str)
     for u_int in urange:
         S.U = u_int
         dimer(S, gmix, file_str, '/U{U}/')
 
     return True
+
 
 # Matsubara interacting self-consistency
 def loop_tab(uint, tabr, t, beta, file_str):
@@ -49,26 +57,6 @@ def loop_tab(uint, tabr, t, beta, file_str):
     return True
 
 
-def loop_u_tx(urange, tab, t, tx, beta, file_str):
-    n_freq = int(15.*beta/np.pi)
-    w_n = gf.matsubara_freq(beta, n_freq)
-    S = Dimer_Solver(U=0, beta=beta, n_points=n_freq)
-    gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
-    S.setup.update({'t': t, 'tx': tx, 'tab': tab, 'beta': beta,
-                    'n_freq': n_freq})
-
-    if file_str.startswith('met'):
-        init_gf_met(S.g_iw, w_n, 0, tab, t)
-    else:
-        init_gf_ins(S.g_iw, w_n, 0, tab, urange[0])
-
-    for u_int in urange:
-        S.U = u_int
-        dimer_tx(S, gmix, file_str, '/U{U}/')
-
-    return True
-
-
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
 parser.add_argument('beta', metavar='B', type=float,
                     default=150., help='The inverse temperature')
@@ -82,18 +70,18 @@ ur = np.arange(0, 4.5, 0.1)
 
 #print(BETA)
 Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur,
-         tab, 0.5, BETA, 'disk/met_fuloop_t{t}_tab{tab}_B{beta}.h5')
+         tab, 0.5, 0., BETA, 'disk/met_fuloop_t{t}_tab{tab}_B{beta}.h5')
          for tab in tabra)
 Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
-         tab, 0.5, BETA, 'disk/ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
+         tab, 0.5, 0., BETA, 'disk/ins_fuloop_t{t}_tab{tab}_B{beta}.h5')
          for tab in tabra)
 
-Parallel(n_jobs=-1, verbose=5)(delayed(loop_u_tx)(ur,
-         tab, 0.5, tx, BETA, 'disk/met_fuloop_t{t}_tx{tx}_tab{tab}_B{beta}.h5')
-         for tab in [0., 0.1, 0.4, 0.8, 1.2] for tx in np.arange(0, 1.2, 0.1))
-Parallel(n_jobs=-1, verbose=5)(delayed(loop_u_tx)(ur[::-1],
-         tab, 0.5, tx, BETA, 'disk/ins_fuloop_t{t}_tx{tx}_tab{tab}_B{beta}.h5')
-         for tab in [0., 0.1, 0.4, 0.8, 1.2] for tx in np.arange(0, 1.2, 0.1))
+Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur,
+         tab, 0.5, tn, BETA, 'disk/met_fuloop_t{t}_tn{tn}_tab{tab}_B{beta}.h5')
+         for tab in [0.1, 0.4, 0.8, 1.2] for tn in np.arange(0, 1.2, 0.1))
+Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
+         tab, 0.5, tn, BETA, 'disk/ins_fuloop_t{t}_tx{tx}_tab{tab}_B{beta}.h5')
+         for tab in [0.1, 0.4, 0.8, 1.2] for tn in np.arange(0, 1.2, 0.1))
 
 
 tabra = np.arange(0, 0.5, 0.05)[::-1]
