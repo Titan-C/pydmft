@@ -167,14 +167,14 @@ def total_energy(file_str):
     results = HDFArchive(file_str, 'r')
     ftr_key = results.keys()[0]
     setup = results[ftr_key]['setup']
-    beta, tab, t = setup['beta'], setup['tab'], setup['t']
+    beta, tab, tn, t = setup['beta'], setup['tab'], setup['tn'], setup['t']
     n_freq = len(results[ftr_key]['G_iwd'].mesh)
 
     Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
                              n_points=n_freq)
     w_n = gf.matsubara_freq(beta, n_freq)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
-    init_gf_met(Gfree, w_n, 0, tab, t)
+    init_gf_met(Gfree, w_n, 0., tab, tn, t)
 
     mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
                           args=(1., tab, t, beta))[0] \
