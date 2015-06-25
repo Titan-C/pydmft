@@ -78,10 +78,10 @@ Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
 
 Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur,
          tab, 0.5, tn, BETA, 'disk/met_fuloop_t{t}_tn{tn}_tab{tab}_B{beta}.h5')
-         for tab in [0.1, 0.4, 0.8, 1.2] for tn in np.arange(0, 1.2, 0.1))
+         for tab in [0.] for tn in np.arange(0, 1.2, 0.1))
 Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1],
-         tab, 0.5, tn, BETA, 'disk/ins_fuloop_t{t}_tx{tx}_tab{tab}_B{beta}.h5')
-         for tab in [0.1, 0.4, 0.8, 1.2] for tn in np.arange(0, 1.2, 0.1))
+         tab, 0.5, tn, BETA, 'disk/ins_fuloop_t{t}_tn{tn}_tab{tab}_B{beta}.h5')
+         for tab in [0., 0.1, 0.4, 0.8, 1.2] for tn in np.arange(0, 1.2, 0.1))
 
 
 tabra = np.arange(0, 0.5, 0.05)[::-1]
