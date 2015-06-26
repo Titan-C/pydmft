@@ -18,40 +18,6 @@ from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, inverse, TailGf, iOmega_n
 import dmft.RKKY_dimer_IPT as rt
 
-def solver(g0up, g0dw, v, parms):
-    gstup, gstdw = np.zeros_like(g0up), np.zeros_like(g0dw)
-    kroneker = np.eye(2*parms['n_tau_mc'])
-    meas = 0
-    ar =[]
-
-    for mcs in range(parms['sweeps'] + parms['therm']):
-        if mcs % parms['therm'] == 0:
-            gup = hf.gnewclean(g0up, v, 1., kroneker)
-            gdw = hf.gnewclean(g0dw, v, -1., kroneker)
-
-        ar.append(hf.hffast.updateDHS(gup, gdw, v))
-
-        if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
-            meas += 1
-            gstup += gup
-            gstdw += gdw
-
-    gstup = gstup/meas
-    gstdw = gstdw/meas
-    print(np.mean(ar))
-    return avg_g(gstup, parms), avg_g(gstdw, parms)
-
-
-def avg_g(gst, parms):
-    n1, n2, lfak = parms['SITES'], parms['SITES'], parms['n_tau_mc']
-
-    gst_m = np.empty((n1, n2, lfak+1))
-    for i in range(n1):
-        for j in range(n2):
-            gst_m[i, j] = hf.avg_g(gst[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak])
-            if i != j:
-                gst_m[i,j, -1] -= 1.
-    return gst_m
 
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
@@ -107,9 +73,8 @@ def dmft_loop_pm(gw=None, **kwargs):
         g0_tau << InverseFourier(g0_iw)
 
         g0t = np.asarray([g0_tau(t).real for t in tau])
-        g0tu = hf.ret_weiss(g0t)
 
-        gtu, gtd = solver(g0tu, g0tu.copy(), v, parameters)
+        gtu, gtd = hf.imp_solver(g0t, g0t, v, parameters)
         gt_D = -0.25 * (gtu[0 ,0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
@@ -131,7 +96,7 @@ def dmft_loop_pm(gw=None, **kwargs):
 
 if __name__ == "__main__":
     gt = dmft_loop_pm()
-#    oplot(gt)
+    oplot(gt)
 #    plt.figure(2)
 #    tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
 #    for it in sorted(sim1):

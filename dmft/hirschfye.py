@@ -62,7 +62,7 @@ def imp_solver(g0up, g0dw, v, parms_user):
 
     gxu = ret_weiss(g0up)
     gxd = ret_weiss(g0dw)
-    kroneker = np.eye(parms_user['n_tau_mc'])
+    kroneker = np.eye(gxu.shape[0])
 
     gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
     vlog = []
@@ -100,7 +100,7 @@ def imp_solver(g0up, g0dw, v, parms_user):
     if parms['save_logs']:
         return avg_g(gstup), avg_g(gstdw), np.asarray(vlog), np.asarray(ar)
     else:
-        return avg_g(gstup), avg_g(gstdw)
+        return avg_g(gstup, parms), avg_g(gstdw, parms)
 
 # Global update on mean field
 #def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
@@ -147,7 +147,7 @@ def ret_weiss(g0tau):
     return g0t_mat
 
 
-def avg_g(gmat):
+def avg_gblock(gmat):
     lfak = gmat.shape[0]
     xga = np.zeros(2*lfak+1)
     for i in range(1, 2*lfak):
@@ -155,10 +155,20 @@ def avg_g(gmat):
 
     xg = np.zeros(lfak+1)
     xg[:-1] = (xga[lfak:-1]-xga[:lfak]) / lfak
-    xg[-1] = 1-xg[0]
+    xg[-1] = -xg[0]
 
     return xg
 
+def avg_g(gst, parms):
+    n1, n2, lfak = parms['SITES'], parms['SITES'], parms['n_tau_mc']
+
+    gst_m = np.empty((n1, n2, lfak+1))
+    for i in range(n1):
+        for j in range(n2):
+            gst_m[i, j] = avg_gblock(gst[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak])
+            if i == j:
+                gst_m[i,j, -1] += 1.
+    return gst_m
 
 def gnewclean(g0t, v, sign, kroneker):
     """Returns the interacting function :math:`G_{ij}` for the non-interacting

@@ -26,6 +26,13 @@ def mix_gf_dimer(gmix, omega, mu, tab):
     return gmix
 
 
+def fit_tail(g_iw):
+    fixed_co = TailGf(2, 2, 3, -1)
+    fixed_co[1] = np.array([[1, 0], [0, 1]])
+    mesh = len(g_iw.mesh)
+    g_iw.fit_tail(fixed_co, 8, int(0.8*mesh), mesh)
+
+
 def init_gf_met(g_iw, omega, mu, tab, tn, t):
     G1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
     G2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
@@ -38,10 +45,7 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
     g_iw['B', 'B'] << g_iw['A', 'A']
 
     if isinstance(g_iw, GfImFreq):
-        fixed_co = TailGf(2, 2, 3, -1)
-        fixed_co[1] = np.array([[1, 0], [0, 1]])
-        g_iw.fit_tail(fixed_co, 8, int(0.8*len(omega)), len(omega))
-
+        fit_tail(g_iw)
 
 
 def init_gf_ins(g_iw, omega, U):
