@@ -38,9 +38,9 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
     g_iw['B', 'B'] << g_iw['A', 'A']
 
     if isinstance(g_iw, GfImFreq):
-        fixed_co = TailGf(2, 2, 4, -1)
+        fixed_co = TailGf(2, 2, 3, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
-        g_iw.fit_tail(fixed_co, 8, int(0.6*len(omega)), int(0.8*len(omega)))
+        g_iw.fit_tail(fixed_co, 8, int(0.8*len(omega)), len(omega))
 
 
 
