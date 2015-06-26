@@ -136,11 +136,15 @@ def ret_weiss(g0tau):
     .. math:: \mathcal{G}^0_{ij} = \mathcal{G}^0(i\Delta\tau - j\Delta\tau)
     Because of the Hirsch-Fye algorithm a minus sign is included
     """
-    lfak = g0tau.shape[-1]-1
+    lfak, n1, n2 = g0tau.shape
     delta_tau = np.arange(lfak)
 
     gind = lfak + np.subtract.outer(delta_tau, delta_tau)
-    return np.concatenate((g0tau[:-1], -g0tau))[gind]
+    g0t_mat = np.empty((lfak*n1,lfak*n2))
+    for i in range(n1):
+        for j in range(n2):
+            g0t_mat[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak] = np.concatenate((g0tau[:, i, j], -g0tau[:, i, j]))[gind]
+    return g0t_mat
 
 
 def avg_g(gmat):
