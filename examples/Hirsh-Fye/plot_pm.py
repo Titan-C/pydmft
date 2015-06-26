@@ -26,8 +26,8 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'U':           3,
                    't':           0.5,
                    'MU':          0,
-                   'loops':       6,
-                   'sweeps':      8000,
+                   'loops':       1,
+                   'sweeps':      5000,
                    'therm':       1000,
                    'N_meas':      4,
                    'save_logs':   False,
@@ -44,8 +44,8 @@ def dmft_loop_pm(gw=None, **kwargs):
     for iter_count in range(parameters['loops']):
         G0iw = 1/(1j*w_n + parameters['MU'] - parameters['t']**2 * Giw)
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
-        g0t = hf.interpol(G0t, parameters['n_tau_mc'])
-
+        g0t = hf.interpol(G0t, parameters['n_tau_mc'])[:-1].reshape(-1, 1, 1)
+        print(g0t.shape)
         gtu, gtd = hf.imp_solver(g0t, g0t, v_aux, parameters)
         gt = -0.5 * (gtu+gtd)
 
