@@ -137,8 +137,9 @@ def ret_weiss(g0tau):
     Because of the Hirsch-Fye algorithm a minus sign is included
     """
     lfak = g0tau.shape[-1]-1
+    delta_tau = np.arange(lfak)
 
-    gind = lfak + np.arange(lfak).reshape(-1, 1)-np.arange(lfak).reshape(1, -1)
+    gind = lfak + np.subtract.outer(delta_tau, delta_tau)
     return np.concatenate((g0tau[:-1], -g0tau))[gind]
 
 
