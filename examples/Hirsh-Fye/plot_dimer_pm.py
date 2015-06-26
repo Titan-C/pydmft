@@ -17,24 +17,24 @@ import dmft.common as gf
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, inverse, TailGf, iOmega_n
 import dmft.RKKY_dimer_IPT as rt
-
+from pytriqs.plot.mpl_interface import oplot
 
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'n_tau_mc':    64,
+                   'n_tau_mc':    128,
                    'BETA':        16,
                    'N_TAU':    2**11,
-                   'N_MATSUBARA': 64,
-                   'U':           3.2,
+                   'N_MATSUBARA': 128,
+                   'U':           1.5,
                    't':           0.5,
                    'tp':          0.1,
                    'MU':          0,
                    'BANDS': 1,
                    'SITES': 2,
-                   'loops':       3,
-                   'sweeps':      30000,
-                   'therm':       1000,
+                   'loops':       1,
+                   'sweeps':      50000,
+                   'therm':       2000,
                    'N_meas':      4,
                    'save_logs':   False,
                    'updater':     'discrete'
@@ -57,7 +57,9 @@ def dmft_loop_pm(gw=None, **kwargs):
     if gw is not None:
         Giw = gw
 
-    for iter_count in range(parameters['loops']):
+    converged = False
+    loops = 0
+    while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
         g_iw.data[:, 0, 0] = 1j*g_iw.data[:, 0, 0].imag
@@ -67,7 +69,7 @@ def dmft_loop_pm(gw=None, **kwargs):
         g_iw['B', 'A']<< 0.5*(g_iw['A', 'B'] + g_iw['B', 'A'])
         g_iw['A', 'B']<<g_iw['B', 'A']
 
-#        oldg = g_iw.data.copy()
+        oldg = g_iw.data.copy()
         # Bethe lattice bath
         g0_iw << gmix - 0.25 * g_iw
         g0_iw.invert()
@@ -92,18 +94,23 @@ def dmft_loop_pm(gw=None, **kwargs):
 
         g_iw << Fourier(g_tau)
 
-        simulation['it{:0>2}'.format(iter_count)] = {
-                            'Giw': g_iw,
-                            }
-    return g_iw, g_tau
+        converged = np.allclose(g_iw.data, oldg, atol=1e-2)
+        loops += 1
+#        mix = mixer(loops)
+        if loops > 8:
+            converged = True
+
+    print(loops)
+
+    return simulation
 
 if __name__ == "__main__":
     sim = dmft_loop_pm()
 #    plt.figure(2)
 #    tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
-#    for it in sorted(sim1):
-#        if 'it' in it:
-##            plt.plot(s['Giw'].real.T, label=it)
+    for it in sorted(sim):
+        if 'it' in it:
+            oplot(sim[it]['Giw']['A','B'], lw=2, num=2)
 #            plt.semilogy(tau,-sim1[it]['gtaud'], 'o', label=it)
 #    plt.legend()
 #    print(np.polyfit(tau[:10], np.log(-sim1['it00']['gtaud'][:10]), 1))
