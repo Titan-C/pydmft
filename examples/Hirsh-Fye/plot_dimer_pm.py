@@ -22,7 +22,7 @@ import dmft.RKKY_dimer_IPT as rt
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'n_tau_mc':    32,
+                   'n_tau_mc':    64,
                    'BETA':        16,
                    'N_TAU':    2**11,
                    'N_MATSUBARA': 64,
@@ -32,8 +32,8 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'MU':          0,
                    'BANDS': 1,
                    'SITES': 2,
-                   'loops':       5,
-                   'sweeps':      15000,
+                   'loops':       3,
+                   'sweeps':      30000,
                    'therm':       1000,
                    'N_meas':      4,
                    'save_logs':   False,
@@ -42,7 +42,9 @@ def dmft_loop_pm(gw=None, **kwargs):
 
     tau = np.arange(0, parameters['BETA'], parameters['BETA']/parameters['n_tau_mc'])
     w_n = gf.matsubara_freq(parameters['BETA'], parameters['N_MATSUBARA'])
-    v = hf.ising_v(0.5, parameters['U'], L=2*parameters['n_tau_mc'])
+
+    parameters['dtau_mc'] = parameters['BETA']/parameters['n_tau_mc']
+    v = hf.ising_v(parameters['dtau_mc'], parameters['U'], L=parameters['SITES']*parameters['n_tau_mc'])
     g_iw = GfImFreq(indices=['A', 'B'], beta=parameters['BETA'],
                              n_points=len(w_n))
     g0_iw = g_iw.copy()
@@ -90,19 +92,13 @@ def dmft_loop_pm(gw=None, **kwargs):
 
         g_iw << Fourier(g_tau)
 
-#        simulation['it{:0>2}'.format(iter_count)] = {
-#                            'G0iwd': G0iw_D,
-#                            'Giwd':  Giw_D,
-#                            'Giwn':  Giw_N,
-#                            'gtaud': gtd,
-#                            'gtaun': gtn,
-#                            }
+        simulation['it{:0>2}'.format(iter_count)] = {
+                            'Giw': g_iw,
+                            }
     return g_iw, g_tau
 
 if __name__ == "__main__":
-    giw, gt = dmft_loop_pm()
-    oplot(giw, num=1)
-    oplot(gt, num=2)
+    sim = dmft_loop_pm()
 #    plt.figure(2)
 #    tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
 #    for it in sorted(sim1):
