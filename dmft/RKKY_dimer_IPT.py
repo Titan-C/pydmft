@@ -30,7 +30,7 @@ def fit_tail(g_iw):
     fixed_co = TailGf(2, 2, 3, -1)
     fixed_co[1] = np.array([[1, 0], [0, 1]])
     mesh = len(g_iw.mesh)
-    g_iw.fit_tail(fixed_co, 8, int(0.8*mesh), mesh)
+    g_iw.fit_tail(fixed_co, 8, int(0.65*mesh), mesh)
 
 
 def init_gf_met(g_iw, omega, mu, tab, tn, t):

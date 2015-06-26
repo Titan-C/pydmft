@@ -83,6 +83,11 @@ def dmft_loop_pm(gw=None, **kwargs):
         g_tau.data[:, 0, 1] = hf.interpol(gt_N, parameters['N_TAU']-1)
         g_tau['B', 'A'] << g_tau['A', 'B']
 
+        fixed_co = TailGf(2, 2, 4, -1)
+        fixed_co[1] = np.array([[1, 0], [0, 1]])
+        fixed_co[2] = parameters['tp']*np.array([[0, 1], [1, 0]])
+        g_tau.tail = fixed_co
+
         g_iw << Fourier(g_tau)
 
 #        simulation['it{:0>2}'.format(iter_count)] = {
@@ -92,11 +97,12 @@ def dmft_loop_pm(gw=None, **kwargs):
 #                            'gtaud': gtd,
 #                            'gtaun': gtn,
 #                            }
-    return g_iw
+    return g_iw, g_tau
 
 if __name__ == "__main__":
-    gt = dmft_loop_pm()
-    oplot(gt)
+    giw, gt = dmft_loop_pm()
+    oplot(giw, num=1)
+    oplot(gt, num=2)
 #    plt.figure(2)
 #    tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
 #    for it in sorted(sim1):
