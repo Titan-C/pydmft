@@ -15,6 +15,7 @@ import dmft.common as gf
 import slaveparticles.quantum.dos as dos
 from scipy.integrate import quad
 from dmft.twosite import matsubara_Z
+improt dmft.hirschfye as hf
 from joblib import Parallel, delayed
 
 
@@ -101,6 +102,37 @@ class Dimer_Solver:
         # Dyson equation to get G
         self.g_iw << inverse(inverse(self.g0_iw) - self.sigma_iw)
 
+class Dimer_Solver_hf(Dimer_Solver):
+
+    def __init__(self):
+        self.g_tau = self.g0_tau.copy()
+        self.fixed_tail()
+
+    def fixed_tail(self):
+        fixed_co = TailGf(2, 2, 4, -1)
+        fixed_co[1] = np.array([[1, 0], [0, 1]])
+        fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
+        self.g_tau.tail = fixed_co
+
+
+
+    def solve(self, tau):
+
+        self.g0_tau << InverseFourier(self.g0_iw)
+
+        g0t = np.asarray([self.g0_tau(t).real for t in tau])
+
+        gtu, gtd = hf.imp_solver(g0t, g0t, v, setup)
+        gt_D = -0.25 * (gtu[0 ,0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
+        gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
+
+        gt_D = hf.interpol(gt_D, setup['N_TAU']-1)
+        gt_N = hf.interpol(gt_N, setup['N_TAU']-1)
+
+        load_gf(g_tau, gt_D, gt_N)
+
+
+        self.g_iw << Fourier(self.g_tau)
 
 def dimer(S, gmix, filename, step):
 

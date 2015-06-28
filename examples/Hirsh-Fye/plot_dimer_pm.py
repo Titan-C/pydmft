@@ -19,6 +19,9 @@ from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
 import dmft.RKKY_dimer_IPT as rt
 from pytriqs.plot.mpl_interface import oplot
 
+def solver(g0_iw):
+
+
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
@@ -33,7 +36,7 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'BANDS': 1,
                    'SITES': 2,
                    'loops':       1,
-                   'sweeps':      50000,
+                   'sweeps':      10000,
                    'therm':       2000,
                    'N_meas':      4,
                    'save_logs':   False,
@@ -74,25 +77,6 @@ def dmft_loop_pm(gw=None, **kwargs):
         g0_iw << gmix - 0.25 * g_iw
         g0_iw.invert()
 
-        g0_tau << InverseFourier(g0_iw)
-
-        g0t = np.asarray([g0_tau(t).real for t in tau])
-
-        gtu, gtd = hf.imp_solver(g0t, g0t, v, parameters)
-        gt_D = -0.25 * (gtu[0 ,0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
-        gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
-
-        g_tau.data[:, 0, 0] = hf.interpol(gt_D, parameters['N_TAU']-1)
-        g_tau['B', 'B'] << g_tau['A', 'A']
-        g_tau.data[:, 0, 1] = hf.interpol(gt_N, parameters['N_TAU']-1)
-        g_tau['B', 'A'] << g_tau['A', 'B']
-
-        fixed_co = TailGf(2, 2, 4, -1)
-        fixed_co[1] = np.array([[1, 0], [0, 1]])
-        fixed_co[2] = parameters['tp']*np.array([[0, 1], [1, 0]])
-        g_tau.tail = fixed_co
-
-        g_iw << Fourier(g_tau)
 
         converged = np.allclose(g_iw.data, oldg, atol=1e-2)
         loops += 1
