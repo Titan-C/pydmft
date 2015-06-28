@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import dmft.hirschfye as hf
 import pytest
-import hffast
+import dmft.hffast as hffast
 
 
 @pytest.mark.parametrize("chempot, u_int", [(0, 2), (0.5, 2.3)])

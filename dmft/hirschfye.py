@@ -14,7 +14,7 @@ from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
-import hffast
+import dmft.hffast as hffast
 
 
 def ising_v(dtau, U, L=32, polar=0.5):
@@ -60,8 +60,8 @@ def imp_solver(g0up, g0dw, v, parms_user):
              }
     parms.update(parms_user)
 
-    gxu = ret_weiss(g0up)
-    gxd = ret_weiss(g0dw)
+    gxu = retarded_weiss(g0up)
+    gxd = retarded_weiss(g0dw)
     kroneker = np.eye(gxu.shape[0])
 
     gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
@@ -80,9 +80,6 @@ def imp_solver(g0up, g0dw, v, parms_user):
             acc = hffast.updateDHS(gup, gdw, v)
         elif parms['updater'] == 'continuous':
             acc = hffast.updateCHS(gup, gdw, v, parms)
-#        elif parms['updater'] == 'continuousMF':
-#            dgup, dgdw = la.det(gup), la.det(gdw)
-#            dgup, dgdw, acc = updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw)
         else:
             raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
@@ -102,39 +99,23 @@ def imp_solver(g0up, g0dw, v, parms_user):
     else:
         return avg_g(gstup, parms), avg_g(gstdw, parms)
 
-# Global update on mean field
-#def updateCHSMF(gup, gdw, v, parms, kroneker, dgup, dgdw):
-#    acc = 0
-#    U, dtau = parms['U'], parms['dtau_mc']
-#    Vjp = dtau * np.random.normal(0, np.sqrt(U/parms['BETA']), 1)
-#    dv = Vjp - v
-#    gnu = gnewclean(gup, dv, 1, kroneker)
-#    gnd = gnewclean(gdw, dv, -1, kroneker)
-#    dgnu = la.det(gnu)
-#    dgnd = la.det(gnd)
-#    ratup = dgnu/dgup
-#    ratdw = dgnd/dgdw
-#    rat = ratup * ratdw
-#    gauss_weight = np.exp((Vjp**2-v**2)/(2*U*dtau)*parms['n_tau_mc'])
-#    rat = rat/(gauss_weight+rat)
-#
-#    if rat > np.random.rand():
-#        acc = 1
-#        v[:] = Vjp[:]
-#        gup[:] = gnu[:]
-#        gdw[:] = gnd[:]
-#        dgup = dgnu
-#        dgdw = dgnd
-#    return dgup, dgdw, acc
 
-
-def ret_weiss(g0tau):
+def retarded_weiss(g0tau):
     r"""
-    Takes the propagator :math:`\mathcal{G}^0(\tau)` and transforms it
+    Takes the propagator :math:`\mathcal{G}^0(\tau)` corresponding to the
+    Weiss mean field of the electronic bath and transforms it
     into the discretized matrix of the retarded weiss field as
 
-    .. math:: \mathcal{G}^0_{ij} = \mathcal{G}^0(i\Delta\tau - j\Delta\tau)
-    Because of the Hirsch-Fye algorithm a minus sign is included
+    .. math:: \mathcal{G}^0_{\alpha\beta_{(ij)}} =
+        -\mathcal{G}^0_{\alpha\beta}(i\Delta\tau - j\Delta\tau)
+    Because of the Hirsch-Fye algorithm a minus sign is included into the
+    matrix expresion. :math:`\alpha,\beta` block indices :math:`i,j` indices
+    within the blocks
+
+    Parameters
+    ----------
+    g0tau : 3D ndarray, of retarded weiss field
+        First axis numerical values, second and third axis are block indices
     """
     lfak, n1, n2 = g0tau.shape
     delta_tau = np.arange(lfak)
