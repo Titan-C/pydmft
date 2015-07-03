@@ -50,10 +50,7 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
 
-    g_iw['A', 'A'].data[:, 0, 0] = Gd
-    g_iw['A', 'B'].data[:, 0, 0] = Gc
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
+    load_gf(g_iw, Gd, Gc)
 
     if isinstance(g_iw, GfImFreq):
         fit_tail(g_iw)
@@ -63,16 +60,14 @@ def init_gf_ins(g_iw, omega, U):
     """Initializes the green function in the insulator limit given by
 
     .. math:: G_{11} = (i\omega_n \pm \frac{U^2}{4i\omega_n})^{-1}
+    """
     G1 = 1./(1j*omega + U**2 / 4j/omega)
     G2 = 1./(1j*omega - U**2 / 4j/omega)
 
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
 
-    g_iw['A', 'A'].data[:, 0, 0] = Gd
-    g_iw['A', 'B'].data[:, 0, 0] = Gc
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
+    load_gf(g_iw, Gd, Gc)
 
 
 def load_gf(g_iw, g_iwd, g_iwo):
@@ -149,6 +144,12 @@ class Dimer_Solver_hf(Dimer_Solver):
 
         self.g_iw << Fourier(self.g_tau)
 
+def gf_symtetrizer(G):
+    gd = 0.5*(G['A', 'A'].data + G['B', 'B'].data)
+    gn = 0.5*(G['A', 'B'].data + G['B', 'A'].data)
+    load_gf(G, gd, gn)
+
+
 def dimer(S, gmix, filename, step):
 
     converged = False
@@ -214,6 +215,17 @@ def store_sim(S, file_str, step_str):
 
 
 def total_energy(file_str):
+    """Calculates the internal energy of the system given by Fetter-Walecka
+    25-26
+
+    .. math:: \langle H \rangle = 1/\beta\sum_{nk} 1/2(i\omega_n +  H^0_k + \mu)
+    Tr G(k, i\omega_n)\\
+    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - G^{0,-1}G^0 + G^{-1}G)\\
+    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 + (i\omega_n - H^0_k +\mu -\Sigma )G)
+    = Tr i\omega_n(G-G^0)
+
+    """
+
 
     results = HDFArchive(file_str, 'r')
     ftr_key = results.keys()[0]
@@ -248,6 +260,7 @@ def total_energy(file_str):
 
 
 def complexity(file_str):
+    """Extracts the loopcount for convergence"""
     results = HDFArchive(file_str, 'r')
     dif = []
     for uint in results:
@@ -268,6 +281,8 @@ def quasiparticle(file_str):
 
 
 def fit_dos(w_n, g):
+    """Performs a quadratic fit of the -first- matsubara frequencies
+    to estimate the value at zero energy"""
     n = len(w_n)
     gfit = g.data[:n, 0, 0].imag
     pf = np.polyfit(w_n, gfit, 2)
@@ -283,6 +298,7 @@ def fermi_level_dos(file_str, n=5):
         fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iwd'])(0.)))
     del results
     return np.asarray(fl_dos)
+
 
 
 def proc_files(filelist):

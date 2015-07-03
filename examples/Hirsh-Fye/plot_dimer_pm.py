@@ -19,8 +19,6 @@ from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
 import dmft.RKKY_dimer_IPT as rt
 from pytriqs.plot.mpl_interface import oplot
 
-def solver(g0_iw):
-
 
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
@@ -80,7 +78,6 @@ def dmft_loop_pm(gw=None, **kwargs):
 
         converged = np.allclose(g_iw.data, oldg, atol=1e-2)
         loops += 1
-#        mix = mixer(loops)
         if loops > 8:
             converged = True
 
