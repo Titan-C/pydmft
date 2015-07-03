@@ -141,6 +141,7 @@ class Dimer_Solver_hf(Dimer_Solver):
         gt_N = hf.interpol(gt_N, setup['N_TAU']-1)
 
         load_gf(g_tau, gt_D, gt_N)
+        self.fixed_tail()
 
 
         self.g_iw << Fourier(self.g_tau)
