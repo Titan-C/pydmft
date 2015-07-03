@@ -15,24 +15,6 @@ from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met
 import dmft.common as gf
 
 
-def init_gf_met_tx(g_iw, omega, mu, tn, t):
-    G1 = gf.greenF(omega, mu=mu, D=2*(t+tn))
-    G2 = gf.greenF(omega, mu=mu, D=2*abs(t-tn))
-
-    Gd = .5*(G1 + G2)
-    Gc = .5*(G1 - G2)
-
-    g_iw['A', 'A'].data[:, 0, 0] = Gd
-    g_iw['A', 'B'].data[:, 0, 0] = Gc
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
-
-    if isinstance(g_iw, GfImFreq):
-        fixed_co = TailGf(2, 2, 4, -1)
-        fixed_co[1] = np.array([[1, 0], [0, 1]])
-#        fixed_co[2] = tab*np.array([[0, 1], [1, 0]])
-        g_iw.fit_tail(fixed_co, 6, int(0.6*len(omega)), int(0.8*len(omega)))
-
 if __name__ == "__main__":
     mu, t = 0.0, 0.5
     t2 = t**2
@@ -46,7 +28,7 @@ if __name__ == "__main__":
         g_re = GfReFreq(indices=['A', 'B'], window=(-3, 3), n_points=len(w))
         gmix_re = mix_gf_dimer(g_re.copy(), Omega + 1e-3j, mu, tab)
 
-        init_gf_met(g_re, -1j*w, mu, tab, t)
+        init_gf_met(g_re, -1j*w, mu, tab, 0., t)
         g_re << gmix_re - t2 * g_re
         g_re.invert()
 
@@ -58,7 +40,7 @@ if __name__ == "__main__":
         g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=len(w_n))
         gmix = mix_gf_dimer(g_iw.copy(), iOmega_n, mu, tab)
 
-        init_gf_met(g_iw, w_n, mu, tab, t)
+        init_gf_met(g_iw, w_n, mu, tab, 0., t)
         g_iw << gmix - t2 * g_iw
         g_iw.invert()
         oplot(g_iw['A', 'A'], '+-', RI='I', label=r'$t_{{ab}}={}$'.format(tab), num=2)
@@ -76,7 +58,7 @@ if __name__ == "__main__":
         a = True
         tc = 0.49
         t_hop = np.matrix([[t, tc], [tc, t]])
-        init_gf_met_tx(g_iw, w_n, 0., tc, t)
+        init_gf_met(g_iw, w_n, 0., 0., tc, t)
         g_re.set_from_pade(g_iw,200)
         oplot(g_re['A','A'],RI='S')
 #        import pdb; pdb.set_trace()
