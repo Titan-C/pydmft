@@ -15,11 +15,17 @@ import dmft.common as gf
 import slaveparticles.quantum.dos as dos
 from scipy.integrate import quad
 from dmft.twosite import matsubara_Z
-improt dmft.hirschfye as hf
+import dmft.hirschfye as hf
 from joblib import Parallel, delayed
 
 
 def mix_gf_dimer(gmix, omega, mu, tab):
+    """Dimer formation Green function term
+
+    .. math::
+
+        G_{mix}(i\omega_n) =ao
+    """"
     gmix['A', 'A'] = omega + mu
     gmix['A', 'B'] = -tab
     gmix['B', 'A'] = -tab
@@ -28,6 +34,7 @@ def mix_gf_dimer(gmix, omega, mu, tab):
 
 
 def fit_tail(g_iw):
+    """Fits a tail with the known first moment decay as 1/w"""
     fixed_co = TailGf(2, 2, 3, -1)
     fixed_co[1] = np.array([[1, 0], [0, 1]])
     mesh = len(g_iw.mesh)
@@ -35,6 +42,9 @@ def fit_tail(g_iw):
 
 
 def init_gf_met(g_iw, omega, mu, tab, tn, t):
+    """Gives a metalic seed of a non-interacting system
+
+    """
     G1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
     G2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
     Gd = .5*(G1 + G2)
@@ -50,6 +60,9 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
 
 
 def init_gf_ins(g_iw, omega, U):
+    """Initializes the green function in the insulator limit given by
+
+    .. math:: G_{11} = (i\omega_n \pm \frac{U^2}{4i\omega_n})^{-1}
     G1 = 1./(1j*omega + U**2 / 4j/omega)
     G2 = 1./(1j*omega - U**2 / 4j/omega)
 
@@ -63,6 +76,8 @@ def init_gf_ins(g_iw, omega, U):
 
 
 def load_gf(g_iw, g_iwd, g_iwo):
+    """Loads into the first greenfunction the equal diagonal terms and the
+    offdiagonals"""
 
     g_iw['A', 'A'] << g_iwd
     g_iw['B', 'B'] << g_iwd

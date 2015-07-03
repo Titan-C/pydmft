@@ -65,20 +65,6 @@ if __name__ == "__main__":
     tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
     for it in sorted(sim1):
         if 'it' in it:
-#            plt.plot(s['Giw'].real.T, label=it)
             plt.semilogy(tau,-sim1[it]['gtau'], 'o', label=it)
     plt.legend()
     print(np.polyfit(tau[:10], np.log(-sim1['it00']['gtau'][:10]), 1))
-#    plt.figure()
-#    for it in sorted(sim2):
-#        if 'it' in it:
-##            plt.plot(s['Giw'].real.T, label=it)
-#            plt.plot(sim2[it]['Giw'].mean(axis=0).T.imag, 's-', label=it)
-#    plt.legend()
-#    sim2=hf.dmft_loop(3.9, gw=sim[-1]['Giw'])
-#    plt.figure()
-#    sim3=hf.dmft_loop(2.8, gw=sim2[-1]['Giw'])
-#    plt.figure()
-#    for i,s in enumerate(sim3):plt.plot(s['Giw'].imag, label=str(i))
-#    plt.figure()
-#    for i,s in enumerate(sim3):plt.plot(s['gtau'], label=str(i))
