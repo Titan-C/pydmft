@@ -117,6 +117,7 @@ class Dimer_Solver_hf(Dimer_Solver):
     def __init__(self):
         self.g_tau = self.g0_tau.copy()
         self.fixed_tail()
+        self.V_field = hf.ising_v(setup['dtau_mc'], self.U, L=setup['SITES']*setup['n_tau_mc'])
 
     def fixed_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
@@ -144,7 +145,8 @@ class Dimer_Solver_hf(Dimer_Solver):
 
         self.g_iw << Fourier(self.g_tau)
 
-def gf_symtetrizer(G):
+
+def gf_symetrizer(G):
     gd = 0.5*(G['A', 'A'].data + G['B', 'B'].data)
     gn = 0.5*(G['A', 'B'].data + G['B', 'A'].data)
     load_gf(G, gd, gn)

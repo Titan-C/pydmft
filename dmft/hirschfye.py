@@ -129,6 +129,9 @@ def retarded_weiss(g0tau):
 
 
 def avg_gblock(gmat):
+    """Averages along the diagonals respecting the translational invariance of
+    the Greens Function"""
+
     lfak = gmat.shape[0]
     xga = np.zeros(2*lfak+1)
     for i in range(1, 2*lfak):
