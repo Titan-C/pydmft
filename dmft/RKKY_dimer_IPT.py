@@ -91,13 +91,13 @@ def load_gf(g_iw, g_iwd, g_iwo):
 
 
 
-class Dimer_Solver:
+class Dimer_Solver(object):
 
     def __init__(self, **params):
 
         self.U = params['U']
         self.beta = params['beta']
-        self.setup = {}
+        self.setup = params
 
         self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta,
                              n_points=params['n_points'])
@@ -124,10 +124,11 @@ class Dimer_Solver:
 
 class Dimer_Solver_hf(Dimer_Solver):
 
-    def __init__(self):
+    def __init__(self, **params):
+        super(Dimer_Solver_hf, self).__init__(**params)
         self.g_tau = self.g0_tau.copy()
         self.fixed_tail()
-        self.V_field = hf.ising_v(setup['dtau_mc'], self.U, L=setup['SITES']*setup['n_tau_mc'])
+        self.V_field = hf.ising_v(self.setup['dtau_mc'], self.U, L=self.setup['SITES']*self.setup['n_tau_mc'])
 
     def fixed_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
@@ -135,22 +136,20 @@ class Dimer_Solver_hf(Dimer_Solver):
         fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
         self.g_tau.tail = fixed_co
 
-
-
     def solve(self, tau):
 
         self.g0_tau << InverseFourier(self.g0_iw)
 
         g0t = np.asarray([self.g0_tau(t).real for t in tau])
 
-        gtu, gtd = hf.imp_solver(g0t, g0t, v, setup)
-        gt_D = -0.25 * (gtu[0 ,0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
+        gtu, gtd = hf.imp_solver(g0t, g0t, self.V_field, self.setup)
+        gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
-        gt_D = hf.interpol(gt_D, setup['N_TAU']-1)
-        gt_N = hf.interpol(gt_N, setup['N_TAU']-1)
+        gt_D = hf.interpol(gt_D, self.setup['N_TAU']-1)
+        gt_N = hf.interpol(gt_N, self.setup['N_TAU']-1)
 
-        load_gf(g_tau, gt_D, gt_N)
+        load_gf_from_np(self.g_tau, gt_D, gt_N)
         self.fixed_tail()
 
 
@@ -158,9 +157,9 @@ class Dimer_Solver_hf(Dimer_Solver):
 
 
 def gf_symetrizer(G):
-    gd = 0.5*(G['A', 'A'].data + G['B', 'B'].data)
-    gn = 0.5*(G['A', 'B'].data + G['B', 'A'].data)
-    load_gf(G, gd, gn)
+    gd = np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data))
+    gn = np.squeeze(0.5*(G['A', 'B'].data + G['B', 'A'].data))
+    load_gf_from_np(G, gd, gn)
 
 
 def dimer(S, gmix, filename, step):

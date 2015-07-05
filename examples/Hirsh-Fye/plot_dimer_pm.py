@@ -25,9 +25,11 @@ def dmft_loop_pm(gw=None, **kwargs):
     setup = {
                'n_tau_mc':    128,
                'BETA':        16,
+               'beta':        16,
                'N_TAU':    2**11,
                'N_MATSUBARA': 128,
-               'U':           1.5,
+               'n_points': 128,
+               'U':           1.,
                't':           0.5,
                'tp':          0.1,
                'MU':          0,
@@ -42,11 +44,12 @@ def dmft_loop_pm(gw=None, **kwargs):
               }
 
     setup['dtau_mc'] = setup['BETA']/setup['n_tau_mc']
-    tau = np.arange(0, setup['BETA'], )
-    w_n = gf.matsubara_freq(parameters['BETA'], parameters['N_MATSUBARA'])
+    tau = np.arange(0, setup['BETA'], setup['dtau_mc'])
+    w_n = gf.matsubara_freq(setup['BETA'], setup['N_MATSUBARA'])
+    S = rt.Dimer_Solver_hf(**setup)
 
-    gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, parameters['MU'], parameters['tp'])
-    rt.init_gf_met(g_iw, w_n, setup['MU'], setu['tp'], 0., 0.5)
+    gmix = rt.mix_gf_dimer(S.g_iw.copy(), iOmega_n, setup['MU'], setup['tp'])
+    rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., 0.5)
     simulation = {'parameters': setup}
 
 
@@ -54,16 +57,19 @@ def dmft_loop_pm(gw=None, **kwargs):
     loops = 0
     while not converged:
         # Enforce DMFT Paramagnetic
-        rt.symetrizer(g_iw)
+        rt.gf_symetrizer(S.g_iw)
 
-        oldg = g_iw.data.copy()
+        oldg = S.g_iw.data.copy()
         # Bethe lattice bath
-        g0_iw << gmix - 0.25 * g_iw
-        g0_iw.invert()
+        S.g0_iw << gmix - 0.25 * S.g_iw
+        S.g0_iw.invert()
+        S.solve(tau)
 
-
-        converged = np.allclose(g_iw.data, oldg, atol=1e-2)
+        converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
         loops += 1
+        simulation['it{:0>2}'.format(loops)] = {
+                            'Giw':  S.g_iw,
+                            }
         if loops > 8:
             converged = True
 
