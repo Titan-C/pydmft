@@ -20,7 +20,7 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
     tau, w_n, g0t, __, v = hf.setup_PM_sim(parms)
 
-    g0ttp = hf.ret_weiss(g0t[:-1].reshape(-1, 1, 1))
+    g0ttp = hf.retarded_weiss(g0t[:-1].reshape(-1, 1, 1))
     kroneker = np.eye(v.size)
 
     groot = hf.gnewclean(g0ttp, v, 1, kroneker)

@@ -25,7 +25,7 @@ def mix_gf_dimer(gmix, omega, mu, tab):
     .. math::
 
         G_{mix}(i\omega_n) =ao
-    """"
+    """
     gmix['A', 'A'] = omega + mu
     gmix['A', 'B'] = -tab
     gmix['B', 'A'] = -tab
@@ -50,7 +50,7 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
 
-    load_gf(g_iw, Gd, Gc)
+    load_gf_from_np(g_iw, Gd, Gc)
 
     if isinstance(g_iw, GfImFreq):
         fit_tail(g_iw)
@@ -67,12 +67,22 @@ def init_gf_ins(g_iw, omega, U):
     Gd = .5*(G1 + G2)
     Gc = .5*(G1 - G2)
 
-    load_gf(g_iw, Gd, Gc)
+    load_gf_from_np(g_iw, Gd, Gc)
+
+
+def load_gf_from_np(g_iw, g_iwd, g_iwo):
+    """Loads into the first greenfunction the equal diagonal terms and the
+    offdiagonals. Input is numpy array"""
+
+    g_iw['A', 'A'].data[:, 0, 0] = g_iwd
+    g_iw['A', 'B'].data[:, 0, 0] = g_iwo
+    g_iw['B', 'A'] << g_iw['A', 'B']
+    g_iw['B', 'B'] << g_iw['A', 'A']
 
 
 def load_gf(g_iw, g_iwd, g_iwo):
     """Loads into the first greenfunction the equal diagonal terms and the
-    offdiagonals"""
+    offdiagonals. Input in GF_view"""
 
     g_iw['A', 'A'] << g_iwd
     g_iw['B', 'B'] << g_iwd

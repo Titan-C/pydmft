@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 cimport numpy as np
 import cython
 from libc.math cimport exp, sqrt
