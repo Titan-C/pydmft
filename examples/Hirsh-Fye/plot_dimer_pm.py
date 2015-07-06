@@ -26,7 +26,6 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     """Implementation of the solver"""
     n_freq = int(15.*beta/np.pi)
     setup = {
-               'n_tau_mc':    32,
                'BETA':        beta,
                'N_TAU':    2**13,
                'n_points': n_freq,
@@ -37,9 +36,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      25000,
-               'therm':       2500,
-               'N_meas':      3,
+               'sweeps':      40000,
+               'therm':       4000,
+               'N_meas':      4,
                'save_logs':   False,
                'updater':     'discrete'
               }
@@ -60,12 +59,14 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
 
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
+    max_dist = 1.
     loops = 0
     while not converged:
         # Enforce DMFT Paramagnetic
         rt.gf_symetrizer(S.g_iw)
 
         oldg = S.g_iw.data.copy()
+        old_max_dist = max_dist
         # Bethe lattice bath
         S.g0_iw << gmix - 0.25 * S.g_iw
         S.g0_iw.invert()
@@ -76,14 +77,16 @@ def dimer_loop(S, gmix, tau, filename, step):
 #        simulation['it{:0>2}'.format(loops)] = {
 #                            'Giw':  S.g_iw.copy(),
 #                            }
-        print(loops, converged, np.max(abs(S.g_iw.data- oldg)))
-        oplot(S.g_iw['A', 'A'], RI='I', label='d'+str(loops))
-        oplot(S.g_iw['A', 'B'], RI='R', label='o'+str(loops))
-        if loops > 5:
+        max_dist = np.max(abs(S.g_iw.data- oldg))
+#        oplot(S.g_iw['A', 'A'], RI='I', label='d'+str(loops))
+#        oplot(S.g_iw['A', 'B'], RI='R', label='o'+str(loops))
+        if loops > 30 or max_dist/old_max_dist > 0.8:
             converged = True
 
+        print(loops, converged, max_dist)
+
     S.setup.update({'U': S.U, 'loops': loops})
-#    rt.store_sim(S, filename, step)
+    rt.store_sim(S, filename, step)
 
 
 if __name__ == "__main__":
