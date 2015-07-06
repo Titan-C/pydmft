@@ -17,7 +17,7 @@ from joblib import Parallel, delayed
 def matsubara_setup(urange, tab, t, tn, beta, file_str):
     n_freq = int(15.*beta/np.pi)
     w_n = gf.matsubara_freq(beta, n_freq)
-    S = Dimer_Solver(U=0, beta=beta, n_points=n_freq)
+    S = Dimer_Solver(U=0, BETA=beta, n_points=n_freq)
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0, tab)
     S.setup.update({'t': t, 'tn': tn, 'tab': tab, 'beta': beta,
                     'n_freq': n_freq})

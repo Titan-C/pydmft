@@ -25,15 +25,14 @@ from joblib import Parallel, delayed
 def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     """Implementation of the solver"""
     setup = {
-               'n_tau_mc':    128,
+               'n_tau_mc':    80,
                'BETA':        beta,
-               'beta':        16,
                'N_TAU':    10000,
                'n_points': 128,
                'U':           3.5,
                't':           t,
                'tp':          tab,
-               'MU':          0,
+               'MU':          0.,
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
@@ -53,8 +52,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., 0.5)
     for u_int in urange:
         S.U = u_int
+        S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
         dimer_loop(S, gmix, tau, file_str, '/U{U}/')
-
 
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
@@ -74,27 +73,30 @@ def dimer_loop(S, gmix, tau, filename, step):
 #        simulation['it{:0>2}'.format(loops)] = {
 #                            'Giw':  S.g_iw.copy(),
 #                            }
-        if loops > 150:
+        print(loops, converged, np.max(abs(S.g_iw.data- oldg)))
+        if loops > 5:
             converged = True
 
+    S.setup.update({'U': S.U, 'loops': loops})
     rt.store_sim(S, filename, step)
 
 
 if __name__ == "__main__":
-#    sim = dmft_loop_pm()
-#    for it in sorted(sim):
-#        if 'it' in it:
-#            oplot(sim[it]['Giw']['A','A'], lw=2)
-    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
-    parser.add_argument('beta', metavar='B', type=float,
-                        default=16., help='The inverse temperature')
-
-
-    tabra = np.hstack((np.arange(0, 0.5, 0.1), np.arange(0.5, 1.1, 0.2)))
-    args = parser.parse_args()
-    BETA = args.beta
-
-    ur = np.arange(0, 4.5, 0.3)
-    Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
-         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{beta}.h5')
-         for tab in tabra)
+    sim = dmft_loop_pm([1.5], 0.2, 0.5, 0., 12., 'tes.h5')
+    plt.figure()
+    for it in sorted(sim):
+        if 'it' in it:
+            oplot(sim[it]['Giw']['B','B'], lw=2)
+#    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
+#    parser.add_argument('beta', metavar='B', type=float,
+#                        default=16., help='The inverse temperature')
+#
+#
+#    tabra = np.hstack((np.arange(0, 0.5, 0.1), np.arange(0.5, 1.1, 0.2)))
+#    args = parser.parse_args()
+#    BETA = args.beta
+#
+#    ur = np.arange(0, 4.5, 0.3)
+#    Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
+#         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{beta}.h5')
+#         for tab in tabra)

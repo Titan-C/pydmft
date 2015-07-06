@@ -96,7 +96,7 @@ class Dimer_Solver(object):
     def __init__(self, **params):
 
         self.U = params['U']
-        self.beta = params['beta']
+        self.beta = params['BETA']
         self.setup = params
 
         self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta,
@@ -127,10 +127,9 @@ class Dimer_Solver_hf(Dimer_Solver):
     def __init__(self, **params):
         super(Dimer_Solver_hf, self).__init__(**params)
         self.g_tau = self.g0_tau.copy()
-        self.fixed_tail()
-        self.V_field = hf.ising_v(self.setup['dtau_mc'], self.U, L=self.setup['SITES']*self.setup['n_tau_mc'])
+        self.g_tau_fixed_tail()
 
-    def fixed_tail(self):
+    def g_tau_fixed_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
         fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
@@ -139,7 +138,6 @@ class Dimer_Solver_hf(Dimer_Solver):
     def solve(self, tau):
 
         self.g0_tau << InverseFourier(self.g0_iw)
-
         g0t = np.asarray([self.g0_tau(t).real for t in tau])
 
         gtu, gtd = hf.imp_solver(g0t, g0t, self.V_field, self.setup)
@@ -150,7 +148,7 @@ class Dimer_Solver_hf(Dimer_Solver):
         gt_N = hf.interpol(gt_N, self.setup['N_TAU']-1)
 
         load_gf_from_np(self.g_tau, gt_D, gt_N)
-        self.fixed_tail()
+        self.g_tau_fixed_tail()
 
 
         self.g_iw << Fourier(self.g_tau)
