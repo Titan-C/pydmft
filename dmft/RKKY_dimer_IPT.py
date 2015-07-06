@@ -157,7 +157,7 @@ class Dimer_Solver_hf(Dimer_Solver):
 
 
 def gf_symetrizer(G):
-    gd = np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data))
+    gd = 1j*np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data)).imag
     gn = np.squeeze(0.5*(G['A', 'B'].data + G['B', 'A'].data))
     load_gf_from_np(G, gd, gn)
 
@@ -190,28 +190,9 @@ def dimer(S, gmix, filename, step):
         if loops > 2000:
             converged = True
 
-#        #Finer loop of complicated region
-#        if S.setup['tab'] > 0.5 and S.U > 1.:
-        S.g_iw.data[:] = S.g_iw.data
-
     S.setup.update({'U': S.U, 'loops': loops})
 
     store_sim(S, filename, step)
-
-
-def mixer(loops):
-    if loops < 10:
-        return 1.
-    elif loops < 50:
-        return 0.9
-    elif loops < 250:
-        return 0.8
-    elif loops < 500:
-        return 0.7
-    elif loops < 1000:
-        return 0.5
-    elif loops < 2000:
-        return 0.3
 
 
 def store_sim(S, file_str, step_str):
@@ -221,8 +202,8 @@ def store_sim(S, file_str, step_str):
     R[step+'setup'] = S.setup
     R[step+'G_iwd'] = S.g_iw['A', 'A']
     R[step+'G_iwo'] = S.g_iw['A', 'B']
-    R[step+'S_iwd'] = S.sigma_iw['A', 'A']
-    R[step+'S_iwo'] = S.sigma_iw['A', 'B']
+#    R[step+'S_iwd'] = S.sigma_iw['A', 'A']
+#    R[step+'S_iwo'] = S.sigma_iw['A', 'B']
     del R
 
 

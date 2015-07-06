@@ -97,7 +97,6 @@ def imp_solver(g0up, g0dw, v, parms_user):
     if parms['save_logs']:
         return avg_g(gstup), avg_g(gstdw), np.asarray(vlog), np.asarray(ar)
     else:
-        print(acc)
         return avg_g(gstup, parms), avg_g(gstdw, parms)
 
 
