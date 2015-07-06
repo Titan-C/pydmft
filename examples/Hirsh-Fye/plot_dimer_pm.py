@@ -96,5 +96,5 @@ if __name__ == "__main__":
 
     ur = np.arange(0, 4.5, 0.3)
     Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
-         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tab{tab}_B{beta}.h5')
+         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{beta}.h5')
          for tab in tabra)
