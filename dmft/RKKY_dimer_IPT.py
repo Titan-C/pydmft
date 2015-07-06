@@ -126,14 +126,15 @@ class Dimer_Solver_hf(Dimer_Solver):
 
     def __init__(self, **params):
         super(Dimer_Solver_hf, self).__init__(**params)
+        self.g0_tau = GfImTime(indices=['A', 'B'], beta=self.beta,
+                               n_points=self.setup['N_TAU'])
         self.g_tau = self.g0_tau.copy()
-        self.g_tau_fixed_tail()
 
-    def g_tau_fixed_tail(self):
+    def patch_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
         fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
-        self.g_tau.tail = fixed_co
+        self.g_iw.fit_tail(fixed_co, 4, self.setup['n_tau_mc']//2, self.setup['n_points'])
 
     def solve(self, tau):
 
@@ -148,10 +149,9 @@ class Dimer_Solver_hf(Dimer_Solver):
         gt_N = hf.interpol(gt_N, self.setup['N_TAU']-1)
 
         load_gf_from_np(self.g_tau, gt_D, gt_N)
-        self.g_tau_fixed_tail()
-
 
         self.g_iw << Fourier(self.g_tau)
+        self.patch_tail()
 
 
 def gf_symetrizer(G):

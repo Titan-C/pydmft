@@ -24,27 +24,27 @@ from joblib import Parallel, delayed
 
 def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     """Implementation of the solver"""
+    n_freq = int(15.*beta/np.pi)
     setup = {
-               'n_tau_mc':    80,
+               'n_tau_mc':    32,
                'BETA':        beta,
-               'N_TAU':    10000,
-               'n_points': 128,
-               'U':           3.5,
+               'N_TAU':    2**13,
+               'n_points': n_freq,
+               'U':           0.,
                't':           t,
                'tp':          tab,
                'MU':          0.,
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      80000,
-               'therm':       8000,
+               'sweeps':      25000,
+               'therm':       2500,
                'N_meas':      3,
                'save_logs':   False,
                'updater':     'discrete'
               }
 
-    setup['dtau_mc'] = setup['BETA']/setup['n_tau_mc']
-    tau = np.arange(0, setup['BETA'], setup['dtau_mc'])
+
     w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
     S = rt.Dimer_Solver_hf(**setup)
 
@@ -52,6 +52,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., 0.5)
     for u_int in urange:
         S.U = u_int
+        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
+        tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
+        S.setup['n_tau_mc'] = len(tau)
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
         dimer_loop(S, gmix, tau, file_str, '/U{U}/')
 
@@ -74,19 +77,21 @@ def dimer_loop(S, gmix, tau, filename, step):
 #                            'Giw':  S.g_iw.copy(),
 #                            }
         print(loops, converged, np.max(abs(S.g_iw.data- oldg)))
+        oplot(S.g_iw['A', 'A'], RI='I', label='d'+str(loops))
+        oplot(S.g_iw['A', 'B'], RI='R', label='o'+str(loops))
         if loops > 5:
             converged = True
 
     S.setup.update({'U': S.U, 'loops': loops})
-    rt.store_sim(S, filename, step)
+#    rt.store_sim(S, filename, step)
 
 
 if __name__ == "__main__":
     sim = dmft_loop_pm([1.5], 0.2, 0.5, 0., 12., 'tes.h5')
-    plt.figure()
-    for it in sorted(sim):
-        if 'it' in it:
-            oplot(sim[it]['Giw']['B','B'], lw=2)
+#    plt.figure()
+#    for it in sorted(sim):
+#        if 'it' in it:
+#            oplot(sim[it]['Giw']['B','B'], lw=2)
 #    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
 #    parser.add_argument('beta', metavar='B', type=float,
 #                        default=16., help='The inverse temperature')
