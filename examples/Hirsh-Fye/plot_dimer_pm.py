@@ -36,9 +36,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      40000,
-               'therm':       4000,
-               'N_meas':      4,
+               'sweeps':      50000,
+               'therm':       5000,
+               'N_meas':      3,
                'save_logs':   False,
                'updater':     'discrete'
               }
@@ -80,7 +80,7 @@ def dimer_loop(S, gmix, tau, filename, step):
         max_dist = np.max(abs(S.g_iw.data- oldg))
 #        oplot(S.g_iw['A', 'A'], RI='I', label='d'+str(loops))
 #        oplot(S.g_iw['A', 'B'], RI='R', label='o'+str(loops))
-        if loops > 30 or max_dist/old_max_dist > 0.8:
+        if loops > 30 or max_dist/old_max_dist > 1.0:
             converged = True
 
         print(loops, converged, max_dist)
@@ -90,21 +90,21 @@ def dimer_loop(S, gmix, tau, filename, step):
 
 
 if __name__ == "__main__":
-    sim = dmft_loop_pm([1.5], 0.2, 0.5, 0., 12., 'tes.h5')
+#    sim = dmft_loop_pm([1.5], 0.2, 0.5, 0., 12., 'tes.h5')
 #    plt.figure()
 #    for it in sorted(sim):
 #        if 'it' in it:
 #            oplot(sim[it]['Giw']['B','B'], lw=2)
-#    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
-#    parser.add_argument('beta', metavar='B', type=float,
-#                        default=16., help='The inverse temperature')
+    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
+    parser.add_argument('beta', metavar='B', type=float,
+                        default=16., help='The inverse temperature')
 #
 #
-#    tabra = np.hstack((np.arange(0, 0.5, 0.1), np.arange(0.5, 1.1, 0.2)))
-#    args = parser.parse_args()
-#    BETA = args.beta
-#
-#    ur = np.arange(0, 4.5, 0.3)
-#    Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
-#         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{beta}.h5')
-#         for tab in tabra)
+    tabra = [0., 0.02, 0.04, 0.06, 0.08, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 0.8]
+    args = parser.parse_args()
+    BETA = args.beta
+
+    ur = np.arange(0.5, 3.5, 0.3)
+    Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
+         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
+         for tab in tabra)
