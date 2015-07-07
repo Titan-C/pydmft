@@ -156,7 +156,7 @@ class Dimer_Solver_hf(Dimer_Solver):
 
 def gf_symetrizer(G):
     gd = 1j*np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data)).imag
-    gn = np.squeeze(0.5*(G['A', 'B'].data + G['B', 'A'].data))
+    gn = np.squeeze(0.5*(G['A', 'B'].data + G['B', 'A'].data)).real
     load_gf_from_np(G, gd, gn)
 
 

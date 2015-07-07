@@ -36,9 +36,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      50000,
-               'therm':       5000,
-               'N_meas':      3,
+               'sweeps':      400000,
+               'therm':       40000,
+               'N_meas':      4,
                'save_logs':   False,
                'updater':     'discrete'
               }
@@ -51,7 +51,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., 0.5)
     for u_int in urange:
         S.U = u_int
-        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
+#        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
+        S.setup['dtau_mc'] = 0.4
         tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
         S.setup['n_tau_mc'] = len(tau)
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
@@ -59,38 +60,46 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
 
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
-    max_dist = 1.
     loops = 0
     while not converged:
+#    for i in range(12):
         # Enforce DMFT Paramagnetic
         rt.gf_symetrizer(S.g_iw)
 
         oldg = S.g_iw.data.copy()
-        old_max_dist = max_dist
         # Bethe lattice bath
         S.g0_iw << gmix - 0.25 * S.g_iw
         S.g0_iw.invert()
         S.solve(tau)
 
-        converged = np.allclose(S.g_iw.data, oldg, atol=5e-3)
+        converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
         loops += 1
 #        simulation['it{:0>2}'.format(loops)] = {
 #                            'Giw':  S.g_iw.copy(),
 #                            }
-        max_dist = np.max(abs(S.g_iw.data- oldg))
-#        oplot(S.g_iw['A', 'A'], RI='I', label='d'+str(loops))
-#        oplot(S.g_iw['A', 'B'], RI='R', label='o'+str(loops))
-        if loops > 30 or max_dist/old_max_dist > 1.0:
+        max_dist = np.max(abs(S.g_iw.data - oldg))
+#        ct = '-' if i<7 else '+--'
+#        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
+#        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
+
+        if loops > 30:
             converged = True
 
-        print(loops, converged, max_dist)
+        print('B', S.beta, 'U:', S.U, 'l:', loops, converged, max_dist)
 
     S.setup.update({'U': S.U, 'loops': loops})
-    rt.store_sim(S, filename, step)
 
+    rt.store_sim(S, filename, step)
+    #+1 loop
+    rt.gf_symetrizer(S.g_iw)
+    S.g0_iw << gmix - 0.25 * S.g_iw
+    S.g0_iw.invert()
+    S.solve(tau)
+    rt.store_sim(S, filename, step+'f')
 
 if __name__ == "__main__":
-#    sim = dmft_loop_pm([1.5], 0.2, 0.5, 0., 12., 'tes.h5')
+#    pass
+#    sim = dmft_loop_pm([2.9], 0.2, 0.5, 0., 18., 'tes.h5')
 #    plt.figure()
 #    for it in sorted(sim):
 #        if 'it' in it:
