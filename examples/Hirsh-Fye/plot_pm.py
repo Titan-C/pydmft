@@ -35,7 +35,7 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'updater':     'discrete'
                   }
 
-    tau, w_n, __, Giw, v_aux = hf.setup_PM_sim(parameters)
+    tau, w_n, __, Giw, v_aux, intm = hf.setup_PM_sim(parameters)
 
     simulation = {'parameters': parameters}
 
@@ -47,7 +47,7 @@ def dmft_loop_pm(gw=None, **kwargs):
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.interpol(G0t, parameters['n_tau_mc'])[:-1].reshape(-1, 1, 1)
         print(g0t.shape)
-        gtu, gtd = hf.imp_solver(g0t, g0t, v_aux, parameters)
+        gtu, gtd = hf.imp_solver([g0t, g0t], v_aux, intm, parameters)
         gt = -np.squeeze(0.5 * (gtu+gtd))
 
         Gt = hf.interpol(gt, parameters['N_TAU'])
