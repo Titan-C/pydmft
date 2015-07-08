@@ -129,6 +129,7 @@ class Dimer_Solver_hf(Dimer_Solver):
         self.g0_tau = GfImTime(indices=['A', 'B'], beta=self.beta,
                                n_points=self.setup['N_TAU'])
         self.g_tau = self.g0_tau.copy()
+        self.intm = hf.interaction_matrix(params['BANDS'])
 
     def patch_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
@@ -141,7 +142,7 @@ class Dimer_Solver_hf(Dimer_Solver):
         self.g0_tau << InverseFourier(self.g0_iw)
         g0t = np.asarray([self.g0_tau(t).real for t in tau])
 
-        gtu, gtd = hf.imp_solver(g0t, g0t, self.V_field, self.setup)
+        gtu, gtd = hf.imp_solver([g0t]*2, self.V_field, self.intm, self.setup)
         gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 

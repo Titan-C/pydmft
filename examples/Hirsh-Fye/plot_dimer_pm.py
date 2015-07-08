@@ -36,8 +36,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      400000,
-               'therm':       40000,
+               'sweeps':      50000,
+               'therm':       4000,
                'N_meas':      4,
                'save_logs':   False,
                'updater':     'discrete'
@@ -85,7 +85,7 @@ def dimer_loop(S, gmix, tau, filename, step):
         if loops > 30:
             converged = True
 
-        print('B', S.beta, 'U:', S.U, 'l:', loops, converged, max_dist)
+        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loops, converged, max_dist)
 
     S.setup.update({'U': S.U, 'loops': loops})
 

@@ -85,7 +85,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
     meas = 0
 
-
+    acc = 0
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
@@ -93,7 +93,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
             int_v = np.dot(interaction, v)
             g = [gnewclean(g_sp, lv, kroneker)  for g_sp, lv in zip(GX, int_v)]
 
-        acc = 0
+
         for i, (up, dw) in enumerate(i_pairs):
             acc += update(g[up], g[dw], v[i])
 
