@@ -17,16 +17,13 @@ from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 import dmft.hffast as hffast
 
 
-def ising_v(dtau, U, L=32, polar=0.5):
+
+def ising_v(dtau, U, L, fields=1, polar=0.5):
     """initialize the vector V of Ising fields
-
     .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
-
     where the vector entries :math:`\\sigma_n=\\pm 1` are randomized subject
     to a threshold given by polar. And
-
     .. math:: \\cosh(\\lambda) = \\exp(\\Delta \\tau \\frac{U}{2})
-
     Parameters
     ----------
     dtau : float
@@ -35,21 +32,22 @@ def ising_v(dtau, U, L=32, polar=0.5):
         local Coulomb repulsion
     L : integer
         length of the array
+    fields: integer
+        Number of auxliary ising fields
     polar : float :math:`\\in (0, 1)`
         polarization threshold, probability of :math:`\\sigma_n=+ 1`
-
     Returns
     -------
     out : single dimension ndarray
     """
     lam = np.arccosh(np.exp(dtau*U/2))
-    vis = np.ones(L)
-    rand = np.random.rand(L)
+    vis = np.ones((fields, L))
+    rand = np.random.rand(fields, L)
     vis[rand > polar] = -1
     return vis*lam
 
 
-def imp_solver(g0up, g0dw, v, parms_user):
+def imp_solver(G0_blocks, v, interaction, parms_user):
     r"""Impurity solver call. Calcutaltes the interacting Green function
     as given by the contribution of the auxiliary discretized spin field.
     """
@@ -57,48 +55,65 @@ def imp_solver(g0up, g0dw, v, parms_user):
     # Set up default values
     parms = {'global_flip': False,
              'save_logs': False,
+             'n_tau_mc':    64,
+               'N_TAU':    2**11,
+               'N_MATSUBARA': 64,
+               't':           0.5,
+               'MU':          0.,
+               'SITES':       1,
+               'loops':       1,
+               'sweeps':      50000,
+               'therm':       5000,
+               'N_meas':      4,
+               'updater':     'discrete'
              }
     parms.update(parms_user)
+    if parms['updater'] == 'discrete':
+        update = hffast.updateDHS
+    elif parms['updater'] == 'continuous':
+        update = hffast.updateCHS
+    else:
+        raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
-    gxu = retarded_weiss(g0up)
-    gxd = retarded_weiss(g0dw)
-    kroneker = np.eye(gxu.shape[0])
+    GX = [retarded_weiss(gb) for gb in G0_blocks]
+    kroneker = np.eye(GX[0].shape[0])  # assuming all blocks are of same shape
+    Gst = [np.zeros_like(gx) for gx in GX]
 
-    gstup, gstdw = np.zeros_like(gxu), np.zeros_like(gxd)
+    i_pairs = np.array([c.nonzero() for c in interaction.T]).reshape(-1, 2)
+
     vlog = []
     ar = []
     meas = 0
+
 
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
                 v *= -1
-            gup = gnewclean(gxu, v, 1., kroneker)
-            gdw = gnewclean(gxd, v, -1., kroneker)
+            int_v = np.dot(interaction, v)
+            g = [gnewclean(g_sp, lv, kroneker)  for g_sp, lv in zip(GX, int_v)]
 
-        if parms['updater'] == 'discrete':
-            acc = hffast.updateDHS(gup, gdw, v)
-        elif parms['updater'] == 'continuous':
-            acc = hffast.updateCHS(gup, gdw, v, parms)
-        else:
-            raise ValueError("Unrecognized updater {}".format(parms['updater']))
+        acc = 0
+        for i, (up, dw) in enumerate(i_pairs):
+            acc += update(g[up], g[dw], v[i])
+
 
         if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
             meas += 1
-            gstup += gup
-            gstdw += gdw
+            for i in range(interaction.shape[0]):
+                Gst[i] += g[i]
             if parms['save_logs']:
                 vlog.append(np.copy(v))
                 ar.append(acc)
 
-    gstup = gstup/meas
-    gstdw = gstdw/meas
-    print('last step acc ',acc)
+    for g in Gst:
+        g /= meas
+    print('acc ', acc/v.size/(parms['sweeps'] + parms['therm']))
 
     if parms['save_logs']:
-        return avg_g(gstup), avg_g(gstdw), np.asarray(vlog), np.asarray(ar)
+        return [avg_g(gst, parms) for gst in Gst], np.asarray(vlog), np.asarray(ar)
     else:
-        return avg_g(gstup, parms), avg_g(gstdw, parms)
+        return [avg_g(gst, parms) for gst in Gst]
 
 
 def retarded_weiss(g0tau):
@@ -155,21 +170,21 @@ def avg_g(gst, parms):
                 gst_m[i,j, -1] += 1.
     return gst_m
 
-def gnewclean(g0t, v, sign, kroneker):
+
+def gnewclean(g0t, v, kroneker):
     """Returns the interacting function :math:`G_{ij}` for the non-interacting
     propagator :math:`\\mathcal{G}^0_{ij}`
-
     .. math:: G_{ij} = B^{-1}_{ij}\\mathcal{G}^0_{ij}
-
     where
-
     .. math::
-        u_j &= \\exp(\\sigma v_j) - 1 \\\\
+        u_j &= \\exp(v_j) - 1 \\\\
         B_{ij} &= \\delta_{ij} - u_j ( \\mathcal{G}^0_{ij} - \\delta_{ij})
-
     no sumation on :math:`j`
+    for memory and speed the kroneker delta needs to be and input.
+    the vector :math:`v_j` contains the effective Ising fields. For
+    multiorbital systems it asumes that it is already the fields addition
     """
-    u_j = np.exp(sign*v) - 1.
+    u_j = np.exp(v) - 1.
     b = kroneker - u_j * (g0t-kroneker)
 
     return la.solve(b, g0t)
@@ -201,12 +216,48 @@ def interpol(gt, Lrang):
     return f(tf)
 
 
-def setup_PM_sim(parms):
+def interaction_matrix(bands):
+    """Output the interaction matrix between all the spin species present
+    in the given amount of bands. This matrix is use to connect the interacting
+    spin densities that later on are decomposed by the Hubbard-Stratanovich
+    transformation so output size is :math:`N\\times(2N-1)` where :math:`N` is
+    the number of orbitals"""
+    particles = 2 * bands
+    fields = bands * (particles - 1)
+    interaction_matrix = np.zeros((particles, fields))
+    L = 0
+    for i in range(particles):
+        for j in range(i+1, particles):
+            interaction_matrix[i, L] = 1
+            interaction_matrix[j, L] = -1
+            L += 1
+    return interaction_matrix
+
+
+def setup_PM_sim(u_parms):
+        # Set up default values
+    parms = {'global_flip': False,
+             'save_logs': False,
+             'n_tau_mc':    64,
+               'N_TAU':    2**11,
+               'N_MATSUBARA': 64,
+               't':           0.5,
+               'MU':          0.,
+               'BANDS':       1,
+               'SITES':       1,
+               'loops':       1,
+               'sweeps':      50000,
+               'therm':       5000,
+               'N_meas':      4,
+               'updater':     'discrete'
+             }
+    parms.update(u_parms)
     tau, w_n = tau_wn_setup(parms)
     gw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
     gt = gw_invfouriertrans(gw, tau, w_n)
     gt = interpol(gt, parms['n_tau_mc'])
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
-    v = ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
+    intm = interaction_matrix(parms['BANDS'])
+    v = ising_v(parms['dtau_mc'], parms['U'], parms['n_tau_mc']*parms['SITES'], intm.shape[1])
 
-    return tau, w_n, gt, gw, v
+    return tau, w_n, gt, gw, v, intm
