@@ -34,19 +34,21 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
              np.ndarray[np.float64_t, ndim=2] gdw,
              np.ndarray[np.float64_t, ndim=1] v):
     cdef double dv, ratup, ratdw, rat
-    cdef int j, i, up, dw, pair, N=v.shape[0], acc = 0
+    cdef int j, i, up, dw, pair, N=v.shape[0], acc = 0, nrat = 0
     for j in range(N):
         dv = -2.*v[j]
         ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
         rat = ratup * ratdw
+        if rat<0:
+            nrat += 1
         rat = rat/(1.+rat)
         if rat > uniform(r):
             acc += 1
             v[j] *= -1.
             cgnew(N, &gup[0,0],  dv, j)
             cgnew(N, &gdw[0,0], -dv, j)
-    return acc
+    return acc, nrat
 
 
 @cython.boundscheck(False)
@@ -57,7 +59,7 @@ def updateCHS(np.ndarray[np.float64_t, ndim=2] gup,
              np.ndarray[np.float64_t, ndim=1] v,
              parms):
     cdef double Vjp, dv, ratup, ratdw, rat, gauss_weight
-    cdef int j, i, up, dw, pair, N=v.shape[0], acc = 0
+    cdef int j, i, up, dw, pair, N=v.shape[0], acc = 0, nrat = 0
     cdef double U, dtau
     U, dtau = parms['U'], parms['dtau_mc']
     for j in range(N):
@@ -66,6 +68,8 @@ def updateCHS(np.ndarray[np.float64_t, ndim=2] gup,
         ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
         rat = ratup * ratdw
+        if rat<0:
+            nrat += 1
         gauss_weight = exp((Vjp*Vjp-v[j]*v[j])/(2*U*dtau))
         rat = rat/(gauss_weight+rat)
         if rat > uniform(r):
@@ -73,4 +77,4 @@ def updateCHS(np.ndarray[np.float64_t, ndim=2] gup,
             v[j] = Vjp
             cgnew(N, &gup[0,0],  dv, j)
             cgnew(N, &gdw[0,0], -dv, j)
-    return acc
+    return acc, nrat

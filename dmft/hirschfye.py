@@ -85,7 +85,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
     meas = 0
 
-    acc = 0
+    acc, anrat = 0, 0
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
@@ -95,7 +95,9 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
 
 
         for i, (up, dw) in enumerate(i_pairs):
-            acc += update(g[up], g[dw], v[i])
+            acr, nrat = update(g[up], g[dw], v[i])
+            acc += acr
+            anrat += nrat
 
 
         if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
@@ -108,7 +110,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
 
     for g in Gst:
         g /= meas
-    print('acc ', acc/v.size/(parms['sweeps'] + parms['therm']))
+    print('acc ', acc/v.size/(parms['sweeps'] + parms['therm']), 'nsign',anrat)
 
     if parms['save_logs']:
         return [avg_g(gst, parms) for gst in Gst], np.asarray(vlog), np.asarray(ar)

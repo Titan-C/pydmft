@@ -36,8 +36,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      50000,
-               'therm':       4000,
+               'sweeps':      100000,
+               'therm':       8000,
                'N_meas':      4,
                'save_logs':   False,
                'updater':     'discrete'
@@ -52,7 +52,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     for u_int in urange:
         S.U = u_int
 #        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
-        S.setup['dtau_mc'] = 0.4
+        S.setup['dtau_mc'] = 0.5
         tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
         S.setup['n_tau_mc'] = len(tau)
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
