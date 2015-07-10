@@ -74,31 +74,23 @@ def dimer_loop(S, gmix, tau, filename, step):
 
         converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
         loops += 1
-#        simulation['it{:0>2}'.format(loops)] = {
-#                            'Giw':  S.g_iw.copy(),
-#                            }
+        S.setup.update({'U': S.U, 'loops': loops})
+        rt.store_sim(S, filename, step+'it{:02}/'.format(loops))
+
         max_dist = np.max(abs(S.g_iw.data - oldg))
-#        ct = '-' if i<7 else '+--'
+        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loops,
+              converged, max_dist)
+
+#        ct = '-' if loops<8 else '+--'
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
 #        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
 
         if loops > 30:
             converged = True
 
-        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loops, converged, max_dist)
-
-    S.setup.update({'U': S.U, 'loops': loops})
-
     rt.store_sim(S, filename, step)
-    #+1 loop
-    rt.gf_symetrizer(S.g_iw)
-    S.g0_iw << gmix - 0.25 * S.g_iw
-    S.g0_iw.invert()
-    S.solve(tau)
-    rt.store_sim(S, filename, step+'f')
 
 if __name__ == "__main__":
-#    pass
 #    sim = dmft_loop_pm([2.9], 0.2, 0.5, 0., 18., 'tes.h5')
 #    plt.figure()
 #    for it in sorted(sim):
