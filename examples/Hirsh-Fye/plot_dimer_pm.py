@@ -15,7 +15,7 @@ import dmft.hirschfye as hf
 import numpy as np
 import dmft.common as gf
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
-    Fourier, inverse, TailGf, iOmega_n
+    Fourier, inverse, TailGf, iOmega_n, inverse
 import dmft.RKKY_dimer_IPT as rt
 from pytriqs.plot.mpl_interface import oplot
 import argparse
@@ -36,9 +36,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      100000,
+               'sweeps':      20000,
                'therm':       8000,
-               'N_meas':      4,
+               'N_meas':      3,
                'save_logs':   False,
                'updater':     'discrete'
               }
@@ -52,11 +52,21 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     for u_int in urange:
         S.U = u_int
 #        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
-        S.setup['dtau_mc'] = 0.5
+        S.setup['dtau_mc'] = 0.4
         tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
         S.setup['n_tau_mc'] = len(tau)
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
         dimer_loop(S, gmix, tau, file_str, '/U{U}/')
+
+def get_selfE(G_iwd, G_iwo):
+    nf = len(G_iwd.mesh)
+    beta = G_iwd.beta
+    g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=nf)
+    rt.load_gf(g_iw, G_iwd, G_iwo)
+    gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, 0, 0.2)
+    sigma = g_iw.copy()
+    sigma << gmix  - 0.25*g_iw - inverse(g_iw)
+    return sigma
 
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
@@ -91,7 +101,7 @@ def dimer_loop(S, gmix, tau, filename, step):
     rt.store_sim(S, filename, step)
 
 if __name__ == "__main__":
-#    sim = dmft_loop_pm([2.9], 0.2, 0.5, 0., 18., 'tes.h5')
+#    sim = dmft_loop_pm([1.], 0.2, 0.5, 0., 16., 'B16t.4.h5')
 #    plt.figure()
 #    for it in sorted(sim):
 #        if 'it' in it:
