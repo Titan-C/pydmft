@@ -18,16 +18,16 @@ n_loops = 5
 
 # Construct the CTQMC solver
 from pytriqs.applications.impurity_solvers.cthyb import Solver
-S = Solver(beta=beta, gf_struct={'up': [0, 1], 'down': [0, 1]})
+S = Solver(beta=beta, gf_struct={ 'up':[0], 'down':[0] })
 
 # Set the solver parameters
 params = {}
-params['n_cycles'] = 100000               # Number of QMC cycles
+params['n_cycles'] = 1000000                # Number of QMC cycles
 params['length_cycle'] = 200                # Length of one cycle
 params['n_warmup_cycles'] = 10000           # Warmup cycles
 
 # Initalize the Green's function to a semi-circular density of states
-g0_iw = GfImFreq(indices=[0], beta=100)
+g0_iw = GfImFreq(indices = [0], beta = 100)
 g0_iw << SemiCircular(half_bandwidth)
 for name, g0block in S.G_tau:
     g0block << InverseFourier(g0_iw)
@@ -41,7 +41,7 @@ for IterationNumber in range(n_loops):
         g0 << inverse( iOmega_n + chemical_potential - (half_bandwidth/2.0)**2  * g )
 
     # Run the solver
-    S.solve(h_loc = U * n('up',0) * n('down',0), **params)
+    S.solve(h_int=U * n('up',0) * n('down',0), **params)
 
     # Some intermediate saves
     if mpi.is_master_node():
