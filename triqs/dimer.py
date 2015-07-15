@@ -19,19 +19,20 @@ beta = 100
 n_loops = 5
 
 # Construct the CTQMC solver
-S = Solver(beta=beta, gf_struct={ 'up':[0, 1], 'down':[0, 1] })
+S = Solver(beta=beta, gf_struct={ 'up':[0, 1], 'down':[0, 1] },
+           n_iw=512, n_tau=2048, n_l=30)
 
 # Set the solver parameters
 params = {
     'n_cycles' : int(1e6),
     'length_cycle' : 250,
-    'n_warmup_cycles' : int(5e4),
+    'n_warmup_cycles' : int(1e5),
 }
 
 # Initalize the Green's function to a semi-circular density of states
-w_n= gf.matsubara_freq(beta, 1025)
+w_n= gf.matsubara_freq(beta, 512)
 g_iw = GfImFreq(indices=['A', 'B'], beta=beta,
-                             n_points=1025)
+                             n_points=512)
 gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, U/2., 0.2)
 rt.init_gf_met(g_iw, w_n, 0., 0.2, 0., 0.5)
 
@@ -47,9 +48,11 @@ for name, g0block in S.G_iw:
 S.solve(h_int=U * n('up',0) * n('down',0) + U * n('up',1) * n('down',1), **params)
 
 if mpi.is_master_node():
-  R = rt.HDFArchive("dimer_bethe.h5")
+  R = rt.HDFArchive("dimer_bethe_fwbin.h5")
   R["G_tau"] = S.G_tau
+  R['G0_iw'] = S.G0_iw
   R['G_iw'] = S.G_iw
+  R['G_l'] = S.G_l
   del R
 # Now do the DMFT loop
 #for IterationNumber in range(n_loops):
