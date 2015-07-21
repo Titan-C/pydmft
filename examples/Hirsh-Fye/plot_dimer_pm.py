@@ -36,8 +36,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      20000,
-               'therm':       8000,
+               'sweeps':      2000000,
+               'therm':       80000,
                'N_meas':      3,
                'save_logs':   False,
                'updater':     'discrete'
@@ -82,7 +82,7 @@ def dimer_loop(S, gmix, tau, filename, step):
         S.g0_iw.invert()
         S.solve(tau)
 
-        converged = np.allclose(S.g_iw.data, oldg, atol=1e-2)
+        converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
         loops += 1
         S.setup.update({'U': S.U, 'loops': loops})
         rt.store_sim(S, filename, step+'it{:02}/'.format(loops))
@@ -95,7 +95,7 @@ def dimer_loop(S, gmix, tau, filename, step):
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
 #        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
 
-        if loops > 30:
+        if loops > 50:
             converged = True
 
     rt.store_sim(S, filename, step)
@@ -111,11 +111,11 @@ if __name__ == "__main__":
                         default=16., help='The inverse temperature')
 #
 #
-    tabra = [0., 0.02, 0.04, 0.06, 0.08, 0.1, 0.14, 0.2, 0.3, 0.4, 0.6, 0.8]
+    tabra = np.arange(0.18, 0.3, 0.01)
     args = parser.parse_args()
     BETA = args.beta
 
-    ur = np.arange(0.5, 3.5, 0.3)
+    ur = np.arange(2, 3, 0.1)
     Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
-         tab, 0.5, 0., BETA, 'disk/met_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
+         tab, 0.5, 0., BETA, 'disk/metf_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
          for tab in tabra)

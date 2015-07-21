@@ -42,7 +42,7 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
         rat = ratup * ratdw
         if rat<0:
             nrat += 1
-        rat = rat/(1.+rat)
+#        rat = rat/(1.+rat)
         if rat > uniform(r):
             acc += 1
             v[j] *= -1.
