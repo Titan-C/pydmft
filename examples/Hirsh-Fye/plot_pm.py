@@ -19,18 +19,18 @@ from dmft.common import gt_fouriertrans, gw_invfouriertrans
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'n_tau_mc':    64,
-                   'BETA':        16,
+                   'n_tau_mc':    300,
+                   'BETA':        80,
                    'N_TAU':    2**11,
-                   'N_MATSUBARA': 64,
-                   'U':           3,
-                   't':           0.5,
+                   'N_MATSUBARA': 500,
+                   'U':           3.2,
+                   't':           .5,
                    'MU':          0,
                    'SITES':       1,
-                   'loops':       1,
-                   'sweeps':      5000,
-                   'therm':       1000,
-                   'N_meas':      4,
+                   'loops':       2,
+                   'sweeps':      30000,
+                   'therm':       8000,
+                   'N_meas':      5,
                    'save_logs':   False,
                    'updater':     'discrete'
                   }
@@ -46,25 +46,34 @@ def dmft_loop_pm(gw=None, **kwargs):
         G0iw = 1/(1j*w_n + parameters['MU'] - parameters['t']**2 * Giw)
         G0t = gw_invfouriertrans(G0iw, tau, w_n)
         g0t = hf.interpol(G0t, parameters['n_tau_mc'])[:-1].reshape(-1, 1, 1)
-        print(g0t.shape)
         gtu, gtd = hf.imp_solver([g0t, g0t], v_aux, intm, parameters)
         gt = -np.squeeze(0.5 * (gtu+gtd))
 
         Gt = hf.interpol(gt, parameters['N_TAU'])
         Giw = gt_fouriertrans(Gt, tau, w_n)
         simulation['it{:0>2}'.format(iter_count)] = {
-                            'G0iw': G0iw,
-                            'Giw':  Giw,
-                            'gtau': gt,
+                            'G0iw': G0iw.copy(),
+                            'Giw':  Giw.copy(),
+                            'gtau': gt.copy(),
                             }
+        #patch tail on
+        Giw.real = 0.
+        Giw[parameters['n_tau_mc']:] = -1j/w_n[parameters['n_tau_mc']:]
     return simulation
 
 if __name__ == "__main__":
-    sim1 = dmft_loop_pm()
+    gw=np.load('fgiws500.npy')
+    sim1 = dmft_loop_pm(gw)
     plt.figure()
     tau = np.linspace(0, sim1['parameters']['BETA'], sim1['parameters']['n_tau_mc']+1)
     for it in sorted(sim1):
         if 'it' in it:
-            plt.semilogy(tau,-sim1[it]['gtau'], 'o', label=it)
+            plt.plot(tau,-sim1[it]['gtau'], 'o', label=it)
     plt.legend()
-    print(np.polyfit(tau[:10], np.log(-sim1['it00']['gtau'][:10]), 1))
+    plt.figure()
+    for it in sorted(sim1):
+        if 'it' in it:
+            plt.plot(sim1[it]['Giw'].imag, 'o-', label=it)
+    plt.legend()
+#    print(np.polyfit(tau[:10], np.log(-sim1['it09']['gtau'][:10]), 1))
+    plt.show()

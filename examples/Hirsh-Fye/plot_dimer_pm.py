@@ -36,7 +36,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
                'BANDS': 1,
                'SITES': 2,
                'loops':       1,
-               'sweeps':      2000000,
+               'sweeps':      500000,
                'therm':       80000,
                'N_meas':      3,
                'save_logs':   False,
@@ -52,7 +52,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str):
     for u_int in urange:
         S.U = u_int
 #        S.setup['dtau_mc'] = min(0.5, 0.3/S.U)
-        S.setup['dtau_mc'] = 0.4
+        S.setup['dtau_mc'] = 0.5
         tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
         S.setup['n_tau_mc'] = len(tau)
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U, L=S.setup['SITES']*S.setup['n_tau_mc'])
@@ -82,7 +82,7 @@ def dimer_loop(S, gmix, tau, filename, step):
         S.g0_iw.invert()
         S.solve(tau)
 
-        converged = np.allclose(S.g_iw.data, oldg, atol=1e-3)
+        converged = np.allclose(S.g_iw.data, oldg, atol=4e-3)
         loops += 1
         S.setup.update({'U': S.U, 'loops': loops})
         rt.store_sim(S, filename, step+'it{:02}/'.format(loops))
@@ -95,7 +95,7 @@ def dimer_loop(S, gmix, tau, filename, step):
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
 #        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
 
-        if loops > 50:
+        if loops > 20:
             converged = True
 
     rt.store_sim(S, filename, step)
@@ -111,11 +111,11 @@ if __name__ == "__main__":
                         default=16., help='The inverse temperature')
 #
 #
-    tabra = np.arange(0.18, 0.3, 0.01)
+    tabra = [.18, 0.22, 0.25, 0.27]
     args = parser.parse_args()
     BETA = args.beta
 
     ur = np.arange(2, 3, 0.1)
-    Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
+    Parallel(n_jobs=4, verbose=5)(delayed(dmft_loop_pm)(ur,
          tab, 0.5, 0., BETA, 'disk/metf_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
          for tab in tabra)

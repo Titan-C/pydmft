@@ -15,8 +15,8 @@ import dmft.RKKY_dimer_IPT as rt
 U = 2.5
 half_bandwidth = 1.0
 chemical_potential = U/2.0
-beta = 100
-n_loops = 5
+beta =20
+n_loops = 1
 
 # Construct the CTQMC solver
 S = Solver(beta=beta, gf_struct={ 'up':[0, 1], 'down':[0, 1] },
@@ -24,9 +24,10 @@ S = Solver(beta=beta, gf_struct={ 'up':[0, 1], 'down':[0, 1] },
 
 # Set the solver parameters
 params = {
-    'n_cycles' : int(1e6),
-    'length_cycle' : 250,
-    'n_warmup_cycles' : int(1e5),
+    'n_cycles' : int(1e5),
+    'length_cycle' : 300,
+    'n_warmup_cycles' : int(5e4),
+    'move_double': True,
 }
 
 # Initalize the Green's function to a semi-circular density of states
@@ -34,7 +35,7 @@ w_n= gf.matsubara_freq(beta, 512)
 g_iw = GfImFreq(indices=['A', 'B'], beta=beta,
                              n_points=512)
 gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, U/2., 0.2)
-rt.init_gf_met(g_iw, w_n, 0., 0.2, 0., 0.5)
+rt.init_gf_met(g_iw, w_n, chemical_potential, 0.2, 0., 0.5)
 
 for name, g0block in S.G_tau:
     g0block << InverseFourier(g_iw)
@@ -48,7 +49,7 @@ for name, g0block in S.G_iw:
 S.solve(h_int=U * n('up',0) * n('down',0) + U * n('up',1) * n('down',1), **params)
 
 if mpi.is_master_node():
-  R = rt.HDFArchive("dimer_bethe_fwbin.h5")
+  R = rt.HDFArchive("qdimer_bethe_fwbin.h5")
   R["G_tau"] = S.G_tau
   R['G0_iw'] = S.G0_iw
   R['G_iw'] = S.G_iw
