@@ -10,7 +10,7 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 
 from __future__ import division, absolute_import, print_function
 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import dmft.hirschfye as hf
 import numpy as np
 import dmft.common as gf
@@ -58,10 +58,10 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
     except IOError: # if no data clean start
         S = rt.Dimer_Solver_hf(**setup)
         w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
-        rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., 0.5)
+        rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., t)
         S.setup['dtau_mc'] = 0.5
-        tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
-        S.setup['n_tau_mc'] = len(tau)
+    tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
+    S.setup['n_tau_mc'] = len(tau)
 
     gmix = rt.mix_gf_dimer(S.g_iw.copy(), iOmega_n, setup['MU'], setup['tp'])
 
@@ -113,7 +113,8 @@ def dimer_loop(S, gmix, tau, filename, step, loop_count=0):
     rt.store_sim(S, filename, step)
 
 if __name__ == "__main__":
-    dmft_loop_pm([2.], tab, 0.5, 0., BETA, 'metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5', dtau_mc=1., sweeps=5000)
+    dmft_loop_pm([2.], 0.2, 0.5, 0., 36., 'metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
+                 dtau_mc=1., sweeps=5000, max_loops=2)
 #    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
 #    parser.add_argument('beta', metavar='B', type=float,
 #                        default=16., help='The inverse temperature')
