@@ -29,22 +29,24 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
                'BETA':        beta,
                'N_TAU':    2**13,
                'n_points': n_freq,
+               'dtau_mc': 0.5,
                'U':           0.,
                't':           t,
                'tp':          tab,
                'MU':          0.,
                'BANDS': 1,
                'SITES': 2,
-               'loops':       1,
+               'loops':       0,  # starting loop count
                'max_loops':   20,
                'sweeps':      500000,
                'therm':       80000,
                'N_meas':      3,
                'save_logs':   False,
-               'updater':     'discrete'
+               'updater':     'discrete',
+               'convegence_tol': 4e-3,
               }
 
-    try: #try reloading data from disk
+    try:  # try reloading data from disk
         last_run = rt.HDFArchive(file_str.format(**setup), 'r')
         lastU = last_run.keys()[-1]
         lastit = last_run[lastU].keys()[-1]
@@ -53,13 +55,13 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
         S = rt.Dimer_Solver_hf(**setup)
         rt.load_gf(S.g_iw, last_run[lastU][lastit]['G_iwd'],
                    last_run[lastU][lastit]['G_iwo'])
-        urange = [u for u in urange if u>=float(lastU[1:])]
+        urange = [u for u in urange if u >= float(lastU[1:])]
         del last_run
-    except IOError: # if no data clean start
+    except Exception:  # if no data clean start
         S = rt.Dimer_Solver_hf(**setup)
         w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
         rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., t)
-        S.setup['dtau_mc'] = 0.5
+
     tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
     S.setup['n_tau_mc'] = len(tau)
 
@@ -69,7 +71,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
         S.U = u_int
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
                                L=S.setup['SITES']*S.setup['n_tau_mc'])
-        dimer_loop(S, gmix, tau, file_str, '/U{U}/', setup['loops'])
+        dimer_loop(S, gmix, tau, file_str, '/U{U}/')
+
 
 def get_selfE(G_iwd, G_iwo):
     nf = len(G_iwd.mesh)
@@ -78,14 +81,13 @@ def get_selfE(G_iwd, G_iwo):
     rt.load_gf(g_iw, G_iwd, G_iwo)
     gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, 0, 0.2)
     sigma = g_iw.copy()
-    sigma << gmix  - 0.25*g_iw - inverse(g_iw)
+    sigma << gmix - 0.25*g_iw - inverse(g_iw)
     return sigma
 
-def dimer_loop(S, gmix, tau, filename, step, loop_count=0):
+
+def dimer_loop(S, gmix, tau, filename, step):
     converged = False
     while not converged:
-#    for i in range(12):
-        # Enforce DMFT Paramagnetic
         rt.gf_symetrizer(S.g_iw)
 
         oldg = S.g_iw.data.copy()
@@ -94,8 +96,9 @@ def dimer_loop(S, gmix, tau, filename, step, loop_count=0):
         S.g0_iw.invert()
         S.solve(tau)
 
-        converged = np.allclose(S.g_iw.data, oldg, atol=4e-3)
-        loop_count += 1
+        converged = np.allclose(S.g_iw.data, oldg,
+                                atol=S.setup['convegence_tol'])
+        loop_count = S.setup['loops'] + 1
         S.setup.update({'U': S.U, 'loops': loop_count})
         rt.store_sim(S, filename, step+'it{:02}/'.format(loop_count))
 
@@ -110,23 +113,22 @@ def dimer_loop(S, gmix, tau, filename, step, loop_count=0):
         if loop_count > S.setup['max_loops']:
             converged = True
 
-    rt.store_sim(S, filename, step)
 
 if __name__ == "__main__":
-    dmft_loop_pm([2.], 0.2, 0.5, 0., 36., 'metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
-                 dtau_mc=1., sweeps=5000, max_loops=2)
-#    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
-#    parser.add_argument('beta', metavar='B', type=float,
-#                        default=16., help='The inverse temperature')
-#    parser.add_argument('-r','--restart', action='store_true',
-#                        help='Restart the job using data from disk')
-##
-##
-#    tabra = [.18, 0.22, 0.25, 0.27]
-#    args = parser.parse_args()
-#    BETA = args.beta
-#
-#    ur = np.arange(2, 3, 0.1)
-#    Parallel(n_jobs=4, verbose=5)(delayed(dmft_loop_pm)(ur,
-#         tab, 0.5, 0., BETA, 'disk/metf_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
-#         for tab in tabra)
+#    dmft_loop_pm([2.], 0.2, 0.5, 0., 36., 'metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
+#                 dtau_mc=1., sweeps=5000, max_loops=2)
+    parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe lattice solved by IPT')
+    parser.add_argument('beta', metavar='B', type=float,
+                        default=16., help='The inverse temperature')
+    parser.add_argument('-r','--restart', action='store_true',
+                        help='Restart the job using data from disk')
+
+
+    tabra = [.18, 0.22, 0.25, 0.27]
+    args = parser.parse_args()
+    BETA = args.beta
+
+    ur = np.arange(2, 3, 0.1)
+    Parallel(n_jobs=4, verbose=5)(delayed(dmft_loop_pm)(ur,
+         tab, 0.5, 0., BETA, 'disk/metf_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
+         for tab in tabra)
