@@ -11,11 +11,16 @@ from plot_dimer_pm import dmft_loop_pm
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
                                               lattice solved by IPT')
+parser.add_argument('dt', metavar='dt', type=float,
+                    default=.5, help='The inverse temperature')
+
 parser.add_argument('beta', metavar='B', type=float,
                     default=16., help='The inverse temperature')
 
+args = parser.parse_args()
+
 PARAMS = {'N_TAU':    2**13,
-          'dtau_mc': 1.,
+          'dtau_mc': args.dt,
           'U':           0.,
           'MU':          0.,
           'BANDS': 1,
@@ -31,7 +36,6 @@ PARAMS = {'N_TAU':    2**13,
           }
 
 TABRA = np.arange(0.18, 0.3, 0.01)
-args = parser.parse_args()
 BETA = args.beta
 
 ur = np.arange(2, 3, 0.1)
