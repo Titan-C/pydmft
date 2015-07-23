@@ -38,8 +38,8 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
                'SITES': 2,
                'loops':       0,  # starting loop count
                'max_loops':   20,
-               'sweeps':      500000,
-               'therm':       80000,
+               'sweeps':      int(2e6),
+               'therm':       int(1e5),
                'N_meas':      3,
                'save_logs':   False,
                'updater':     'discrete',
@@ -132,3 +132,4 @@ if __name__ == "__main__":
     Parallel(n_jobs=4, verbose=5)(delayed(dmft_loop_pm)(ur,
          tab, 0.5, 0., BETA, 'disk/metf_HF_Ul_t{t}_tp{tp}_B{BETA}.h5')
          for tab in tabra)
+
