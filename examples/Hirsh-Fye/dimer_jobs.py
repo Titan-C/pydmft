@@ -41,5 +41,5 @@ BETA = args.beta
 ur = np.arange(2, 3, 0.1)
 Parallel(n_jobs=6, verbose=5)(delayed(dmft_loop_pm)(ur,
                              tab, 0.5, 0., BETA,
-                             'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
+                             'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5', **PARAMS)
                              for tab in TABRA)
