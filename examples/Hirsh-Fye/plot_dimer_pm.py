@@ -84,14 +84,16 @@ def dimer_loop(S, gmix, tau, filename, step):
 
         converged = np.allclose(S.g_iw.data, oldg,
                                 atol=S.setup['convegence_tol'])
+
         loop_count = S.setup['loops'] + 1
+        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count,
+              converged, max_dist)
+        sys.stdout.flush()
+
         S.setup.update({'U': S.U, 'loops': loop_count})
         rt.store_sim(S, filename, step+'it{:02}/'.format(loop_count))
 
         max_dist = np.max(abs(S.g_iw.data - oldg))
-        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count,
-              converged, max_dist)
-        sys.stdout.flush()
 
 #        ct = '-' if loops<8 else '+--'
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
