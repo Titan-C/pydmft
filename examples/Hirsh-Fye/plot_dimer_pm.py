@@ -14,7 +14,8 @@ import dmft.hirschfye as hf
 import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
-
+import sys
+from pytriqs.gf.local import GfImFreq, iOmega_n
 
 def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
     """Implementation of the solver"""
@@ -69,9 +70,6 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
         dimer_loop(S, gmix, tau, file_str, '/U{U}/')
 
 
-
-
-
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
     while not converged:
@@ -92,6 +90,7 @@ def dimer_loop(S, gmix, tau, filename, step):
         max_dist = np.max(abs(S.g_iw.data - oldg))
         print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count,
               converged, max_dist)
+        sys.stdout.flush()
 
 #        ct = '-' if loops<8 else '+--'
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
@@ -101,12 +100,9 @@ def dimer_loop(S, gmix, tau, filename, step):
             converged = True
 
 
-
-
-
 if __name__ == "__main__":
-    dmft_loop_pm([2.7], 0.2, 0.5, 0., 36., '1metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
-                 dtau_mc=.4, sweeps=10000, max_loops=10)
+    from dimer_plots import plot_gf_loops
+    dmft_loop_pm([2.7], 0.2, 0.5, 0., 80., '1metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
+                 dtau_mc=.5, sweeps=30000, max_loops=3)
 
-    plot_gf_loops(0.2, 36., '1metf_HF_Ul_dt0.3_t0.5_tp{}_B{}.h5', 5 )
-
+    plot_gf_loops(0.2, 80., '1metf_HF_Ul_dt0.3_t0.5_tp{}_B{}.h5', 5)

@@ -15,35 +15,43 @@ import dmft.common as gf
 import dmft.RKKY_dimer as rt
 
 
+def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
+    diag_f = []
+    offdiag_f = []
+
+    for u_iter in R[ru].keys():
+        diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
+        offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
+        gfin.plot(w_n, R[ru][u_iter]['G_iwd'].data[:gflen, 0, 0].imag, 'bs:')
+        gfin.plot(w_n, R[ru][u_iter]['G_iwo'].data[:gflen, 0, 0].real, 'gs:')
+    diag_f = np.asarray(diag_f).T
+    offdiag_f = np.asarray(offdiag_f).T
+#    gfin.plot(w_n[2*nf:], -1/w_n[2*nf:])  # tails
+#    gfin.plot(w_n[2*nf:], -tab/w_n[2*nf:]**2)
+    gfin.set_xticks(gfin.get_xlim())
+    gfin.set_yticks(gfin.get_ylim())
+
+    return diag_f, offdiag_f
+
+
 def plot_gf_loops(tab, beta, filestr, nf):
     R = rt.HDFArchive(filestr.format(tab, beta), 'r')
     gflen = 3*nf
     w_n = gf.matsubara_freq(beta, gflen)
     for ru in R.keys():
-        diag_f = []
-        offdiag_f = []
         f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
         f.subplots_adjust(hspace=0.2)
         gfin = f.add_axes([0.16, 0.17, 0.20, 0.25])
-        for u_iter in R[ru].keys():
-            if 'it' in u_iter:
-                diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
-                offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
-                gfin.plot(w_n, R[ru][u_iter]['G_iwd'].data[:gflen, 0, 0].imag, 'bs:')
-                gfin.plot(w_n, R[ru][u_iter]['G_iwo'].data[:gflen, 0, 0].real, 'gs:')
 
-        diag_f = np.asarray(diag_f).T
-        offdiag_f = np.asarray(offdiag_f).T
-        gfin.plot(w_n[2*nf:], -1/w_n[2*nf:])
-        gfin.plot(w_n[2*nf:], -tab/w_n[2*nf:]**2)
-        gfin.set_xticks(gfin.get_xlim())
-        gfin.set_yticks(gfin.get_ylim())
+        diag_f, offdiag_f = plot_gf_iter(R, ru, gfin, w_n, nf, gflen)
+
         plt.axhline()
         for freq, (hd, ho) in enumerate(zip(diag_f, offdiag_f)):
-            ax[0].plot(hd,'o-.', label='n='+str(freq+1))
-            ax[1].plot(ho,'o-.', label='n='+str(freq+1))
-        ax[1].legend(loc=3,prop={'size':18})
-        plt.suptitle('First frequencies of the Matsubara GF, at iteration @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
+            ax[0].plot(hd, 'o-.', label='n='+str(freq+1))
+            ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
+        ax[1].legend(loc=3, prop={'size':18})
+        plt.suptitle('First frequencies of the Matsubara GF, at iteration\
+        @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
         #show()
         #close()
     del R
