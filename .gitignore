@@ -61,3 +61,4 @@ target/
 fort.*
 *.dat
 *.h5
+*.*o*
