@@ -11,7 +11,7 @@ from pytriqs.gf.local import GfReFreq, Omega
 from pytriqs.plot.mpl_interface import oplot
 import numpy as np
 import matplotlib.pyplot as plt
-from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met
+from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met
 import dmft.common as gf
 
 

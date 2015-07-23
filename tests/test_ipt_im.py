@@ -9,7 +9,7 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 from dmft import ipt_imag
 from dmft.common import greenF, tau_wn_setup
-from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, \
+from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met, \
     Dimer_Solver, dimer
 from pytriqs.gf.local import iOmega_n
 import pytest

@@ -8,7 +8,7 @@ Created on Fri May 29 13:51:22 2015
 from pytriqs.gf.local import iOmega_n
 import dmft.common as gf
 import numpy as np
-from dmft.RKKY_dimer_IPT import mix_gf_dimer, init_gf_met, init_gf_ins, \
+from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met, init_gf_ins, \
     Dimer_Solver, dimer
 import argparse
 from joblib import Parallel, delayed

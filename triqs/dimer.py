@@ -9,7 +9,7 @@ from pytriqs.archive import *
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 import pytriqs.utility.mpi as mpi
 import dmft.common as gf
-import dmft.RKKY_dimer_IPT as rt
+import dmft.RKKY_dimer as rt
 
 # Set up a few parameters
 U = 2.5
