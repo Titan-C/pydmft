@@ -21,11 +21,9 @@ args = parser.parse_args()
 
 PARAMS = {'N_TAU':    2**13,
           'dtau_mc': args.dt,
-          'U':           0.,
           'MU':          0.,
           'BANDS': 1,
           'SITES': 2,
-          'loops':       0,  # starting loop count
           'max_loops':   20,
           'sweeps':      int(2e6),
           'therm':       int(1e5),
