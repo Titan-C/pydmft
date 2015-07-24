@@ -104,8 +104,8 @@ def dimer_loop(S, gmix, tau, filename, step):
 
 
 if __name__ == "__main__":
-    from dimer_plots import plot_gf_loops
-    dmft_loop_pm([2.7], 0.2, 0.5, 0., 80., '1metf_HF_Ul_dt0.3_t{t}_tp{tp}_B{BETA}.h5',
-                 dtau_mc=.5, sweeps=30000, max_loops=3)
+    dmft_loop_pm([2.4], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
+                 dtau_mc=0.5, sweeps=3000, max_loops=1)
 
-    plot_gf_loops(0.2, 80., '1metf_HF_Ul_dt0.3_t0.5_tp{}_B{}.h5', 5)
+    from dimer_plots import plot_gf_loopU, plot_gf_iter
+    plot_gf_loopU(40., 0.23, 2.5, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)
