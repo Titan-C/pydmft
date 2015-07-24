@@ -17,7 +17,6 @@ from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 import dmft.hffast as hffast
 
 
-
 def ising_v(dtau, U, L, fields=1, polar=0.5):
     """initialize the vector V of Ising fields
     .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
@@ -56,24 +55,18 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     parms = {'global_flip': False,
              'save_logs': False,
              'n_tau_mc':    64,
-               'N_TAU':    2**11,
-               'N_MATSUBARA': 64,
-               't':           0.5,
-               'MU':          0.,
-               'SITES':       1,
-               'loops':       1,
-               'sweeps':      50000,
-               'therm':       5000,
-               'N_meas':      4,
-               'updater':     'discrete'
+             'N_TAU':    2**11,
+             'N_MATSUBARA': 64,
+             't':           0.5,
+             'MU':          0.,
+             'SITES':       1,
+             'loops':       1,
+             'sweeps':      50000,
+             'therm':       5000,
+             'N_meas':      4,
+             'Heat_bath':   True,
              }
     parms.update(parms_user)
-    if parms['updater'] == 'discrete':
-        update = hffast.updateDHS
-    elif parms['updater'] == 'continuous':
-        update = hffast.updateCHS
-    else:
-        raise ValueError("Unrecognized updater {}".format(parms['updater']))
 
     GX = [retarded_weiss(gb) for gb in G0_blocks]
     kroneker = np.eye(GX[0].shape[0])  # assuming all blocks are of same shape
@@ -83,25 +76,23 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
 
     vlog = []
     ar = []
-    meas = 0
 
     acc, anrat = 0, 0
+
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
                 v *= -1
             int_v = np.dot(interaction, v)
-            g = [gnewclean(g_sp, lv, kroneker)  for g_sp, lv in zip(GX, int_v)]
+            g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
 
+        for updates in range(parms['N_meas']):
+            for i, (up, dw) in enumerate(i_pairs):
+                acr, nrat = hffast.updateDHS(g[up], g[dw], v[i], parms['Heat_bath'])
+                acc += acr
+                anrat += nrat
 
-        for i, (up, dw) in enumerate(i_pairs):
-            acr, nrat = update(g[up], g[dw], v[i])
-            acc += acr
-            anrat += nrat
-
-
-        if mcs > parms['therm'] and mcs % parms['N_meas'] == 0:
-            meas += 1
+        if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
             if parms['save_logs']:
@@ -109,11 +100,13 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
                 ar.append(acc)
 
     for g in Gst:
-        g /= meas
-    print('acc ', acc/v.size/(parms['sweeps'] + parms['therm']), 'nsign',anrat)
+        g /= parms['sweeps']
+    acc /= v.size/parms['N_meas']/(parms['sweeps'] + parms['therm'])
+    print('acc ', acc, 'nsign', anrat)
 
     if parms['save_logs']:
-        return [avg_g(gst, parms) for gst in Gst], np.asarray(vlog), np.asarray(ar)
+        return [avg_g(gst, parms) for gst in Gst],\
+                np.asarray(vlog), np.asarray(ar)
     else:
         return [avg_g(gst, parms) for gst in Gst]
 
@@ -226,14 +219,14 @@ def interaction_matrix(bands):
     the number of orbitals"""
     particles = 2 * bands
     fields = bands * (particles - 1)
-    interaction_matrix = np.zeros((particles, fields))
+    int_matrix = np.zeros((particles, fields))
     L = 0
     for i in range(particles):
         for j in range(i+1, particles):
-            interaction_matrix[i, L] = 1
-            interaction_matrix[j, L] = -1
+            int_matrix[i, L] = 1
+            int_matrix[j, L] = -1
             L += 1
-    return interaction_matrix
+    return int_matrix
 
 
 def setup_PM_sim(u_parms):
@@ -241,17 +234,17 @@ def setup_PM_sim(u_parms):
     parms = {'global_flip': False,
              'save_logs': False,
              'n_tau_mc':    64,
-               'N_TAU':    2**11,
-               'N_MATSUBARA': 64,
-               't':           0.5,
-               'MU':          0.,
-               'BANDS':       1,
-               'SITES':       1,
-               'loops':       1,
-               'sweeps':      50000,
-               'therm':       5000,
-               'N_meas':      4,
-               'updater':     'discrete'
+             'N_TAU':    2**11,
+             'N_MATSUBARA': 64,
+             't':           0.5,
+             'MU':          0.,
+             'BANDS':       1,
+             'SITES':       1,
+             'loops':       1,
+             'sweeps':      50000,
+             'therm':       5000,
+             'N_meas':      4,
+             'updater':     'discrete'
              }
     parms.update(u_parms)
     tau, w_n = tau_wn_setup(parms)

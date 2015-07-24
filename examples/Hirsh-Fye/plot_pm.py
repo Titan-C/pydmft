@@ -19,8 +19,8 @@ from dmft.common import gt_fouriertrans, gw_invfouriertrans
 def dmft_loop_pm(gw=None, **kwargs):
     """Implementation of the solver"""
     parameters = {
-                   'n_tau_mc':    300,
-                   'BETA':        80,
+                   'n_tau_mc':    64,
+                   'BETA':        32,
                    'N_TAU':    2**11,
                    'N_MATSUBARA': 500,
                    'U':           3.2,
@@ -28,7 +28,7 @@ def dmft_loop_pm(gw=None, **kwargs):
                    'MU':          0,
                    'SITES':       1,
                    'loops':       2,
-                   'sweeps':      30000,
+                   'sweeps':      8000,
                    'therm':       8000,
                    'N_meas':      5,
                    'save_logs':   False,

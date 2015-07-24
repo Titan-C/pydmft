@@ -48,7 +48,7 @@ def test_solver_atom(u_int):
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
     v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
     tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
-    intm = hf.interaction_matrix(1) # one orbital
+    intm = hf.interaction_matrix(1)  # one orbital
     g0t = -.5 * np.ones(parms['n_tau_mc']).reshape(-1, 1, 1)
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(0.5 * (gtu+gtd))
