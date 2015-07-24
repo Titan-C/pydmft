@@ -48,11 +48,10 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
         lastit = last_run[lastU].keys()[-1]
         setup = last_run[lastU][lastit]['setup']
         setup.update(params)
-        S = rt.Dimer_Solver_hf(**setup)
-        rt.load_gf(S.g_iw, last_run[lastU][lastit]['G_iwd'],
-                   last_run[lastU][lastit]['G_iwo'])
         del last_run
-    except Exception:  # if no data clean start
+    except IOError:  # if no data clean start
+        pass
+    finally:
         S = rt.Dimer_Solver_hf(**setup)
         w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
         rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., t)
@@ -73,6 +72,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
 
 def dimer_loop(S, gmix, tau, filename, step):
     converged = False
+    rt.recover_lastit(S, filename)
     while not converged:
         rt.gf_symetrizer(S.g_iw)
 
@@ -99,13 +99,13 @@ def dimer_loop(S, gmix, tau, filename, step):
 #        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
 #        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
 
-        if loop_count > S.setup['max_loops']:
+        if loop_count >= S.setup['max_loops']:
             converged = True
 
 
 if __name__ == "__main__":
     dmft_loop_pm([2.4], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
-                 dtau_mc=0.5, sweeps=3000, max_loops=1)
+                 dtau_mc=0.4, sweeps=4000, max_loops=1)
 
     from dimer_plots import plot_gf_loopU, plot_gf_iter
-    plot_gf_loopU(40., 0.23, 2.5, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)
+    plot_gf_loopU(40., 0.23, 2.4, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)

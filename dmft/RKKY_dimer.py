@@ -206,6 +206,17 @@ def store_sim(S, file_str, step_str):
     del R
 
 
+def recover_lastit(S, file_str):
+    try:
+        file_name = file_str.format(**S.setup)
+        R = HDFArchive(file_name, 'r')
+        ru = 'U'+str(S.U)
+        lastit = R[ru].keys()[-1]
+        load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
+        del R
+    except IOError:
+        pass
+
 def total_energy(file_str):
     """Calculates the internal energy of the system given by Fetter-Walecka
     25-26
