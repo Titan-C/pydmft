@@ -43,12 +43,11 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
     setup.update(params)
 
     try:  # try reloading data from disk
-        last_run = rt.HDFArchive(file_str.format(**setup), 'r')
-        lastU = 'U'+str(urange[0])
-        lastit = last_run[lastU].keys()[-1]
-        setup = last_run[lastU][lastit]['setup']
-        setup.update(params)
-        del last_run
+        with rt.HDFArchive(file_str.format(**setup), 'r') as last_run:
+            lastU = 'U'+str(urange[0])
+            lastit = last_run[lastU].keys()[-1]
+            setup = last_run[lastU][lastit]['setup']
+            setup.update(params)
     except IOError:  # if no data clean start
         pass
     finally:
@@ -104,8 +103,8 @@ def dimer_loop(S, gmix, tau, filename, step):
 
 
 if __name__ == "__main__":
-    dmft_loop_pm([2.4], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
-                 dtau_mc=0.4, sweeps=4000, max_loops=1)
+    dmft_loop_pm([2.5], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
+                 dtau_mc=0.5, sweeps=40, max_loops=1)
 
     from dimer_plots import plot_gf_loopU, plot_gf_iter
-    plot_gf_loopU(40., 0.23, 2.4, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)
+    plot_gf_loopU(40., 0.23, 2.5, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)

@@ -34,24 +34,23 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     return diag_f, offdiag_f
 
 def plot_gf_loopU(beta, tab, U, filestr, nf):
-    R = rt.HDFArchive(filestr.format(tab, beta), 'r')
+    with rt.HDFArchive(filestr.format(tab, beta), 'r') as R:
 
-    f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
-    f.subplots_adjust(hspace=0.2)
-    gfin = f.add_axes([0.16, 0.17, 0.20, 0.25])
-    gflen = 3*nf
-    w_n = gf.matsubara_freq(beta, gflen)
-    ru = 'U'+str(U)
-    diag_f, offdiag_f = plot_gf_iter(R, ru, gfin, w_n, nf, gflen)
+        f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
+        f.subplots_adjust(hspace=0.2)
+        gfin = f.add_axes([0.16, 0.17, 0.20, 0.25])
+        gflen = 3*nf
+        w_n = gf.matsubara_freq(beta, gflen)
+        ru = 'U'+str(U)
+        diag_f, offdiag_f = plot_gf_iter(R, ru, gfin, w_n, nf, gflen)
 
-    plt.axhline()
-    for freq, (hd, ho) in enumerate(zip(diag_f, offdiag_f)):
-        ax[0].plot(hd, 'o-.', label='n='+str(freq+1))
-        ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
-    ax[1].legend(loc=3, prop={'size':18})
-    plt.suptitle('First frequencies of the Matsubara GF, at iteration\
-    @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
-    del R
+        plt.axhline()
+        for freq, (hd, ho) in enumerate(zip(diag_f, offdiag_f)):
+            ax[0].plot(hd, 'o-.', label='n='+str(freq+1))
+            ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
+        ax[1].legend(loc=3, prop={'size':18})
+        plt.suptitle('First frequencies of the Matsubara GF, at iteration\
+        @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
 
 
 def get_selfE(G_iwd, G_iwo):

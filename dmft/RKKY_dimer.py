@@ -197,23 +197,19 @@ def dimer(S, gmix, filename, step):
 def store_sim(S, file_str, step_str):
     file_name = file_str.format(**S.setup)
     step = step_str.format(**S.setup)
-    R = HDFArchive(file_name, 'a')
-    R[step+'setup'] = S.setup
-    R[step+'G_iwd'] = S.g_iw['A', 'A']
-    R[step+'G_iwo'] = S.g_iw['A', 'B']
-#    R[step+'S_iwd'] = S.sigma_iw['A', 'A']
-#    R[step+'S_iwo'] = S.sigma_iw['A', 'B']
-    del R
+    with HDFArchive(file_name, 'a') as R:
+        R[step+'setup'] = S.setup
+        R[step+'G_iwd'] = S.g_iw['A', 'A']
+        R[step+'G_iwo'] = S.g_iw['A', 'B']
 
 
 def recover_lastit(S, file_str):
     try:
         file_name = file_str.format(**S.setup)
-        R = HDFArchive(file_name, 'r')
-        ru = 'U'+str(S.U)
-        lastit = R[ru].keys()[-1]
-        load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
-        del R
+        with HDFArchive(file_name, 'r') as R:
+            ru = 'U'+str(S.U)
+            lastit = R[ru].keys()[-1]
+            load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
     except IOError:
         pass
 
