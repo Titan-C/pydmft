@@ -62,7 +62,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
 
     for u_int in urange:
         S.U = u_int
-        S.setup['loops'] = setup['loops']
+        S.setup['loops'] = 0.
         S.setup['max_loops'] = setup['max_loops']
         S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
                                L=S.setup['SITES']*S.setup['n_tau_mc'])

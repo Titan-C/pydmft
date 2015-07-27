@@ -212,7 +212,7 @@ def recover_lastit(S, file_str):
             load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
             S.setup['loops'] = R[ru][lastit]['setup']['loops']
             S.setup['max_loops'] += S.setup['loops']
-    except IOError:
+    except (IOError, KeyError):
         pass
 
 def total_energy(file_str):

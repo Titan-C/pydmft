@@ -10,9 +10,12 @@ from pytriqs.gf.local import GfImFreq, iOmega_n, TailGf, inverse
 from pytriqs.gf.local import GfImTime, InverseFourier, Fourier
 from pytriqs.plot.mpl_interface import oplot
 import matplotlib.pyplot as plt
+plt.matplotlib.rcParams.update({'font.size': 22})
 import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
+import pandas as pd
+import re
 
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
@@ -51,7 +54,33 @@ def plot_gf_loopU(beta, tab, U, filestr, nf):
         ax[1].legend(loc=3, prop={'size':18})
         plt.suptitle('First frequencies of the Matsubara GF, at iteration\
         @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
+        plt.show()
+        plt.close()
 
+def plot_acc(filelist):
+    rawdata=''
+    for fname in filelist:
+        with open(fname) as fcontent:
+            rawdata += fcontent.read()
+
+    infocols=re.findall('acc\s+([\d\.]+?) nsign (\d)\s+B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
+    infosum=np.array(infocols).astype(np.float)
+    table=pd.DataFrame(infosum,columns=['acc', 'sign', 'beta', 'tp', 'U', 'loop', 'dist'])
+    tpg=table.groupby('tp')
+    for tp_key, group in tpg:
+        tpg_ug = group.groupby('U')
+        f, tp_ax = plt.subplots(1, 2, figsize=(18, 8))
+        for U_key, ugroup in tpg_ug:
+            ugroup.plot(x='loop', y='acc', ax=tp_ax[0], marker='o',
+                        label='U='+str(U_key),
+                        title='Acceptance rate @ $t\\perp=$'+str(tp_key))
+            ugroup.plot(x='loop', y='dist', ax=tp_ax[1], marker='o',
+                        label='U='+str(U_key), logy=True, legend=False,
+                        title='Convergence @ $t\\perp=$'+str(tp_key))
+        tp_ax[0].legend(loc=0, prop={'size':18})
+        tp_ax[1].axhline(y=4e-3, ls=':')
+        plt.show()
+        plt.close()
 
 def get_selfE(G_iwd, G_iwo):
     nf = len(G_iwd.mesh)
