@@ -210,6 +210,8 @@ def recover_lastit(S, file_str):
             ru = 'U'+str(S.U)
             lastit = R[ru].keys()[-1]
             load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
+            S.setup['loops'] = R[ru][lastit]['setup']['loops']
+            S.setup['max_loops'] += S.setup['loops']
     except IOError:
         pass
 
