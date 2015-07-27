@@ -101,7 +101,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
 
     for g in Gst:
         g /= parms['sweeps']
-    acc /= v.size/parms['N_meas']/(parms['sweeps'] + parms['therm'])
+    acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
     print('acc ', acc, 'nsign', anrat)
 
     if parms['save_logs']:
