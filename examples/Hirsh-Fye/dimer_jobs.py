@@ -24,10 +24,10 @@ PARAMS = {'N_TAU':    2**13,
           'MU':          0.,
           'BANDS': 1,
           'SITES': 2,
-          'max_loops':   3,
+          'max_loops':   4,
           'sweeps':      int(2e6),
           'therm':       int(1e5),
-          'N_meas':      3,
+          'N_meas':      2,
           'save_logs':   False,
           'updater':     'discrete',
           'convegence_tol': 4e-3,
@@ -37,7 +37,7 @@ TABRA = np.arange(0.18, 0.3, 0.01)
 BETA = args.beta
 
 ur = np.arange(2, 3, 0.1)
-Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(ur,
+Parallel(n_jobs=-1, verbose=5)(delayed(dmft_loop_pm)(u_int,
                              tab, 0.5, 0., BETA,
                              'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5', **PARAMS)
-                             for tab in TABRA)
+                             for tab in TABRA for u_int in ur)
