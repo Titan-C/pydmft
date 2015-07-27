@@ -17,7 +17,7 @@ import dmft.RKKY_dimer as rt
 import sys
 from pytriqs.gf.local import GfImFreq, iOmega_n
 
-def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
+def dmft_loop_pm(u_int, tab, t, tn, beta, file_str, **params):
     """Implementation of the solver"""
     n_freq = int(15.*beta/np.pi)
     setup = {
@@ -25,7 +25,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
                'N_TAU':    2**13,
                'n_points': n_freq,
                'dtau_mc': 0.5,
-               'U':           0.,
+               'U':           u_int,
                't':           t,
                'tp':          tab,
                'MU':          0.,
@@ -44,7 +44,7 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
 
     try:  # try reloading data from disk
         with rt.HDFArchive(file_str.format(**setup), 'r') as last_run:
-            lastU = 'U'+str(urange[0])
+            lastU = 'U'+str(u_int)
             lastit = last_run[lastU].keys()[-1]
             setup = last_run[lastU][lastit]['setup']
             setup.update(params)
@@ -60,13 +60,9 @@ def dmft_loop_pm(urange, tab, t, tn, beta, file_str, **params):
 
     gmix = rt.mix_gf_dimer(S.g_iw.copy(), iOmega_n, setup['MU'], setup['tp'])
 
-    for u_int in urange:
-        S.U = u_int
-        S.setup['loops'] = 0.
-        S.setup['max_loops'] = setup['max_loops']
-        S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
-                               L=S.setup['SITES']*S.setup['n_tau_mc'])
-        dimer_loop(S, gmix, tau, file_str, '/U{U}/')
+    S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
+                           L=S.setup['SITES']*S.setup['n_tau_mc'])
+    dimer_loop(S, gmix, tau, file_str, '/U{U}/')
 
 
 def dimer_loop(S, gmix, tau, filename, step):
