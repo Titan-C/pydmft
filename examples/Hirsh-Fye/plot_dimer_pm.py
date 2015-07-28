@@ -48,7 +48,7 @@ def dmft_loop_pm(u_int, tab, t, tn, beta, file_str, **params):
             lastit = last_run[lastU].keys()[-1]
             setup = last_run[lastU][lastit]['setup']
             setup.update(params)
-    except IOError:  # if no data clean start
+    except (IOError, KeyError):  # if no data clean start
         pass
     finally:
         S = rt.Dimer_Solver_hf(**setup)
