@@ -48,7 +48,7 @@ def mix_gf_dimer(gmix, omega, mu, tab):
 
 def cthyb_last_run(u_int, tp, BETA, file_str):
     u = 'U'+str(u_int)
-    with rt.HDFArchive(file_str.format(tp, BETA)) as last_run:
+    with rt.HDFArchive(file_str.format(tp=tp, BETA=BETA)) as last_run:
         lastit = mpi.bcast(last_run[u].keys()[-1])
         setup = mpi.bcast(last_run[u][lastit]['setup'])
         gd = mpi.bcast(last_run[u][lastit]['G_iwd'])
@@ -68,7 +68,7 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
     S.solve(h_int=U * n('up',0) * n('down',0) + U * n('up',1) * n('down',1), **params)
 
     if mpi.is_master_node():
-        with rt.HDFArchive(file_str.format(**setup), 'r') as last_run:
+        with rt.HDFArchive(file_str.format(**setup)) as last_run:
             last_run[u]['cthyb/G_iw'] = S.G_iw
             last_run[u]['cthyb/G_tau'] = S.G_tau
             last_run[u]['cthyb/G_l'] = S.G_l
@@ -84,5 +84,5 @@ args = parser.parse_args()
 import numpy as np
 ur = np.arange(2, 3, 0.1)
 for u_int in ur:
-    cthyb_last_run(u_int, args.tp, 10., 'disk/metf_HF_Ul_tp{}_B{}.h5')
+    cthyb_last_run(u_int, args.tp, 10., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
 
