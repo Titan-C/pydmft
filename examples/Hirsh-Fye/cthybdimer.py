@@ -74,10 +74,15 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
             last_run[u]['cthyb/G_l'] = S.G_l
 
 
-TABRA = np.arange(0.18, 0.3, 0.01)
-ur = np.arange(2, 3, 0.1)
+import argparse
 
-for tab in TABRA:
-    for u_int in ur:
-        cthyb_last_run(u_int, tab, 10., 'disk/metf_HF_Ul_tp{}_B{}.h5')
+parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
+                                                      lattice solved by IPT')
+parser.add_argument('tp', default=0.18, help='The dimerization strength')
+
+args = parser.parse_args()
+import numpy as np
+ur = np.arange(2, 3, 0.1)
+for u_int in ur:
+    cthyb_last_run(u_int, args.tp, 10., 'disk/metf_HF_Ul_tp{}_B{}.h5')
 
