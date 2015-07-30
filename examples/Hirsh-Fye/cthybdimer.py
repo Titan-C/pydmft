@@ -78,7 +78,7 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
 
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
-                                                      lattice solved by IPT')
+                                                      lattice solved by CTHYB')
 parser.add_argument('tp', default=0.18, help='The dimerization strength')
 
 args = parser.parse_args()
