@@ -4,21 +4,23 @@ Created on Thu Jul 23 14:08:23 2015
 
 @author: oscar
 """
+
 from __future__ import division, print_function, absolute_import
-from pytriqs.gf.local import GfReFreq, Omega
 from pytriqs.gf.local import GfImFreq, iOmega_n, TailGf, inverse
 from pytriqs.gf.local import GfImTime, InverseFourier, Fourier
+from pytriqs.gf.local import GfReFreq, Omega
 from pytriqs.plot.mpl_interface import oplot
-import matplotlib.pyplot as plt
-plt.matplotlib.rcParams.update({'font.size': 22})
-import numpy as np
-import dmft.common as gf
 import dmft.RKKY_dimer as rt
+import dmft.common as gf
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import re
-
+plt.matplotlib.rcParams.update({'font.size': 22})
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
+    """Plot all Hirsch - Fye iterations of a given file at
+    the specified interaction strength"""
     diag_f = []
     offdiag_f = []
 
@@ -37,6 +39,8 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     return diag_f, offdiag_f
 
 def plot_gf_loopU(beta, tab, U, filestr, nf):
+    """Loop over all interaction strengths for a given file
+    to plot all its iterations"""
     with rt.HDFArchive(filestr.format(tab, beta), 'r') as R:
 
         f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
@@ -58,6 +62,8 @@ def plot_gf_loopU(beta, tab, U, filestr, nf):
         plt.close()
 
 def plot_acc(filelist):
+    """Plot the evolution of the acceptance rate in each DMFT loop
+    extracting the status information of the jobs"""
     rawdata=''
     for fname in filelist:
         with open(fname) as fcontent:
