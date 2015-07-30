@@ -3,14 +3,16 @@
 @author: Óscar Nájera
 """
 #from __future__ import division, absolute_import, print_function
+from pytriqs.applications.impurity_solvers.cthyb import Solver
+from pytriqs.archive import *
 from pytriqs.gf.local import *
 from pytriqs.operators import *
-from pytriqs.archive import *
-from pytriqs.applications.impurity_solvers.cthyb import Solver
-import pytriqs.utility.mpi as mpi
 from time import time
-import dmft.common as gf
+import argparse
 import dmft.RKKY_dimer as rt
+import dmft.common as gf
+import numpy as np
+import pytriqs.utility.mpi as mpi
 
 # Set the solver parameters
 params = {
@@ -74,14 +76,12 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
             last_run[u]['cthyb/G_l'] = S.G_l
 
 
-import argparse
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
                                                       lattice solved by IPT')
 parser.add_argument('tp', default=0.18, help='The dimerization strength')
 
 args = parser.parse_args()
-import numpy as np
 ur = np.arange(2, 3, 0.1)
 for u_int in ur:
     cthyb_last_run(u_int, args.tp, 10., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
