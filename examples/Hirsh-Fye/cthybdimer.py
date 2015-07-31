@@ -79,10 +79,12 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
                                                       lattice solved by CTHYB')
+parser.add_argument('beta', metavar='B', type=float,
+                    default=20., help='The inverse temperature')
 parser.add_argument('tp', default=0.18, help='The dimerization strength')
 
 args = parser.parse_args()
 ur = np.arange(2, 3, 0.1)
 for u_int in ur:
-    cthyb_last_run(u_int, args.tp, 10., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
+    cthyb_last_run(u_int, args.tp, args.beta, 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
 
