@@ -142,10 +142,13 @@ def plot_gf(tp, beta):
     with rt.HDFArchive(filestr, 'r') as results:
         for u in results.keys():
             lastit = results[u].keys()[-1]
-            gd.oplot(results[u][lastit]['G_iwd'], RI='I', label=u)
-            go.oplot(results[u][lastit]['G_iwo'], RI='R', label=u)
+            gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+            go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
 
     gd.set_xlim([0, 4])
     gd.legend(loc=0, prop={'size': 18})
+    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
     go.set_xlim([0, 4])
     go.legend(loc=0, prop={'size': 18})
+    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
