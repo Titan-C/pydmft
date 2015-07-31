@@ -25,16 +25,20 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     offdiag_f = []
 
     for u_iter in R[ru].keys():
+        if u_iter == 'cthyb':
+            continue
         diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
         offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
-        gfin.plot(w_n, R[ru][u_iter]['G_iwd'].data[:gflen, 0, 0].imag, 'bs:')
-        gfin.plot(w_n, R[ru][u_iter]['G_iwo'].data[:gflen, 0, 0].real, 'gs:')
+        gfin.oplot(R[ru][u_iter]['G_iwd'], 'bs:', RI='I')
+        gfin.oplot(R[ru][u_iter]['G_iwo'], 'gs:', RI='R')
     diag_f = np.asarray(diag_f).T
     offdiag_f = np.asarray(offdiag_f).T
 #    gfin.plot(w_n[2*nf:], -1/w_n[2*nf:])  # tails
 #    gfin.plot(w_n[2*nf:], -tab/w_n[2*nf:]**2)
+    gfin.set_xlim([0, 5])
     gfin.set_xticks(gfin.get_xlim())
     gfin.set_yticks(gfin.get_ylim())
+    gfin.legend_.remove()
 
     return diag_f, offdiag_f
 
