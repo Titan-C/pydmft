@@ -130,3 +130,18 @@ def phase_diag(beta):
                 lastit = results[u].keys()[-1]
                 fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
     return np.asarray(fl_dos)
+
+def plot_gf(tp, beta):
+
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
+    with rt.HDFArchive(filestr, 'r') as results:
+        for u in results.keys():
+            lastit = results[u].keys()[-1]
+            gd.oplot(results[u][lastit]['G_iwd'], RI='I', label=u)
+            go.oplot(results[u][lastit]['G_iwo'], RI='R', label=u)
+
+    gd.set_xlim([0, 4])
+    gd.legend(loc=0, prop={'size': 18})
+    go.set_xlim([0, 4])
+    go.legend(loc=0, prop={'size': 18})
