@@ -118,3 +118,15 @@ def plotGiw(saveblock):
     plot_tails(giw)
     plt.xlim(xmax=10)
     plt.ylim(ymin=-1.2)
+
+def phase_diag(beta):
+
+    fl_dos = []
+    for tp in np.arange(0.18, 0.3, 0.01):
+        w_n = gf.matsubara_freq(beta, 5)
+        filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+        with rt.HDFArchive(filestr, 'r') as results:
+            for u in results.keys():
+                lastit = results[u].keys()[-1]
+                fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
+    return np.asarray(fl_dos)
