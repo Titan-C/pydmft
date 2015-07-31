@@ -152,3 +152,22 @@ def plot_gf(tp, beta):
     go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+
+def plot_gf_ct(tp, beta):
+
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
+    with rt.HDFArchive(filestr, 'r') as results:
+        for u in results.keys():
+            lastit = 'cthyb'
+            giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
+            gd.oplot(giw[0,0], 'x-', RI='I', label=u)
+            go.oplot(giw[0,1], '+-', RI='R', label=u)
+
+    gd.set_xlim([0, 4])
+    gd.legend(loc=0, prop={'size': 18})
+    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
+    go.set_xlim([0, 4])
+    go.legend(loc=0, prop={'size': 18})
+    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
