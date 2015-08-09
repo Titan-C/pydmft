@@ -171,3 +171,68 @@ def plot_gf_ct(tp, beta):
     go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+
+
+def diag_sys(tp, beta):
+    rot = np.matrix([[-1,1],[1,1]])/np.sqrt(2)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
+    with rt.HDFArchive(filestr, 'r') as results:
+        for u in results.keys():
+            lastit = results[u].keys()[-1]
+            g_iw = rot*getGiw(results[u][lastit])*rot
+#            import pdb; pdb.set_trace()
+            gd.oplot(g_iw['A','A'], 'x-', label=u)
+            go.oplot(g_iw['B', 'B'], '+-', label=u)
+
+    gd.set_xlim([0, 4])
+    gd.legend(loc=0, prop={'size': 18})
+    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
+    go.set_xlim([0, 4])
+    go.legend(loc=0, prop={'size': 18})
+    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+
+def spectral(tp, U, beta, pade_fit_pts):
+    rot = np.matrix([[-1,1],[1,1]])/np.sqrt(2)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    f, (gl, gd) = plt.subplots(1, 2, figsize=(18, 8))
+    with rt.HDFArchive(filestr, 'r') as results:
+        u = 'U'+str(U)
+        lastit = results[u].keys()[-1]
+        g_iw = getGiw(results[u][lastit])
+        greal = GfReFreq(indices=[0,1], window=(-3.5, 3.5), n_points=500)
+        greal.set_from_pade(g_iw, pade_fit_pts, 0.)
+        gl.oplot(greal[0,0], RI='S', label='out')
+        gl.set_title('On site GF')
+        
+
+        rgiw = rot*g_iw*rot
+        greal.set_from_pade(rgiw, pade_fit_pts, 0.)
+        gd.oplot(greal[0,0], RI='S', label='bond')
+        gd.oplot(greal[1,1], RI='S', label='anti-bond')
+        gd.set_title('Diagonal GF')
+        
+        
+        gl.oplot(0.5*(greal[0,0] + greal[1,1]), '--', RI='S', label='d avg')
+
+
+
+def save_out(rgt):
+    gtu = np.squeeze(rgt['up'].data)
+    gtd = np.squeeze(rgt['down'].data)
+    outputs.append((gtu.copy(),gtd.copy()))
+
+    wgt.data[:,0,0] = 0.5*(gtu+gtd)
+    giw<<Fourier(wgt)
+    giw.fit_tail(fixed,3, 300, 1025)
+    giw.data[:,0,0]=1j*giw.data[:,0,0].imag
+    inputs.append(np.squeeze(giw.data.copy()))
+
+    g=np.squeeze(giw.data[:,0,0])
+    den=np.abs(1j*wn +1.6-.25*g)**2
+    g0iw=(1.6-.25*g.real)/den-1j*(wn-.25*g.imag)/den
+
+    giw.data[:,0,0]=g0iw
+    giw.fit_tail(fixedg0, 6, 300, 1025)
+    g0ins.append(np.squeeze(giw.data.copy()))
