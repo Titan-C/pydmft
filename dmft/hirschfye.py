@@ -79,7 +79,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
 
     acc, anrat = 0, 0
 
-    for mcs in range(parms['sweeps'] + parms['therm']):
+    for mcs in xrange(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
             if parms['global_flip']:
                 v *= -1

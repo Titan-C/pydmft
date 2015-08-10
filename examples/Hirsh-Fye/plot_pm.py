@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import dmft.hirschfye as hf
 import numpy as np
 import dmft.common as gf
+import cPickle
 
 
 def dmft_loop_pm(simulation={}, **kwarg):
@@ -22,14 +23,14 @@ def dmft_loop_pm(simulation={}, **kwarg):
              'n_tau_mc':    64,
              'BETA':        32,
              'N_TAU':    2**11,
-             'N_MATSUBARA': 500,
+             'N_MATSUBARA': 512,
              'U':           2.2,
              't':           .5,
              'MU':          0,
              'SITES':       1,
-             'loops':       2,
-             'sweeps':      50000,
-             'therm':       5000,
+             'loops':       10,
+             'sweeps':      300000,
+             'therm':       10000,
              'N_meas':      3,
              'save_logs':   False,
              'updater':     'discrete'
@@ -43,12 +44,12 @@ def dmft_loop_pm(simulation={}, **kwarg):
 
     last_loop = len(simulation) - 1
     if last_loop:
-        Giw = simulation['it{:0>2}'.format(last_loop-1)]['Giw']
+        Giw = simulation['it{:0>2}'.format(last_loop-1)]['Giw'].copy()
 
     for iter_count in range(setup['loops']):
         #patch tail on
         Giw.real = 0.
-        Giw[setup['n_tau_mc']:] = -1j/w_n[setup['n_tau_mc']:]
+        Giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
 
         G0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * Giw)
         G0t = gf.gw_invfouriertrans(G0iw, tau, w_n)
@@ -65,17 +66,31 @@ def dmft_loop_pm(simulation={}, **kwarg):
                             }
     return simulation
 
+
 def plot_it(ax, it):
     tau = np.linspace(0, sim['setup']['BETA'], len(sim[it]['gtau']))
     w_n = gf.matsubara_freq(sim['setup']['BETA'], len(sim[it]['Giw']))
-    ax[0].plot(w_n, sim[it]['Giw'].real,label=it)
     ax[0].plot(w_n, sim[it]['Giw'].imag,label=it)
     ax[1].plot(tau, sim[it]['gtau'])
 
 if __name__ == "__main__":
 
-    sim=dmft_loop_pm({}, n_tau_mc=64, loops=3)
-    f, ax = plt.subplots(1, 2)
-    for it in sorted(sim):
-        if 'it' in it:
-            plot_it(ax, it)
+    sim=dmft_loop_pm({}, n_tau_mc=64)
+    sim=dmft_loop_pm(sim, n_tau_mc=128)
+    sim=dmft_loop_pm(sim, n_tau_mc=256, loops=3)
+    with open('HF_st_u2.2', 'wb') as f:
+        cPickle.dump(sim,f)
+
+    sim2=dmft_loop_pm({'it00':{'Giw': sim['it22']['Giw']}}, U=2.7, n_tau_mc=64,
+                      Heat_bath=False)
+    sim2=dmft_loop_pm(sim2, n_tau_mc=128)
+    sim2=dmft_loop_pm(sim2, n_tau_mc=256, loops=3)
+    with open('HF_st_u2.7', 'wb') as f:
+        cPickle.dump(sim2,f)
+
+    sim3=dmft_loop_pm({'it00':{'Giw': sim2['it22']['Giw']}}, U=3.2, n_tau_mc=64,
+                      Heat_bath=False)
+    sim3=dmft_loop_pm(sim3, n_tau_mc=128)
+    sim3=dmft_loop_pm(sim3, n_tau_mc=256, loops=3)
+    with open('HF_st_u3.2', 'wb') as f:
+        cPickle.dump(sim3,f)
