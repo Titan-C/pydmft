@@ -11,11 +11,9 @@ import numpy as np
 import pytriqs.utility.mpi as mpi
 
 # Set up a few parameters
-U = 3.2
 half_bandwidth = 1.0
-chemical_potential = U/2.0
-beta = 100.
-n_loops = 5
+beta = 32
+n_loops = 10
 
 # Construct the CTQMC solver
 from pytriqs.applications.impurity_solvers.cthyb import Solver
@@ -31,39 +29,38 @@ params = {'n_cycles': int(3e7),
 
 # Initalize the Green's function to a semi-circular density of states
 
-g_iw = GfImFreq(indices = [0], beta = beta, n_points=1025)
-#g_iw << SemiCircular(half_bandwidth)
-g_iw.data[:,0,0] = np.load('Giw_out.npy')[-1] #np.load('fgiws500.npy')
-fixed=TailGf(1,1,5,-1)
-fixed[1]=np.array([[1]])
-fixed[3]=np.array([[3.2**2/4]])
-g_iw.fit_tail(fixed,5, 98, len(g_iw.mesh))
-
-
+g_iw = S.G_iw['up'].copy()
+g_iw << SemiCircular(half_bandwidth)
+fixed = TailGf(1, 1, 5, -1)
+fixed[1] = np.array([[1]])
 fixedg0=TailGf(1,1,4,-1)
 fixedg0[1]=np.array([[1]])
-fixedg0[2]=np.array([[-chemical_potential]])
 
-print 'got here'
-# Now do the DMFT loop
-for it in range(n_loops):
+def dmft_loop_pm(U):
+    chemical_potential = U/2.0
 
-    # Compute S.G0_iw with the self-consistency condition while imposing paramagnetism
-#    g_iw.set_from_legendre( 0.5 * ( S.G_l['up'] + S.G_l['down'] ))
-    g_iw << 0.5*(S.G_iw['up']+S.G_iw['down']))
-    g_iw.fit_tail(fixed, 5, 98, len(g_iw.mesh))
-    g_iw.data[:]=1j*g_iw.data.imag
+    fixed[3] = np.array([[U**2/4]])
+    fixedg0[2]=np.array([[-chemical_potential]])
 
-    for name, g0 in S.G0_iw:
-        g0 << inverse( iOmega_n + chemical_potential - (half_bandwidth/2.0)**2  * g_iw )
-#        g0.fit_tail(fixedg0, 6, 100, 1025)
-    # Run the solver
-    S.solve(h_int=U * n('up',0) * n('down',0), **params)
+    print 'got here'
+    # Now do the DMFT loop
+    for it in range(n_loops):
 
-    # Some intermediate saves
-    if mpi.is_master_node():
-        with HDFArchive("deep_in_ins3.h5") as R:
-          R["G_tau-%s"%it] = S.G_tau
-          R["G_iw-%s"%it] = S.G_iw
-          R["G0_iw-%s"%it] = S.G0_iw
-          R["G_l-%s"%it] = S.G_l
+        # Compute S.G0_iw with the self-consistency condition while imposing paramagnetism
+        g_iw << 0.5*(S.G_iw['up']+S.G_iw['down']))
+        g_iw.fit_tail(fixed, 5, int(beta), len(g_iw.mesh))
+        g_iw.data[:]=1j*g_iw.data.imag
+
+        for name, g0 in S.G0_iw:
+            g0 << inverse( iOmega_n + chemical_potential - (half_bandwidth/2.0)**2  * g_iw )
+        # Run the solver
+        S.solve(h_int=U * n('up',0) * n('down',0), **params)
+
+        # Some intermediate saves
+        if mpi.is_master_node():
+            with HDFArchive("CH_sb_b32.h5") as R:
+                R["U{}/G_tau-{}".format(U, it)] = S.G_tau
+                R["U{}/G_iw-{}".format(U, it)] = S.G_iw
+
+for u in [2.2, 2.7, 3.2]:
+    dmft_loop_pm(u)
