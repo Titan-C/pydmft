@@ -4,24 +4,34 @@ import dmft.common as gf
 import numpy as np
 import os,sys,subprocess
 import shutil
+import argparse
 
 """
 This module runs ctqmc impurity solver for one-band model.
 The executable shoule exist in directory params['exe']
 """
 
+parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band')
+parser.add_argument('-beta', metavar='B', type=float,
+                    default=64., help='The inverse temperature')
+parser.add_argument('-Niter', metavar='N', type=int,
+                    default=10, help='Number of iterations')
+parser.add_argument('-U', metavar='U', nargs='+', type=float,
+                    default=[2.7], help='Local interaction strenght')
 
-Niter = 2 # Number of DMFT iterations
-Uc=2.4
-beta=100.
+args = parser.parse_args()
+
+Niter = args.Niter
+Uc = args.U
+beta = args.beta
 M=10e6
 
 
 params = {"exe"          : ['ctqmc'          , "# Path to executable"],
           "Delta"        : ["Delta.inp"         , "# Input bath function hybridization"],
           "cix"          : ["one_band.imp"      , "# Input file with atomic state"],
-          "U"            : [Uc                  , "# Coulomb repulsion (F0)"],
-          "mu"           : [Uc/2.               , "# Chemical potential"],
+#          "U"            : [Uc                  , "# Coulomb repulsion (F0)"],
+#          "mu"           : [Uc/2.               , "# Chemical potential"],
           "beta"         : [beta                , "# Inverse temperature"],
           "M"            : [M                   , "# Number of Monte Carlo steps"],
           "nom"          : [beta                , "# number of Matsubara frequency points to sample"],
@@ -117,31 +127,42 @@ def DMFT_SCC(fDelta):
     np.savetxt(fDelta, delta)
 
 
-# Creating parameters file PARAMS for qmc execution
-CreateInputFile(params)
 
-mpifile = 'mpi_prefix.dat'
-if os.path.isfile(mpifile):
-    mpi_prefix = open(mpifile, 'r').next().strip()
-    print "DmftEnvironment: mpi_prefix.dat exists -- running in parallel mode."
-else:
-    print "DmftEnvironment: mpi_prefix.dat does not exists -- running in serial mode."
-    mpi_prefix = ''
+def dmft_loop_pm(Uc):
+    # Creating parameters file PARAMS for qmc execution
+    uparams = {"U"            : [Uc                  , "# Coulomb repulsion (F0)"],
+              "mu"           : [Uc/2.               , "# Chemical potential"]}
+    params.update(uparams)
+    CreateInputFile(params)
 
-fh_info = open('info.dat', 'w')
+    mpi_prefix = 'mpirun -np 12'
 
-for it in range(Niter):
-    # Constructing bath Delta.inp from Green's function
-    DMFT_SCC(params['Delta'][0])
+    fh_info = open('info.dat', 'w')
 
-    # Running ctqmc
-    print 'Running ---- qmc itt.: ', it, '-----'
-    #print os.popen(params['exe'][0]).read()
+    for it in range(Niter):
+        # Constructing bath Delta.inp from Green's function
+        DMFT_SCC(params['Delta'][0])
 
-    cmd = mpi_prefix+' '+params['exe'][0]+'  PARAMS > nohup_imp.out 2>&1 '
-    subprocess.call(cmd,shell=True,stdout=fh_info,stderr=fh_info)
-    fh_info.flush()
+        # Running ctqmc
+        print 'Running ---- qmc itt.: ', it, '-----'
+        #print os.popen(params['exe'][0]).read()
 
-    # Some copying to store data obtained so far (at each iteration)
-    shutil.copy('Gf.out', 'Gf.out.'+str(it))
-    shutil.copy('Sig.out', 'Sig.out.'+str(it))
+        cmd = mpi_prefix+' '+params['exe'][0]+'  PARAMS > nohup_imp.out 2>&1 '
+        subprocess.call(cmd,shell=True,stdout=fh_info,stderr=fh_info)
+        fh_info.flush()
+
+        # Some copying to store data obtained so far (at each iteration)
+        shutil.copy('Gf.out', 'Gf.out.'+str(it))
+        shutil.copy('Sig.out', 'Sig.out.'+str(it))
+
+cwd = os.getcwd()
+for Uc in args.U:
+
+    udir = 'B{}_U{}'.format(args.beta, Uc)
+    os.makedirs(udir)
+    os.chdir(udir)
+    if os.path.exists('Gf.out'):
+        shutil.copy('Gf.out', udir)
+    dmft_loop_pm(Uc)
+    shutil.copy('Gf.out', '../Gf.out')
+    os.chdir(cwd)
