@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
-plt.matplotlib.rcParams.update({'font.size': 22})
+plt.matplotlib.rcParams.update({'figure.figsize':(8, 8), 'axes.labelsize':22})
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     """Plot all Hirsch - Fye iterations of a given file at
