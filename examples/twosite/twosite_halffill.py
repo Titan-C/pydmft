@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 19 15:12:44 2014
+Some extra scripts for movie generation
+=======================================
 
-@author: oscar
 """
 
 from __future__ import division, absolute_import, print_function

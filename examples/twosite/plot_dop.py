@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 19 15:12:44 2014
+Parameter space result for the doped case
+=========================================
 
-@author: oscar
+In this case one solves the two site problem for all doping cases
+at various local interaction values. The most prevalent differnce
+is the behavior of the hybridization to the bath site.
 """
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt

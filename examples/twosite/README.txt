@@ -1,4 +1,5 @@
-  .. _twosite_examples:
+
+.. _twosite_examples:
 
 Two Site DMFT examples
 ======================
