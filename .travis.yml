@@ -31,8 +31,8 @@ before_install:
     - ./miniconda.sh -b
     - export PATH=$HOME/miniconda/bin:$HOME/lib/lib:$PATH
     - conda update --yes conda
-    - wget https://s3-us-west-2.amazonaws.com/buildbin/triqs_$CXX.tar.bz2
-    - tar -C / -jvxf triqs_$CXX.tar.bz2
+    - wget https://s3-us-west-2.amazonaws.com/buildbin/triqs_$CC.tar.bz2
+    - tar -C / -jvxf triqs_$CC.tar.bz2
     - export LD_LIBRARY_PATH=$HOME/lib/lib:$LD_LIBRARY_PATH
     - export PYTHONPATH=$HOME/lib/lib/python2.7/site-packages:$PYTHONPATH
     - export OPENBLAS_NUM_THREADS=1
