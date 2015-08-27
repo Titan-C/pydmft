@@ -5,6 +5,7 @@ addons:
   apt:
     sources:
     - ubuntu-toolchain-r-test
+    - boost-latest
     packages:
     - gcc-4.9
     - g++-4.9
@@ -13,22 +14,35 @@ addons:
     - libgsl0-dev
     - libopenmpi-dev
     - openmpi-bin
+    - cmake
+    - libgfortran3
+    - gfortran
+    - libfftw3-dev
+    - libgmp-dev
+    - libhdf5-serial-dev
+    - libboost1.55-all-dev
 env:
     - PYTHON_VERSION="2.7"
     - PYTHON_VERSION="3.4"
 
 before_install:
+    - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
-    - export PATH=/home/travis/miniconda/bin:$PATH
+    - export PATH=$HOME/miniconda/bin:$HOME/lib/lib:$PATH
     - conda update --yes conda
+    - wget https://s3-us-west-2.amazonaws.com/buildbin/triqs.tar.bz2
+    - tar -C / -jvxf triqs.tar.bz2
+    - export LD_LIBRARY_PATH=$HOME/libs/lib:$LD_LIBRARY_PATH
+    - export PYTHONPATH=$HOME/libs/lib:$PYTHONPATH
+    - export OPENBLAS_NUM_THREADS=1
 
 install:
     - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
-      matplotlib pytest coverage sphinx setuptools cython
+      matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
     - source activate testenv
-    - pip install slaveparticles sphinx-gallery
+    - pip install slaveparticles sphinx-gallery mako mpi4py
     - python setup.py install
 
 script:
