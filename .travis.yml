@@ -34,8 +34,8 @@ before_install:
     - conda update --yes conda
     - wget https://s3-us-west-2.amazonaws.com/buildbin/triqs.tar.bz2
     - tar -C / -jvxf triqs.tar.bz2
-    - export LD_LIBRARY_PATH=$HOME/libs/lib:$LD_LIBRARY_PATH
-    - export PYTHONPATH=$HOME/libs/lib:$PYTHONPATH
+    - export LD_LIBRARY_PATH=$HOME/lib/lib:$LD_LIBRARY_PATH
+    - export PYTHONPATH=$HOME/lib/lib/python2.7/site-packages:$PYTHONPATH
     - export OPENBLAS_NUM_THREADS=1
 
 install:
