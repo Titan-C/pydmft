@@ -41,6 +41,7 @@ before_install:
 install:
     - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
       matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
+      joblib
     - source activate testenv
     - pip install slaveparticles sphinx-gallery mako mpi4py
     - python setup.py install
