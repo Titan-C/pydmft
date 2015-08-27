@@ -8,7 +8,7 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    - libatlas-dev
+    - libopenblas-dev
     - libgsl0-dev
     - libopenmpi-dev
     - openmpi-bin
