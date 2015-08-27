@@ -25,7 +25,7 @@ env:
     - PYTHON_VERSION="2.7"
 
 before_install:
-    - if [ "$CXX" == "g++" ]; then export CXX="g++-4.9" CC="gcc-4.9"; fi
+    - export CXX="g++-4.9" CC="gcc-4.9"
     - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
