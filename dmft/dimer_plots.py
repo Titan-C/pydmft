@@ -111,10 +111,11 @@ def getGiw(saveblock):
     rt.load_gf(g_iw, gd, saveblock['G_iwo'])
     return g_iw
 
-def plot_tails(giw):
-    w_n = gf.matsubara_freq(giw.beta, len(giw.mesh))
+def plot_tails(beta, U, tp):
+    w_n = gf.matsubara_freq(beta, beta)
     plt.plot(w_n, -1/w_n, '--')
-    plt.plot(w_n, -0.23/w_n**2, '--')
+    plt.plot(w_n, -tp/w_n**2, '--')
+    plt.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
 def plotGiw(saveblock):
     giw=getGiw(saveblock)
@@ -149,8 +150,11 @@ def plot_gf(tp, beta, runsolver):
                 giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
             gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
             go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
+            w_n = gf.matsubara_freq(beta, beta)
+            gd.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
 
     gd.set_xlim([0, 4])
+    gd.set_ylim([-1.4,0])
     gd.legend(loc=0, prop={'size': 18})
     gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
     go.set_xlim([0, 4])
@@ -222,3 +226,15 @@ def save_out(rgt):
     giw.data[:,0,0]=g0iw
     giw.fit_tail(fixedg0, 6, 300, 1025)
     g0ins.append(np.squeeze(giw.data.copy()))
+
+U, tp, beta = 2.8, 0.18, 60.
+filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+with dp.rt.HDFArchive(filestr, 'r') as results:
+    u='U'+str(U)
+    lastit = results[u].keys()[-1]
+    oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+    w_n = dp.gf.matsubara_freq(beta, beta)
+    plt.plot(w_n, -1/w_n, '--')
+    plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
+plt.xlim([0,6])
+plt.ylim([-.6, 0])
