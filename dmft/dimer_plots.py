@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
-plt.matplotlib.rcParams.update({'figure.figsize':(8, 8), 'axes.labelsize':22})
+plt.matplotlib.rcParams.update({'figure.figsize':(8, 8), 'axes.labelsize': 22,
+                                'axes.titlesize': 22})
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     """Plot all Hirsch - Fye iterations of a given file at
@@ -59,9 +60,9 @@ def plot_gf_loopU(beta, tab, U, filestr, nf):
         for freq, (hd, ho) in enumerate(zip(diag_f, offdiag_f)):
             ax[0].plot(hd, 'o-.', label='n='+str(freq+1))
             ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
-        ax[1].legend(loc=3, prop={'size':18})
-        plt.suptitle('First frequencies of the Matsubara GF, at iteration\
-        @ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
+        ax[1].legend(loc=9, ncol=nf)
+        ax[0].set_title('First frequencies of the Matsubara GF, at iteration\n'
+        '@ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
         plt.show()
         plt.close()
 
@@ -205,15 +206,15 @@ def spectral(tp, U, beta, pade_fit_pts):
         greal.set_from_pade(g_iw, pade_fit_pts, 0.)
         gl.oplot(greal[0,0], RI='S', label='out')
         gl.set_title('On site GF')
-        
+
 
         rgiw = rot*g_iw*rot
         greal.set_from_pade(rgiw, pade_fit_pts, 0.)
         gd.oplot(greal[0,0], RI='S', label='bond')
         gd.oplot(greal[1,1], RI='S', label='anti-bond')
         gd.set_title('Diagonal GF')
-        
-        
+
+
         gl.oplot(0.5*(greal[0,0] + greal[1,1]), '--', RI='S', label='d avg')
 
 
