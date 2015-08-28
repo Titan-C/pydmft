@@ -136,34 +136,19 @@ def phase_diag(beta):
                 fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
     return np.asarray(fl_dos)
 
-def plot_gf(tp, beta):
+def plot_gf(tp, beta, runsolver):
 
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with rt.HDFArchive(filestr, 'r') as results:
         for u in results.keys():
-            lastit = results[u].keys()[-1]
+            if runsolver == 'HF':
+               lastit = results[u].keys()[-1]
+            if runsolver == 'cthyb':
+                lastit = 'cthyb'
+                giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
             gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
             go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
-
-    gd.set_xlim([0, 4])
-    gd.legend(loc=0, prop={'size': 18})
-    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
-    go.set_xlim([0, 4])
-    go.legend(loc=0, prop={'size': 18})
-    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
-
-def plot_gf_ct(tp, beta):
-
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.HDFArchive(filestr, 'r') as results:
-        for u in results.keys():
-            lastit = 'cthyb'
-            giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
-            gd.oplot(giw[0,0], 'x-', RI='I', label=u)
-            go.oplot(giw[0,1], '+-', RI='R', label=u)
 
     gd.set_xlim([0, 4])
     gd.legend(loc=0, prop={'size': 18})
@@ -188,10 +173,10 @@ def diag_sys(tp, beta):
 
     gd.set_xlim([0, 4])
     gd.legend(loc=0, prop={'size': 18})
-    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
+    gd.set_ylabel(r'$\Im m G_{1}(i\omega_n)$')
     go.set_xlim([0, 4])
     go.legend(loc=0, prop={'size': 18})
-    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
+    go.set_ylabel(r'$\Re e G_{2}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
 
 def spectral(tp, U, beta, pade_fit_pts):
