@@ -227,14 +227,15 @@ def save_out(rgt):
     giw.fit_tail(fixedg0, 6, 300, 1025)
     g0ins.append(np.squeeze(giw.data.copy()))
 
-U, tp, beta = 2.8, 0.18, 60.
-filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-with dp.rt.HDFArchive(filestr, 'r') as results:
-    u='U'+str(U)
-    lastit = results[u].keys()[-1]
-    oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
-    w_n = dp.gf.matsubara_freq(beta, beta)
-    plt.plot(w_n, -1/w_n, '--')
-    plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
-plt.xlim([0,6])
-plt.ylim([-.6, 0])
+def plotginta():
+    U, tp, beta = 2.8, 0.18, 60.
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    with rt.HDFArchive(filestr, 'r') as results:
+        u='U'+str(U)
+        lastit = results[u].keys()[-1]
+        oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+        w_n = gf.matsubara_freq(beta, beta)
+        plt.plot(w_n, -1/w_n, '--')
+        plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
+    plt.xlim([0,6])
+    plt.ylim([-.6, 0])

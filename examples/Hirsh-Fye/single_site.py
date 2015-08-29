@@ -77,20 +77,23 @@ if __name__ == "__main__":
 
     sim=dmft_loop_pm({}, n_tau_mc=64)
     sim=dmft_loop_pm(sim, n_tau_mc=128)
-    sim=dmft_loop_pm(sim, n_tau_mc=256, loops=3)
-    with open('HF_st_u2.2', 'wb') as f:
+    sim=dmft_loop_pm(sim, n_tau_mc=256)
+    sim=dmft_loop_pm(sim, n_tau_mc=512, loops=3)
+    with open('HF_stb64__u2.2', 'wb') as f:
         cPickle.dump(sim,f)
 
     sim2=dmft_loop_pm({'it00':{'Giw': sim['it22']['Giw']}}, U=2.7, n_tau_mc=64,
                       Heat_bath=False)
     sim2=dmft_loop_pm(sim2, n_tau_mc=128)
-    sim2=dmft_loop_pm(sim2, n_tau_mc=256, loops=3)
-    with open('HF_st_u2.7', 'wb') as f:
+    sim2=dmft_loop_pm(sim2, n_tau_mc=256)
+    sim2=dmft_loop_pm(sim2, n_tau_mc=512, loops=3)
+    with open('HF_stb64_u2.7', 'wb') as f:
         cPickle.dump(sim2,f)
 
     sim3=dmft_loop_pm({'it00':{'Giw': sim2['it22']['Giw']}}, U=3.2, n_tau_mc=64,
                       Heat_bath=False)
     sim3=dmft_loop_pm(sim3, n_tau_mc=128)
-    sim3=dmft_loop_pm(sim3, n_tau_mc=256, loops=3)
-    with open('HF_st_u3.2', 'wb') as f:
+    sim3=dmft_loop_pm(sim3, n_tau_mc=256)
+    sim3=dmft_loop_pm(sim3, n_tau_mc=512, loops=3)
+    with open('HF_stb64__u3.2', 'wb') as f:
         cPickle.dump(sim3,f)

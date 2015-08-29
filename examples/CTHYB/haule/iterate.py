@@ -160,9 +160,11 @@ for Uc in args.U:
 
     udir = 'B{}_U{}'.format(args.beta, Uc)
     os.makedirs(udir)
-    os.chdir(udir)
     if os.path.exists('Gf.out'):
         shutil.copy('Gf.out', udir)
+        shutil.copy(params['cix'][0], udir)
+    os.chdir(udir)
     dmft_loop_pm(Uc)
     shutil.copy('Gf.out', '../Gf.out')
+    shutil.copy(params['cix'][0], '../')
     os.chdir(cwd)
