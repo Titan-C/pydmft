@@ -158,13 +158,14 @@ def dmft_loop_pm(Uc):
 cwd = os.getcwd()
 for Uc in args.U:
 
-    udir = 'B{}_U{}'.format(args.beta, Uc)
+    udir = 'B{}_U{}'.format(beta, Uc)
     os.makedirs(udir)
-    if os.path.exists('Gf.out'):
-        shutil.copy('Gf.out', udir)
+    seedGF = 'Gf.out.B'+str(beta)
+    if os.path.exists(seedGF):
+        shutil.copy(seedGF, udir+'Gf.out')
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
     dmft_loop_pm(Uc)
-    shutil.copy('Gf.out', '../Gf.out')
+    shutil.copy('Gf.out', seedGF)
     shutil.copy(params['cix'][0], '../')
     os.chdir(cwd)
