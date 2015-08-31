@@ -43,14 +43,15 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
 
     return diag_f, offdiag_f
 
-def plot_gf_loopU(beta, tab, U, filestr, nf):
+def plot_gf_loopU(beta, tab, U, filestr, nf,
+                  in_box=[0.16, 0.17, 0.20, 0.25]):
     """Loop over all interaction strengths for a given file
     to plot all its iterations"""
     with rt.HDFArchive(filestr.format(tab, beta), 'r') as R:
 
         f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
         f.subplots_adjust(hspace=0.2)
-        gfin = f.add_axes([0.16, 0.17, 0.20, 0.25])
+        gfin = f.add_axes(in_box)
         gflen = 3*nf
         w_n = gf.matsubara_freq(beta, gflen)
         ru = 'U'+str(U)
@@ -63,8 +64,7 @@ def plot_gf_loopU(beta, tab, U, filestr, nf):
         ax[1].legend(loc=9, ncol=nf)
         ax[0].set_title('First frequencies of the Matsubara GF, at iteration\n'
         '@ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
-        plt.show()
-        plt.close()
+
 
 def plot_acc(filelist):
     """Plot the evolution of the acceptance rate in each DMFT loop
