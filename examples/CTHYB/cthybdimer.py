@@ -20,7 +20,6 @@ params = {
     'length_cycle': 80,
     'n_warmup_cycles' : int(5e4),
     'move_double': True,
-    'measure_g_l': True,
 #    'measure_pert_order': True,
     'random_seed': int(time()/2**14+time()/2**16*mpi.rank)
 }
@@ -70,11 +69,9 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
     S.solve(h_int=U * n('up',0) * n('down',0) + U * n('up',1) * n('down',1), **params)
 
     if mpi.is_master_node():
-        with rt.HDFArchive(file_str.format(**setup)) as last_run:
-            last_run[u]['cthyb/G_iw'] = S.G_iw
-            last_run[u]['cthyb/G_tau'] = S.G_tau
-            last_run[u]['cthyb/G_l'] = S.G_l
-
+        with rt.HDFArchive(file_str.format(**setup)+'ct') as last_run:
+            last_run[u]['it00/G_iw'] = S.G_iw
+            last_run[u]['it00/G_tau'] = S.G_tau
 
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
@@ -86,5 +83,5 @@ parser.add_argument('tp', default=0.18, help='The dimerization strength')
 args = parser.parse_args()
 ur = np.arange(2, 3, 0.1)
 for u_int in ur:
-    cthyb_last_run(u_int, args.tp, args.beta, 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
-
+    cthyb_last_run(u_int, args.tp, args.beta,
+                   '/home/oscar/dev/dmft-learn/examples/Hirsh-Fye/disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
