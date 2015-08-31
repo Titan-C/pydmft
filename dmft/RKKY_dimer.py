@@ -283,7 +283,10 @@ def quasiparticle(file_str):
 
 def fit_dos(w_n, g):
     """Performs a quadratic fit of the -first- matsubara frequencies
-    to estimate the value at zero energy"""
+    to estimate the value at zero energy.
+
+    It is relevant to note w_n contains the array with the matsubara
+    frequencies to be considered"""
     n = len(w_n)
     gfit = g.data[:n, 0, 0].imag
     pf = np.polyfit(w_n, gfit, 2)

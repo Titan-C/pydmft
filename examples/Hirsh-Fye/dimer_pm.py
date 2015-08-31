@@ -8,14 +8,12 @@ To treat the Anderson impurity model and solve it using the Hirsch - Fye
 Quantum Monte Carlo algorithm for a paramagnetic impurity
 """
 
-from __future__ import division, absolute_import, print_function
-
+from pytriqs.gf.local import GfImFreq, iOmega_n
+import dmft.RKKY_dimer as rt
+import dmft.common as gf
 import dmft.hirschfye as hf
 import numpy as np
-import dmft.common as gf
-import dmft.RKKY_dimer as rt
 import sys
-from pytriqs.gf.local import GfImFreq, iOmega_n
 
 def dmft_loop_pm(u_int, tab, t, tn, beta, file_str, **params):
     """Implementation of the solver"""
@@ -89,11 +87,6 @@ def dimer_loop(S, gmix, tau, filename, step):
         S.setup.update({'U': S.U, 'loops': loop_count})
         rt.store_sim(S, filename, step+'it{:02}/'.format(loop_count))
 
-
-#        ct = '-' if loops<8 else '+--'
-#        oplot(S.g_iw['A', 'A'], ct, RI='I', label='d'+str(loops), num=6)
-#        oplot(S.g_iw['A', 'B'], ct, RI='R', label='o'+str(loops), num=7)
-
         if loop_count >= S.setup['max_loops']:
             converged = True
 
@@ -101,6 +94,3 @@ def dimer_loop(S, gmix, tau, filename, step):
 if __name__ == "__main__":
     dmft_loop_pm([2.5], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
                  dtau_mc=0.5, sweeps=20000, max_loops=1)
-
-    from dimer_plots import plot_gf_loopU, plot_gf_iter
-    plot_gf_loopU(40., 0.23, 2.5, 'disk/metf_HF_Ul_tp{}_B{}.h5', 5)

@@ -4,15 +4,15 @@ Created on Thu Jul 23 13:03:46 2015
 
 @author: oscar
 """
+from joblib import Parallel, delayed
+from dimer_pm import dmft_loop_pm
 import argparse
 import numpy as np
-from joblib import Parallel, delayed
-from plot_dimer_pm import dmft_loop_pm
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
-                                              lattice solved by IPT')
+                                              lattice solved by HFQMC')
 parser.add_argument('dt', metavar='dt', type=float,
-                    default=.5, help='The inverse temperature')
+                    default=.5, help='Time slicing')
 
 parser.add_argument('beta', metavar='B', type=float,
                     default=16., help='The inverse temperature')
