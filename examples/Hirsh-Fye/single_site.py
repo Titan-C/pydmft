@@ -10,18 +10,18 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 
 from __future__ import division, absolute_import, print_function
 
-import matplotlib.pyplot as plt
-import dmft.hirschfye as hf
-import numpy as np
 import dmft.common as gf
-import cPickle
+import dmft.hirschfye as hf
+import matplotlib.pyplot as plt
+import numpy as np
+import shelve
 
 
 def dmft_loop_pm(simulation={}, **kwarg):
     """Implementation of the solver"""
     setup = {
              'n_tau_mc':    64,
-             'BETA':        32,
+             'BETA':        64,
              'N_TAU':    2**11,
              'N_MATSUBARA': 512,
              'U':           2.2,
@@ -29,7 +29,7 @@ def dmft_loop_pm(simulation={}, **kwarg):
              'MU':          0,
              'SITES':       1,
              'loops':       10,
-             'sweeps':      300000,
+             'sweeps':      100000,
              'therm':       10000,
              'N_meas':      3,
              'save_logs':   False,
@@ -42,12 +42,17 @@ def dmft_loop_pm(simulation={}, **kwarg):
 
     simulation.update({'setup': setup})
 
-    last_loop = len(simulation) - 1
-    if last_loop:
-        Giw = simulation['it{:0>2}'.format(last_loop-1)]['Giw'].copy()
+    current_u = 'U'+str(setup['U'])
+    try:
+        last_loop = len(simulation[current_u])
+        Giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['Giw'].copy()
+    except Exception:
+        last_loop = 0
+        simulation.update({current_u:{}})
 
     for iter_count in range(setup['loops']):
         #patch tail on
+        print('On loop', iter_count, 'beta', setup['BETA'])
         Giw.real = 0.
         Giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
 
@@ -59,35 +64,30 @@ def dmft_loop_pm(simulation={}, **kwarg):
 
         Gt = hf.interpol(gt, setup['N_TAU'])
         Giw = gf.gt_fouriertrans(Gt, tau, w_n)
-        simulation['it{:0>2}'.format(last_loop + iter_count)] = {
+        simulation[current_u]['it{:0>2}'.format(last_loop + iter_count)] = {
                             'G0iw': G0iw.copy(),
+                            'setup': setup.copy(),
                             'Giw':  Giw.copy(),
                             'gtau': gt.copy(),
                             }
-    return simulation
-
-
-def plot_it(ax, it):
-    tau = np.linspace(0, sim['setup']['BETA'], len(sim[it]['gtau']))
-    w_n = gf.matsubara_freq(sim['setup']['BETA'], len(sim[it]['Giw']))
-    ax[0].plot(w_n, sim[it]['Giw'].imag,label=it)
-    ax[1].plot(tau, sim[it]['gtau'])
+        simulation.sync()
 
 if __name__ == "__main__":
 
-    sim = shelve.open('HF_stb64_u2.2')
-    sim=dmft_loop_pm(sim, n_tau_mc=128)
-    sim=dmft_loop_pm(sim, n_tau_mc=256)
 
-    sim2 = shelve.open('HF_stb64_u2.7')
-    sim2['it00'] = {'Giw': sim['it19']['Giw']}
-    sim2=dmft_loop_pm(sim2, U=2.7, n_tau_mc=128,
-                      Heat_bath=False)
-    sim2=dmft_loop_pm(sim2, n_tau_mc=256)
+    sim = shelve.open('HF_stb64_met', writeback=True)
+    dmft_loop_pm(sim, n_tau_mc=128)
+    dmft_loop_pm(sim, n_tau_mc=256)
+
+    sim.update({'U2.7': {'it00': {'Giw': sim['U2.2']['it19']['Giw']}}})
+    dmft_loop_pm(sim, U=2.7, n_tau_mc=128,
+                  Heat_bath=False)
+    dmft_loop_pm(sim, n_tau_mc=256)
 
 
-    sim3 = shelve.open('HF_stb64_u3.2')
-    sim3['it00'] = {'Giw': sim2['it19']['Giw']}
-    sim3=dmft_loop_pm(sim3, U=3.2, n_tau_mc=128,
-                      Heat_bath=False)
-    sim3=dmft_loop_pm(sim3, n_tau_mc=256)
+    sim.update({'U3.2': {'it00': {'Giw': sim['U2.7']['it19']['Giw']}}})
+    dmft_loop_pm(sim, U=3.2, n_tau_mc=128,
+                 Heat_bath=False)
+    dmft_loop_pm(sim, n_tau_mc=256)
+
+    shelve.close()
