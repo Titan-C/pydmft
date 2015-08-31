@@ -128,8 +128,8 @@ def plotGiw(saveblock):
 def phase_diag(beta):
 
     fl_dos = []
+    w_n = gf.matsubara_freq(beta, 3)
     for tp in np.arange(0.18, 0.3, 0.01):
-        w_n = gf.matsubara_freq(beta, 5)
         filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
         with rt.HDFArchive(filestr, 'r') as results:
             for u in results.keys():
@@ -137,20 +137,52 @@ def phase_diag(beta):
                 fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
     return np.asarray(fl_dos)
 
+def compare_last_gf(tp, beta, contl=2, ylim=-1):
+    """Compartes in a plot the last GF of the HF simulation with the one CTHYB
+       run done with this seed"""
+
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    w_n = gf.matsubara_freq(beta, 3)
+    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
+    with rt.HDFArchive(filestr, 'r') as results:
+        for u in results.keys():
+            lastit = results[u].keys()[-1]
+            gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+            go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
+            giw =results[u][lastit]['G_iwd']
+
+            fit = rt.fit_dos(w_n, giw[0,0])
+            w = np.arange(0, contl, 0.05)
+            gcont = fit(w)
+            gd.plot(w, gcont, 'k:')
+
+
+    gd.set_xlim([0, 4])
+    gd.set_ylim([ylim,0])
+    gd.legend(loc=0, prop={'size': 18})
+    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
+    go.set_xlim([0, 4])
+    go.legend(loc=0, prop={'size': 18})
+    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+
 def plot_gf(tp, beta, runsolver):
 
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    w_n = gf.matsubara_freq(beta, beta)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with rt.HDFArchive(filestr, 'r') as results:
         for u in results.keys():
             if runsolver == 'HF':
-               lastit = results[u].keys()[-1]
+                lastit = results[u].keys()[-1]
+                gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+                go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
             if runsolver == 'cthyb':
                 lastit = 'cthyb'
                 giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
-            gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
-            go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
-            w_n = gf.matsubara_freq(beta, beta)
+                gd.oplot(giw[0, 0], 'x-', RI='I', label=u)
+                go.oplot(giw[0, 1], '+-', RI='R', label=u)
+
             gd.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
 
     gd.set_xlim([0, 4])
@@ -194,7 +226,8 @@ def spectral(tp, U, beta, pade_fit_pts):
         greal = GfReFreq(indices=[0,1], window=(-3.5, 3.5), n_points=500)
         greal.set_from_pade(g_iw, pade_fit_pts, 0.)
         gl.oplot(greal[0,0], RI='S', label='out')
-        gl.set_title('On site GF')
+        gl.set_title('On site GF, fit pts'+str(pade_fit_pts))
+        gl.set_ylim([0, 0.6])
 
 
         rgiw = rot*g_iw*rot
@@ -206,6 +239,8 @@ def spectral(tp, U, beta, pade_fit_pts):
 
         gl.oplot(0.5*(greal[0,0] + greal[1,1]), '--', RI='S', label='d avg')
 
+    plt.show()
+    plt.close()
 
 
 def save_out(rgt):
