@@ -6,9 +6,9 @@ Created on Thu Jul 23 14:08:23 2015
 """
 
 from __future__ import division, print_function, absolute_import
-from pytriqs.gf.local import GfImFreq, iOmega_n, TailGf, inverse
-from pytriqs.gf.local import GfImTime, InverseFourier, Fourier
-from pytriqs.gf.local import GfReFreq, Omega
+from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
+from pytriqs.gf.local import Fourier
+from pytriqs.gf.local import GfReFreq
 from pytriqs.plot.mpl_interface import oplot
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
@@ -16,8 +16,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
-plt.matplotlib.rcParams.update({'figure.figsize':(8, 8), 'axes.labelsize': 22,
+plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
+
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     """Plot all Hirsch - Fye iterations of a given file at
@@ -63,21 +64,25 @@ def plot_gf_loopU(beta, tab, U, filestr, nf,
             ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
         ax[1].legend(loc=9, ncol=nf)
         ax[0].set_title('First frequencies of the Matsubara GF, at iteration\n'
-        '@ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru, tab, beta))
+                        '@ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru,
+                                                                        tab,
+                                                                        beta))
+        plt.show()
+        plt.close()
 
 
 def plot_acc(filelist):
     """Plot the evolution of the acceptance rate in each DMFT loop
     extracting the status information of the jobs"""
-    rawdata=''
+    rawdata = ''
     for fname in filelist:
         with open(fname) as fcontent:
             rawdata += fcontent.read()
 
-    infocols=re.findall('acc\s+([\d\.]+?) nsign (\d)\s+B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
-    infosum=np.array(infocols).astype(np.float)
-    table=pd.DataFrame(infosum,columns=['acc', 'sign', 'beta', 'tp', 'U', 'loop', 'dist'])
-    tpg=table.groupby('tp')
+    infocols = re.findall('acc\s+([\d\.]+?) nsign (\d)\s+B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
+    infosum = np.array(infocols).astype(np.float)
+    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'beta', 'tp', 'U', 'loop', 'dist'])
+    tpg = table.groupby('tp')
     for tp_key, group in tpg:
         tpg_ug = group.groupby('U')
         f, tp_ax = plt.subplots(1, 2, figsize=(18, 8))
@@ -88,10 +93,11 @@ def plot_acc(filelist):
             ugroup.plot(x='loop', y='dist', ax=tp_ax[1], marker='o',
                         label='U='+str(U_key), logy=True, legend=False,
                         title='Convergence @ $t\\perp=$'+str(tp_key))
-        tp_ax[0].legend(loc=0, prop={'size':18})
+        tp_ax[0].legend(loc=0, prop={'size': 18})
         tp_ax[1].axhline(y=4e-3, ls=':')
         plt.show()
         plt.close()
+
 
 def get_selfE(G_iwd, G_iwo):
     nf = len(G_iwd.mesh)
@@ -103,6 +109,7 @@ def get_selfE(G_iwd, G_iwo):
     sigma << gmix - 0.25*g_iw - inverse(g_iw)
     return sigma
 
+
 def getGiw(saveblock):
     gd = saveblock['G_iwd']
     nf = len(gd.mesh)
@@ -111,19 +118,22 @@ def getGiw(saveblock):
     rt.load_gf(g_iw, gd, saveblock['G_iwo'])
     return g_iw
 
+
 def plot_tails(beta, U, tp):
     w_n = gf.matsubara_freq(beta, beta)
     plt.plot(w_n, -1/w_n, '--')
     plt.plot(w_n, -tp/w_n**2, '--')
     plt.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
+
 def plotGiw(saveblock):
-    giw=getGiw(saveblock)
-    oplot(giw['A','B'], RI='R')
-    oplot(giw['A','A'], RI='I')
+    giw = getGiw(saveblock)
+    oplot(giw['A', 'B'], RI='R')
+    oplot(giw['A', 'A'], RI='I')
     plot_tails(giw)
     plt.xlim(xmax=10)
     plt.ylim(ymin=-1.2)
+
 
 def phase_diag(beta):
 
@@ -137,6 +147,7 @@ def phase_diag(beta):
                 fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
     return np.asarray(fl_dos)
 
+
 def compare_last_gf(tp, beta, contl=2, ylim=-1):
     """Compartes in a plot the last GF of the HF simulation with the one CTHYB
        run done with this seed"""
@@ -149,22 +160,22 @@ def compare_last_gf(tp, beta, contl=2, ylim=-1):
             lastit = results[u].keys()[-1]
             gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
             go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
-            giw =results[u][lastit]['G_iwd']
+            giw = results[u][lastit]['G_iwd']
 
-            fit = rt.fit_dos(w_n, giw[0,0])
+            fit = rt.fit_dos(w_n, giw[0, 0])
             w = np.arange(0, contl, 0.05)
             gcont = fit(w)
             gd.plot(w, gcont, 'k:')
 
-
     gd.set_xlim([0, 4])
-    gd.set_ylim([ylim,0])
+    gd.set_ylim([ylim, 0])
     gd.legend(loc=0, prop={'size': 18})
     gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
     go.set_xlim([0, 4])
     go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+
 
 def plot_gf(tp, beta, runsolver):
 
@@ -179,14 +190,15 @@ def plot_gf(tp, beta, runsolver):
                 go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
             if runsolver == 'cthyb':
                 lastit = 'cthyb'
-                giw = 0.5* (results[u][lastit]['G_iw']['up'] +results[u][lastit]['G_iw']['down'])
+                giw = 0.5 * (results[u][lastit]['G_iw']['up'] +
+                             results[u][lastit]['G_iw']['down'])
                 gd.oplot(giw[0, 0], 'x-', RI='I', label=u)
                 go.oplot(giw[0, 1], '+-', RI='R', label=u)
 
             gd.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
 
     gd.set_xlim([0, 4])
-    gd.set_ylim([-1.4,0])
+    gd.set_ylim([-1.4, 0])
     gd.legend(loc=0, prop={'size': 18})
     gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
     go.set_xlim([0, 4])
@@ -196,15 +208,14 @@ def plot_gf(tp, beta, runsolver):
 
 
 def diag_sys(tp, beta):
-    rot = np.matrix([[-1,1],[1,1]])/np.sqrt(2)
+    rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with rt.HDFArchive(filestr, 'r') as results:
         for u in results.keys():
             lastit = results[u].keys()[-1]
             g_iw = rot*getGiw(results[u][lastit])*rot
-#            import pdb; pdb.set_trace()
-            gd.oplot(g_iw['A','A'], 'x-', label=u)
+            gd.oplot(g_iw['A', 'A'], 'x-', label=u)
             go.oplot(g_iw['B', 'B'], '+-', label=u)
 
     gd.set_xlim([0, 4])
@@ -215,29 +226,28 @@ def diag_sys(tp, beta):
     go.set_ylabel(r'$\Re e G_{2}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
 
+
 def spectral(tp, U, beta, pade_fit_pts):
-    rot = np.matrix([[-1,1],[1,1]])/np.sqrt(2)
+    rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     f, (gl, gd) = plt.subplots(1, 2, figsize=(18, 8))
     with rt.HDFArchive(filestr, 'r') as results:
         u = 'U'+str(U)
         lastit = results[u].keys()[-1]
         g_iw = getGiw(results[u][lastit])
-        greal = GfReFreq(indices=[0,1], window=(-3.5, 3.5), n_points=500)
+        greal = GfReFreq(indices=[0, 1], window=(-3.5, 3.5), n_points=500)
         greal.set_from_pade(g_iw, pade_fit_pts, 0.)
-        gl.oplot(greal[0,0], RI='S', label='out')
+        gl.oplot(greal[0, 0], RI='S', label='out')
         gl.set_title('On site GF, fit pts'+str(pade_fit_pts))
         gl.set_ylim([0, 0.6])
 
-
         rgiw = rot*g_iw*rot
         greal.set_from_pade(rgiw, pade_fit_pts, 0.)
-        gd.oplot(greal[0,0], RI='S', label='bond')
-        gd.oplot(greal[1,1], RI='S', label='anti-bond')
+        gd.oplot(greal[0, 0], RI='S', label='bond')
+        gd.oplot(greal[1, 1], RI='S', label='anti-bond')
         gd.set_title('Diagonal GF')
 
-
-        gl.oplot(0.5*(greal[0,0] + greal[1,1]), '--', RI='S', label='d avg')
+        gl.oplot(0.5*(greal[0, 0] + greal[1, 1]), '--', RI='S', label='d avg')
 
     plt.show()
     plt.close()
@@ -246,31 +256,32 @@ def spectral(tp, U, beta, pade_fit_pts):
 def save_out(rgt):
     gtu = np.squeeze(rgt['up'].data)
     gtd = np.squeeze(rgt['down'].data)
-    outputs.append((gtu.copy(),gtd.copy()))
+    outputs.append((gtu.copy(), gtd.copy()))
 
-    wgt.data[:,0,0] = 0.5*(gtu+gtd)
-    giw<<Fourier(wgt)
-    giw.fit_tail(fixed,3, 300, 1025)
-    giw.data[:,0,0]=1j*giw.data[:,0,0].imag
+    wgt.data[:, 0, 0] = 0.5*(gtu+gtd)
+    giw << Fourier(wgt)
+    giw.fit_tail(fixed, 3, 300, 1025)
+    giw.data[:, 0, 0] = 1j*giw.data[:, 0, 0].imag
     inputs.append(np.squeeze(giw.data.copy()))
 
-    g=np.squeeze(giw.data[:,0,0])
-    den=np.abs(1j*wn +1.6-.25*g)**2
-    g0iw=(1.6-.25*g.real)/den-1j*(wn-.25*g.imag)/den
+    g = np.squeeze(giw.data[:, 0, 0])
+    den = np.abs(1j*wn + 1.6-.25*g)**2
+    g0iw = (1.6-.25*g.real)/den-1j*(wn-.25*g.imag)/den
 
-    giw.data[:,0,0]=g0iw
+    giw.data[:, 0, 0] = g0iw
     giw.fit_tail(fixedg0, 6, 300, 1025)
     g0ins.append(np.squeeze(giw.data.copy()))
+
 
 def plotginta():
     U, tp, beta = 2.8, 0.18, 60.
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     with rt.HDFArchive(filestr, 'r') as results:
-        u='U'+str(U)
+        u = 'U'+str(U)
         lastit = results[u].keys()[-1]
         oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
         w_n = gf.matsubara_freq(beta, beta)
         plt.plot(w_n, -1/w_n, '--')
         plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
-    plt.xlim([0,6])
+    plt.xlim([0, 6])
     plt.ylim([-.6, 0])
