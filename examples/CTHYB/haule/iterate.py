@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # Author: Óscar Nájera Sept 2015
 # Author: KH, March 2007
 """
@@ -164,10 +165,11 @@ CWD = os.getcwd()
 for Uc in args.U:
 
     udir = 'B{}_U{}'.format(BETA, Uc)
-    os.makedirs(udir)
+    if not os.path.exists(udir):
+        os.makedirs(udir)
     seedGF = 'Gf.out.B'+str(BETA)
     if os.path.exists(seedGF):
-        shutil.copy(seedGF, udir+'Gf.out')
+        shutil.copy(seedGF, udir+'/Gf.out')
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
     dmft_loop_pm(Uc)
