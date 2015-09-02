@@ -34,7 +34,7 @@ params = {"exe"          : ['ctqmc'          , "# Path to executable"],
           "cix"          : ["one_band.imp"      , "# Input file with atomic state"],
 #          "U"            : [Uc                  , "# Coulomb repulsion (F0)"],
 #          "mu"           : [Uc/2.               , "# Chemical potential"],
-          "BETA"         : [BETA                , "# Inverse temperature"],
+          "beta"         : [BETA                , "# Inverse temperature"],
           "M"            : [M                   , "# Number of Monte Carlo steps"],
           "nom"          : [BETA                , "# number of Matsubara frequency points to sample"],
           "nomD"         : [0                   , "# number of Matsubara points using the Dyson Equation"],
@@ -115,8 +115,8 @@ def DMFT_SCC(fDelta):
     try:
         Gf = np.loadtxt(fileGf).T# If output file exists, start from previous iteration
     except Exception: # otherwise start from non-interacting limit
-        print('Starting from non-interacting model')
-        w_n = gf.matsubara_freq(params['BETA'][0])
+        print('Starting from non-interacting model at beta'+str(BETA))
+        w_n = gf.matsubara_freq(BETA)
         Gf = gf.greenF(w_n)
         Gf = np.array([w_n, Gf.real, Gf.imag])
 
