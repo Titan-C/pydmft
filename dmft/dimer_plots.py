@@ -7,7 +7,6 @@ Created on Thu Jul 23 14:08:23 2015
 
 from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
-from pytriqs.gf.local import Fourier
 from pytriqs.gf.local import GfReFreq
 from pytriqs.plot.mpl_interface import oplot
 import dmft.RKKY_dimer as rt
@@ -44,6 +43,7 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
 
     return diag_f, offdiag_f
 
+
 def plot_gf_loopU(beta, tab, U, filestr, nf,
                   in_box=[0.16, 0.17, 0.20, 0.25]):
     """Loop over all interaction strengths for a given file
@@ -79,9 +79,12 @@ def plot_acc(filelist):
         with open(fname) as fcontent:
             rawdata += fcontent.read()
 
-    infocols = re.findall('acc\s+([\d\.]+?) nsign (\d)\s+B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
+    infocols = re.findall('acc\s+([\d\.]+?) nsign (\d)\s+'
+                          'B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) '
+                          'l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
     infosum = np.array(infocols).astype(np.float)
-    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'beta', 'tp', 'U', 'loop', 'dist'])
+    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'beta', 'tp', 'U',
+                                           'loop', 'dist'])
     tpg = table.groupby('tp')
     for tp_key, group in tpg:
         tpg_ug = group.groupby('U')
@@ -93,7 +96,7 @@ def plot_acc(filelist):
             ugroup.plot(x='loop', y='dist', ax=tp_ax[1], marker='o',
                         label='U='+str(U_key), logy=True, legend=False,
                         title='Convergence @ $t\\perp=$'+str(tp_key))
-        tp_ax[0].legend(loc=0, prop={'size': 18})
+        tp_ax[0].legend(loc=0, ncol=2)
         tp_ax[1].axhline(y=4e-3, ls=':')
         plt.show()
         plt.close()
@@ -177,7 +180,7 @@ def compare_last_gf(tp, beta, contl=2, ylim=-1):
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
 
 
-def plot_gf(tp, beta, runsolver):
+def plot_gf(tp, beta, runsolver, xlim=4, ylim=1.4):
 
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     w_n = gf.matsubara_freq(beta, beta)
@@ -196,13 +199,12 @@ def plot_gf(tp, beta, runsolver):
                 go.oplot(giw[0, 1], '+-', RI='R', label=u)
 
             gd.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
-
-    gd.set_xlim([0, 4])
-    gd.set_ylim([-1.4, 0])
-    gd.legend(loc=0, prop={'size': 18})
+    gd.set_xlim([0, xlim])
+    go.set_xlim([0, xlim])
+    gd.set_ylim([-ylim, 0])
+    gd.legend(loc=0)
+    go.legend(loc=0)
     gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
-    go.set_xlim([0, 4])
-    go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
 
@@ -251,26 +253,6 @@ def spectral(tp, U, beta, pade_fit_pts):
 
     plt.show()
     plt.close()
-
-
-def save_out(rgt):
-    gtu = np.squeeze(rgt['up'].data)
-    gtd = np.squeeze(rgt['down'].data)
-    outputs.append((gtu.copy(), gtd.copy()))
-
-    wgt.data[:, 0, 0] = 0.5*(gtu+gtd)
-    giw << Fourier(wgt)
-    giw.fit_tail(fixed, 3, 300, 1025)
-    giw.data[:, 0, 0] = 1j*giw.data[:, 0, 0].imag
-    inputs.append(np.squeeze(giw.data.copy()))
-
-    g = np.squeeze(giw.data[:, 0, 0])
-    den = np.abs(1j*wn + 1.6-.25*g)**2
-    g0iw = (1.6-.25*g.real)/den-1j*(wn-.25*g.imag)/den
-
-    giw.data[:, 0, 0] = g0iw
-    giw.fit_tail(fixedg0, 6, 300, 1025)
-    g0ins.append(np.squeeze(giw.data.copy()))
 
 
 def plotginta():
