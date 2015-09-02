@@ -156,11 +156,11 @@ def dmft_loop_pm(Uc):
         fh_info.flush()
 
         # Some copying to store data obtained so far (at each iteration)
-        shutil.copy('Gf.out', 'Gf.out.'+str(it))
-        shutil.copy('Sig.out', 'Sig.out.'+str(it))
+        shutil.copy('Gf.out', 'Gf.out.{:02}'.format(it))
+        shutil.copy('Sig.out', 'Sig.out.{:02}'.format(it))
 
 
-cwd = os.getcwd()
+CWD = os.getcwd()
 for Uc in args.U:
 
     udir = 'B{}_U{}'.format(BETA, Uc)
@@ -171,6 +171,6 @@ for Uc in args.U:
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
     dmft_loop_pm(Uc)
-    shutil.copy('Gf.out', seedGF)
+    shutil.copy('Gf.out', '../'+seedGF)
     shutil.copy(params['cix'][0], '../')
-    os.chdir(cwd)
+    os.chdir(CWD)
