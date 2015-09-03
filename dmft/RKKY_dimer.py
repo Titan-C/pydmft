@@ -281,28 +281,15 @@ def quasiparticle(file_str):
     return np.asarray(zet)
 
 
-def fit_dos(w_n, g):
-    """Performs a quadratic fit of the -first- matsubara frequencies
-    to estimate the value at zero energy.
-
-    It is relevant to note w_n contains the array with the matsubara
-    frequencies to be considered"""
-    n = len(w_n)
-    gfit = g.data[:n, 0, 0].imag
-    pf = np.polyfit(w_n, gfit, 2)
-    return np.poly1d(pf)
-
-
 def fermi_level_dos(file_str, n=5):
     results = HDFArchive(file_str, 'r')
     ftr_key = results.keys()[0]
     fl_dos = []
     w_n = gf.matsubara_freq(results[ftr_key]['G_iwd'].beta, n)
     for uint in results:
-        fl_dos.append(abs(fit_dos(w_n, results[uint]['G_iwd'])(0.)))
+        fl_dos.append(abs(gf.fit_gf(w_n, results[uint]['G_iwd'].imag)(0.)))
     del results
     return np.asarray(fl_dos)
-
 
 
 def proc_files(filelist):

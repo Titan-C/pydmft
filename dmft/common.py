@@ -8,6 +8,7 @@ import numpy as np
 from scipy.integrate import romb
 from scipy.linalg.blas import dger
 
+
 def matsubara_freq(beta=16., size=250, fer=1):
     """Calculates an array containing the matsubara frequencies under the
     formula
@@ -40,6 +41,7 @@ def tau_wn_setup(parms):
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     w_n = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     return tau, w_n
+
 
 def greenF(w_n, sigma=0, mu=0, D=1):
     r"""Calculate the Bethe lattice Green function, defined as part of the
@@ -154,3 +156,24 @@ def gw_invfouriertrans(g_iwn, tau, w_n):
     g_iwn = (g_iwn + 1.j/w_n).reshape(-1, 1, g_shape[-1])
     g_tau = g_iwn.real * fou_cos + g_iwn.imag * fou_sin
     return np.squeeze(np.sum(g_tau, axis=-1)*2/beta - 0.5)
+
+
+def fit_gf(w_n, g):
+    """Performs a quadratic fit of the -first- matsubara frequencies
+    to estimate the value at zero energy.
+
+    Parameters
+    ----------
+    w_n : real float array
+            First matsubara frequencies to fit
+    giw : real array
+            Function to fit
+
+    Returns
+    -------
+    Callable for inter - extrapolate function
+    """
+    n = len(w_n)
+    gfit = np.squeeze(g)[:n]
+    pf = np.polyfit(w_n, gfit, 2)
+    return np.poly1d(pf)

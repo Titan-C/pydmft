@@ -147,7 +147,7 @@ def phase_diag(beta):
         with rt.HDFArchive(filestr, 'r') as results:
             for u in results.keys():
                 lastit = results[u].keys()[-1]
-                fl_dos.append(rt.fit_dos(w_n, results[u][lastit]['G_iwd'])(0.))
+                fl_dos.append(gf.fit_gf(w_n, results[u][lastit]['G_iwd'].imag)(0.))
     return np.asarray(fl_dos)
 
 
@@ -165,7 +165,7 @@ def compare_last_gf(tp, beta, contl=2, ylim=-1):
             go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
             giw = results[u][lastit]['G_iwd']
 
-            fit = rt.fit_dos(w_n, giw[0, 0])
+            fit = gf.fit_gf(w_n, giw[0, 0].imag)
             w = np.arange(0, contl, 0.05)
             gcont = fit(w)
             gd.plot(w, gcont, 'k:')
