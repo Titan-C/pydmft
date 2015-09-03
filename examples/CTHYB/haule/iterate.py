@@ -14,6 +14,7 @@ import numpy as np
 import os
 import shutil
 import subprocess
+import plot_single_band as psb
 
 parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band')
 parser.add_argument('-beta', metavar='B', type=float,
@@ -137,14 +138,9 @@ def DMFT_SCC(fDelta):
 
 def averager(vector, file_str='Gf.out'):
     """Averages over the files terminating with the numbers given in vector"""
-    simgiw = 0
-    for it in vector:
-        wn, regiw, imgiw = np.loadtxt(file_str+'.{:02}'.format(it)).T
-        simgiw += imgiw
-
-    regiw[:] = 0.
-    simgiw /= len(vector)
-    np.savetxt(file_str, np.array([wn, regiw, imgiw]).T)
+    nvec = (file_str+'.{:02}'.format(it) for it in vector)
+    new_gf = psb._averager(nvec).T
+    np.savetxt(file_str, new_gf)
 
 
 def dmft_loop_pm(Uc, liter, resume):

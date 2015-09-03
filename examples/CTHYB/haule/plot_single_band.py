@@ -56,29 +56,56 @@ def show_conv(beta, U, filestr='B{}_U{}/Gf.out.*', nf=5, xlim=2):
 # the monte carlo noise in the solution.
 
 
-def fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
-    """Plot the evolution of the Green's function in DMFT iterations"""
-    f, ax = plt.subplots(1, 2, figsize=(13, 8))
+def _averager(vector):
+    """Averages over the files terminating with the numbers given in vector"""
+    simgiw = 0
+    for it in vector:
+        wn, regiw, imgiw = np.loadtxt(it).T
+        simgiw += imgiw
+
+    regiw[:] = 0.
+    simgiw /= len(vector)
+    return np.array([wn, regiw, imgiw])
+
+
+def fit_dos(beta, avg):
     list_dirs = sorted(glob('coex/B{}_U*'.format(beta)))
     dos = []
     U = []
     cwd = os.getcwd()
+    w_n = gf.matsubara_freq(beta, 3)
+
     for ldir in list_dirs:
         os.chdir(ldir)
         iterations = sorted(glob('Gf.out.*'))[-avg:]
-        simgiw = 0
-        for it in iterations:
-            wn, regiw, imgiw = np.loadtxt(it).T
-            simgiw += imgiw
-        simgiw /= len(iterations)
+        wn, rgiw, igiw = _averager(iterations)
         U.append(re.findall("U([\d\.]+)", ldir))
-        gfit = gf.fit_gf(wn[:3], simgiw)
-        ax[0].plot(wn, simgiw, 'o:', label='U='+str(U[-1]))
-
-        wr = np.arange(0, wn[2], 0.05)
+        gfit = gf.fit_gf(w_n, igiw)
         dos.append(gfit(0))
-        ax[0].plot(wr, gfit(wr), 'k:')
         os.chdir(cwd)
 
+    return np.asarray(U), np.asarray(dos)
+
+
+def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
+    """Plot the evolution of the Green's function in DMFT iterations"""
+    f, ax = plt.subplots(1, 2, figsize=(13, 8))
+
+#        ax[0].plot(wn, igiw, 'o:', label='U='+str(U[-1]))
+#        wr = np.arange(0, w_n[2], 0.05)
+#        ax[0].plot(wr, gfit(wr), 'k:')
+
+    U, dos = fit_dos(beta, avg)
     ax[0].set_xlim([0, xlim])
     ax[1].plot(U, dos, 'o-')
+
+    plt.show()
+    plt.close()
+
+
+def phases():
+    fig, axs = plt.subplots()
+    for beta in np.array([20., 40., 64., 100.]):
+        U, dos = fit_dos(beta, 2)
+        T = np.ones(len(U)) * 2 / beta
+        axs.scatter(U, T, s=300, c=dos)
