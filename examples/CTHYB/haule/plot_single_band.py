@@ -12,8 +12,11 @@ searched data point.
 
 from __future__ import division, print_function, absolute_import
 from glob import glob
+import dmft.common as gf
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import re
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
@@ -44,10 +47,38 @@ def show_conv(beta, U, filestr='B{}_U{}/Gf.out.*', nf=5, xlim=2):
 # outputed Green's functions and the self energy on every loop
 # performing as many iteration to see the system stabilize
 
-show_conv(64., 2.4, 'coex/B{}_U{}/Sig.out.*')
+#show_conv(64., 2.4, 'coex/B{}_U{}/Sig.out.*')
 
 ###############################################################################
 # This first plot demostrates that for the simply metalic state the
 # system is quite well behaved and the convergence is quite
 # simple. Few iterations are necessary but then there always remains
 # the monte carlo noise in the solution.
+
+
+def fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
+    """Plot the evolution of the Green's function in DMFT iterations"""
+    f, ax = plt.subplots(1, 2, figsize=(13, 8))
+    list_dirs = sorted(glob('coex/B{}_U*'.format(beta)))
+    dos = []
+    U = []
+    cwd = os.getcwd()
+    for ldir in list_dirs:
+        os.chdir(ldir)
+        iterations = sorted(glob('Gf.out.*'))[-avg:]
+        simgiw = 0
+        for it in iterations:
+            wn, regiw, imgiw = np.loadtxt(it).T
+            simgiw += imgiw
+        simgiw /= len(iterations)
+        U.append(re.findall("U([\d\.]+)", ldir))
+        gfit = gf.fit_gf(wn[:3], simgiw)
+        ax[0].plot(wn, simgiw, 'o:', label='U='+str(U[-1]))
+
+        wr = np.arange(0, wn[2], 0.05)
+        dos.append(gfit(0))
+        ax[0].plot(wr, gfit(wr), 'k:')
+        os.chdir(cwd)
+
+    ax[0].set_xlim([0, xlim])
+    ax[1].plot(U, dos, 'o-')
