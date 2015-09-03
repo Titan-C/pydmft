@@ -22,9 +22,11 @@ parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of iterations')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
-parser.add_argument('-resume', action='store_false',
+parser.add_argument('-r', '--resume', action='store_false',
                     help='Resume DMFT loops from inside folder. Do not copy'
                     'a seed file from the main directory')
+parser.add_argument('-liter', metavar='N', type=int,
+                    default=5, help='On resume, average over liter[ations]')
 args = parser.parse_args()
 
 Niter = args.Niter
@@ -50,10 +52,9 @@ params = {"exe":           ['ctqmc',              "# Path to executable"],
           "minD"         : [1e-10               , "# The smallest allowed value for the determinant"],
           "Nmax"         : [BETA*2              , "# Maximum perturbation order allowed"],
           "GlobalFlip"   : [100000              , "# Global flip shold be tried"],
+          }
 
-}
-
-icix="""# Cix file for cluster DMFT with CTQMC
+icix = """# Cix file for cluster DMFT with CTQMC
 # cluster_size, number of states, number of baths, maximum matrix size
 1 4 2 1
 # baths, dimension, symmetry, global flip
@@ -108,6 +109,7 @@ def CreateInputFile(params):
         for key, vaule in params.iteritems():
             parfile.write('{}\t{}\t{}\n'.format(key, vaule[0], vaule[1]))
 
+
 def DMFT_SCC(fDelta):
     """This subroutine creates Delta.inp from Gf.out for DMFT on bethe
     lattice: Delta=t^2*G If Gf.out does not exist, it creates Gf.out
@@ -116,13 +118,13 @@ def DMFT_SCC(fDelta):
     about the atomic states."""
     fileGf = 'Gf.out'
     try:
-        Gf = np.loadtxt(fileGf).T# If output file exists, start from previous iteration
-    except Exception: # otherwise start from non-interacting limit
+        Gf = np.loadtxt(fileGf).T
+        # If output file exists, start from previous iteration
+    except Exception:  # otherwise start from non-interacting limit
         print('Starting from non-interacting model at beta'+str(BETA))
         w_n = gf.matsubara_freq(BETA)
         Gf = gf.greenF(w_n)
         Gf = np.array([w_n, Gf.real, Gf.imag])
-
 
         # creating impurity cix file
         with open(params['cix'][0], 'w') as f:
@@ -133,11 +135,22 @@ def DMFT_SCC(fDelta):
     np.savetxt(fDelta, delta)
 
 
+def averager(vector, file_str='Gf.out'):
+    """Averages over the files terminating with the numbers given in vector"""
+    simgiw = 0
+    for it in vector:
+        wn, regiw, imgiw = np.loadtxt(file_str+'.{:02}'.format(it)).T
+        simgiw += imgiw
 
-def dmft_loop_pm(Uc):
+    regiw[:] = 0.
+    simgiw /= len(vector)
+    np.savetxt(file_str, np.array([wn, regiw, imgiw]).T)
+
+
+def dmft_loop_pm(Uc, liter, resume):
     """Creating parameters file PARAMS for qmc execution"""
-    uparams = {"U"            : [Uc                  , "# Coulomb repulsion (F0)"],
-              "mu"           : [Uc/2.               , "# Chemical potential"]}
+    uparams = {"U": [Uc, "# Coulomb repulsion (F0)"],
+               "mu": [Uc/2., "# Chemical potential"]}
     params.update(uparams)
     CreateInputFile(params)
 
@@ -146,14 +159,15 @@ def dmft_loop_pm(Uc):
     fh_info = open('info.dat', 'w')
 
     prev_iter = len(glob.glob('Gf.out.*'))
+    if resume:
+        averager(np.arange(prev_iter - liter, prev_iter))
 
     for it in range(prev_iter, prev_iter + Niter):
         # Constructing bath Delta.inp from Green's function
         DMFT_SCC(params['Delta'][0])
 
         # Running ctqmc
-        print('Running ---- qmc itt.: ', it, '-----')
-        #print os.popen(params['exe'][0]).read()
+        print('Running ---- qmc it: ', it, '-----')
 
         cmd = mpi_prefix+' '+params['exe'][0]+'  PARAMS > nohup_imp.out 2>&1 '
         subprocess.call(cmd, shell=True, stdout=fh_info, stderr=fh_info)
@@ -175,7 +189,7 @@ for Uc in args.U:
         shutil.copy(seedGF, udir+'/Gf.out')
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
-    dmft_loop_pm(Uc)
+    dmft_loop_pm(Uc, args.liter, args.resume)
     shutil.copy('Gf.out', '../'+seedGF)
     shutil.copy(params['cix'][0], '../')
     os.chdir(CWD)
