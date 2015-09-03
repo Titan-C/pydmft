@@ -11,8 +11,9 @@ import argparse
 import dmft.common as gf
 import glob
 import numpy as np
-import os, subprocess
+import os
 import shutil
+import subprocess
 
 parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band')
 parser.add_argument('-beta', metavar='B', type=float,
@@ -21,17 +22,19 @@ parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of iterations')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
-
+parser.add_argument('-resume', action='store_false',
+                    help='Resume DMFT loops from inside folder. Do not copy'
+                    'a seed file from the main directory')
 args = parser.parse_args()
 
 Niter = args.Niter
 BETA = args.beta
-M=10e6
+M = 10e6
 
 
-params = {"exe"          : ['ctqmc'          , "# Path to executable"],
-          "Delta"        : ["Delta.inp"         , "# Input bath function hybridization"],
-          "cix"          : ["one_band.imp"      , "# Input file with atomic state"],
+params = {"exe":           ['ctqmc',              "# Path to executable"],
+          "Delta":         ["Delta.inp"         , "# Input bath function hybridization"],
+          "cix":           ["one_band.imp"      , "# Input file with atomic state"],
 #          "U"            : [Uc                  , "# Coulomb repulsion (F0)"],
 #          "mu"           : [Uc/2.               , "# Chemical potential"],
           "beta"         : [BETA                , "# Inverse temperature"],
@@ -168,7 +171,7 @@ for Uc in args.U:
     if not os.path.exists(udir):
         os.makedirs(udir)
     seedGF = 'Gf.out.B'+str(BETA)
-    if os.path.exists(seedGF):
+    if os.path.exists(seedGF) and not args.resume:
         shutil.copy(seedGF, udir+'/Gf.out')
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
