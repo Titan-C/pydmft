@@ -22,7 +22,7 @@ parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of iterations')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
-parser.add_argument('-r', '--resume', action='store_false',
+parser.add_argument('-r', '--resume', action='store_true',
                     help='Resume DMFT loops from inside folder. Do not copy'
                     'a seed file from the main directory')
 parser.add_argument('-liter', metavar='N', type=int,
