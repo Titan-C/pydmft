@@ -90,7 +90,6 @@ def load_gf(g_iw, g_iwd, g_iwo):
     g_iw['B', 'A'] << g_iwo
 
 
-
 class Dimer_Solver(object):
 
     def __init__(self, **params):
@@ -122,6 +121,7 @@ class Dimer_Solver(object):
         # Dyson equation to get G
         self.g_iw << inverse(inverse(self.g0_iw) - self.sigma_iw)
 
+
 class Dimer_Solver_hf(Dimer_Solver):
 
     def __init__(self, **params):
@@ -135,7 +135,8 @@ class Dimer_Solver_hf(Dimer_Solver):
         fixed_co = TailGf(2, 2, 4, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
         fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
-        self.g_iw.fit_tail(fixed_co, 4, self.setup['n_tau_mc']//2, self.setup['n_points'])
+        self.g_iw.fit_tail(fixed_co, 4, self.setup['n_tau_mc']//2,
+                           self.setup['n_points'])
 
     def solve(self, tau):
 
@@ -165,16 +166,17 @@ def dimer(S, gmix, filename, step):
 
     converged = False
     loops = 0
-    t_hop = np.matrix([[S.setup['t'], S.setup['tn']],[S.setup['tn'], S.setup['t']]])
+    t_hop = np.matrix([[S.setup['t'], S.setup['tn']],
+                       [S.setup['tn'], S.setup['t']]])
     while not converged:
         # Enforce DMFT Paramagnetic, IPT conditions
         # Pure imaginary GF in diagonals
         S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
-        S.g_iw['B', 'B']<<S.g_iw['A', 'A']
+        S.g_iw['B', 'B'] << S.g_iw['A', 'A']
         # Pure real GF in off-diagonals
 #        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
-        S.g_iw['B', 'A']<< 0.5*(S.g_iw['A', 'B'] + S.g_iw['B', 'A'])
-        S.g_iw['A', 'B']<<S.g_iw['B', 'A']
+        S.g_iw['B', 'A'] << 0.5*(S.g_iw['A', 'B'] + S.g_iw['B', 'A'])
+        S.g_iw['A', 'B'] << S.g_iw['B', 'A']
 
         oldg = S.g_iw.data.copy()
         # Bethe lattice bath
@@ -215,18 +217,20 @@ def recover_lastit(S, file_str):
     except (IOError, KeyError):
         pass
 
+
 def total_energy(file_str):
     """Calculates the internal energy of the system given by Fetter-Walecka
     25-26
 
-    .. math:: \langle H \rangle = 1/\beta\sum_{nk} 1/2(i\omega_n +  H^0_k + \mu)
+    .. math:: \langle H \rangle = 1/\beta\sum_{nk}
+    1/2(i\omega_n +  H^0_k + \mu)
     Tr G(k, i\omega_n)\\
     = Tr 1/2(i\omega_n +  H^0_k + \mu)G - G^{0,-1}G^0 + G^{-1}G)\\
-    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 + (i\omega_n - H^0_k +\mu -\Sigma )G)
+    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 +
+     (i\omega_n - H^0_k +\mu -\Sigma )G)
     = Tr i\omega_n(G-G^0)
 
     """
-
 
     results = HDFArchive(file_str, 'r')
     ftr_key = results.keys()[0]
@@ -235,16 +239,15 @@ def total_energy(file_str):
     n_freq = len(results[ftr_key]['G_iwd'].mesh)
 
     Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
-                             n_points=n_freq)
+                     n_points=n_freq)
     w_n = gf.matsubara_freq(beta, n_freq)
     om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
     init_gf_met(Gfree, w_n, 0., tab, tn, t)
 
     mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
                           args=(1., tab, t, beta))[0] \
-                  -tab*quad(dos.bethe_fermi, -tab, tab,
-                          args=(1., 0., t, beta))[0]
-
+                     - tab*quad(dos.bethe_fermi, -tab, tab,
+                                args=(1., 0., t, beta))[0]
 
     total_e = []
     Giw = Gfree.copy()
@@ -306,18 +309,24 @@ def proc_files(filelist):
     data. Keep in mind H5 files return keys in alphabetical and not write order
     """
 
-    dif = np.asarray(Parallel(n_jobs=-1)(delayed(complexity)(f) for f in filelist))
-    zet = np.asarray(Parallel(n_jobs=-1)(delayed(quasiparticle)(f) for f in filelist))
-    imet = np.asarray(Parallel(n_jobs=-1)(delayed(fermi_level_dos)(f) for f in filelist))
-    H = np.asarray(Parallel(n_jobs=-1)(delayed(total_energy)(f) for f in filelist))
+    dif = np.asarray(Parallel(n_jobs=-1)(delayed(complexity)(f)
+                                         for f in filelist))
+    zet = np.asarray(Parallel(n_jobs=-1)(delayed(quasiparticle)(f)
+                                         for f in filelist))
+    imet = np.asarray(Parallel(n_jobs=-1)(delayed(fermi_level_dos)(f)
+                                          for f in filelist))
+    H = np.asarray(Parallel(n_jobs=-1)(delayed(total_energy)(f)
+                                       for f in filelist))
 
     return dif, zet, imet, H
 
 
 def result_pros(tabra, beta):
-    filelist = ['met_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta) for it in tabra]
+    filelist = ['met_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta)
+                for it in tabra]
     met_sol = proc_files(filelist)
-    filelist = ['ins_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta) for it in tabra]
+    filelist = ['ins_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta)
+                for it in tabra]
     ins_sol = proc_files(filelist)
 
     np.savez('results_fuloop_t0.5_B{}'.format(beta),
