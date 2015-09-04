@@ -47,7 +47,7 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
     S.solve(h_int=HINT, **params)
 
     if mpi.is_master_node():
-        with rt.HDFArchive(file_str.format(**setup)+'ct') as last_run:
+        with rt.HDFArchive('diag_dimer.h5') as last_run:
             last_run[u]['it00/G_iw'] = S.G_iw
             last_run[u]['it00/G_tau'] = S.G_tau
 
