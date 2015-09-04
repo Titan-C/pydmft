@@ -85,7 +85,7 @@ def fit_dos(beta, avg):
     Return
     ------
     arrays of Interaction, Fitted and source GF imaginary part
-"""
+    """
 
     list_dirs = sorted(glob('coex/B{}_U*'.format(beta)))
     U = []
