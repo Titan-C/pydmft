@@ -16,13 +16,16 @@ import pytriqs.utility.mpi as mpi
 
 # Set the solver parameters
 params = {
-    'n_cycles' : int(2e6),
+    'n_cycles': int(2e6),
     'length_cycle': 80,
-    'n_warmup_cycles' : int(5e4),
+    'n_warmup_cycles': int(5e4),
     'move_double': True,
 #    'measure_pert_order': True,
     'random_seed': int(time()/2**14+time()/2**16*mpi.rank)
 }
+
+HINT = U * (n('up', 0) * n('down', 0) + n('up', 1) * n('down', 1))
+
 
 def load_gf(g_iw, g_iwd, g_iwo):
     """Loads into the first greenfunction the equal diagonal terms and the
@@ -32,6 +35,7 @@ def load_gf(g_iw, g_iwd, g_iwo):
     g_iw['1', '1'] << g_iwd
     g_iw['0', '1'] << g_iwo
     g_iw['1', '0'] << g_iwo
+
 
 def mix_gf_dimer(gmix, omega, mu, tab):
     """Dimer formation Green function term
@@ -66,7 +70,7 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
     for name, g0block in S.G0_iw:
         g0block << inverse(gmix - 0.25*S.G_iw['up'])
 
-    S.solve(h_int=U * n('up',0) * n('down',0) + U * n('up',1) * n('down',1), **params)
+    S.solve(h_int=HINT, **params)
 
     if mpi.is_master_node():
         with rt.HDFArchive(file_str.format(**setup)+'ct') as last_run:
