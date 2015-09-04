@@ -26,8 +26,11 @@ def do_input():
                         default=64., help='Number of time slices')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
-    parser.add_argument('-U', metavar='U', nargs='+', type=float,
-                        default=[2.7], help='Local interaction strenght')
+    parser.add_argument('-U', type=float,
+                        default=[2.], help='Local interaction strenght')
+
+    parser.add_argument('-M', '--Heat_bath', action='store_false',
+                        help='Use Metropolis importance sampling')
     parser.add_argument('-r', '--resume', action='store_true',
                         help='Resume DMFT loops from inside folder. Do not copy'
                         'a seed file from the main directory')
@@ -39,15 +42,11 @@ def do_input():
 def dmft_loop_pm(simulation={}, **kwarg):
     """Implementation of the solver"""
     setup = {
-             'n_tau_mc':    64,
-             'BETA':        64,
              'N_TAU':    2**11,
              'N_MATSUBARA': 512,
-             'U':           2.2,
              't':           .5,
              'MU':          0,
              'SITES':       1,
-             'Niter':       10,
              'sweeps':      100000,
              'therm':       10000,
              'N_meas':      3,
