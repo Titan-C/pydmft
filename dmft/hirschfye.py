@@ -12,10 +12,12 @@ import numpy as np
 import scipy.linalg as la
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
+from mpi4py import MPI
 
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 import dmft.hffast as hffast
 
+comm = MPI.COMM_WORLD
 
 def ising_v(dtau, U, L, fields=1, polar=0.5):
     """initialize the vector V of Ising fields
@@ -99,8 +101,11 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
                 vlog.append(np.copy(v))
                 ar.append(acc)
 
-    for g in Gst:
-        g /= parms['sweeps']
+    tGst = np.asarray(Gst)
+    Gst = np.zeros_like(Gst)
+    comm.Allreduce(tGst, Gst)
+    Gst /= parms['sweeps']*comm.Get_size()
+
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
     print('acc ', acc, 'nsign', anrat)
 
