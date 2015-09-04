@@ -12,17 +12,17 @@ from __future__ import division, absolute_import, print_function
 
 import dmft.common as gf
 import dmft.hirschfye as hf
-import matplotlib.pyplot as plt
 import numpy as np
 import shelve
 import argparse
 
+
 def do_input():
 
     parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band')
-    parser.add_argument('-beta', metavar='B', type=float,
+    parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
-    parser.add_argument('-n_tau', metavar='B', type=float,
+    parser.add_argument('-n_tau_mc', metavar='B', type=float,
                         default=64., help='Number of time slices')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
@@ -47,7 +47,7 @@ def dmft_loop_pm(simulation={}, **kwarg):
              't':           .5,
              'MU':          0,
              'SITES':       1,
-             'loops':       10,
+             'Niter':       10,
              'sweeps':      100000,
              'therm':       10000,
              'N_meas':      3,
@@ -69,7 +69,7 @@ def dmft_loop_pm(simulation={}, **kwarg):
         last_loop = 0
         simulation.update({current_u:{}})
 
-    for iter_count in range(setup['loops']):
+    for iter_count in range(setup['Niter']):
         #patch tail on
         print('On loop', iter_count, 'beta', setup['BETA'])
         Giw.real = 0.
@@ -93,8 +93,9 @@ def dmft_loop_pm(simulation={}, **kwarg):
 
 if __name__ == "__main__":
 
+    setup = do_input()
 
-    sim = shelve.open('HF_stb64_met', writeback=True)
+    sim = shelve.open('HF_stb{BETA}_met'.format(**setup), writeback=True)
     dmft_loop_pm(sim, n_tau_mc=128)
     dmft_loop_pm(sim, n_tau_mc=256)
 

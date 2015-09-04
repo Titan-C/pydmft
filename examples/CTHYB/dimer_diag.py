@@ -48,8 +48,8 @@ def cthyb_last_run(u_int, tp, BETA, file_str):
 
     if mpi.is_master_node():
         with rt.HDFArchive('diag_dimer.h5') as last_run:
-            last_run[u]['it00/G_iw'] = S.G_iw
-            last_run[u]['it00/G_tau'] = S.G_tau
+            last_run['G_iw'] = S.G_iw
+            last_run['G_tau'] = S.G_tau
 
 
 parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
