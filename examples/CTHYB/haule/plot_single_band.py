@@ -34,9 +34,14 @@ def show_conv(beta, U, filestr='B{}_U{}/Gf.out.*', nf=5, xlim=2):
         ax[1].plot(freqs, 'o-.', label=str(num))
     ax[0].set_xlim([0, 2])
     ax[1].legend(loc=0, ncol=nf)
-    graf = r'$G(i\omega)$' if 'Gf' in filestr else r'$\Sigma(i\omega_n)$'
+    graf = r'$G(i\omega_n)$' if 'Gf' in filestr else r'$\Sigma(i\omega_n)$'
     ax[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, U))
+    ax[0].set_ylabel(graf)
+    ax[0].set_xlabel(r'$i\omega_n$')
     ax[1].set_title('Evolution of the first frequencies')
+    ax[1].set_ylabel(graf+'$(l)$')
+    ax[1].set_xlabel('iterations')
+
     plt.show()
     plt.close()
 
@@ -69,9 +74,23 @@ def _averager(vector):
 
 
 def fit_dos(beta, avg):
+    """Fits for all Green's functions at a given beta their
+    density of states at the Fermi energy
+
+    Parameters
+    ----------
+    beta: float inverse temperature
+    avg: int number of last iterations to average over
+
+    Return
+    ------
+    arrays of Interaction, Fitted and source GF imaginary part
+"""
+
     list_dirs = sorted(glob('coex/B{}_U*'.format(beta)))
-    dos = []
     U = []
+    figiw = []
+    ligiw = []
     cwd = os.getcwd()
     w_n = gf.matsubara_freq(beta, 3)
 
@@ -79,25 +98,28 @@ def fit_dos(beta, avg):
         os.chdir(ldir)
         iterations = sorted(glob('Gf.out.*'))[-avg:]
         wn, rgiw, igiw = _averager(iterations)
-        U.append(re.findall("U([\d\.]+)", ldir))
+        U.append(float(re.findall("U([\d\.]+)", ldir)[0]))
         gfit = gf.fit_gf(w_n, igiw)
-        dos.append(gfit(0))
+        figiw.append(gfit)
+        ligiw.append(igiw)
         os.chdir(cwd)
 
-    return np.asarray(U), np.asarray(dos)
+    return np.asarray(U), figiw, ligiw
 
 
 def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     f, ax = plt.subplots(1, 2, figsize=(13, 8))
 
-#        ax[0].plot(wn, igiw, 'o:', label='U='+str(U[-1]))
-#        wr = np.arange(0, w_n[2], 0.05)
-#        ax[0].plot(wr, gfit(wr), 'k:')
+    U, fit_gf, lgiw = fit_dos(beta, avg)
+    wn = gf.matsubara_freq(beta)
+    wr = np.arange(0, wn[2], 0.05)
+    for u, gfit, igiw in zip(U, fit_gf, lgiw):
+        ax[0].plot(wn, igiw, 'o:', label='U='+str(u))
+        ax[0].plot(wr, gfit(wr), 'k:')
 
-    U, dos = fit_dos(beta, avg)
     ax[0].set_xlim([0, xlim])
-    ax[1].plot(U, dos, 'o-')
+    ax[1].plot(U, [dos(0) for dos in fit_gf], 'o-')
 
     plt.show()
     plt.close()
@@ -106,6 +128,10 @@ def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
 def phases():
     fig, axs = plt.subplots()
     for beta in np.array([20., 40., 64., 100.]):
-        U, dos = fit_dos(beta, 2)
+        U, gfit, _ = fit_dos(beta, 2)
         T = np.ones(len(U)) * 2 / beta
-        axs.scatter(U, T, s=300, c=dos)
+        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit])
+
+    plt.xlabel('U/D')
+    plt.ylabel('T/t')
+    print(U)
