@@ -138,7 +138,7 @@ def DMFT_SCC(fDelta):
 
 def averager(vector, file_str='Gf.out'):
     """Averages over the files terminating with the numbers given in vector"""
-    nvec = (file_str+'.{:02}'.format(it) for it in vector)
+    nvec = [file_str+'.{:02}'.format(it) for it in vector]
     new_gf = psb._averager(nvec).T
     np.savetxt(file_str, new_gf)
 
