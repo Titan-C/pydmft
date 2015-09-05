@@ -22,12 +22,19 @@ def do_input():
     parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band')
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
-    parser.add_argument('-n_tau_mc', metavar='B', type=float,
-                        default=64., help='Number of time slices')
+    parser.add_argument('-n_tau_mc', metavar='B', type=int,
+                        default=64, help='Number of time slices')
+    parser.add_argument('-sweeps', metavar='MCS', type=int,
+                        default=int(1e5), help='Number Monte Carlo Measurement')
+    parser.add_argument('-therm', type=int,
+                        default=int(1e4), help='Monte Carlo sweeps of thermalization')
+    parser.add_argument('-N_meas', type=int,
+                        default=2, help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
-                        default=20, help='Number of iterations')
+                        default=4, help='Number of iterations')
     parser.add_argument('-U', type=float,
-                        default=[2.], help='Local interaction strenght')
+                        default=2.5, help='Local interaction strenght')
+    parser.add_argument('pref', default='st', help='fileprefix')
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
@@ -39,7 +46,7 @@ def do_input():
     return vars(parser.parse_args())
 
 
-def dmft_loop_pm(simulation={}, **kwarg):
+def dmft_loop_pm(simulation, **kwarg):
     """Implementation of the solver"""
     setup = {
              'N_TAU':    2**11,
@@ -47,16 +54,13 @@ def dmft_loop_pm(simulation={}, **kwarg):
              't':           .5,
              'MU':          0,
              'SITES':       1,
-             'sweeps':      100000,
-             'therm':       10000,
-             'N_meas':      3,
              'save_logs':   False,
              'updater':     'discrete'
             }
 
     setup.update(simulation.pop('setup', {}))
     setup.update(kwarg)
-    tau, w_n, __, Giw, v_aux, intm = hf.setup_PM_sim(setup)
+    tau, w_n, _, Giw, v_aux, intm = hf.setup_PM_sim(setup)
 
     simulation.update({'setup': setup})
 
@@ -92,21 +96,9 @@ def dmft_loop_pm(simulation={}, **kwarg):
 
 if __name__ == "__main__":
 
-    setup = do_input()
+    SETUP = do_input()
 
-    sim = shelve.open('HF_stb{BETA}_met'.format(**setup), writeback=True)
-    dmft_loop_pm(sim, n_tau_mc=128)
-    dmft_loop_pm(sim, n_tau_mc=256)
-
-    sim.update({'U2.7': {'it00': {'Giw': sim['U2.2']['it19']['Giw']}}})
-    dmft_loop_pm(sim, U=2.7, n_tau_mc=128,
-                  Heat_bath=False)
-    dmft_loop_pm(sim, n_tau_mc=256)
-
-
-    sim.update({'U3.2': {'it00': {'Giw': sim['U2.7']['it19']['Giw']}}})
-    dmft_loop_pm(sim, U=3.2, n_tau_mc=128,
-                 Heat_bath=False)
-    dmft_loop_pm(sim, n_tau_mc=256)
-
-    shelve.close()
+    sim = shelve.open(SETUP['pref']+'stb{BETA}_met'.format(**SETUP), writeback=True)
+    sim['setup'] = SETUP
+    dmft_loop_pm(sim)
+    sim.close()
