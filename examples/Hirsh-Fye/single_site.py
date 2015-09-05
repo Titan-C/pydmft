@@ -27,12 +27,12 @@ def do_input():
                         default=32., help='The inverse temperature')
     parser.add_argument('-n_tau_mc', metavar='B', type=int,
                         default=64, help='Number of time slices')
-    parser.add_argument('-sweeps', metavar='MCS', type=int,
-                        default=int(1e5), help='Number Monte Carlo Measurement')
-    parser.add_argument('-therm', type=int,
-                        default=int(1e4), help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int,
-                        default=3, help='Number of Updates before measurements')
+    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(1e5),
+                        help='Number Monte Carlo Measurement')
+    parser.add_argument('-therm', type=int, default=int(1e4),
+                        help='Monte Carlo sweeps of thermalization')
+    parser.add_argument('-N_meas', type=int, default=3,
+                        help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, nargs='+',
@@ -42,10 +42,10 @@ def do_input():
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
     parser.add_argument('-r', '--resume', action='store_true',
-                        help='Resume DMFT loops from inside folder. Do not copy'
-                        'a seed file from the main directory')
-    parser.add_argument('-liter', metavar='N', type=int,
-                        default=5, help='On resume, average over liter[ations]')
+                        help='Resume DMFT loops from inside folder. Do not'
+                        'copy a seed file from the main directory')
+    parser.add_argument('-liter', metavar='N', type=int, default=5,
+                        help='On resume, average over liter[ations]')
     return vars(parser.parse_args())
 
 
@@ -57,12 +57,11 @@ def dmft_loop_pm(simulation, **kwarg):
              'MU':          0,
              'SITES':       1,
              'save_logs':   False,
-             'updater':     'discrete'
-            }
+             'updater':     'discrete'}
 
     setup.update(simulation.pop('setup', {}))
     setup.update(kwarg)
-    tau, w_n, _, Giw, v_aux, intm = hf.setup_PM_sim(setup)
+    tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
     simulation.update({'setup': setup})
     simulation['U'] = kwarg['U']
@@ -70,32 +69,33 @@ def dmft_loop_pm(simulation, **kwarg):
     current_u = 'U'+str(setup['U'])
     try:
         last_loop = len(simulation[current_u])
-        Giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['Giw'].copy()
+        giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw'].copy()
     except Exception:
         last_loop = 0
-        simulation.update({current_u:{}})
+        simulation.update({current_u: {}})
 
-    for iter_count in range(setup['Niter']):
-        #patch tail on
+    for iter_count in range(last_loop, last_loop + setup['Niter']):
         if comm.rank == 0:
             print('On loop', iter_count, 'beta', setup['BETA'], 'U', setup['U'])
-        Giw.real = 0.
-        Giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
 
-        G0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * Giw)
-        G0t = gf.gw_invfouriertrans(G0iw, tau, w_n)
-        g0t = hf.interpol(G0t, setup['n_tau_mc'])[:-1].reshape(-1, 1, 1)
+        # patch tail on
+        giw.real = 0.
+        giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
+
+        g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
+        g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n)
+        g0t = hf.interpol(g0tau, setup['n_tau_mc'])[:-1].reshape(-1, 1, 1)
         gtu, gtd = hf.imp_solver([g0t, g0t], v_aux, intm, setup)
         gt = -np.squeeze(0.5 * (gtu+gtd))
 
-        Gt = hf.interpol(gt, setup['N_TAU'])
-        Giw = gf.gt_fouriertrans(Gt, tau, w_n)
+        gtau = hf.interpol(gt, setup['N_TAU'])
+        giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
         if comm.rank == 0:
-            simulation[current_u]['it{:0>2}'.format(last_loop + iter_count)] = {
-                                'G0iw': G0iw.copy(),
+            simulation[current_u]['it{:0>2}'.format(iter_count)] = {
+                                'g0iw': g0iw.copy(),
                                 'setup': setup.copy(),
-                                'Giw':  Giw.copy(),
+                                'giw':  giw.copy(),
                                 'gtau': gt.copy(),
                                 }
             simulation.sync()
@@ -104,9 +104,9 @@ def dmft_loop_pm(simulation, **kwarg):
 if __name__ == "__main__":
 
     SETUP = do_input()
-
-    sim = shelve.open(SETUP['pref'] + 'stb{BETA}_met'.format(**SETUP), writeback=True)
     U_rang = SETUP.pop('U')
+    sim = shelve.open(SETUP['pref'] + 'stb{BETA}_met'.format(**SETUP),
+                      writeback=True)
     sim['setup'] = SETUP
     for u_int in U_rang:
         dmft_loop_pm(sim, U=u_int)
