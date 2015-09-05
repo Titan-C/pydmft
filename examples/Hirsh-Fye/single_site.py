@@ -22,7 +22,8 @@ comm = MPI.COMM_WORLD
 def do_input():
     """Prepares the input for the simulation at hand"""
 
-    parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band')
+    parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
     parser.add_argument('-n_tau_mc', metavar='B', type=int,
@@ -43,8 +44,7 @@ def do_input():
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
     parser.add_argument('-r', '--resume', action='store_true',
-                        help='Resume DMFT loops from inside folder. Do not'
-                        'copy a seed file from the main directory')
+                        help='Resume DMFT loops from on disk data files')
     parser.add_argument('-liter', metavar='N', type=int, default=5,
                         help='On resume, average over liter[ations]')
     return vars(parser.parse_args())
