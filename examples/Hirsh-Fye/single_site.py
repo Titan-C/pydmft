@@ -15,6 +15,8 @@ import dmft.hirschfye as hf
 import numpy as np
 import shelve
 import argparse
+from mpi4py import MPI
+comm = MPI.COMM_WORLD
 
 
 def do_input():
@@ -29,11 +31,11 @@ def do_input():
     parser.add_argument('-therm', type=int,
                         default=int(1e4), help='Monte Carlo sweeps of thermalization')
     parser.add_argument('-N_meas', type=int,
-                        default=2, help='Number of Updates before measurements')
+                        default=3, help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
-                        default=4, help='Number of iterations')
-    parser.add_argument('-U', type=float,
-                        default=2.5, help='Local interaction strenght')
+                        default=20, help='Number of iterations')
+    parser.add_argument('-U', type=float, nargs='+',
+                        default=[2.5], help='Local interaction strenght')
     parser.add_argument('pref', default='st', help='fileprefix')
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
@@ -63,6 +65,7 @@ def dmft_loop_pm(simulation, **kwarg):
     tau, w_n, _, Giw, v_aux, intm = hf.setup_PM_sim(setup)
 
     simulation.update({'setup': setup})
+    simulation['U'] = kwarg['U']
 
     current_u = 'U'+str(setup['U'])
     try:
@@ -74,7 +77,8 @@ def dmft_loop_pm(simulation, **kwarg):
 
     for iter_count in range(setup['Niter']):
         #patch tail on
-        print('On loop', iter_count, 'beta', setup['BETA'])
+        if comm.rank == 0:
+            print('On loop', iter_count, 'beta', setup['BETA'], 'U', setup['U'])
         Giw.real = 0.
         Giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
 
@@ -99,6 +103,8 @@ if __name__ == "__main__":
     SETUP = do_input()
 
     sim = shelve.open(SETUP['pref']+'stb{BETA}_met'.format(**SETUP), writeback=True)
+    U_rang = SETUP.pop('U')
     sim['setup'] = SETUP
-    dmft_loop_pm(sim)
+    for u_int in U_rang:
+        dmft_loop_pm(sim, U=u_int)
     sim.close()

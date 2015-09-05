@@ -111,7 +111,8 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps']*comm.Get_size()
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
-    print('acc ', acc, 'nsign', anrat)
+
+    print('acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
     if parms['save_logs']:
         return [avg_g(gst, parms) for gst in Gst],\
