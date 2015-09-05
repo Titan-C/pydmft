@@ -20,6 +20,7 @@ comm = MPI.COMM_WORLD
 
 
 def do_input():
+    """Prepares the input for the simulation at hand"""
 
     parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band')
     parser.add_argument('-BETA', metavar='B', type=float,
@@ -50,8 +51,7 @@ def do_input():
 
 def dmft_loop_pm(simulation, **kwarg):
     """Implementation of the solver"""
-    setup = {
-             'N_TAU':    2**11,
+    setup = {'N_TAU':    2**11,
              'N_MATSUBARA': 512,
              't':           .5,
              'MU':          0,
@@ -90,19 +90,22 @@ def dmft_loop_pm(simulation, **kwarg):
 
         Gt = hf.interpol(gt, setup['N_TAU'])
         Giw = gf.gt_fouriertrans(Gt, tau, w_n)
-        simulation[current_u]['it{:0>2}'.format(last_loop + iter_count)] = {
-                            'G0iw': G0iw.copy(),
-                            'setup': setup.copy(),
-                            'Giw':  Giw.copy(),
-                            'gtau': gt.copy(),
-                            }
-        simulation.sync()
+
+        if comm.rank == 0:
+            simulation[current_u]['it{:0>2}'.format(last_loop + iter_count)] = {
+                                'G0iw': G0iw.copy(),
+                                'setup': setup.copy(),
+                                'Giw':  Giw.copy(),
+                                'gtau': gt.copy(),
+                                }
+            simulation.sync()
+
 
 if __name__ == "__main__":
 
     SETUP = do_input()
 
-    sim = shelve.open(SETUP['pref']+'stb{BETA}_met'.format(**SETUP), writeback=True)
+    sim = shelve.open(SETUP['pref'] + 'stb{BETA}_met'.format(**SETUP), writeback=True)
     U_rang = SETUP.pop('U')
     sim['setup'] = SETUP
     for u_int in U_rang:

@@ -21,6 +21,7 @@ import dmft.hffast as hffast
 
 comm = MPI.COMM_WORLD
 
+
 def ising_v(dtau, U, L, fields=1, polar=0.5):
     """initialize the vector V of Ising fields
     .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
@@ -93,9 +94,10 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
             int_v = np.dot(interaction, v)
             g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
 
-        for updates in range(parms['N_meas']):
+        for _ in range(parms['N_meas']):
             for i, (up, dw) in enumerate(i_pairs):
-                acr, nrat = hffast.updateDHS(g[up], g[dw], v[i], parms['Heat_bath'])
+                acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
+                                             parms['Heat_bath'])
                 acc += acr
                 anrat += nrat
 
@@ -143,10 +145,11 @@ def retarded_weiss(g0tau):
     delta_tau = np.arange(lfak)
 
     gind = lfak + np.subtract.outer(delta_tau, delta_tau)
-    g0t_mat = np.empty((lfak*n1,lfak*n2))
+    g0t_mat = np.empty((lfak*n1, lfak*n2))
     for i in range(n1):
         for j in range(n2):
-            g0t_mat[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak] = np.concatenate((g0tau[:, i, j], -g0tau[:, i, j]))[gind]
+            g0t_mat[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak] = np.concatenate(
+                (g0tau[:, i, j], -g0tau[:, i, j]))[gind]
     return g0t_mat
 
 
@@ -165,6 +168,7 @@ def avg_gblock(gmat):
 
     return xg
 
+
 def avg_g(gst, parms):
     n1, n2, lfak = parms['SITES'], parms['SITES'], parms['n_tau_mc']
 
@@ -173,7 +177,7 @@ def avg_g(gst, parms):
         for j in range(n2):
             gst_m[i, j] = avg_gblock(gst[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak])
             if i == j:
-                gst_m[i,j, -1] += 1.
+                gst_m[i, j, -1] += 1.
     return gst_m
 
 
@@ -212,12 +216,12 @@ def gnew(g, dv, k):
     g = dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
-def interpol(gt, Lrang):
+def interpol(gtau, Lrang):
     """This function interpolates :math:`G(\\tau)` to an even numbered anti
     periodic array for it to be directly used by the fourier transform into
     matsubara frequencies"""
-    t = np.linspace(0, 1, gt.size)
-    f = interp1d(t, gt)
+    t = np.linspace(0, 1, gtau.size)
+    f = interp1d(t, gtau)
     tf = np.linspace(0, 1, Lrang+1)
     return f(tf)
 
@@ -241,7 +245,7 @@ def interaction_matrix(bands):
 
 
 def setup_PM_sim(u_parms):
-        # Set up default values
+    """Setup the default state for a Paramagnetic simulation"""
     parms = {'global_flip': False,
              'save_logs': False,
              'n_tau_mc':    64,
@@ -255,15 +259,15 @@ def setup_PM_sim(u_parms):
              'sweeps':      50000,
              'therm':       5000,
              'N_meas':      4,
-             'updater':     'discrete'
-             }
+             'updater':     'discrete'}
     parms.update(u_parms)
     tau, w_n = tau_wn_setup(parms)
-    gw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
-    gt = gw_invfouriertrans(gw, tau, w_n)
-    gt = interpol(gt, parms['n_tau_mc'])
+    giw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
+    gtau = gw_invfouriertrans(giw, tau, w_n)
+    gtau = interpol(gtau, parms['n_tau_mc'])
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
     intm = interaction_matrix(parms['BANDS'])
-    v = ising_v(parms['dtau_mc'], parms['U'], parms['n_tau_mc']*parms['SITES'], intm.shape[1])
+    v = ising_v(parms['dtau_mc'], parms['U'], parms['n_tau_mc']*parms['SITES'],
+                intm.shape[1])
 
-    return tau, w_n, gt, gw, v, intm
+    return tau, w_n, gtau, giw, v, intm
