@@ -43,7 +43,7 @@ def test_hf_fast_updatecond(chempot, u_int, beta=16.,
 @pytest.mark.xfail(raises=AssertionError, reason='Atom is not well described')
 def test_solver_atom(u_int):
     parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    64,
-             'sweeps': 2000, 'therm': 1000, 'N_meas': 3,
+             'sweeps': 2000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete',
              'global_flip': True, 'SITES': 1, 'BANDS': 1}
     parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
@@ -70,7 +70,7 @@ def test_solver(chempot, u_int, gend):
     parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
              't': 0.5, 'SITES': 1, 'BANDS':1,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
-             'sweeps': 5000, 'therm': 1000, 'N_meas': 1,
+             'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete'}
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
