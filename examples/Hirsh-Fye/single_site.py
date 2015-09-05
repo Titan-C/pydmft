@@ -37,7 +37,8 @@ def do_input():
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, nargs='+',
                         default=[2.5], help='Local interaction strenght')
-    parser.add_argument('pref', default='st', help='fileprefix')
+    parser.add_argument('-ofile', default='SB_PM_B{BETA}',
+                        help='Output file shelve')
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
@@ -105,8 +106,7 @@ if __name__ == "__main__":
 
     SETUP = do_input()
     U_rang = SETUP.pop('U')
-    sim = shelve.open(SETUP['pref'] + 'stb{BETA}_met'.format(**SETUP),
-                      writeback=True)
+    sim = shelve.open(SETUP['ofile'].format(**SETUP), writeback=True)
     sim['setup'] = SETUP
     for u_int in U_rang:
         dmft_loop_pm(sim, U=u_int)
