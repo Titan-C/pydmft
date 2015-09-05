@@ -56,6 +56,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     """
 
     # Set up default values
+    fracp, intp = math.modf(time.time())
     parms = {'global_flip': False,
              'save_logs': False,
              'n_tau_mc':    64,
@@ -68,6 +69,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
              'sweeps':      50000,
              'therm':       5000,
              'N_meas':      4,
+             'SEED':        int(intp+comm.Get_rank()*341*fracp),
              'Heat_bath':   True,
              }
     parms.update(parms_user)
@@ -82,8 +84,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
-    bas, mult = math.modf(time.time())
-    hffast.set_seed(int(bas+comm.Get_rank()*341*mult))
+    hffast.set_seed(parms['SEED'])
 
     for mcs in xrange(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
