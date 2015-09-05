@@ -13,6 +13,8 @@ import scipy.linalg as la
 from scipy.linalg.blas import dger
 from scipy.interpolate import interp1d
 from mpi4py import MPI
+import math
+import time
 
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 import dmft.hffast as hffast
@@ -80,6 +82,8 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
+    bas, mult = math.modf(time.time())
+    hffast.set_seed(int(bas+comm.Get_rank()*341*mult))
 
     for mcs in xrange(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0:
