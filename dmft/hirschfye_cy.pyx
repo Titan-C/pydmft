@@ -21,12 +21,15 @@ cdef extern from "gsl/gsl_rng.h":
     gsl_rng_type *gsl_rng_mt19937
     gsl_rng *gsl_rng_alloc(gsl_rng_type * T)
     double uniform "gsl_rng_uniform"(gsl_rng *r)
+    void cyset_seed "gsl_rng_set"(gsl_rng *r, unsigned long int)
 
 cdef extern from "gsl/gsl_randist.h":
     double normal "gsl_ran_gaussian"(gsl_rng *r, double sigma)
 
 cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
 
+def set_seed(seed=84263):
+    cyset_seed(r, seed)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
