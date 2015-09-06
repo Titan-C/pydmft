@@ -15,6 +15,7 @@ import dmft.hirschfye as hf
 import numpy as np
 import shelve
 import argparse
+from pytriqs.archive import HDFArchive
 from mpi4py import MPI
 comm = MPI.COMM_WORLD
 
@@ -38,7 +39,7 @@ def do_input():
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, nargs='+',
                         default=[2.5], help='Local interaction strenght')
-    parser.add_argument('-ofile', default='SB_PM_B{BETA}',
+    parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
                         help='Output file shelve')
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
@@ -60,19 +61,18 @@ def dmft_loop_pm(simulation, **kwarg):
              'save_logs':   False,
              'updater':     'discrete'}
 
-    setup.update(simulation.pop('setup', {}))
+    current_u = 'U'+str(kwarg['U'])
+    setup.update(simulation)
     setup.update(kwarg)
-    simulation.update({'setup': setup})
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
-    current_u = 'U'+str(setup['U'])
     try:
-        last_loop = len(simulation[current_u])
-        giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw'].copy()
-    except KeyError:
+        with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
+            last_loop = len(simulation[current_u].keys())
+            giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw']
+    except (IOError, KeyError):
         last_loop = 0
-        simulation.update({current_u: {}})
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
         if comm.rank == 0:
@@ -91,22 +91,19 @@ def dmft_loop_pm(simulation, **kwarg):
         gtau = hf.interpol(gt, setup['N_TAU'])
         giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
-        simulation[current_u]['it{:0>2}'.format(iter_count)] = {
+        if comm.rank == 0:
+            with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
+                simulation[current_u+'/it{:0>2}'.format(iter_count)] = {
                             'g0iw': g0iw.copy(),
                             'setup': setup.copy(),
                             'giw':  giw.copy(),
                             'gtau': gt.copy(),
                             }
-        simulation.sync()
 
 
 if __name__ == "__main__":
 
     SETUP = do_input()
     U_rang = SETUP.pop('U')
-    sim = shelve.open(SETUP['ofile'].format(**SETUP), writeback=True)
-    sim['setup'] = SETUP
     for u_int in U_rang:
-        dmft_loop_pm(sim, U=u_int)
-        comm.Barrier()
-    sim.close()
+        dmft_loop_pm(SETUP, U=u_int)
