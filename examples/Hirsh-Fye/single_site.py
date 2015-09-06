@@ -62,16 +62,15 @@ def dmft_loop_pm(simulation, **kwarg):
 
     setup.update(simulation.pop('setup', {}))
     setup.update(kwarg)
-    tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
-
     simulation.update({'setup': setup})
-    simulation['U'] = kwarg['U']
+
+    tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
     current_u = 'U'+str(setup['U'])
     try:
         last_loop = len(simulation[current_u])
         giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw'].copy()
-    except Exception:
+    except KeyError:
         last_loop = 0
         simulation.update({current_u: {}})
 
@@ -92,14 +91,13 @@ def dmft_loop_pm(simulation, **kwarg):
         gtau = hf.interpol(gt, setup['N_TAU'])
         giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
-        if comm.rank == 0:
-            simulation[current_u]['it{:0>2}'.format(iter_count)] = {
-                                'g0iw': g0iw.copy(),
-                                'setup': setup.copy(),
-                                'giw':  giw.copy(),
-                                'gtau': gt.copy(),
-                                }
-            simulation.sync()
+        simulation[current_u]['it{:0>2}'.format(iter_count)] = {
+                            'g0iw': g0iw.copy(),
+                            'setup': setup.copy(),
+                            'giw':  giw.copy(),
+                            'gtau': gt.copy(),
+                            }
+        simulation.sync()
 
 
 if __name__ == "__main__":
@@ -110,4 +108,5 @@ if __name__ == "__main__":
     sim['setup'] = SETUP
     for u_int in U_rang:
         dmft_loop_pm(sim, U=u_int)
+        comm.Barrier()
     sim.close()
