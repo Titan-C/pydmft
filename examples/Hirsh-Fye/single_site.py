@@ -45,7 +45,7 @@ def do_input():
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
-    parser.add_argument('-new_seed', type=float, nargs=3,
+    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                         metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
     parser.add_argument('-liter', metavar='N', type=int, default=5,
@@ -82,7 +82,7 @@ def dmft_loop_pm(simulation, **kwarg):
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
-    if setup['new_seed'] is not None:
+    if setup['new_seed']:
         set_new_seed(setup)
         return
 
