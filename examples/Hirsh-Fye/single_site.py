@@ -10,13 +10,13 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 
 from __future__ import division, absolute_import, print_function
 
+from mpi4py import MPI
+from pytriqs.archive import HDFArchive
+import argparse
 import dmft.common as gf
 import dmft.hirschfye as hf
 import numpy as np
-import shelve
-import argparse
-from pytriqs.archive import HDFArchive
-from mpi4py import MPI
+import sys
 comm = MPI.COMM_WORLD
 
 
@@ -99,6 +99,7 @@ def dmft_loop_pm(simulation, **kwarg):
                             'giw':  giw.copy(),
                             'gtau': gt.copy(),
                             }
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
