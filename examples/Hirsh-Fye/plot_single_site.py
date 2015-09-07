@@ -92,15 +92,15 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
     return np.asarray(U), figiw, lgiw
 
 
-def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
+def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     f, ax = plt.subplots(1, 2, figsize=(13, 8))
 
     U, fit_gf, lgiw = fit_dos(beta, avg)
-    wn = gf.matsubara_freq(beta)
+    wn = gf.matsubara_freq(beta, 512)
     wr = np.arange(0, wn[2], 0.05)
-    for u, gfit, igiw in zip(U, fit_gf, lgiw):
-        ax[0].plot(wn, igiw, 'o:', label='U='+str(u))
+    for u, gfit, giw in zip(U, fit_gf, lgiw):
+        ax[0].plot(wn, giw.imag, 'o:', label='U='+str(u))
         ax[0].plot(wr, gfit(wr), 'k:')
 
     ax[0].set_xlim([0, xlim])
