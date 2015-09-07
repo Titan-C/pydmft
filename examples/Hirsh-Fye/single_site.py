@@ -16,6 +16,7 @@ import argparse
 import dmft.common as gf
 import dmft.hirschfye as hf
 import numpy as np
+import plot_single_site as pss
 import sys
 comm = MPI.COMM_WORLD
 
@@ -29,7 +30,7 @@ def do_input():
                         default=32., help='The inverse temperature')
     parser.add_argument('-n_tau_mc', metavar='B', type=int,
                         default=64, help='Number of time slices')
-    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(1e5),
+    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
                         help='Number Monte Carlo Measurement')
     parser.add_argument('-therm', type=int, default=int(1e4),
                         help='Monte Carlo sweeps of thermalization')
@@ -44,11 +45,25 @@ def do_input():
 
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
-    parser.add_argument('-r', '--resume', action='store_true',
+    parser.add_argument('-new_seed', type=float, nargs=3,
+                        metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
     parser.add_argument('-liter', metavar='N', type=int, default=5,
                         help='On resume, average over liter[ations]')
     return vars(parser.parse_args())
+
+
+def set_new_seed(setup):
+    print(setup['new_seed'])
+    source_U = 'U' + str(setup['new_seed'][0])
+    target_U = 'U' + str(setup['new_seed'][1])
+    avg_over = int(setup['new_seed'][2])
+
+    with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
+        last_iterations = outp[source_U].keys()[-avg_over:]
+        giw = pss._averager(outp[source_U], last_iterations)
+        outp[target_U + '/it00/giw'] = giw
+        outp[target_U + '/it00/setup'] = outp[source_U]['it00']['setup']
 
 
 def dmft_loop_pm(simulation, **kwarg):
@@ -66,6 +81,10 @@ def dmft_loop_pm(simulation, **kwarg):
     setup.update(kwarg)
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
+
+    if setup['new_seed'] is not None:
+        set_new_seed(setup)
+        return
 
     try:
         with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
