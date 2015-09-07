@@ -18,12 +18,11 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, U, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
+def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     f, ax = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
     with HDFArchive(filestr.format(beta), 'r') as output_files:
-        u_str = 'U{}'.format(U)
         w_n = gf.matsubara_freq(output_files[u_str]['it00']['setup']['BETA'],
                                 output_files[u_str]['it00']['setup']['N_MATSUBARA'])
         for it in sorted(output_files[u_str].keys()):
@@ -37,7 +36,7 @@ def show_conv(beta, U, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
     ax[0].set_xlim([0, 2])
     ax[1].legend(loc=0, ncol=nf)
     graf = r'$G(i\omega_n)$'
-    ax[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, U))
+    ax[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
     ax[0].set_ylabel(graf)
     ax[0].set_xlabel(r'$i\omega_n$')
     ax[1].set_title('Evolution of the first frequencies')
@@ -81,7 +80,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
 
     with HDFArchive(filestr.format(beta), 'r') as output_files:
         for u_str in sorted(output_files.keys()):
-            U.append(float(re.findall("U([\d\.]+)", u_str)[0]))
+            U.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
             giw = _averager(output_files[u_str], last_iterations)
 
@@ -108,3 +107,15 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
 
     plt.show()
     plt.close()
+
+
+def phases():
+    fig, axs = plt.subplots()
+    for beta in np.array([32., 40., 64.]):
+        U, gfit, _ = fit_dos(beta, 2)
+        T = np.ones(len(U)) * 2 / beta
+        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit])
+
+    plt.xlabel('U/D')
+    plt.ylabel('T/t')
+    print(U)
