@@ -47,6 +47,13 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
     plt.close()
 
 
+def list_show_conv(beta, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
+    with HDFArchive(filestr.format(beta), 'r') as output_files:
+        urange = output_files.keys()
+
+    for u_str in urange:
+        show_conv(beta, u_str, filestr, nf, xlim)
+
 def _averager(it_output, last_iterations):
     """Averages over the files terminating with the numbers given in vector"""
     sgiw = 0
