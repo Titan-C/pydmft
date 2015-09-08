@@ -46,6 +46,14 @@ def show_conv(beta, U, filestr='B{}_U{}/Gf.out.*', nf=5, xlim=2):
     plt.close()
 
 
+def list_show_conv(beta, dirstr='B{}_U{}', nf=5, xlim=2):
+    list_dirs = sorted(glob(dirstr.format(beta, '*')))
+
+    for ldir in list_dirs:
+        U = float(re.findall("U([\d\.]+)", ldir)[0])
+        show_conv(beta, U, dirstr, nf, xlim)
+
+
 ###############################################################################
 # I start first by checking the convergence of the system at various
 # data points for this I have a look at the evolulution of the
