@@ -7,52 +7,53 @@ This module runs ctqmc impurity solver for one-band model.
 The executable shoule exist in directory params['exe']
 """
 
+from glob import glob
 import argparse
 import dmft.common as gf
-import glob
 import numpy as np
 import os
+import plot_single_band as psb
 import shutil
 import subprocess
-import plot_single_band as psb
+import sys
 
-parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band')
-parser.add_argument('-beta', metavar='B', type=float,
+parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band',
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-BETA', metavar='B', type=float,
                     default=64., help='The inverse temperature')
 parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of iterations')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
-parser.add_argument('-r', '--resume', action='store_true',
-                    help='Resume DMFT loops from inside folder. Do not copy'
-                    'a seed file from the main directory')
-parser.add_argument('-liter', metavar='N', type=int,
-                    default=5, help='On resume, average over liter[ations]')
+
+parser.add_argument('-odir', default='coex/B{BETA}_U{U}',
+                    help='Output directory')
+parser.add_argument('-new_seed', type=float, nargs=3, default=False,
+                    metavar=('U_src', 'U_target', 'avg_over'),
+                    help='Resume DMFT loops from on disk data files')
 args = parser.parse_args()
 
 Niter = args.Niter
-BETA = args.beta
+BETA = args.BETA
 M = 10e6
 
 
-params = {"exe":           ['ctqmc',              "# Path to executable"],
-          "Delta":         ["Delta.inp"         , "# Input bath function hybridization"],
-          "cix":           ["one_band.imp"      , "# Input file with atomic state"],
-#          "U"            : [Uc                  , "# Coulomb repulsion (F0)"],
-#          "mu"           : [Uc/2.               , "# Chemical potential"],
-          "beta"         : [BETA                , "# Inverse temperature"],
-          "M"            : [M                   , "# Number of Monte Carlo steps"],
-          "nom"          : [BETA                , "# number of Matsubara frequency points to sample"],
-          "nomD"         : [0                   , "# number of Matsubara points using the Dyson Equation"],
-          "Segment"      : [0                   , "# Whether to use segment type algorithm"],
-          "aom"          : [5                   , "# number of frequency points to determin high frequency tail"],
-          "tsample"      : [30                  , "# how often to record the measurements" ],
-          "PChangeOrder" : [0.9                 , "# Ratio between trial steps: add-remove-a-kink / move-a-kink"],
-          "OCA_G"        : [False               , "# No OCA diagrams being computed - for speed"],
-          "minM"         : [1e-10               , "# The smallest allowed value for the atomic trace"],
-          "minD"         : [1e-10               , "# The smallest allowed value for the determinant"],
-          "Nmax"         : [BETA*2              , "# Maximum perturbation order allowed"],
-          "GlobalFlip"   : [100000              , "# Global flip shold be tried"],
+params = {"exe":          ['ctqmc',        "# Path to executable"],
+          "Delta":        ["Delta.inp",    "# Input bath function hybridization"],
+          "cix":          ["one_band.imp", "# Input file with atomic state"],
+          "beta":         [BETA,           "# Inverse temperature"],
+          "M":            [M,              "# Number of Monte Carlo steps"],
+          "nom":          [BETA,           "# number of Matsubara frequency points to sample"],
+          "nomD":         [0,              "# number of Matsubara points using the Dyson Equation"],
+          "Segment":      [0,              "# Whether to use segment type algorithm"],
+          "aom":          [5,              "# number of frequency points to determin high frequency tail"],
+          "tsample":      [30,             "# how often to record the measurements" ],
+          "PChangeOrder": [0.9,            "# Ratio between trial steps: add-remove-a-kink / move-a-kink"],
+          "OCA_G":        [False,          "# No OCA diagrams being computed - for speed"],
+          "minM":         [1e-10,          "# The smallest allowed value for the atomic trace"],
+          "minD":         [1e-10,          "# The smallest allowed value for the determinant"],
+          "Nmax":         [BETA*2,         "# Maximum perturbation order allowed"],
+          "GlobalFlip":   [100000,         "# Global flip shold be tried"],
           }
 
 icix = """# Cix file for cluster DMFT with CTQMC
@@ -136,14 +137,18 @@ def DMFT_SCC(fDelta):
     np.savetxt(fDelta, delta)
 
 
-def averager(vector, file_str='Gf.out'):
-    """Averages over the files terminating with the numbers given in vector"""
-    nvec = [file_str+'.{:02}'.format(it) for it in vector]
-    new_gf = psb._averager(nvec).T
-    np.savetxt(file_str, new_gf)
+def set_new_seed(setup):
+    new_seed = setup.new_seed
+    avg_over = int(new_seed[2])
+
+    prev_iter = sorted(glob(setup.odir.format(setup.beta, setup.new_seed[0]) +
+                            '/Gf.out.*'))[-avg_over:]
+    giw = psb._averager(prev_iter).T
+    np.savetxt(setup.odir.format(setup.beta, setup.new_seed[1]) + '/Gf.out',
+               giw)
 
 
-def dmft_loop_pm(Uc, liter, resume):
+def dmft_loop_pm(Uc, liter, new_seed):
     """Creating parameters file PARAMS for qmc execution"""
     uparams = {"U": [Uc, "# Coulomb repulsion (F0)"],
                "mu": [Uc/2., "# Chemical potential"]}
@@ -155,8 +160,6 @@ def dmft_loop_pm(Uc, liter, resume):
     fh_info = open('info.dat', 'w')
 
     prev_iter = len(glob.glob('Gf.out.*'))
-    if resume:
-        averager(np.arange(prev_iter - liter, prev_iter))
 
     for it in range(prev_iter, prev_iter + Niter):
         # Constructing bath Delta.inp from Green's function
@@ -175,17 +178,22 @@ def dmft_loop_pm(Uc, liter, resume):
 
 
 CWD = os.getcwd()
+import pdb; pdb.set_trace()
+if args.new_seed:
+    set_new_seed(args)
+    sys.exit()
+
 for Uc in args.U:
 
     udir = 'B{}_U{}'.format(BETA, Uc)
     if not os.path.exists(udir):
         os.makedirs(udir)
     seedGF = 'Gf.out.B'+str(BETA)
-    if os.path.exists(seedGF) and not args.resume:
+    if os.path.exists(seedGF) and not args.new_seed:
         shutil.copy(seedGF, udir+'/Gf.out')
         shutil.copy(params['cix'][0], udir)
     os.chdir(udir)
-    dmft_loop_pm(Uc, args.liter, args.resume)
+    dmft_loop_pm(Uc, args.new_seed)
     shutil.copy('Gf.out', '../'+seedGF)
     shutil.copy(params['cix'][0], '../')
     os.chdir(CWD)

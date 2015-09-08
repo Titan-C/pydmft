@@ -48,8 +48,6 @@ def do_input():
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                         metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
-    parser.add_argument('-liter', metavar='N', type=int, default=5,
-                        help='On resume, average over liter[ations]')
     return vars(parser.parse_args())
 
 
