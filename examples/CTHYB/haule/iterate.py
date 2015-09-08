@@ -141,14 +141,20 @@ def set_new_seed(setup):
     new_seed = setup.new_seed
     avg_over = int(new_seed[2])
 
-    prev_iter = sorted(glob(setup.odir.format(setup.beta, setup.new_seed[0]) +
+    prev_iter = sorted(glob(setup.odir.format(BETA=setup.BETA, U=new_seed[0]) +
                             '/Gf.out.*'))[-avg_over:]
     giw = psb._averager(prev_iter).T
-    np.savetxt(setup.odir.format(setup.beta, setup.new_seed[1]) + '/Gf.out',
-               giw)
+
+    udir = setup.odir.format(BETA=setup.BETA, U=new_seed[1])
+    if not os.path.exists(udir):
+        os.makedirs(udir)
+    np.savetxt(udir + '/Gf.out', giw)
+    # creating impurity cix file
+    with open(udir + '/' + params['cix'][0], 'w') as f:
+        f.write(icix)
 
 
-def dmft_loop_pm(Uc, liter, new_seed):
+def dmft_loop_pm(Uc):
     """Creating parameters file PARAMS for qmc execution"""
     uparams = {"U": [Uc, "# Coulomb repulsion (F0)"],
                "mu": [Uc/2., "# Chemical potential"]}
@@ -159,7 +165,7 @@ def dmft_loop_pm(Uc, liter, new_seed):
 
     fh_info = open('info.dat', 'w')
 
-    prev_iter = len(glob.glob('Gf.out.*'))
+    prev_iter = len(glob('Gf.out.*'))
 
     for it in range(prev_iter, prev_iter + Niter):
         # Constructing bath Delta.inp from Green's function
@@ -167,6 +173,7 @@ def dmft_loop_pm(Uc, liter, new_seed):
 
         # Running ctqmc
         print('Running ---- qmc it: ', it, '-----')
+        sys.stdout.flush()
 
         cmd = mpi_prefix+' '+params['exe'][0]+'  PARAMS > nohup_imp.out 2>&1 '
         subprocess.call(cmd, shell=True, stdout=fh_info, stderr=fh_info)
@@ -178,22 +185,16 @@ def dmft_loop_pm(Uc, liter, new_seed):
 
 
 CWD = os.getcwd()
-import pdb; pdb.set_trace()
 if args.new_seed:
     set_new_seed(args)
     sys.exit()
 
 for Uc in args.U:
 
-    udir = 'B{}_U{}'.format(BETA, Uc)
+    udir = args.odir.format(BETA=BETA, U=Uc)
     if not os.path.exists(udir):
         os.makedirs(udir)
-    seedGF = 'Gf.out.B'+str(BETA)
-    if os.path.exists(seedGF) and not args.new_seed:
-        shutil.copy(seedGF, udir+'/Gf.out')
-        shutil.copy(params['cix'][0], udir)
+
     os.chdir(udir)
-    dmft_loop_pm(Uc, args.new_seed)
-    shutil.copy('Gf.out', '../'+seedGF)
-    shutil.copy(params['cix'][0], '../')
+    dmft_loop_pm(Uc)
     os.chdir(CWD)
