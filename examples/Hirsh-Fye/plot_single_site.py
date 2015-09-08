@@ -54,6 +54,7 @@ def list_show_conv(beta, filestr='SB_PM_B{}.h5', nf=5, xlim=2):
     for u_str in urange:
         show_conv(beta, u_str, filestr, nf, xlim)
 
+
 def _averager(it_output, last_iterations):
     """Averages over the files terminating with the numbers given in vector"""
     sgiw = 0
@@ -112,6 +113,15 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     ax[0].set_xlim([0, xlim])
     ax[1].plot(U, [dos(0) for dos in fit_gf], 'o-')
 
+    ax[1].legend(loc=0, ncol=2)
+    graf = r'$G(i\omega_n)$'
+    ax[0].set_title(r'State of {} @ $\beta={}$'.format(graf, beta))
+    ax[0].set_ylabel(graf)
+    ax[0].set_xlabel(r'$i\omega_n$')
+    ax[1].set_title('Density of states at the fermi Level')
+    ax[1].set_ylabel(graf+r'$_{\omega\rightarrow 0}$')
+    ax[1].set_xlabel('$U/D$')
+
     plt.show()
     plt.close()
 
@@ -120,7 +130,7 @@ def phases():
     fig, axs = plt.subplots()
     for beta in np.array([32., 40., 64.]):
         U, gfit, _ = fit_dos(beta, 2)
-        T = np.ones(len(U)) * 2 / beta
+        T = np.ones(len(U)) * 4 / beta
         axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit])
 
     plt.xlabel('U/D')
