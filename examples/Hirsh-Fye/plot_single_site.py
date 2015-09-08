@@ -136,4 +136,3 @@ def phases():
 
     plt.xlabel('U/D')
     plt.ylabel('T/t')
-    print(U)

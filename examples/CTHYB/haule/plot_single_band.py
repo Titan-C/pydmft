@@ -69,7 +69,7 @@ def list_show_conv(beta, dirstr='B{}_U{}', nf=5, xlim=2):
 # the monte carlo noise in the solution.
 
 
-def _averager(vector):
+def averager(vector):
     """Averages over the files terminating with the numbers given in vector"""
     simgiw = 0
     for it in vector:
@@ -106,7 +106,7 @@ def fit_dos(beta, avg, dirstr='coex/B{}_U{}'):
         if not iterations:
             continue
 
-        wn, rgiw, igiw = _averager(iterations)
+        wn, rgiw, igiw = averager(iterations)
         U.append(float(re.findall("U([\d\.]+)", ldir)[0]))
         gfit = gf.fit_gf(w_n, igiw)
         figiw.append(gfit)

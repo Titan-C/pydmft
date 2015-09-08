@@ -143,7 +143,7 @@ def set_new_seed(setup):
 
     prev_iter = sorted(glob(setup.odir.format(BETA=setup.BETA, U=new_seed[0]) +
                             '/Gf.out.*'))[-avg_over:]
-    giw = psb._averager(prev_iter).T
+    giw = psb.averager(prev_iter).T
 
     udir = setup.odir.format(BETA=setup.BETA, U=new_seed[1])
     if not os.path.exists(udir):
@@ -166,6 +166,7 @@ def dmft_loop_pm(Uc):
     fh_info = open('info.dat', 'w')
 
     prev_iter = len(glob('Gf.out.*'))
+    print('Loop at beta ', BETA, ' U=', Uc)
 
     for it in range(prev_iter, prev_iter + Niter):
         # Constructing bath Delta.inp from Green's function
