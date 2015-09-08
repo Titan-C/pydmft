@@ -128,10 +128,11 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
 
 def phases():
     fig, axs = plt.subplots()
-    for beta in np.array([32., 40., 64.]):
+    for beta in np.array([32., 40., 50., 64.]):
         U, gfit, _ = fit_dos(beta, 2)
         T = np.ones(len(U)) * 4 / beta
-        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit])
+        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit],
+                    vmin=-2, vmax=0)
 
     plt.xlabel('U/D')
     plt.ylabel('T/t')

@@ -51,7 +51,7 @@ def list_show_conv(beta, dirstr='B{}_U{}', nf=5, xlim=2):
 
     for ldir in list_dirs:
         U = float(re.findall("U([\d\.]+)", ldir)[0])
-        show_conv(beta, U, dirstr, nf, xlim)
+        show_conv(beta, U, dirstr+'/Gf.out.*', nf, xlim)
 
 
 ###############################################################################
@@ -81,7 +81,7 @@ def _averager(vector):
     return np.array([wn, regiw, imgiw])
 
 
-def fit_dos(beta, avg):
+def fit_dos(beta, avg, dirstr='coex/B{}_U{}'):
     """Fits for all Green's functions at a given beta their
     density of states at the Fermi energy
 
@@ -95,22 +95,22 @@ def fit_dos(beta, avg):
     arrays of Interaction, Fitted and source GF imaginary part
     """
 
-    list_dirs = sorted(glob('coex/B{}_U*'.format(beta)))
+    list_dirs = sorted(glob(dirstr.format(beta, '*')))
     U = []
     figiw = []
     ligiw = []
-    cwd = os.getcwd()
     w_n = gf.matsubara_freq(beta, 3)
 
     for ldir in list_dirs:
-        os.chdir(ldir)
-        iterations = sorted(glob('Gf.out.*'))[-avg:]
+        iterations = sorted(glob(ldir + '/Gf.out.*'))[-avg:]
+        if not iterations:
+            continue
+
         wn, rgiw, igiw = _averager(iterations)
         U.append(float(re.findall("U([\d\.]+)", ldir)[0]))
         gfit = gf.fit_gf(w_n, igiw)
         figiw.append(gfit)
         ligiw.append(igiw)
-        os.chdir(cwd)
 
     return np.asarray(U), figiw, ligiw
 
@@ -133,13 +133,13 @@ def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
     plt.close()
 
 
-def phases():
+def phases(dirstr):
     fig, axs = plt.subplots()
     for beta in np.array([20., 40., 64., 100.]):
-        U, gfit, _ = fit_dos(beta, 2)
-        T = np.ones(len(U)) * 2 / beta
-        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit])
+        U, gfit, _ = fit_dos(beta, 2, dirstr)
+        T = np.ones(len(U)) * 4 / beta
+        axs.scatter(U, T, s=300, c=[dos(0) for dos in gfit],
+                    vmin=-2, vmax=0)
 
     plt.xlabel('U/D')
     plt.ylabel('T/t')
-    print(U)
