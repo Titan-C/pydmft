@@ -14,6 +14,7 @@ from time import time
 import argparse
 import pytriqs.utility.mpi as mpi
 
+
 def prepare_interaction(u_int):
     """Build the local interaction term of the dimer
 
@@ -41,7 +42,7 @@ def dmft_loop(setup):
     for name, gblock in imp_sol.G_iw:
         gblock << SemiCircular(1)
 
-    for loop in range(20):
+    for loop in range(setup['Niter']):
 
         imp_sol.G_iw['low_up'] << 0.5 * (imp_sol.G_iw['low_up'] +
                                          imp_sol.G_iw['low_dw'])
@@ -56,7 +57,7 @@ def dmft_loop(setup):
             g0block << inverse(iOmega_n + setup['U']/2. + shift * setup['tp'] -
                                0.25*imp_sol.G_iw[name])
 
-        imp_sol.solve(h_int=h_int, **setup)
+        imp_sol.solve(h_int=h_int, **setup['s_params'])
 
         if mpi.is_master_node():
             with HDFArchive(setup['ofile']) as last_run:
@@ -69,19 +70,20 @@ def do_setup():
 
     parser = argparse.ArgumentParser(description='DMFT loop for CTHYB dimer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-sweeps', dest='n_cycles', metavar='MCS', type=int,
+    parser.add_argument('-sweeps', metavar='MCS', type=int,
                         default=int(1e6), help='Number MonteCarlo Measurement')
-    parser.add_argument('-n_warmup_cycles', type=int, default=int(1e4),
+    parser.add_argument('-therm', type=int, default=int(1e4),
                         help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=200, dest='length_cycle',
+    parser.add_argument('-N_meas', type=int, default=200,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
-    parser.add_argument('-U', type=float, nargs='+',
-                        default=[2.5], help='Local interaction strenght')
-    parser.add_argument('tp', default=0.18, help='The dimerization strength')
+    parser.add_argument('-U', type=float,
+                        default=2.5, help='Local interaction strenght')
+    parser.add_argument('-tp', default=0.18, type=float,
+                        help='The dimerization strength')
     parser.add_argument('-ofile', default='DIMER_PM_B{BETA}.h5',
                         help='Output file shelve')
 
@@ -91,9 +93,12 @@ def do_setup():
     setup = vars(parser.parse_args())
 
     fracp, intp = modf(time())
-    setup.update({'move_double': True,
-                  'measure_pert_order': True,
-                  'random_seed': int(intp+mpi.rank*341*fracp)})
+    setup.update({'s_params': {'move_double': True,
+                               'n_cycles': setup['sweeps'],
+                               'n_warmup_cycles': setup['therm'],
+                               'length_cycle': setup['N_meas'],
+                               'measure_pert_order': True,
+                               'random_seed': int(intp+mpi.rank*341*fracp)}})
 
     return setup
 
