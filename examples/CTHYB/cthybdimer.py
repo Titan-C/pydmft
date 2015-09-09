@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: Óscar Nájera
+Dimer in Bethe lattice
+======================
+
 """
-#from __future__ import division, absolute_import, print_function
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 from pytriqs.archive import *
 from pytriqs.gf.local import *
@@ -10,82 +11,77 @@ from pytriqs.operators import *
 from time import time
 import argparse
 import dmft.RKKY_dimer as rt
-import dmft.common as gf
-import numpy as np
 import pytriqs.utility.mpi as mpi
-
-# Set the solver parameters
-params = {
-    'n_cycles': int(2e6),
-    'length_cycle': 80,
-    'n_warmup_cycles': int(5e4),
-    'move_double': True,
-#    'measure_pert_order': True,
-    'random_seed': int(time()/2**14+time()/2**16*mpi.rank)
-}
-
-HINT = U * (n('up', 0) * n('down', 0) + n('up', 1) * n('down', 1))
+from math import sqrt
 
 
-def load_gf(g_iw, g_iwd, g_iwo):
-    """Loads into the first greenfunction the equal diagonal terms and the
-    offdiagonals. Input in GF_view"""
+aup = (-c('low_up', 0) + c('high_up', 0))/sqrt(2)
+adw = (-c('low_dw', 0) + c('high_dw', 0))/sqrt(2)
 
-    g_iw['0', '0'] << g_iwd
-    g_iw['1', '1'] << g_iwd
-    g_iw['0', '1'] << g_iwo
-    g_iw['1', '0'] << g_iwo
+bup = (c('low_up', 0) + c('high_up', 0))/sqrt(2)
+bdw = (c('low_dw', 0) + c('high_dw', 0))/sqrt(2)
 
-
-def mix_gf_dimer(gmix, omega, mu, tab):
-    """Dimer formation Green function term
-
-    .. math::
-
-        G_{mix}(i\omega_n) =ao
-    """
-    gmix['0', '0'] = omega + mu
-    gmix['0', '1'] = -tab
-    gmix['1', '0'] = -tab
-    gmix['1', '1'] = omega + mu
-    return gmix
 
 
 def cthyb_last_run(u_int, tp, BETA, file_str):
-    u = 'U'+str(u_int)
-    with rt.HDFArchive(file_str.format(tp=tp, BETA=BETA)) as last_run:
-        lastit = mpi.bcast(last_run[u].keys()[-1])
-        setup = mpi.bcast(last_run[u][lastit]['setup'])
-        gd = mpi.bcast(last_run[u][lastit]['G_iwd'])
-        go = mpi.bcast(last_run[u][lastit]['G_iwo'])
-
-    S = Solver(beta=setup['BETA'], gf_struct={'up': [0, 1], 'down': [0, 1]},
-               n_iw=setup['n_points'], n_tau=1025, n_l=15)
+    S = Solver(beta=BETA, gf_struct={'low_up': [0], 'high_up': [0],
+                                     'low_dw': [0], 'high_dw': [0]})
 
     for name, gblock in S.G_iw:
-        load_gf(gblock, gd, go)
+        gblock << SemiCircular(1)
 
-    U = setup['U']
-    gmix = mix_gf_dimer(S.G_iw['up'].copy(), iOmega_n, U/2., setup['tp'])
-    for name, g0block in S.G0_iw:
-        g0block << inverse(gmix - 0.25*S.G_iw['up'])
+    for it in range(20):
 
-    S.solve(h_int=HINT, **params)
+        S.G_iw['low_up'] << 0.5 * (S.G_iw['low_up'] + S.G_iw['low_dw'])
+        S.G_iw['high_up'] << 0.5 * (S.G_iw['high_up'] + S.G_iw['high_dw'])
+        S.G_iw['low_dw'] << S.G_iw['low_up']
+        S.G_iw['high_dw'] << S.G_iw['high_up']
 
-    if mpi.is_master_node():
-        with rt.HDFArchive(file_str.format(**setup)+'ct') as last_run:
-            last_run[u]['it00/G_iw'] = S.G_iw
-            last_run[u]['it00/G_tau'] = S.G_tau
+        for name, g0block in S.G0_iw:
+            g0block << inverse(iOmega_n + u_int/2. - 0.25*S.G_iw[name])
+
+        HINT = u_int * (dagger(aup)*aup*dagger(adw)*adw + dagger(bup)*bup*dagger(bdw)*bdw)
+
+        S.solve(h_int=HINT, **params)
+
+        if mpi.is_master_node():
+            with rt.HDFArchive('netdiag_dimer.h5') as last_run:
+                last_run['it{}/G_iw'.format(it)] = S.G_iw
+                last_run['it{}/G_tau'.format(it)] = S.G_tau
 
 
-parser = argparse.ArgumentParser(description='DMFT loop for a dimer bethe\
-                                                      lattice solved by CTHYB')
-parser.add_argument('beta', metavar='B', type=float,
-                    default=20., help='The inverse temperature')
-parser.add_argument('tp', default=0.18, help='The dimerization strength')
+def do_setup():
+    """Set the solver parameters"""
 
-args = parser.parse_args()
-ur = np.arange(2, 3, 0.1)
-for u_int in ur:
-    cthyb_last_run(u_int, args.tp, args.beta,
-                   '/home/oscar/dev/dmft-learn/examples/Hirsh-Fye/disk/metf_HF_Ul_tp{tp}_B{BETA}.h5')
+    parser = argparse.ArgumentParser(description='DMFT loop for CTHYB dimer',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-sweeps', dest='n_cycles', metavar='MCS', type=int,
+                        default=int(1e6), help='Number MonteCarlo Measurement')
+    parser.add_argument('-therm', type=int, default=int(1e4), dest='n_warmup_cycles',
+                        help='Monte Carlo sweeps of thermalization')
+    parser.add_argument('-N_meas', type=int, default=200, dest='length_cycle',
+                        help='Number of Updates before measurements')
+    parser.add_argument('-Niter', metavar='N', type=int,
+                        default=20, help='Number of iterations')
+    parser.add_argument('-BETA', metavar='B', type=float,
+                        default=32., help='The inverse temperature')
+    parser.add_argument('-U', type=float, nargs='+',
+                        default=[2.5], help='Local interaction strenght')
+    parser.add_argument('tp', default=0.18, help='The dimerization strength')
+    parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
+                        help='Output file shelve')
+
+    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
+                        metavar=('U_src', 'U_target', 'avg_over'),
+                        help='Resume DMFT loops from on disk data files')
+    setup = vars(parser.parse_args())
+    setup.update({'move_double': True,
+                  'measure_pert_order': True,
+                  'random_seed': int(time()/2**14+time()/2**16*mpi.rank)})
+
+    return setup
+
+if __name__ == "__main__":
+    SETUP = do_setup()
+
+    dmft_loop(SETUP)
