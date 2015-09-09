@@ -117,7 +117,7 @@ def dmft_loop_pm(simulation, **kwarg):
 
         if comm.rank == 0:
             with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
-                simulation[current_u+'/it{:0>2}'.format(iter_count)] = {
+                simulation[current_u+'/it{:03}'.format(iter_count)] = {
                             'g0iw': g0iw.copy(),
                             'setup': setup.copy(),
                             'giw':  giw.copy(),
