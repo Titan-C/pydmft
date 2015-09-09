@@ -17,7 +17,7 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
     for step in sorted(glob(filestr.format(beta, u_int))):
         w_n, _, imgiw = np.loadtxt(step).T
@@ -36,17 +36,17 @@ def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', n_freq=5, xlim=2):
     axes[1].set_ylabel(graf+'$(l)$')
     axes[1].set_xlabel('iterations')
 
-    fig.show()
+    plt.show()
     plt.close()
 
 
-def list_show_conv(beta, dirstr='B{}_U{}', n_freq=5, xlim=2):
+def list_show_conv(beta, dirstr='B{}_U{}', n_freq=5, xlim=2, func='/Gf.out.*'):
     """Provides a list of all convergence plots at a given temperature"""
     list_dirs = sorted(glob(dirstr.format(beta, '*')))
 
     for ldir in list_dirs:
         u_int = float(re.findall(r"U([\d\.]+)", ldir)[0])
-        show_conv(beta, u_int, dirstr+'/Gf.out.*', n_freq, xlim)
+        show_conv(beta, u_int, dirstr+func, n_freq, xlim)
 
 
 def averager(vector):
@@ -97,7 +97,7 @@ def fit_dos(beta, avg, dirstr='coex/B{}_U{}'):
 
 def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
     u_range, fit_gf, lgiw = fit_dos(beta, avg, filestr)
     w_n = gf.matsubara_freq(beta)
@@ -109,7 +109,7 @@ def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
     axes[0].set_xlim([0, xlim])
     axes[1].plot(u_range, [dos(0) for dos in fit_gf], 'o-')
 
-    fig.show()
+    plt.show()
     plt.close()
 
 

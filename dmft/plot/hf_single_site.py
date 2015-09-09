@@ -15,7 +15,7 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
     with HDFArchive(filestr.format(beta), 'r') as output_files:
         w_n = gf.matsubara_freq(output_files[u_str]['it00']['setup']['BETA'],
@@ -38,7 +38,7 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     axes[1].set_ylabel(graf+'$(l)$')
     axes[1].set_xlabel('iterations')
 
-    fig.show()
+    plt.show()
     plt.close()
 
 
@@ -97,7 +97,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
 
 def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    fig, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
     u_range, fit_gf, lgiw = fit_dos(beta, avg, filestr)
     w_n = gf.matsubara_freq(beta, 512)
@@ -109,7 +109,7 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     axes[0].set_xlim([0, xlim])
     axes[1].plot(u_range, [dos(0) for dos in fit_gf], 'o-')
 
-    fig.show()
+    plt.show()
     plt.close()
 
 
@@ -118,10 +118,11 @@ def phases():
 
     Shows the phase diagram of the impurity model of DMFT"""
 
-    for beta in np.array([32., 40., 64.]):
+    for beta in np.array([32., 40., 50., 64.]):
         u_int, gfit, _ = fit_dos(beta, 2)
         temp = np.ones(len(u_int)) * 2 / beta
-        plt.scatter(u_int, temp, s=300, c=[dos(0) for dos in gfit])
+        plt.scatter(u_int, temp, s=300, c=[dos(0) for dos in gfit],
+                    vmin=-2, vmax=0)
 
     plt.xlabel('U/D')
     plt.ylabel('T/t')
