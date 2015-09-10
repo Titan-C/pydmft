@@ -104,8 +104,7 @@ def set_new_seed(setup):
 
 def dmft_loop_pm(Uc):
     """Creating parameters file PARAMS for qmc execution"""
-    uparams = {"U": [Uc, "# Coulomb repulsion (F0)"],
-               "mu": [Uc/2., "# Chemical potential"]}
+    uparams = {"mu": [Uc/2., "# Chemical potential"]}
     params.update(uparams)
     CreateInputFile(params)
 
