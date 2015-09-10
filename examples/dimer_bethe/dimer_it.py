@@ -143,6 +143,7 @@ for Uc in args.U:
     udir = args.odir.format(BETA=BETA, U=Uc)
     if not os.path.exists(udir):
         os.makedirs(udir)
+        shutil.copy(params['cix'][0], udir + '/' + params['cix'][0])
 
     os.chdir(udir)
     dmft_loop_pm(Uc)

@@ -15,14 +15,15 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', n_freq=5, xlim=2):
+def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', col=2, n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
     for step in sorted(glob(filestr.format(beta, u_int))):
-        w_n, _, imgiw = np.loadtxt(step).T
-        axes[0].plot(w_n, imgiw)
-        freq_arr.append(imgiw[:n_freq])
+        gf_out = np.loadtxt(step).T
+        w_n, gf_iw = gf_out[0], gf_out[col]
+        axes[0].plot(w_n, gf_iw)
+        freq_arr.append(gf_iw[:n_freq])
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
         axes[1].plot(freqs, 'o-.', label=str(num))
@@ -40,13 +41,14 @@ def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', n_freq=5, xlim=2):
     plt.close()
 
 
-def list_show_conv(beta, dirstr='B{}_U{}', n_freq=5, xlim=2, func='/Gf.out.*'):
+def list_show_conv(beta, dirstr='B{}_U{}', col=2,
+                   n_freq=5, xlim=2, func='/Gf.out.*'):
     """Provides a list of all convergence plots at a given temperature"""
     list_dirs = sorted(glob(dirstr.format(beta, '*')))
 
     for ldir in list_dirs:
         u_int = float(re.findall(r"U([\d\.]+)", ldir)[0])
-        show_conv(beta, u_int, dirstr+func, n_freq, xlim)
+        show_conv(beta, u_int, dirstr+func, col, n_freq, xlim)
 
 
 def averager(vector):
