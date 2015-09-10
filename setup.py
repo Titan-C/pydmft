@@ -12,6 +12,7 @@ import dmft
 import sys
 import numpy as np
 
+
 class PyTest(TestCommand):
     """Test class to do test coverage analysis"""
     def finalize_options(self):
@@ -19,8 +20,9 @@ class PyTest(TestCommand):
         self.test_args = ['--cov-report', 'term-missing',
                           '--cov', 'dmft', 'tests/']
         self.test_suite = True
+
     def run_tests(self):
-        #import here, cause outside the eggs aren't loaded
+        # import here, cause outside the eggs aren't loaded
         import pytest
         errno = pytest.main(self.test_args)
         sys.exit(errno)
@@ -39,11 +41,13 @@ setup(
     author_email='najera.oscar@gmail.com',
     license="GNU General Public License v3 (GPLv3)",
 
-    install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles', 'joblib'],
+    install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles',
+                      'joblib'],
     setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest, 'build_ext': build_ext},
-    ext_modules=[Extension('dmft.hffast', ['dmft/hirschfye_cy.pyx', 'dmft/hfc.cpp'],
+    ext_modules=[Extension('dmft.hffast', ['dmft/hirschfye_cy.pyx',
+                                           'dmft/hfc.cpp'],
                            include_dirs=[np.get_include()],
                            language="c++",
                            libraries=['blas', 'gsl']),
