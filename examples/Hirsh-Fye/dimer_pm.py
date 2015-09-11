@@ -66,6 +66,7 @@ def dmft_loop_pm(params):
              'BANDS':     1,
              'SITES':     2,
              'save_logs': False,
+             'global_flip': True,
              'updater':   'discrete'}
 
     setup.update(params)
@@ -93,7 +94,8 @@ def dmft_loop_pm(params):
                            L=S.setup['SITES']*S.setup['n_tau_mc'])
 
     for loop_count in range(last_loop, last_loop + setup['Niter']):
-        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count)
+        if comm.rank == 0:
+            print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count)
 
         rt.gf_symetrizer(S.g_iw)
 

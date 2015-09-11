@@ -8,15 +8,59 @@ Created on Thu Jul 23 14:08:23 2015
 from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
 from pytriqs.gf.local import GfReFreq
+from pytriqs.archive import HDFArchive
 from pytriqs.plot.mpl_interface import oplot
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 import numpy as np
 import pandas as pd
 import re
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
+
+
+def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
+    """Plot the evolution of the Green's function in DMFT iterations"""
+    _, axes = plt.subplots(1, 2, figsize=(13, 8))
+    freq_arrd = []
+    freq_arro = []
+    with HDFArchive(filestr.format(beta), 'r') as output_files:
+        for step in output_files[u_str].keys():
+            giwd = output_files[u_str][step]['G_iwd']
+            giwo = output_files[u_str][step]['G_iwo']
+            axes[0].oplot(giwd, 'bo:', RI='I')
+            axes[0].oplot(giwo, 'gs:', RI='R')
+
+            freq_arrd.append(giwd.data.imag[:n_freq, 0, 0])
+            freq_arro.append(giwo.data.real[:n_freq, 0, 0])
+
+    freq_arrd = np.asarray(freq_arrd).T
+    freq_arro = np.asarray(freq_arro).T
+
+    for num, (freqsd, freqso) in enumerate(zip(freq_arrd, freq_arro)):
+        axes[1].plot(freqsd, 'o-.', label=str(num))
+        axes[1].plot(freqso, 's-.', label=str(num))
+
+    labimgiws = mlines.Line2D([], [], color='blue', marker='o',
+                              label=r'$\Im m G_{AA}$')
+    labregiws = mlines.Line2D([], [], color='green', marker='s',
+                              label=r'$\Re e G_{AB}$')
+    axes[0].legend(handles=[labimgiws, labregiws], loc=0)
+
+    axes[0].set_xlim([0, xlim])
+    axes[1].legend(loc=0, ncol=n_freq)
+    graf = r'$G(i\omega_n)$'
+    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
+    axes[0].set_ylabel(graf)
+    axes[0].set_xlabel(r'$i\omega_n$')
+    axes[1].set_title('Evolution of the first frequencies')
+    axes[1].set_ylabel(graf+'$(l)$')
+    axes[1].set_xlabel('iterations')
+
+    plt.show()
+    plt.close()
 
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
