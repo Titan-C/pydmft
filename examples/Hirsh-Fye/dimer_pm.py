@@ -1,57 +1,88 @@
 # -*- coding: utf-8 -*-
 r"""
-================================
-QMC Hirsch - Fye Impurity solver
-================================
+============================================
+QMC Hirsch - Fye Impurity solver for a Dimer
+============================================
 
-To treat the Anderson impurity model and solve it using the Hirsch - Fye
-Quantum Monte Carlo algorithm for a paramagnetic impurity
+To treat the dimer in a Bethe lattice and solve it using the Hirsch - Fye
+Quantum Monte Carlo algorithm
 """
 
-from pytriqs.gf.local import GfImFreq, iOmega_n
+from __future__ import division, absolute_import, print_function
+
+
+from mpi4py import MPI
+from pytriqs.archive import HDFArchive
+from pytriqs.gf.local import iOmega_n
+import argparse
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.hirschfye as hf
 import numpy as np
 import sys
 
-def dmft_loop_pm(u_int, tab, t, tn, beta, file_str, **params):
+comm = MPI.COMM_WORLD
+
+
+def do_input():
+    """Prepares the input for the simulation at hand"""
+
+    parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye dimer lattice',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-BETA', metavar='B', type=float,
+                        default=32., help='The inverse temperature')
+    parser.add_argument('-dtau_mc', metavar='dt', type=float,
+                        default=0.5, help='Trotter time step')
+    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
+                        help='Number Monte Carlo Measurement')
+    parser.add_argument('-therm', type=int, default=int(1e4),
+                        help='Monte Carlo sweeps of thermalization')
+    parser.add_argument('-N_meas', type=int, default=3,
+                        help='Number of Updates before measurements')
+    parser.add_argument('-Niter', metavar='N', type=int,
+                        default=20, help='Number of iterations')
+    parser.add_argument('-U', type=float, default=2.,
+                        help='Local interaction strenght')
+    parser.add_argument('-tp', type=float, default=.25,
+                        help='Dimerization strength')
+    parser.add_argument('-ofile', default='disk/dim_PM_B{BETA}_t{tp}.h5',
+                        help='Output file')
+
+    parser.add_argument('-M', '--Heat_bath', action='store_false',
+                        help='Use Metropolis importance sampling')
+    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
+                        metavar=('U_src', 'U_target', 'avg_over'),
+                        help='Resume DMFT loops from on disk data files')
+    return vars(parser.parse_args())
+
+
+def dmft_loop_pm(params):
     """Implementation of the solver"""
-    n_freq = int(15.*beta/np.pi)
-    setup = {
-               'BETA':        beta,
-               'N_TAU':    2**13,
-               'n_points': n_freq,
-               'dtau_mc': 0.5,
-               'U':           u_int,
-               't':           t,
-               'tp':          tab,
-               'MU':          0.,
-               'BANDS': 1,
-               'SITES': 2,
-               'loops':       0,  # starting loop count
-               'max_loops':   20,
-               'sweeps':      int(2e4),
-               'therm':       int(5e3),
-               'N_meas':      3,
-               'save_logs':   False,
-               'updater':     'discrete',
-               'convegence_tol': 4e-3,
-              }
+    n_freq = int(15.*params['BETA']/np.pi)
+    setup = {'N_TAU':     2**10,
+             'n_points':  n_freq,
+             't':         0.5,
+             'MU':        0.,
+             'BANDS':     1,
+             'SITES':     2,
+             'save_logs': False,
+             'updater':   'discrete'}
+
     setup.update(params)
+    current_u = 'U'+str(setup['U'])
+
+    S = rt.Dimer_Solver_hf(**setup)
+    w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
+    rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., setup['t'])
 
     try:  # try reloading data from disk
-        with rt.HDFArchive(file_str.format(**setup), 'r') as last_run:
-            lastU = 'U'+str(u_int)
-            lastit = last_run[lastU].keys()[-1]
-            setup = last_run[lastU][lastit]['setup']
-            setup.update(params)
+        with HDFArchive(setup['ofile'].format(**setup), 'r') as last_run:
+            last_loop = len(last_run[current_u].keys())
+            last_it = 'it{:02}'.format(last_loop-1)
+            rt.load_gf(S.g_iw, last_run[current_u][last_it]['G_iwd'],
+                       last_run[current_u][last_it]['G_iwo'])
     except (IOError, KeyError):  # if no data clean start
-        pass
-    finally:
-        S = rt.Dimer_Solver_hf(**setup)
-        w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
-        rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., t)
+        last_loop = 0
 
     tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
     S.setup['n_tau_mc'] = len(tau)
@@ -60,37 +91,26 @@ def dmft_loop_pm(u_int, tab, t, tn, beta, file_str, **params):
 
     S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
                            L=S.setup['SITES']*S.setup['n_tau_mc'])
-    dimer_loop(S, gmix, tau, file_str, '/U{U}/')
 
+    for loop_count in range(last_loop, last_loop + setup['Niter']):
+        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count)
 
-def dimer_loop(S, gmix, tau, filename, step):
-    converged = False
-    rt.recover_lastit(S, filename)
-    while not converged:
         rt.gf_symetrizer(S.g_iw)
 
-        oldg = S.g_iw.data.copy()
         # Bethe lattice bath
         S.g0_iw << gmix - 0.25 * S.g_iw
         S.g0_iw.invert()
         S.solve(tau)
 
-        converged = np.allclose(S.g_iw.data, oldg,
-                                atol=S.setup['convegence_tol'])
-
-        loop_count = S.setup['loops'] + 1
-        max_dist = np.max(abs(S.g_iw.data - oldg))
-        print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count,
-              converged, max_dist)
+        if comm.rank == 0:
+            with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
+                simulation[current_u+'/it{:02}'.format(loop_count)] = {
+                            'setup': setup.copy(),
+                            'G_iwd':  S.g_iw['A', 'A'],
+                            'G_iwo':  S.g_iw['A', 'B'],
+                            }
         sys.stdout.flush()
 
-        S.setup.update({'U': S.U, 'loops': loop_count})
-        rt.store_sim(S, filename, step+'it{:02}/'.format(loop_count))
-
-        if loop_count >= S.setup['max_loops']:
-            converged = True
-
-
 if __name__ == "__main__":
-    dmft_loop_pm([2.5], 0.23, 0.5, 0., 40., 'disk/metf_HF_Ul_tp{tp}_B{BETA}.h5',
-                 dtau_mc=0.5, sweeps=20000, max_loops=1)
+    SETUP = do_input()
+    dmft_loop_pm(SETUP)

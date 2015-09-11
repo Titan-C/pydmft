@@ -51,7 +51,7 @@ def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
         show_conv(beta, u_str, filestr, n_freq, xlim)
 
 
-def _averager(it_output, last_iterations):
+def averager(it_output, last_iterations):
     """Averages over the files terminating with the numbers given in vector"""
     sgiw = 0
     for step in last_iterations:
@@ -86,7 +86,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
         for u_str in sorted(output_files.keys()):
             u_range.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            giw = _averager(output_files[u_str], last_iterations)
+            giw = averager(output_files[u_str], last_iterations)
 
             gfit = gf.fit_gf(w_n, giw.imag)
             figiw.append(gfit)

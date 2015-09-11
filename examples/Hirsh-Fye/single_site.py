@@ -15,8 +15,8 @@ from pytriqs.archive import HDFArchive
 import argparse
 import dmft.common as gf
 import dmft.hirschfye as hf
+import dmft.plot.hf_single_site as pss
 import numpy as np
-import plot_single_site as pss
 import sys
 comm = MPI.COMM_WORLD
 
@@ -92,7 +92,7 @@ def dmft_loop_pm(simulation, **kwarg):
         return
 
     try:
-        with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
+        with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
             last_loop = len(simulation[current_u].keys())
             giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw']
     except (IOError, KeyError):
@@ -116,7 +116,7 @@ def dmft_loop_pm(simulation, **kwarg):
         giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
         if comm.rank == 0:
-            with HDFArchive(setup['ofile'].format(**SETUP), 'a') as simulation:
+            with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
                 simulation[current_u+'/it{:03}'.format(iter_count)] = {
                             'g0iw': g0iw.copy(),
                             'setup': setup.copy(),
