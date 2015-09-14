@@ -10,6 +10,7 @@ from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
 from pytriqs.gf.local import GfReFreq
 from pytriqs.archive import HDFArchive
 from pytriqs.plot.mpl_interface import oplot
+from dmft.plot.hf_single_site import label_convergence
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import matplotlib.pyplot as plt
@@ -49,15 +50,8 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
                               label=r'$\Re e G_{AB}$')
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
-    axes[0].set_xlim([0, xlim])
-    axes[1].legend(loc=0, ncol=n_freq)
     graf = r'$G(i\omega_n)$'
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
-    axes[0].set_ylabel(graf)
-    axes[0].set_xlabel(r'$i\omega_n$')
-    axes[1].set_title('Evolution of the first frequencies')
-    axes[1].set_ylabel(graf+'$(l)$')
-    axes[1].set_xlabel('iterations')
+    label_convergence(beta, u_str, axes, graf, n_freq, xlim)
 
     plt.show()
     plt.close()

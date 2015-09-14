@@ -13,6 +13,18 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
+def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
+    """Label the axes of the common plot of the evolution of DMFT loops"""
+    axes[0].set_xlim([0, xlim])
+    axes[1].legend(loc=0, ncol=n_freq)
+    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
+    axes[0].set_ylabel(graf)
+    axes[0].set_xlabel(r'$i\omega_n$')
+    axes[1].set_title('Evolution of the first frequencies')
+    axes[1].set_ylabel(graf+'$(l)$')
+    axes[1].set_xlabel('iterations')
+
+
 def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
@@ -28,16 +40,9 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
         axes[1].plot(freqs, 'o-.', label=str(num))
-    axes[0].set_xlim([0, xlim])
-    axes[1].legend(loc=0, ncol=n_freq)
     graf = r'$G(i\omega_n)$'
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
-    axes[0].set_ylabel(graf)
-    axes[0].set_xlabel(r'$i\omega_n$')
-    axes[1].set_title('Evolution of the first frequencies')
-    axes[1].set_ylabel(graf+'$(l)$')
-    axes[1].set_xlabel('iterations')
 
+    label_convergence(beta, u_str, axes, graf, n_freq, xlim)
     plt.show()
     plt.close()
 

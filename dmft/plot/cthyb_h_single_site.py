@@ -7,6 +7,7 @@ Plotting utilities for the Single site DMFT phase diagram
 
 from __future__ import division, print_function, absolute_import
 from glob import glob
+from dmft.plot.hf_single_site import label_convergence
 import dmft.common as gf
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,15 +28,9 @@ def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', col=2, n_freq=5, xlim=2):
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
         axes[1].plot(freqs, 'o-.', label=str(num))
-    axes[0].set_xlim([0, xlim])
-    axes[1].legend(loc=0, ncol=n_freq)
+
     graf = r'$G(i\omega_n)$' if 'Gf' in filestr else r'$\Sigma(i\omega_n)$'
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_int))
-    axes[0].set_ylabel(graf)
-    axes[0].set_xlabel(r'$i\omega_n$')
-    axes[1].set_title('Evolution of the first frequencies')
-    axes[1].set_ylabel(graf+'$(l)$')
-    axes[1].set_xlabel('iterations')
+    label_convergence(beta, 'U'+str(u_int), axes, graf, n_freq, xlim)
 
     plt.show()
     plt.close()
