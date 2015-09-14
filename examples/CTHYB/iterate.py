@@ -12,7 +12,7 @@ import argparse
 import dmft.common as gf
 import numpy as np
 import os
-import plot_single_band as psb
+import dmft.plot.cthyb_h_single_site as psb
 import shutil
 import subprocess
 import sys
