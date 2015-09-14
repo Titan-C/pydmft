@@ -60,7 +60,7 @@ def dmft_loop(setup):
         imp_sol.solve(h_int=h_int, **setup['s_params'])
 
         if mpi.is_master_node():
-            with HDFArchive(setup['ofile']) as last_run:
+            with HDFArchive(setup['ofile'].format(**setup)) as last_run:
                 last_run['/it{:03}/G_iw'.format(loop)] = imp_sol.G_iw
                 last_run['/it{:03}/G_tau'.format(loop)] = imp_sol.G_tau
 
@@ -84,7 +84,7 @@ def do_setup():
                         default=2.5, help='Local interaction strenght')
     parser.add_argument('-tp', default=0.18, type=float,
                         help='The dimerization strength')
-    parser.add_argument('-ofile', default='DIMER_PM_B{BETA}.h5',
+    parser.add_argument('-ofile', default='DIMER_PM_B{BETA}_tp{tp}.h5',
                         help='Output file shelve')
 
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
