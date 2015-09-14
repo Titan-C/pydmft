@@ -61,8 +61,8 @@ def dmft_loop(setup):
 
         if mpi.is_master_node():
             with HDFArchive(setup['ofile'].format(**setup)) as last_run:
-                last_run['/it{:03}/G_iw'.format(loop)] = imp_sol.G_iw
-                last_run['/it{:03}/G_tau'.format(loop)] = imp_sol.G_tau
+                last_run['/U{}/it{:03}/G_iw'.format(setup['U'], loop)] = imp_sol.G_iw
+                last_run['/U{}/it{:03}/setup'.format(setup['U'], loop)] = setup
 
 
 def do_setup():
