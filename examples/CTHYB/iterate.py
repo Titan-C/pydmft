@@ -31,11 +31,13 @@ parser.add_argument('-odir', default='coex/B{BETA}_U{U}',
 parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                     metavar=('U_src', 'U_target', 'avg_over'),
                     help='Resume DMFT loops from on disk data files')
-args = parser.parse_args()
+parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e7),
+                    help='Number Monte Carlo Measurement')
 
+args = parser.parse_args()
 Niter = args.Niter
 BETA = args.BETA
-M = 10e6
+M = int(args.sweeps)
 
 
 params = {"exe":          ['ctqmc',        "# Path to executable"],
