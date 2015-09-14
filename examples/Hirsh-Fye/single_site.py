@@ -62,6 +62,8 @@ def set_new_seed(setup):
     with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
         giw = pss.averager(outp[src_U], last_iterations)
+        # This is a particular cleaning for the half-filled single band
+        giw.real = 0.
         try:
             dest_count = len(outp[dest_U].keys())
         except KeyError:

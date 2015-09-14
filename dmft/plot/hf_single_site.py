@@ -60,11 +60,9 @@ def averager(it_output, last_iterations):
     """Averages over the files terminating with the numbers given in vector"""
     sgiw = 0
     for step in last_iterations:
-        giw = it_output[step]['giw']
-        sgiw += giw
+        sgiw += it_output[step]['giw']
 
     sgiw /= len(last_iterations)
-    sgiw.real = 0.
     return sgiw
 
 

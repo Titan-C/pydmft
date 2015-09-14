@@ -31,8 +31,35 @@ def prepare_interaction(u_int):
     return h_int
 
 
+def set_new_seed(setup):
+    """Generates a new starting Green's function for the DMFT loop
+    based on the finishing state of the system at a diffent parameter set"""
+
+    src_U = 'U' + str(setup['new_seed'][0])
+    dest_U = 'U' + str(setup['new_seed'][1])
+    avg_over = int(setup['new_seed'][2])
+
+    with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
+        last_iterations = outp[src_U].keys()[-avg_over:]
+        giw = pss.averager(outp[src_U], last_iterations)
+        try:
+            dest_count = len(outp[dest_U].keys())
+        except KeyError:
+            dest_count = 0
+        dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
+
+        outp[dest_group + 'giw'] = giw
+        outp[dest_group + 'setup'] = outp[src_U]['it00']['setup']
+
+    print(setup['new_seed'])
+
+
 def dmft_loop(setup):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
+
+    if setup['new_seed']:
+        set_new_seed(setup)
+        return
 
     imp_sol = Solver(beta=setup['BETA'],
                      gf_struct={'low_up': [0], 'high_up': [0],
