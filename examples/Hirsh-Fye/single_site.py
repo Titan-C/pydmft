@@ -62,7 +62,10 @@ def set_new_seed(setup):
     with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
         giw = pss.averager(outp[src_U], last_iterations)
-        dest_count = len(outp[dest_U].keys())
+        try:
+            dest_count = len(outp[dest_U].keys())
+        except KeyError:
+            dest_count = 0
         dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
 
         outp[dest_group + 'giw'] = giw
