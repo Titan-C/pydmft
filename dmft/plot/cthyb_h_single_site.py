@@ -60,7 +60,7 @@ def averager(vector):
 
     regiw[:] = 0.
     simgiw /= len(vector)
-    return np.array([w_n, regiw, imgiw])
+    return np.array([w_n, regiw, simgiw])
 
 
 def fit_dos(beta, avg, dirstr='coex/B{}_U{}'):
