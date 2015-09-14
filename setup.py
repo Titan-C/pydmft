@@ -18,7 +18,7 @@ class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = ['--cov-report', 'term-missing',
-                          '--cov', 'dmft', 'tests/']
+                          '--cov', 'dmft']
         self.test_suite = True
 
     def run_tests(self):

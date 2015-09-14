@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 r"""
 ================================
@@ -99,7 +100,7 @@ def dmft_loop_pm(simulation, **kwarg):
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
             last_loop = len(simulation[current_u].keys())
-            giw = simulation[current_u]['it{:0>2}'.format(last_loop-1)]['giw']
+            giw = simulation[current_u]['it{:03}'.format(last_loop-1)]['giw']
     except (IOError, KeyError):
         last_loop = 0
 
