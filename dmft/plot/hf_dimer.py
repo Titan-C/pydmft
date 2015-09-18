@@ -29,10 +29,14 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     freq_arro = []
     with HDFArchive(filestr.format(beta), 'r') as output_files:
         for step in output_files[u_str].keys():
-            giwd = output_files[u_str][step]['G_iwd']
-            giwo = output_files[u_str][step]['G_iwo']
-            axes[0].oplot(giwd, 'bo:', RI='I')
-            axes[0].oplot(giwo, 'gs:', RI='R')
+            try:
+
+                giwd = output_files[u_str][step]['G_iwd']
+                giwo = output_files[u_str][step]['G_iwo']
+                axes[0].oplot(giwd, 'bo:', RI='I')
+                axes[0].oplot(giwo, 'gs:', RI='R')
+            except (KeyError, TypeError):
+                continue
 
             freq_arrd.append(giwd.data.imag[:n_freq, 0, 0])
             freq_arro.append(giwo.data.real[:n_freq, 0, 0])
@@ -64,12 +68,13 @@ def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     offdiag_f = []
 
     for u_iter in R[ru].keys():
-        if u_iter == 'cthyb':
-            continue
-        diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
-        offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
-        gfin.oplot(R[ru][u_iter]['G_iwd'], 'bs:', RI='I')
-        gfin.oplot(R[ru][u_iter]['G_iwo'], 'gs:', RI='R')
+        try:
+            diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
+            offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
+            gfin.oplot(R[ru][u_iter]['G_iwd'], 'bs:', RI='I')
+            gfin.oplot(R[ru][u_iter]['G_iwo'], 'gs:', RI='R')
+        except KeyError:
+            pass
     diag_f = np.asarray(diag_f).T
     offdiag_f = np.asarray(offdiag_f).T
 #    gfin.plot(w_n[2*nf:], -1/w_n[2*nf:])  # tails

@@ -30,8 +30,8 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
     with HDFArchive(filestr.format(beta), 'r') as output_files:
-        w_n = gf.matsubara_freq(output_files[u_str]['it000']['setup']['BETA'],
-                                output_files[u_str]['it000']['setup']['N_MATSUBARA'])
+        w_n = gf.matsubara_freq(output_files[u_str]['it00']['setup']['BETA'],
+                                output_files[u_str]['it00']['setup']['N_MATSUBARA'])
         for step in sorted(output_files[u_str].keys()):
             giw = output_files[u_str][step]['giw']
             axes[0].plot(w_n, giw.imag)

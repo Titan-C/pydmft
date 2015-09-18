@@ -107,8 +107,8 @@ def do_setup():
 
     parser = argparse.ArgumentParser(description='DMFT loop for CTHYB dimer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-sweeps', metavar='MCS', type=int,
-                        default=int(1e6), help='Number MonteCarlo Measurement')
+    parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e6),
+                        help='Number MonteCarlo Measurement')
     parser.add_argument('-therm', type=int, default=int(1e4),
                         help='Monte Carlo sweeps of thermalization')
     parser.add_argument('-N_meas', type=int, default=200,
@@ -131,7 +131,7 @@ def do_setup():
 
     fracp, intp = modf(time())
     setup.update({'s_params': {'move_double': True,
-                               'n_cycles': setup['sweeps'],
+                               'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['N_meas'],
                                'measure_pert_order': True,

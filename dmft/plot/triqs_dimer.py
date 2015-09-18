@@ -20,7 +20,7 @@ def show_conv(beta, u_str, filestr='B{}_U{}.h5', block=2, n_freq=5, xlim=2):
         for step in datarecord[u_str]:
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw'][labels[block]]
-            axes[0].oplot(gf_iw, 'o:')
+            axes[0].oplot(gf_iw, 'o:', label=None)
             freq_arr.append(gf_iw.data[:n_freq, 0, 0].imag)
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
