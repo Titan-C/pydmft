@@ -69,10 +69,10 @@ def set_new_seed(setup):
             dest_count = len(outp[dest_U].keys())
         except KeyError:
             dest_count = 0
-        dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
+        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
 
         outp[dest_group + 'giw'] = giw
-        outp[dest_group + 'setup'] = outp[src_U]['it00']['setup']
+        outp[dest_group + 'setup'] = outp[src_U][last_iterations[-1]]['setup']
 
     print(setup['new_seed'])
 
