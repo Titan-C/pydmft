@@ -67,10 +67,19 @@ def dmft_loop(setup):
                                 'low_dw': [0], 'high_dw': [0]})
     h_int = prepare_interaction(setup['U'])
 
-    for name, gblock in imp_sol.G_iw:
-        gblock << SemiCircular(1)
+    src_U = 'U'+str(setup['U'])
 
-    for loop in range(setup['Niter']):
+    try:
+        with HDFArchive(setup['ofile'].format(**setup), 'a') as outp:
+            last_loop = len(outp[src_U].keys())
+            last_it = 'it{:03}'.format(last_loop-1)
+            imp_sol.G_iw = outp[src_U][last_it]['G_iw']
+    except (KeyError, IOError):
+        for name, gblock in imp_sol.G_iw:
+            gblock << SemiCircular(1)
+
+    for loop in range(last_loop, last_loop + setup['Niter']):
+        if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
 
         imp_sol.G_iw['low_up'] << 0.5 * (imp_sol.G_iw['low_up'] +
                                          imp_sol.G_iw['low_dw'])
