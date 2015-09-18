@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 @author: Óscar Nájera
@@ -18,7 +19,7 @@ class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
         self.test_args = ['--cov-report', 'term-missing',
-                          '--cov', 'dmft']
+                          '--cov', 'dmft', '--cov', 'examples']
         self.test_suite = True
 
     def run_tests(self):
