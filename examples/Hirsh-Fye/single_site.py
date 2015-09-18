@@ -39,8 +39,8 @@ def do_input():
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
-    parser.add_argument('-U', type=float, nargs='+',
-                        default=[2.5], help='Local interaction strenght')
+    parser.add_argument('-U', type=float, default=2.5,
+                        help='Local interaction strenght')
     parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
                         help='Output file shelve')
 
@@ -77,7 +77,7 @@ def set_new_seed(setup):
     print(setup['new_seed'])
 
 
-def dmft_loop_pm(simulation, **kwarg):
+def dmft_loop_pm(simulation):
     """Implementation of the solver"""
     setup = {'N_TAU':    2**11,
              'N_MATSUBARA': 512,
@@ -87,15 +87,18 @@ def dmft_loop_pm(simulation, **kwarg):
              'save_logs':   False,
              'updater':     'discrete'}
 
-    current_u = 'U'+str(kwarg['U'])
+    if simulation['new_seed']:
+        if comm.rank == 0:
+            set_new_seed(simulation)
+        simulation['U'] = simulation['new_seed'][1]
+
+    comm.Barrier()
+
+    current_u = 'U'+str(simulation['U'])
     setup.update(simulation)
-    setup.update(kwarg)
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
-    if setup['new_seed']:
-        set_new_seed(setup)
-        return
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
@@ -135,6 +138,4 @@ def dmft_loop_pm(simulation, **kwarg):
 if __name__ == "__main__":
 
     SETUP = do_input()
-    U_rang = SETUP.pop('U')
-    for u_int in U_rang:
-        dmft_loop_pm(SETUP, U=u_int)
+    dmft_loop_pm(SETUP)
