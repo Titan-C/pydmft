@@ -40,30 +40,30 @@ def hamiltonian(U, mu, tp):
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
     H += -tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, a_up, a_dw, b_up, b_dw
+    return H, [a_up, a_dw, b_up, b_dw]
 
 
 def gf(w, U, mu, tp, beta):
     """Calculate by Lehmann representation the green function"""
-    H, a_up, a_dw, b_up, b_dw = hamiltonian(U, mu, tp)
+    H, operators = hamiltonian(U, mu, tp)
     e, v = diagonalize(H.todense())
-    g_up = gf_lehmann(e, v, a_up.T, beta, w)
-    return g_up
+    gf_list = [gf_lehmann(e, v, c.T, beta, w) for c in operators]
+    return gf_list
 
 
 beta = 50
 U = 1.
-tp = 0.4
-mu_v = np.array([0])#, 0.2, 0.45, 0.5, 0.65])
-c_v = ['b', 'g', 'r', 'k', 'm']
+tp = 0.25
+c_v = ['b', 'g', 'r', 'k']
+names = ['a\uparrow', 'a\downarrow', 'b\uparrow', 'b\downarrow']
 
 f, axw = plt.subplots(2, sharex=True)
 f.subplots_adjust(hspace=0)
 w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
-for mu, c in zip(mu_v, c_v):
-    gw = gf(w, U, mu, tp, beta)
-    axw[0].plot(w.real, gw.real, c, label=r'$\mu={}$'.format(mu))
-    axw[1].plot(w.real, -1*gw.imag/np.pi, c)
+gfs = gf(w, U, 0.0, tp, beta)
+for gw, color, name in zip(gfs, c_v, names):
+    axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
+    axw[1].plot(w.real, -1*gw.imag/np.pi, color)
 axw[0].legend()
 axw[0].set_title(r'Real Frequencies Green functions, $\beta={}$'.format(beta))
 axw[0].set_ylabel(r'$\Re e G(\omega)$')
@@ -76,13 +76,13 @@ gwp.subplots_adjust(hspace=0)
 gtp, axt = plt.subplots()
 wn = matsubara_freq(beta, 64)
 tau = np.linspace(0, beta, 2**10)
-for mu, c in zip(mu_v, c_v):
-    giw = gf(1j*wn, U, mu, tp, beta)
-    axwn[0].plot(wn, giw.real, c+'s-', label=r'$\mu={}$'.format(mu))
-    axwn[1].plot(wn, giw.imag, c+'o-')
+gfs = gf(1j*wn, U, 0.0, tp, beta)
+for giw, color, name in zip(gfs, c_v, names):
+    axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
+    axwn[1].plot(wn, giw.imag, color+'o-')
 
     gt = gw_invfouriertrans(giw, tau, wn)
-    axt.plot(tau, gt, label=r'$\mu={}$'.format(mu))
+    axt.plot(tau, gt, label=r'${}$'.format(name))
 
 axwn[0].legend()
 axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
