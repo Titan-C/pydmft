@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from dmft.common import matsubara_freq, gw_invfouriertrans
 from slaveparticles.quantum import fermion
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize
-
+from math import sqrt
 
 def hamiltonian(U, mu, tp):
     r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
@@ -43,55 +43,84 @@ def hamiltonian(U, mu, tp):
     return H, [a_up, a_dw, b_up, b_dw]
 
 
-def gf(w, U, mu, tp, beta):
-    """Calculate by Lehmann representation the green function"""
-    H, operators = hamiltonian(U, mu, tp)
-    e, v = diagonalize(H.todense())
-    gf_list = [gf_lehmann(e, v, c.T, beta, w) for c in operators]
-    return gf_list
-
-
 beta = 50
 U = 1.
+mu = 0.
 tp = 0.25
 c_v = ['b', 'g', 'r', 'k']
 names = ['a\uparrow', 'a\downarrow', 'b\uparrow', 'b\downarrow']
 
-f, axw = plt.subplots(2, sharex=True)
-f.subplots_adjust(hspace=0)
-w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
-gfs = gf(w, U, 0.0, tp, beta)
-for gw, color, name in zip(gfs, c_v, names):
-    axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
-    axw[1].plot(w.real, -1*gw.imag/np.pi, color)
-axw[0].legend()
-axw[0].set_title(r'Real Frequencies Green functions, $\beta={}$'.format(beta))
-axw[0].set_ylabel(r'$\Re e G(\omega)$')
-axw[1].set_ylabel(r'$A(\omega)$')
-axw[1].set_xlabel(r'$\omega$')
+
+def plot_real_gf(eig_e, eig_v, oper):
+
+    f, axw = plt.subplots(2, sharex=True)
+    f.subplots_adjust(hspace=0)
+    w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
+    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w) for c in oper]
+    for gw, color, name in zip(gfs, c_v, names):
+        axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
+        axw[1].plot(w.real, -1*gw.imag/np.pi, color)
+        axw[0].legend()
+        axw[0].set_title(r'Real Frequencies Green functions, $\beta={}$'.format(beta))
+        axw[0].set_ylabel(r'$\Re e G(\omega)$')
+        axw[1].set_ylabel(r'$A(\omega)$')
+        axw[1].set_xlabel(r'$\omega$')
 
 
-gwp, axwn = plt.subplots(2, sharex=True)
-gwp.subplots_adjust(hspace=0)
-gtp, axt = plt.subplots()
-wn = matsubara_freq(beta, 64)
-tau = np.linspace(0, beta, 2**10)
-gfs = gf(1j*wn, U, 0.0, tp, beta)
-for giw, color, name in zip(gfs, c_v, names):
-    axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
-    axwn[1].plot(wn, giw.imag, color+'o-')
+def plot_matsubara_gf(eig_e, eig_v, oper):
+    gwp, axwn = plt.subplots(2, sharex=True)
+    gwp.subplots_adjust(hspace=0)
+    gtp, axt = plt.subplots()
+    wn = matsubara_freq(beta, 64)
+    tau = np.linspace(0, beta, 2**10)
+    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, 1j*wn) for c in oper]
+    for giw, color, name in zip(gfs, c_v, names):
+        axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
+        axwn[1].plot(wn, giw.imag, color+'o-')
 
-    gt = gw_invfouriertrans(giw, tau, wn)
-    axt.plot(tau, gt, label=r'${}$'.format(name))
+        gt = gw_invfouriertrans(giw, tau, wn)
+        axt.plot(tau, gt, label=r'${}$'.format(name))
 
-axwn[0].legend()
-axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
-axwn[1].set_xlabel(r'$\omega_n$')
-axwn[0].set_ylabel(r'$\Re e G(i\omega_n)$')
-axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
+        axwn[0].legend()
+        axwn[0].set_title(r'Matsubara Green functions, $\beta={}$'.format(beta))
+        axwn[1].set_xlabel(r'$\omega_n$')
+        axwn[0].set_ylabel(r'$\Re e G(i\omega_n)$')
+        axwn[1].set_ylabel(r'$\Im m G(i\omega_n)$')
 
-axt.set_ylim(top=0.05)
-axt.legend(loc=0)
-axt.set_title(r'Imaginary time Green functions, $\beta={}$'.format(beta))
-axt.set_xlabel(r'$\tau$')
-axt.set_ylabel(r'$G(\tau)$')
+        axt.set_ylim(top=0.05)
+        axt.legend(loc=0)
+        axt.set_title(r'Imaginary time Green functions, $\beta={}$'.format(beta))
+        axt.set_xlabel(r'$\tau$')
+        axt.set_ylabel(r'$G(\tau)$')
+
+
+h_at, oper = hamiltonian(U, mu, tp)
+eig_e, eig_v = diagonalize(h_at.todense())
+plot_real_gf(eig_e, eig_v, oper)
+plot_matsubara_gf(eig_e, eig_v, oper)
+
+
+############################################################
+# The symmetric and anti-symmetric bands
+# ======================================
+#
+
+def hamiltonian_bond(U, mu, tp):
+    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
+    symmetry. Include chemical potential for grand Canonical calculations
+
+    .. math::
+    """
+    as_up, as_dw, s_up, s_dw = [fermion.destruct(4, sigma) for sigma in range(4)]
+
+    a_up = (-as_up + s_up)/sqrt(2)
+    b_up = (-as_up + s_up)/sqrt(2)
+    a_dw = ( as_dw + s_dw)/sqrt(2)
+    b_dw = ( as_dw + s_dw)/sqrt(2)
+
+    sigma_za = a_up.T*a_up - a_dw.T*a_dw
+    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
+    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
+    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
+    H += -tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    return H, [a_up, a_dw, b_up, b_dw]
