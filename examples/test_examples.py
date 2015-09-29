@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""testing the examples before gallery"""
+"""
+Testing the examples before gallery
+======================================
+
+Performs a quick run of the examples to keep tests upon them
+"""
+
 from __future__ import division, print_function, absolute_import
 import subprocess
 # matplotlib back end has to be called before it gets loaded elsewhere

@@ -279,6 +279,7 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 sphinxgallery_conf = {
     'doc_module': 'dmft',
     'reference_url': {
+        'dmft': None,
         'matplotlib': 'http://matplotlib.org',
         'scipy': 'http://docs.scipy.org/doc/scipy-0.15.1/reference',
         'numpy': 'http://docs.scipy.org/doc/numpy-1.9.1',

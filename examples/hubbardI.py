@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 r"""
 Hubbard I solver
+================
+
+Atomic limit expresion of the self-energy
 """
 # Created Mon Sep 28 15:25:30 2015
 # Author: Óscar Nájera
