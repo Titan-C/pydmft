@@ -14,8 +14,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dmft.common import matsubara_freq, gw_invfouriertrans
 from slaveparticles.quantum import fermion
+import slaveparticles.quantum.operators as op
+reload(op)
 from slaveparticles.quantum.operators import gf_lehmann, diagonalize
 from math import sqrt
+from itertools import product
 
 def hamiltonian(U, mu, tp):
     r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
@@ -114,8 +117,8 @@ def hamiltonian_bond(U, mu, tp):
     as_up, as_dw, s_up, s_dw = [fermion.destruct(4, sigma) for sigma in range(4)]
 
     a_up = (-as_up + s_up)/sqrt(2)
-    b_up = (-as_up + s_up)/sqrt(2)
-    a_dw = ( as_dw + s_dw)/sqrt(2)
+    b_up = ( as_up + s_up)/sqrt(2)
+    a_dw = (-as_dw + s_dw)/sqrt(2)
     b_dw = ( as_dw + s_dw)/sqrt(2)
 
     sigma_za = a_up.T*a_up - a_dw.T*a_dw
@@ -123,4 +126,28 @@ def hamiltonian_bond(U, mu, tp):
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
     H += -tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, [a_up, a_dw, b_up, b_dw]
+    return H, [as_up, as_dw, s_up, s_dw]
+
+h_at, oper = hamiltonian_bond(U, mu, tp)
+eig_e, eig_v = diagonalize(h_at.todense())
+
+def plot_real_gf(eig_e, eig_v, oper):
+    f, axw = plt.subplots(2, sharex=True)
+    w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
+    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w) for c in oper]
+    #oper_res = product([oper[0], oper[2]], repeat=2)
+    #gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w, d) for c, d in oper_res]
+    for gw, color, name in zip(gfs, c_v, names):
+        axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
+        axw[1].plot(w.real, -1*gw.imag/np.pi, color)
+        axw[0].legend()
+        axw[0].set_title(r'Real Frequencies Green functions, $\beta={}$'.format(beta))
+        axw[0].set_ylabel(r'$\Re e G(\omega)$')
+        axw[1].set_ylabel(r'$A(\omega)$')
+        axw[1].set_xlabel(r'$\omega$')
+
+
+plot_real_gf(eig_e, eig_v, oper)
+
+# TODO: verify the asy/sym basis scale
+# TODO: view in the local one the of diag terms

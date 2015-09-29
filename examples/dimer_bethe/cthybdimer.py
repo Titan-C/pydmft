@@ -6,6 +6,7 @@ Dimer in Bethe lattice
 
 """
 
+from __future__ import division, absolute_import, print_function
 from math import sqrt, modf
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 from pytriqs.archive import HDFArchive
@@ -141,5 +142,4 @@ def do_setup():
 
 if __name__ == "__main__":
     SETUP = do_setup()
-
     dmft_loop(SETUP)
