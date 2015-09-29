@@ -107,7 +107,7 @@ def gt_fouriertrans(g_tau, tau, w_n):
     return np.squeeze(romb(g_tau, dx=beta/(tau.size-1)))
 
 
-def gw_invfouriertrans(g_iwn, tau, w_n):
+def gw_invfouriertrans(g_iwn, tau, w_n, tail=[1., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -153,9 +153,9 @@ def gw_invfouriertrans(g_iwn, tau, w_n):
     fou_sin = np.sin(w_ntau)
     g_shape = g_iwn.shape
 
-    g_iwn = (g_iwn + 1.j/w_n).reshape(-1, 1, g_shape[-1])
+    g_iwn = (g_iwn - tail[0]/(1.j*w_n) - tail[1]/(1.j*w_n)**2).reshape(-1, 1, g_shape[-1])
     g_tau = g_iwn.real * fou_cos + g_iwn.imag * fou_sin
-    return np.squeeze(np.sum(g_tau, axis=-1)*2/beta - 0.5)
+    return np.squeeze(np.sum(g_tau, axis=-1)*2/beta - 0.5*tail[0] + tail[1]*(tau-beta/2)/2)
 
 
 def fit_gf(w_n, g):

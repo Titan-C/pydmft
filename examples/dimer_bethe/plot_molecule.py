@@ -71,7 +71,8 @@ def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names):
         axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
         axwn[1].plot(wn, giw.imag, color+'o-')
 
-        gt = gw_invfouriertrans(giw, tau, wn)
+        tail =  [0, -tp] if name[0]!=name[1] else [1., 0]
+        gt = gw_invfouriertrans(giw, tau, wn, tail)
         axt.plot(tau, gt, label=r'${}$'.format(name))
 
         axwn[0].legend()
@@ -124,7 +125,7 @@ def hamiltonian_bond(U, mu, tp):
     sigma_zb = b_up.T*b_up - b_dw.T*b_dw
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += -tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
     return H, [as_up, as_dw, s_up, s_dw]
 
 h_at, oper = hamiltonian_bond(U, mu, tp)
