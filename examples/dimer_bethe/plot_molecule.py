@@ -5,20 +5,20 @@ Isolated molecule spectral function
 ===================================
 
 For the case of contact interaction in the di-atomic molecule case
-spectral function are evaluated by means of the Lehman representation
+spectral function are evaluated by means of the Lehmann representation
 """
 # author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
-import numpy as np
-import matplotlib.pyplot as plt
 from dmft.common import matsubara_freq, gw_invfouriertrans
+from itertools import product
+from math import sqrt
 from slaveparticles.quantum import fermion
 import slaveparticles.quantum.operators as op
-reload(op)
-from slaveparticles.quantum.operators import gf_lehmann, diagonalize
-from math import sqrt
-from itertools import product
+import matplotlib.pyplot as plt
+import numpy as np
+
+
 
 def hamiltonian(U, mu, tp):
     r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
@@ -46,20 +46,10 @@ def hamiltonian(U, mu, tp):
     return H, [a_up, a_dw, b_up, b_dw]
 
 
-beta = 50
-U = 1.
-mu = 0.
-tp = 0.25
-c_v = ['b', 'g', 'r', 'k']
-names = ['a\uparrow', 'a\downarrow', 'b\uparrow', 'b\downarrow']
-
-
-def plot_real_gf(eig_e, eig_v, oper):
-
-    f, axw = plt.subplots(2, sharex=True)
-    f.subplots_adjust(hspace=0)
+def plot_real_gf(eig_e, eig_v, oper_pair, c_v, names):
+    _, axw = plt.subplots(2, sharex=True)
     w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
-    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w) for c in oper]
+    gfs = [op.gf_lehmann(eig_e, eig_v, c.T, beta, w, d) for c, d in oper_pair]
     for gw, color, name in zip(gfs, c_v, names):
         axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
         axw[1].plot(w.real, -1*gw.imag/np.pi, color)
@@ -70,13 +60,13 @@ def plot_real_gf(eig_e, eig_v, oper):
         axw[1].set_xlabel(r'$\omega$')
 
 
-def plot_matsubara_gf(eig_e, eig_v, oper):
+def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names):
     gwp, axwn = plt.subplots(2, sharex=True)
     gwp.subplots_adjust(hspace=0)
     gtp, axt = plt.subplots()
     wn = matsubara_freq(beta, 64)
     tau = np.linspace(0, beta, 2**10)
-    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, 1j*wn) for c in oper]
+    gfs = [op.gf_lehmann(eig_e, eig_v, c.T, beta, 1j*wn, d) for c, d in oper_pair]
     for giw, color, name in zip(gfs, c_v, names):
         axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
         axwn[1].plot(wn, giw.imag, color+'o-')
@@ -97,10 +87,19 @@ def plot_matsubara_gf(eig_e, eig_v, oper):
         axt.set_ylabel(r'$G(\tau)$')
 
 
+beta = 50
+U = 1.
+mu = 0.
+tp = 0.25
+c_v = ['b', 'g', 'r', 'k']
+names = [r'a\uparrow', r'a\downarrow', r'b\uparrow', r'b\downarrow']
+
 h_at, oper = hamiltonian(U, mu, tp)
-eig_e, eig_v = diagonalize(h_at.todense())
-plot_real_gf(eig_e, eig_v, oper)
-plot_matsubara_gf(eig_e, eig_v, oper)
+eig_e, eig_v = op.diagonalize(h_at.todense())
+oper_pair = list(product([oper[0], oper[2]], repeat=2))
+names = list(product('AB', repeat=2))
+plot_real_gf(eig_e, eig_v, oper_pair, c_v, names)
+plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names)
 
 
 ############################################################
@@ -129,25 +128,11 @@ def hamiltonian_bond(U, mu, tp):
     return H, [as_up, as_dw, s_up, s_dw]
 
 h_at, oper = hamiltonian_bond(U, mu, tp)
-eig_e, eig_v = diagonalize(h_at.todense())
+eig_e, eig_v = op.diagonalize(h_at.todense())
 
-def plot_real_gf(eig_e, eig_v, oper):
-    f, axw = plt.subplots(2, sharex=True)
-    w = np.linspace(-1.5, 1.5, 500) + 1j*1e-2
-    gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w) for c in oper]
-    #oper_res = product([oper[0], oper[2]], repeat=2)
-    #gfs = [gf_lehmann(eig_e, eig_v, c.T, beta, w, d) for c, d in oper_res]
-    for gw, color, name in zip(gfs, c_v, names):
-        axw[0].plot(w.real, gw.real, color, label=r'${}$'.format(name))
-        axw[1].plot(w.real, -1*gw.imag/np.pi, color)
-        axw[0].legend()
-        axw[0].set_title(r'Real Frequencies Green functions, $\beta={}$'.format(beta))
-        axw[0].set_ylabel(r'$\Re e G(\omega)$')
-        axw[1].set_ylabel(r'$A(\omega)$')
-        axw[1].set_xlabel(r'$\omega$')
+oper_pair = product([oper[0], oper[2]], repeat=2)
 
-
-plot_real_gf(eig_e, eig_v, oper)
+#plot_real_gf(eig_e, eig_v, oper_pair, c_v, names)
 
 # TODO: verify the asy/sym basis scale
 # TODO: view in the local one the of diag terms
