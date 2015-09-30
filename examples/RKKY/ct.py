@@ -74,7 +74,7 @@ print('uea')
 while not converged:
     # Bethe lattice PM bath
     if mpi.is_master_node():
-        oldg = newg.data.copy()
+        oldg = g_new.data.copy()
         for na in ['up', 'down']:
             S.G0_iw[na] << gmix - t2 * g_new
 #        S.G0_iw.invert()

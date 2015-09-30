@@ -3,6 +3,9 @@
 # Author: Óscar Nájera Sept 2015
 # Author: KH, March 2007
 """
+Iterator for CTQMC of a dimer
+=============================
+
 This module runs ctqmc impurity solver for one-band model.
 The executable shoule exist in directory params['exe']
 """

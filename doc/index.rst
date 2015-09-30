@@ -12,10 +12,13 @@ Contents:
 
    twosite.rst
 
+.. automodule:: dmft.common
+    :members:
+
 .. automodule:: dmft.twosite
     :members:
 
-.. currentmodule:: dmft
+.. automodule:: dmft
 
 .. autosummary::
    :toctree: generated/
@@ -30,4 +33,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+r"""
+Basis constructor for a dimer
+=============================
+
+Generates cix file
+"""
+
 from scipy import *
 from scipy import linalg
 import sys

@@ -71,7 +71,7 @@ def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names):
         axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
         axwn[1].plot(wn, giw.imag, color+'o-')
 
-        tail =  [0, -tp] if name[0]!=name[1] else [1., 0]
+        tail =  [0., -tp, 0.] if name[0]!=name[1] else [1., 0., 0.]
         gt = gw_invfouriertrans(giw, tau, wn, tail)
         axt.plot(tau, gt, label=r'${}$'.format(name))
 
