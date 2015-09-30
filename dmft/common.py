@@ -37,7 +37,16 @@ def matsubara_freq(beta=16., size=250, fer=1):
 def tau_wn_setup(parms):
     """return two numpy arrays one corresponding to the imaginary time array
     and the other to the matsubara frequencies.
-    parms is a dictionary with the keywords BETA, N_TAU, N_MATSUBARA"""
+    Parameters
+    ----------
+    parms: dictionary
+        with keywords BETA, N_TAU, N_MATSUBARA
+
+    Returns
+    -------
+    out: tuple (tau real ndarray, w_n real ndarray)
+    """
+
     tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     w_n = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
     return tau, w_n
@@ -107,7 +116,28 @@ def gt_fouriertrans(g_tau, tau, w_n):
     return np.squeeze(romb(g_tau, dx=beta/(tau.size-1)))
 
 
-def gw_invfouriertrans(g_iwn, tau, w_n, tail=[1., 0.]):
+def freq_tail_fourier(tail_coef, tau, w_n):
+    """Fourier transforms analytically the slow decaying tail_coefs of
+    the Greens functions[matsubara]
+
+    .. [matsubara] https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain
+
+    in block
+     """
+
+    beta = tau[-1]
+    freq_tail =   tail_coef[0]/(1.j*w_n)\
+                + tail_coef[1]/(1.j*w_n)**2\
+                + tail_coef[2]/(1.j*w_n)**3
+
+    time_tail = - tail_coef[0]/2 \
+                + tail_coef[1]/2*(tau-beta/2) \
+                - tail_coef[2]/4*(tau**2 - beta*(beta-2*tau) + beta**2/2)
+
+    return freq_tail, time_tail
+
+
+def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -137,6 +167,8 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail=[1., 0.]):
             fermionic matsubara frequencies. Only use the positive ones
     beta : float
         Inverse temperature of the system
+    tail_coef : list of floats size 3
+        The first moments of the tails
 
     Returns
     -------
@@ -153,12 +185,14 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail=[1., 0.]):
     fou_sin = np.sin(w_ntau)
     g_shape = g_iwn.shape
 
-    g_iwn = (g_iwn - tail[0]/(1.j*w_n) - tail[1]/(1.j*w_n)**2).reshape(-1, 1, g_shape[-1])
+    freq_tail, time_tail = freq_tail_fourier(tail_coef, tau, w_n)
+
+    g_iwn = (g_iwn - freq_tail).reshape(-1, 1, g_shape[-1])
     g_tau = g_iwn.real * fou_cos + g_iwn.imag * fou_sin
-    return np.squeeze(np.sum(g_tau, axis=-1)*2/beta - 0.5*tail[0] + tail[1]*(tau-beta/2)/2)
+    return np.squeeze(np.sum(g_tau, axis=-1)*2/beta + time_tail)
 
 
-def fit_gf(w_n, g):
+def fit_gf(w_n, giw):
     """Performs a quadratic fit of the -first- matsubara frequencies
     to estimate the value at zero energy.
 
@@ -174,6 +208,6 @@ def fit_gf(w_n, g):
     Callable for inter - extrapolate function
     """
     n = len(w_n)
-    gfit = np.squeeze(g)[:n]
+    gfit = np.squeeze(giw)[:n]
     pf = np.polyfit(w_n, gfit, 2)
     return np.poly1d(pf)
