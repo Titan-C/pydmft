@@ -109,7 +109,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
             double_occupation(g, i_pairs, double_occ)
             if parms['save_logs']:
                 vlog.append(np.copy(v))
-                ar.append(acc)
+                ar.append(acr)
 
     tGst = np.asarray(Gst)
     Gst = np.zeros_like(tGst)
@@ -117,10 +117,13 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps']*comm.Get_size()
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
+    double_occ /= v.size*parms['sweeps']
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
     comm.Allreduce(double_occ, double_occ)
-    double_occ /= v.size*parms['sweeps']*comm.Get_size()
+
+    if comm.rank == 0:
+        save_output(parms, double_occ/comm.Get_size(), vlog, ar)
 
     return [avg_g(gst, parms) for gst in Gst]
 
@@ -134,11 +137,16 @@ def double_occupation(g, i_pairs, double_occ):
         double_occ[i] += np.dot(n_up, n_dw)
 
 
-def save_output():
+def save_output(parms, double_occ, vlog, ar):
     """Saves the simulation status to the out.h5 file. Overwrites"""
 
+    output_file = h5file('temp_out.h5', 'w')
+
+    output_file['double_occ'] = double_occ
+
     if parms['save_logs']:
-        np.asarray(vlog), np.asarray(ar)
+        output_file['V_ising'] = np.asarray(vlog)
+        output_file['acceptance'] = np.asarray(ar)
 
 
 def retarded_weiss(g0tau):
@@ -215,6 +223,7 @@ def gnewclean(g0t, v, kroneker):
     b = kroneker - u_j * (g0t-kroneker)
 
     return la.solve(b, g0t)
+
 
 def gnew(g, dv, k):
     """Quick update of the interacting Green function matrix after a single
