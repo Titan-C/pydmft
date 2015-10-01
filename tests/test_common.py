@@ -20,7 +20,7 @@ def test_fourier_trasforms(chempot, beta=50., n_tau=2**11, n_matsubara=115):
     giw = greenF(w_n, mu=chempot)
 
     for gwr in [giw, np.array([giw, giw])]:
-        g_tau = gw_invfouriertrans(gwr, tau, w_n)
+        g_tau = gw_invfouriertrans(gwr, tau, w_n, [1., -chempot, 0.25])
         g_iomega = gt_fouriertrans(g_tau, tau, w_n)
         assert np.allclose(gwr, g_iomega)
 

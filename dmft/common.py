@@ -132,7 +132,7 @@ def freq_tail_fourier(tail_coef, tau, w_n):
 
     time_tail = - tail_coef[0]/2 \
                 + tail_coef[1]/2*(tau-beta/2) \
-                - tail_coef[2]/4*(tau**2 - beta*(beta-2*tau) + beta**2/2)
+                - tail_coef[2]/4*(tau**2 - beta*tau)
 
     return freq_tail, time_tail
 
