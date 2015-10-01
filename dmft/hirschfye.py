@@ -124,6 +124,17 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
         return [avg_g(gst, parms) for gst in Gst]
 
 
+def double_occupation(g, i_pairs):
+    """Calculates the double occupation of the correlated orbital"""
+
+    double_occ = np.zeros(len(g))
+    for i, (up, dw) in enumerate(i_pairs):
+        n_up = np.diag(g[up])
+        n_dw = np.diag(g[dw])
+        double_occ[i] += np.dot(n_up, n_dw)
+    return double_occ
+
+
 def retarded_weiss(g0tau):
     r"""
     Takes the propagator :math:`\mathcal{G}^0(\tau)` corresponding to the
