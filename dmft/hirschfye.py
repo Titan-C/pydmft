@@ -20,7 +20,6 @@ import numpy as np
 import scipy.linalg as la
 import time
 
-comm = MPI.COMM_WORLD
 
 
 def ising_v(dtau, U, L, fields=1, polar=0.5):
@@ -52,11 +51,12 @@ def ising_v(dtau, U, L, fields=1, polar=0.5):
     return vis*lam
 
 
-def imp_solver(G0_blocks, v, interaction, parms_user):
+def imp_solver(g0_blocks, v, interaction, parms_user):
     r"""Impurity solver call. Calcutaltes the interacting Green function
     as given by the contribution of the auxiliary discretized spin field.
     """
 
+    comm = MPI.COMM_WORLD
     # Set up default values
     fracp, intp = math.modf(time.time())
     parms = {'global_flip': False,
@@ -76,7 +76,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
              }
     parms.update(parms_user)
 
-    GX = [retarded_weiss(gb) for gb in G0_blocks]
+    GX = [retarded_weiss(gb) for gb in g0_blocks]
     kroneker = np.eye(GX[0].shape[0])  # assuming all blocks are of same shape
     Gst = [np.zeros_like(gx) for gx in GX]
 
@@ -86,7 +86,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
-    double_occ = np.zeros(len(i_pairs))
+    double_occ = np.zeros((len(i_pairs), parms['SITES']))
     hffast.set_seed(parms['SEED'])
 
     for mcs in xrange(parms['sweeps'] + parms['therm']):
@@ -107,7 +107,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
         if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
-            double_occupation(g, i_pairs, double_occ)
+            double_occupation(g, i_pairs, double_occ, parms)
             if parms['save_logs']:
                 vlog.append(np.copy(v))
                 ar.append(acr)
@@ -118,10 +118,10 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps']*comm.Get_size()
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
-    double_occ /= v.size*parms['sweeps']
+    double_occ /= parms['n_tau_mc']*parms['sweeps']
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
-    comm.Allreduce(double_occ, double_occ)
+    comm.Allreduce(double_occ.copy(), double_occ)
 
     if comm.rank == 0:
         save_output(parms, double_occ/comm.Get_size(), vlog, ar)
@@ -129,13 +129,15 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     return [avg_g(gst, parms) for gst in Gst]
 
 
-def double_occupation(g, i_pairs, double_occ):
+def double_occupation(g, i_pairs, double_occ, parms):
     """Calculates the double occupation of the correlated orbital"""
-
+    slices = parms['n_tau_mc']
     for i, (up, dw) in enumerate(i_pairs):
-        n_up = np.diag(g[up])
-        n_dw = np.diag(g[dw])
-        double_occ[i] += np.dot(n_up, n_dw)
+        for j in range(parms['SITES']):
+            n_up = np.diag(g[up][j*slices:(j+1)*slices, j*slices:(j+1)*slices])
+            n_dw = np.diag(g[dw][j*slices:(j+1)*slices, j*slices:(j+1)*slices])
+            double_occ[i][j] += np.dot(n_up, n_dw)
+
 
 def susceptibility(v):
     """Calculate the susceptibility from the Ising fields"""
@@ -171,15 +173,16 @@ def retarded_weiss(g0tau):
     g0tau : 3D ndarray, of retarded weiss field
         First axis numerical values, second and third axis are block indices
     """
-    lfak, n1, n2 = g0tau.shape
-    delta_tau = np.arange(lfak)
+    slices, n1, n2 = g0tau.shape
+    delta_tau = np.arange(slices)
 
-    gind = lfak + np.subtract.outer(delta_tau, delta_tau)
-    g0t_mat = np.empty((lfak*n1, lfak*n2))
+    gind = slices + np.subtract.outer(delta_tau, delta_tau)
+    g0t_mat = np.empty((slices*n1, slices*n2))
     for i in range(n1):
         for j in range(n2):
-            g0t_mat[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak] = np.concatenate(
-                (g0tau[:, i, j], -g0tau[:, i, j]))[gind]
+            g0t_mat[i*slices:(i+1)*slices,
+                    j*slices:(j+1)*slices] = np.concatenate(
+                        (g0tau[:, i, j], -g0tau[:, i, j]))[gind]
     return g0t_mat
 
 
@@ -187,25 +190,26 @@ def avg_gblock(gmat):
     """Averages along the diagonals respecting the translational invariance of
     the Greens Function"""
 
-    lfak = gmat.shape[0]
-    xga = np.zeros(2*lfak+1)
-    for i in range(1, 2*lfak):
-        xga[i] = np.trace(gmat, offset=lfak-i)
+    slices = gmat.shape[0]
+    xga = np.zeros(2*slices+1)
+    for i in range(1, 2*slices):
+        xga[i] = np.trace(gmat, offset=slices-i)
 
-    xg = np.zeros(lfak+1)
-    xg[:-1] = (xga[lfak:-1]-xga[:lfak]) / lfak
+    xg = np.zeros(slices+1)
+    xg[:-1] = (xga[slices:-1]-xga[:slices]) / slices
     xg[-1] = -xg[0]
 
     return xg
 
 
 def avg_g(gst, parms):
-    n1, n2, lfak = parms['SITES'], parms['SITES'], parms['n_tau_mc']
+    n1, n2, slices = parms['SITES'], parms['SITES'], parms['n_tau_mc']
 
-    gst_m = np.empty((n1, n2, lfak+1))
+    gst_m = np.empty((n1, n2, slices+1))
     for i in range(n1):
         for j in range(n2):
-            gst_m[i, j] = avg_gblock(gst[i*lfak:(i+1)*lfak, j*lfak:(j+1)*lfak])
+            gst_m[i, j] = avg_gblock(gst[i*slices:(i+1)*slices,
+                                         j*slices:(j+1)*slices])
             if i == j:
                 gst_m[i, j, -1] += 1.
     return gst_m
