@@ -44,6 +44,8 @@ def do_input():
     parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
                         help='Output file shelve')
 
+    parser.add_argument('-l', '--save_logs', action='store_true',
+                        help='Store the changes in the auxiliary field')
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
