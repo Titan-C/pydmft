@@ -68,13 +68,13 @@ def test_solver_atom(u_int):
        -0.105, -0.114, -0.127, -0.144, -0.172, -0.222, -0.322, -0.549]))])
 def test_solver(chempot, u_int, gend):
     parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
-             't': 0.5, 'SITES': 1, 'BANDS':1,
+             't': 0.5, 'SITES': 1, 'BANDS': 1,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
              'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete'}
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
-    G0t = hf.gw_invfouriertrans(G0iw, tau, w_n)
+    G0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
     g0t = hf.interpol(G0t, parms['n_tau_mc'])[:-1].reshape(-1, 1, 1)
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(-0.5 * (gtu+gtd))

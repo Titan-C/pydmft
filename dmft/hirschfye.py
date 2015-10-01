@@ -109,7 +109,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
                 ar.append(acc)
 
     tGst = np.asarray(Gst)
-    Gst = np.zeros_like(Gst)
+    Gst = np.zeros_like(tGst)
     comm.Allreduce(tGst, Gst)
     Gst /= parms['sweeps']*comm.Get_size()
 
