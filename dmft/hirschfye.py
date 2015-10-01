@@ -7,17 +7,18 @@ QMC Hirsch - Fye Impurity solver
 To treat the Anderson impurity model and solve it using the Hirsch - Fye
 Quantum Monte Carlo algorithm
 """
+
 from __future__ import division, absolute_import, print_function
+from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
+from h5py import File as h5file
+from mpi4py import MPI
+from scipy.interpolate import interp1d
+from scipy.linalg.blas import dger
+import dmft.hffast as hffast
+import math
 import numpy as np
 import scipy.linalg as la
-from scipy.linalg.blas import dger
-from scipy.interpolate import interp1d
-from mpi4py import MPI
-import math
 import time
-
-from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
-import dmft.hffast as hffast
 
 comm = MPI.COMM_WORLD
 
@@ -85,6 +86,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
+    double_occ = np.zeros(len(i_pairs))
     hffast.set_seed(parms['SEED'])
 
     for mcs in xrange(parms['sweeps'] + parms['therm']):
@@ -104,6 +106,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
         if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
+            double_occupation(g, i_pairs, double_occ)
             if parms['save_logs']:
                 vlog.append(np.copy(v))
                 ar.append(acc)
@@ -114,25 +117,28 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps']*comm.Get_size()
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
+    print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
-    print('acc ', acc, 'nsign', anrat, 'rank', comm.rank)
+    comm.Allreduce(double_occ, double_occ)
+    double_occ /= v.size*parms['sweeps']*comm.Get_size()
 
-    if parms['save_logs']:
-        return [avg_g(gst, parms) for gst in Gst],\
-                np.asarray(vlog), np.asarray(ar)
-    else:
-        return [avg_g(gst, parms) for gst in Gst]
+    return [avg_g(gst, parms) for gst in Gst]
 
 
-def double_occupation(g, i_pairs):
+def double_occupation(g, i_pairs, double_occ):
     """Calculates the double occupation of the correlated orbital"""
 
-    double_occ = np.zeros(len(g))
     for i, (up, dw) in enumerate(i_pairs):
         n_up = np.diag(g[up])
         n_dw = np.diag(g[dw])
         double_occ[i] += np.dot(n_up, n_dw)
-    return double_occ
+
+
+def save_output():
+    """Saves the simulation status to the out.h5 file. Overwrites"""
+
+    if parms['save_logs']:
+        np.asarray(vlog), np.asarray(ar)
 
 
 def retarded_weiss(g0tau):
