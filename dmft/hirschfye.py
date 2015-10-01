@@ -99,6 +99,7 @@ def imp_solver(G0_blocks, v, interaction, parms_user):
         for _ in range(parms['N_meas']):
             for i, (up, dw) in enumerate(i_pairs):
                 acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
+                                             parms['n_tau_mc'],
                                              parms['Heat_bath'])
                 acc += acr
                 anrat += nrat
@@ -135,6 +136,10 @@ def double_occupation(g, i_pairs, double_occ):
         n_up = np.diag(g[up])
         n_dw = np.diag(g[dw])
         double_occ[i] += np.dot(n_up, n_dw)
+
+def susceptibility(v):
+    """Calculate the susceptibility from the Ising fields"""
+    pass
 
 
 def save_output(parms, double_occ, vlog, ar):

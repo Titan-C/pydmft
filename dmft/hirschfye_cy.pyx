@@ -37,10 +37,13 @@ def set_seed(seed=84263):
 def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
               np.ndarray[np.float64_t, ndim=2] gdw,
               np.ndarray[np.float64_t, ndim=1] v,
+              int subblock_len,
               bool Heatbath = True):
     cdef double dv, ratup, ratdw, rat
-    cdef int j, i, up, dw, pair, N=v.shape[0], acc = 0, nrat = 0
-    for j in range(N):
+    cdef int j, i, up, dw, pair, sn, N=v.shape[0], acc = 0, nrat = 0
+    sn = int(N/subblock_len)
+    order = [int(a+subblock_len*b) for a in range(subblock_len) for b in range(sn)]
+    for j in order:
         dv = -2.*v[j]
         ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
