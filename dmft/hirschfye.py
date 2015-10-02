@@ -253,20 +253,29 @@ def gnew(g, dv, k):
 
 
 def g2flip(g, dv, lk):
-    """2flip update"""
-    print(dv)
+    """Update the interacting Green function at arbitrary spinflips
+
+    Using the Woodbury matrix identity it is possible to perform an
+    update of two simultaneous spin flips. I calculate
+    .. math :: G'_{ij} = G_{ij}
+              - U_{if}(\delta_{fg} + U_{\bar{k}g})^{-1}G_{\bar{l}j}
+
+    where :math:`i,j,l,k\in{1..L}` the time slices and :math:`f,g\in{1,2}`
+    the 2 simultaneous spin flips. :math:`\bar{l}` lists the flipped
+    spin entry
+    .. math :: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_\bar{l})-1)\delta_{\bar{l}f}
+
+"""
     d2 = np.eye(len(lk))
     U = -g[:, lk].copy()
     np.add.at(U, lk, d2)
     U *= np.exp(dv) - 1.
 
+    denom = LA.inv(d2 + U[lk, :])
+
     V = g[lk, :].copy()
-    inV = np.zeros_like(V)
-    inV[:, lk]=d2
 
-    denom = LA.inv(d2 + np.dot(inV, U))
-
-    return g - np.dot(U, denom.dot(V))
+    g -= np.dot(U, denom.dot(V))
 
 
 def interpol(gtau, Lrang):
