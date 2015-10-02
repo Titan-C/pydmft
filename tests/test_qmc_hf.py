@@ -20,7 +20,7 @@ def test_hf_fast_updatecond(chempot, u_int, updater, beta=16.,
     parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'BANDS': 1,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
-    tau, w_n, g0t, _, v, _ = hf.setup_PM_sim(parms)
+    _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
     v = np.squeeze(v)
     g0ttp = hf.retarded_weiss(g0t[:-1].reshape(-1, 1, 1))
     kroneker = np.eye(v.size)
@@ -37,7 +37,8 @@ def test_hf_fast_updatecond(chempot, u_int, updater, beta=16.,
     assert np.allclose(g_flip, g_fast_flip)
 
 
-@pytest.mark.parametrize("chempot, u_int, updater", [(0, 2, hf.g2flip)])
+@pytest.mark.parametrize("chempot, u_int, updater",
+                         product([0, 0.3], [2, 2.3], [hf.g2flip]))
 def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
                             n_tau=2**11, n_matsubara=64):
     parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
@@ -49,20 +50,13 @@ def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
     kroneker = np.eye(v.size)
 
     groot = hf.gnewclean(g0ttp, v, kroneker)
-    g_single_f = np.copy(groot)
     g_fast_flip = np.copy(groot)
     flip = [6, 10]
-    #flip = [6]
-    for j in flip:
-        v[j] *= -1
-        hf.gnew(g_single_f, 2*v[j], j)
-
-    #v[flip] *= -1
+    v[flip] *= -1
     g_fast_flip = updater(g_fast_flip, 2*v[flip], flip)
 
     g_flip = hf.gnewclean(g0ttp, v, kroneker)
 
-    assert np.allclose(g_flip, g_single_f)
     assert np.allclose(g_flip, g_fast_flip)
 
 
