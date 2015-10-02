@@ -109,6 +109,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
             double_occupation(g, i_pairs, double_occ, parms)
+            #measure_chi(v, parms)
             if parms['save_logs']:
                 vlog.append(np.copy(v))
                 ar.append(acr)
@@ -129,6 +130,13 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
     return [avg_g(gst, parms) for gst in Gst]
 
+
+def measure_chi(v, chi, parms):
+    """Estimates the susceptibility from the Ising auxiliary fields"""
+    s = np.sign(np.array([v]*2).flatten())
+    for i in range(lev(v)-1):
+        for j in range(1, len(v)):
+            chi[i] += s(i+j)*s(j)
 
 def double_occupation(g, i_pairs, double_occ, parms):
     """Calculates the double occupation of the correlated orbital"""
