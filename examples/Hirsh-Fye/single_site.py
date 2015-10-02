@@ -41,6 +41,8 @@ def do_input():
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, default=2.5,
                         help='Local interaction strenght')
+    parser.add_argument('-mu', '--MU', type=float, default=0.,
+                        help='Chemical potential')
     parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
                         help='Output file shelve')
 
