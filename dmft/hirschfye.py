@@ -14,7 +14,6 @@ from h5py import File as h5file
 from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.linalg.blas import dger
-import scipy.linalg as LA
 import dmft.hffast as hffast
 import math
 import numpy as np
@@ -279,11 +278,10 @@ def g2flip(g, dv, lk):
     np.add.at(U, lk, d2)
     U *= np.exp(dv) - 1.
 
-    denom = LA.inv(d2 + U[lk, :])
-
     V = g[lk, :].copy()
+    denom = la.solve(d2 + U[lk, :], V)
 
-    g -= np.dot(U, denom.dot(V))
+    g -= np.dot(U, denom)
 
 
 def interpol(gtau, Lrang):
