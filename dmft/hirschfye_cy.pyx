@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 cimport numpy as np
+cimport scipy.linalg.cython_lapack as la
 import cython
 from libc.math cimport exp, sqrt
 from libcpp cimport bool
@@ -11,6 +12,32 @@ cdef extern from "hfc.h":
 def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
     cdef int N=g.shape[0]
     cgnew(N, &g[0,0], dv, k)
+
+cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g,
+             np.ndarray[np.float64_t, ndim=1] dv,
+             np.ndarray[np.float64_t, ndim=1] lk):
+    """Update the interacting Green function at arbitrary spinflips
+
+    Using the Woodbury matrix identity it is possible to perform an
+    update of two simultaneous spin flips. I calculate
+    .. math :: G'_{ij} = G_{ij}
+              - U_{if}(\delta_{fg} + U_{\bar{k}g})^{-1}G_{\bar{l}j}
+
+    where :math:`i,j,l,k\in{1..L}` the time slices and :math:`f,g\in{1,2}`
+    the 2 simultaneous spin flips. :math:`\bar{l}` lists the flipped
+    spin entry
+    .. math :: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_\bar{l})-1)\delta_{\bar{l}f}
+
+"""
+    d2 = np.eye(len(lk))
+    U = -g[:, lk].copy()
+    np.add.at(U, lk, d2)
+    U *= np.exp(dv) - 1.
+
+    V = g[lk, :].copy()
+    denom = la.dgesv(d2 + U[lk, :], V)
+
+    g -= np.dot(U, denom) w g
 
 
 cdef extern from "gsl/gsl_rng.h":
