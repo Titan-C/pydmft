@@ -14,6 +14,7 @@ from h5py import File as h5file
 from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.linalg.blas import dger
+import scipy.linalg as LA
 import dmft.hffast as hffast
 import math
 import numpy as np
@@ -249,6 +250,23 @@ def gnew(g, dv, k):
     x[k] -= 1
     y = g[k, :].copy()
     g = dger(a, x, y, 1, 1, g, 1, 1, 1)
+
+
+def g2flip(g, dv, lk):
+    """2flip update"""
+    print(dv)
+    d2 = np.eye(len(lk))
+    U = -g[:, lk].copy()
+    np.add.at(U, lk, d2)
+    U *= np.exp(dv) - 1.
+
+    V = g[lk, :].copy()
+    inV = np.zeros_like(V)
+    inV[:, lk]=d2
+
+    denom = LA.inv(d2 + np.dot(inV, U))
+
+    return g - np.dot(U, denom.dot(V))
 
 
 def interpol(gtau, Lrang):
