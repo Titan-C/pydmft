@@ -29,7 +29,7 @@ def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
     cdef int N=g.shape[0]
     cgnew(N, &g[0,0], dv, k)
 
-cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, lk):
+cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, int[::1] lk):
     d2 = np.asfortranarray(np.eye(len(lk)))
     U = g[:, lk].copy(order='F')
     np.add.at(U, lk, -d2)
@@ -71,13 +71,14 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
     cdef double dv, ratup, ratdw, rat
     cdef int j, pair, sn, N=v.shape[0], acc = 0, nrat = 0
     cdef int jns
+    cdef int[2] slic = [1, 1]
     sn = int(N/subblock_len)
     order = [int(a+subblock_len*b) for a in range(subblock_len) for b in range(sn)]
     for j in order:
+        dv = -2.*v[j]
+        ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
+        ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
         if uniform(r)>0.5:
-            dv = -2.*v[j]
-            ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
-            ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
             rat = ratup * ratdw
             if rat<0:
                 nrat += 1
@@ -90,10 +91,6 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
                 cgnew(N, &gup[0,0],  dv, j)
                 cgnew(N, &gdw[0,0], -dv, j)
         elif sn > 1:
-            dv = -2.*v[j]
-            ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
-            ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
-
             jns = j+subblock_len if j<subblock_len else j-subblock_len
             dv = -2.*v[jns]
             ratup *= 1. + (1. - gup[jns, jns])*(exp( dv)-1.)
@@ -107,7 +104,8 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
 
             if rat > uniform(r):
                 acc += 1
-                v[[j, jns]] *= -1.
-                g2flip(gup,  2*v[[j, jns]], [j, jns])
-                g2flip(gdw, -2*v[[j, jns]], [j, jns])
+                slic = [j, jns]
+                v[slic] *= -1.
+                g2flip(gup,  2*v[slic], slic)
+                g2flip(gdw, -2*v[slic], slic)
     return acc, nrat

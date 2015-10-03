@@ -51,7 +51,7 @@ def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
 
     groot = hf.gnewclean(g0ttp, v, kroneker)
     g_fast_flip = np.copy(groot)
-    flip = [6, 10]
+    flip = np.array([6, 10], dtype=np.intc)
     v[flip] *= -1
     updater(g_fast_flip, 2*v[flip], flip)
 
