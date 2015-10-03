@@ -21,7 +21,6 @@ import scipy.linalg as la
 import time
 
 
-
 def ising_v(dtau, U, L, fields=1, polar=0.5):
     """initialize the vector V of Ising fields
     .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)

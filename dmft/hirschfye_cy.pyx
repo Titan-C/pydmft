@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 cimport numpy as np
-cimport scipy.linalg.cython_lapack as la
+from scipy.linalg.cython_lapack cimport dgesv
 import cython
 from libc.math cimport exp, sqrt
 from libcpp cimport bool
+
+
+cdef solve(double[:, ::1] A, double[:, ::1] B):
+    cdef int n = A.shape[0], nrhs = B.shape[1], info
+    cdef np.ndarray[int] piv = np.zeros(n, dtype=np.intc)
+    dgesv(&n, &nrhs, &A[0, 0], &n, &piv[0], &B[0, 0], &n, &info)
 
 cdef extern from "hfc.h":
     void cgnew(size_t N, double *g, double dv, int k)
@@ -15,7 +22,7 @@ def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
 
 cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g,
              np.ndarray[np.float64_t, ndim=1] dv,
-             np.ndarray[np.float64_t, ndim=1] lk):
+             lk):
     """Update the interacting Green function at arbitrary spinflips
 
     Using the Woodbury matrix identity it is possible to perform an
@@ -35,9 +42,10 @@ cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g,
     U *= np.exp(dv) - 1.
 
     V = g[lk, :].copy()
-    denom = la.dgesv(d2 + U[lk, :], V)
+    solve(d2 + U[lk, :], V)
 
-    g -= np.dot(U, denom) w g
+
+    np.subtract(g, np.dot(U, V))
 
 
 cdef extern from "gsl/gsl_rng.h":
