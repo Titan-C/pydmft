@@ -40,3 +40,16 @@ void cgnew(size_t N, double *g, double dv, int k){
     y.clear();
 
 }
+
+void cg2flip(size_t N, double *g, double *dv, int l, int k){
+  std::vector<double> id2 (4, 0.);
+  id2[0] = id2[3] = 1.;
+
+  for(auto ent: id2) std::cout << ent << "\n";
+  std::vector<double> U (2*N);
+  std::copy (g + k*N, g + (k+1)*N, U.begin());//column fortran
+  for(auto ent: U) std::cout << ent << " ";
+  std::vector<double> V (2*N);
+
+
+}

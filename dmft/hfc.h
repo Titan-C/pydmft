@@ -31,5 +31,6 @@ extern "C"
 }
 
 void cgnew(size_t N, double *g, double dv, int k);
+void cg2flip(size_t N, double *g, double *dv, int l, int k);
 
 #endif // HFC_H

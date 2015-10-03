@@ -24,22 +24,27 @@ cdef solve(double[::1, :] A, double[::1, :] B):
 
 cdef extern from "hfc.h":
     void cgnew(size_t N, double *g, double dv, int k)
+    void cg2flip(size_t N, double *g, double *dv, int l, int k)
 
 def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
     cdef int N=g.shape[0]
     cgnew(N, &g[0,0], dv, k)
 
-cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, int[::1] lk):
-    d2 = np.asfortranarray(np.eye(len(lk)))
-    U = g[:, lk].copy(order='F')
-    np.add.at(U, lk, -d2)
-    U *= np.asfortranarray(np.exp(dv) - 1.)
+def g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, int l, int k):
+    cdef int N=g.shape[0]
+    cg2flip(N, &g[0,0], &dv[0], l, k)
 
-    V = g[lk, :].copy(order='F')
-    cdef double[::1, :] mat=U[lk, :].copy(order='F') - d2
-    solve(mat, V)
-
-    mdot(-1., U, V, 1, g)
+#cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, int[::1] lk):
+#    d2 = np.asfortranarray(np.eye(len(lk)))
+#    U = g[:, lk].copy(order='F')
+#    np.add.at(U, lk, -d2)
+#    U *= np.asfortranarray(np.exp(dv) - 1.)
+#
+#    V = g[lk, :].copy(order='F')
+#    cdef double[::1, :] mat=U[lk, :].copy(order='F') - d2
+#    solve(mat, V)
+#
+#    mdot(-1., U, V, 1, g)
 
 
 cdef extern from "gsl/gsl_rng.h":
@@ -106,6 +111,6 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
                 acc += 1
                 slic = [j, jns]
                 v[slic] *= -1.
-                g2flip(gup,  2*v[slic], slic)
-                g2flip(gdw, -2*v[slic], slic)
+                g2flip(gup,  2*v[slic], j, jns)
+                g2flip(gdw, -2*v[slic], j, jns)
     return acc, nrat
