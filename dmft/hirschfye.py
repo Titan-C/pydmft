@@ -258,7 +258,7 @@ def gnew(g, dv, k):
     g = dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
-def g2flip(g, dv, lk):
+def g2flip(g, dv, l, k):
     """Update the interacting Green function at arbitrary spinflips
 
     Using the Woodbury matrix identity it is possible to perform an
@@ -272,6 +272,7 @@ def g2flip(g, dv, lk):
     .. math :: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_\bar{l})-1)\delta_{\bar{l}f}
 
 """
+    lk = [l, k]
     d2 = np.eye(len(lk))
     U = -g[:, lk].copy()
     np.add.at(U, lk, d2)

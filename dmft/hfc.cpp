@@ -42,17 +42,31 @@ void cgnew(size_t N, double *g, double dv, int k){
 }
 
 void cg2flip(size_t N, double *g, double *dv, int l, int k){
-  std::vector<double> id2 (4, 0.);
+  std::valarray<double> id2 (0., 4);
   id2[0] = id2[3] = 1.;
 
-  std::vector<double> U (2*N);
-  std::copy (g + l*N, g + (l+1)*N, U.begin());//column fortran
-  std::copy (g + k*N, g + (k+1)*N, U.begin() + N);//column fortran
+  std::valarray<double> U (2*N);
+  std::copy (g + l*N, g + (l+1)*N, std::begin(U));//column fortran
+  std::copy (g + k*N, g + (k+1)*N, std::begin(U) + N);//column fortran
   U[l] -= 1.;
   U[N+k] -= 1.;
 
-  for(auto ent: U) std::cout << ent << " ";
-  std::vector<double> V (2*N);
+  U[std::slice(0, N, 1)] += std::valarray<double>(exp(dv[0])-1., N);
+  U[std::slice(N, N, 1)] += std::valarray<double>(exp(dv[1])-1., N);
 
+  for(auto ent: U) std::cout << ent << " ";
+  std::valarray<double> V (2*N);
+    for(size_t i=0; i<N; i++){
+      V[i] = g[i*N + l];
+      V[i+N] = g[i*N + k];
+    }
+
+  //  size_t sel[]= {l, l+N, k, k+N};
+  //  std::valarray<size_t> myselection (sel,4);
+  //  std::valarray<double> mat (U[myselection]);
+  //  mat -= id2;
+  //  int n = 2, info;
+  //  std::valarray<int> ipiv(n);
+  //  //  LAPACK_dgesv(LAPACK_ROW_MAJOR, &n, &N, &mat[0], &n, &ipiv[0], &V[0], &n, &info);
 
 }

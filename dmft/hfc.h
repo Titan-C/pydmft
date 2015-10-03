@@ -22,13 +22,16 @@
 
 #include <cstdlib>
 #include <vector>
+#include <valarray>
 #include <iostream>
 #include <cmath>
 
 extern "C"
 {
      #include <cblas.h>
+
 }
+
 
 void cgnew(size_t N, double *g, double dv, int k);
 void cg2flip(size_t N, double *g, double *dv, int l, int k);
