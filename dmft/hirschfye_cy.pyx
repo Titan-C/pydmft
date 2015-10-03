@@ -14,11 +14,8 @@ cdef mdot(double alpha, double[::1,:] a, double[::1,:] b, double beta, double[::
         char *transa = 'n'
         char *transb = 'n'
         int m = a.shape[0], n=b.shape[1], k=a.shape[1]
-        double *a0=&a[0,0]
-        double *b0=&b[0,0]
-        double *c0=&c[0,0]
-    dgemm(transa, transb, &m, &n, &k, &alpha, a0, &m, b0,
-                   &k, &beta, c0, &m)
+    dgemm(transa, transb, &m, &n, &k, &alpha, &a[0, 0], &m, &b[0, 0],
+                   &k, &beta, &c[0, 0], &m)
 
 cdef solve(double[::1, :] A, double[::1, :] B):
     cdef int n = A.shape[0], nrhs = B.shape[1], info
@@ -49,26 +46,14 @@ cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g,
 
 """
     d2 = np.asfortranarray(np.eye(len(lk)))
-    print('g is for', np.isfortran(g))
     U = -g[:, lk].copy(order='A')
     np.add.at(U, lk, d2)
-    print('g is for', np.isfortran(U))
     U *= np.asfortranarray(np.exp(dv) - 1.)
-    print('g is for', np.isfortran(U))
-    print('U=', U)
 
     V = g[lk, :].copy(order='F')
-    print('v=', V)
     mat=np.asfortranarray(d2 + U[lk, :])
-    print('mat isf', np.isfortran(mat))
-    print('V is for', np.isfortran(V))
     solve(mat, V)
-    print('den=', V)
-    print(np.isfortran(V))
 
-
-    updat = np.dot(U, V)
-    print(np.isfortran(updat))
     mdot(-1., U, V, 1, g)
 
 
