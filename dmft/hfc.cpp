@@ -61,12 +61,12 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
       V[i+N] = g[i*N + k];
     }
 
-  //  size_t sel[]= {l, l+N, k, k+N};
-  //  std::valarray<size_t> myselection (sel,4);
-  //  std::valarray<double> mat (U[myselection]);
-  //  mat -= id2;
-  //  int n = 2, info;
-  //  std::valarray<int> ipiv(n);
-  //  //  LAPACK_dgesv(LAPACK_ROW_MAJOR, &n, &N, &mat[0], &n, &ipiv[0], &V[0], &n, &info);
+  size_t sel[]= {l, l+N, k, k+N};
+  std::valarray<size_t> myselection (sel,4);
+  std::valarray<double> mat (U[myselection]);
+  mat -= id2;
+  int n = 2, info;
+  std::valarray<int> ipiv(n);
+  //  LAPACK_dgesv(LAPACK_ROW_MAJOR, &n, &N, &mat[0], &n, &ipiv[0], &V[0], &n, &info);
 
 }
