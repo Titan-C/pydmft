@@ -100,3 +100,31 @@ def test_solver(chempot, u_int, gend):
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(-0.5 * (gtu+gtd))
     assert np.allclose(gend, g, atol=6e-3)
+
+
+@pytest.mark.parametrize("chempot, u_int, gend",
+ [(0, 2, np.array([-0.5  , -0.335, -0.246, -0.196, -0.164, -0.144, -0.129,
+       -0.118, -0.11 , -0.104, -0.099, -0.095, -0.092, -0.09 , -0.089, -0.087,
+       -0.087, -0.087, -0.089, -0.09 , -0.092, -0.095, -0.099, -0.104, -0.11 ,
+       -0.118, -0.129, -0.144, -0.164, -0.196, -0.246, -0.335, -0.5  ])),
+  (0.5, 2.3, np.array([-0.451, -0.316, -0.237, -0.187, -0.154, -0.132, -0.117,
+       -0.106, -0.098, -0.092, -0.088, -0.085, -0.082, -0.08 , -0.08 , -0.079,
+       -0.079, -0.079, -0.08 , -0.081, -0.083, -0.085, -0.088, -0.092, -0.098,
+       -0.105, -0.114, -0.127, -0.144, -0.172, -0.222, -0.322, -0.549]))])
+def test_solver_dimer(chempot, u_int, gend):
+    parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
+             't': 0.5, 'SITES': 2, 'BANDS': 1,
+             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
+             'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
+             'save_logs': False, 'updater': 'discrete'}
+    tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
+    G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
+    G0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
+    g0t = hf.interpol(G0t, parms['n_tau_mc'])
+    gb0t = np.asarray([np.array([[g0, 0.], [0., g0]]) for g0 in g0t[:-1]])
+    gtu, gtd = hf.imp_solver([gb0t]*2, v, intm, parms)
+    g = np.squeeze(-0.5 * (gtu+gtd))
+    assert np.allclose(gend, g[0, 0], atol=6e-3)
+    assert np.allclose(np.zeros_like(g0t), g[0, 1], atol=6e-3)
+    assert np.allclose(np.zeros_like(g0t), g[1, 0], atol=6e-3)
+    assert np.allclose(gend, g[1, 1], atol=6e-3)
