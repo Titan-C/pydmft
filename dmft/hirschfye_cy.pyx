@@ -2,13 +2,25 @@
 
 import numpy as np
 cimport numpy as np
+from scipy.linalg.cython_blas cimport dgemm
 from scipy.linalg.cython_lapack cimport dgesv
 import cython
 from libc.math cimport exp, sqrt
 from libcpp cimport bool
 
 
-cdef solve(double[:, ::1] A, double[:, ::1] B):
+cdef mdot(double alpha, double[::1,:] a, double[::1,:] b, double beta, double[::1,:] c):
+    cdef:
+        char *transa = 'n'
+        char *transb = 'n'
+        int m = a.shape[0], n=b.shape[1], k=a.shape[1]
+        double *a0=&a[0,0]
+        double *b0=&b[0,0]
+        double *c0=&c[0,0]
+    dgemm(transa, transb, &m, &n, &k, &alpha, a0, &m, b0,
+                   &k, &beta, c0, &m)
+
+cdef solve(double[::1, :] A, double[::1, :] B):
     cdef int n = A.shape[0], nrhs = B.shape[1], info
     cdef np.ndarray[int] piv = np.zeros(n, dtype=np.intc)
     dgesv(&n, &nrhs, &A[0, 0], &n, &piv[0], &B[0, 0], &n, &info)
@@ -36,16 +48,28 @@ cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g,
     .. math :: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_\bar{l})-1)\delta_{\bar{l}f}
 
 """
-    d2 = np.eye(len(lk))
-    U = -g[:, lk].copy()
+    d2 = np.asfortranarray(np.eye(len(lk)))
+    print('g is for', np.isfortran(g))
+    U = -g[:, lk].copy(order='A')
     np.add.at(U, lk, d2)
-    U *= np.exp(dv) - 1.
+    print('g is for', np.isfortran(U))
+    U *= np.asfortranarray(np.exp(dv) - 1.)
+    print('g is for', np.isfortran(U))
+    print('U=', U)
 
-    V = g[lk, :].copy()
-    solve(d2 + U[lk, :], V)
+    V = g[lk, :].copy(order='F')
+    print('v=', V)
+    mat=np.asfortranarray(d2 + U[lk, :])
+    print('mat isf', np.isfortran(mat))
+    print('V is for', np.isfortran(V))
+    solve(mat, V)
+    print('den=', V)
+    print(np.isfortran(V))
 
 
-    np.subtract(g, np.dot(U, V))
+    updat = np.dot(U, V)
+    print(np.isfortran(updat))
+    mdot(-1., U, V, 1, g)
 
 
 cdef extern from "gsl/gsl_rng.h":
