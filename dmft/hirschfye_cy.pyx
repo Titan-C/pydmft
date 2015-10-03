@@ -31,12 +31,12 @@ def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
 
 cpdef g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, lk):
     d2 = np.asfortranarray(np.eye(len(lk)))
-    U = -g[:, lk].copy(order='F')
-    np.add.at(U, lk, d2)
+    U = g[:, lk].copy(order='F')
+    np.add.at(U, lk, -d2)
     U *= np.asfortranarray(np.exp(dv) - 1.)
 
     V = g[lk, :].copy(order='F')
-    cdef double[::1, :] mat=d2 + U[lk, :].copy(order='F')
+    cdef double[::1, :] mat=U[lk, :].copy(order='F') - d2
     solve(mat, V)
 
     mdot(-1., U, V, 1, g)
