@@ -69,26 +69,31 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
               int subblock_len,
               bool Heatbath = True):
     cdef double dv, ratup, ratdw, rat
-    cdef int j, i, pair, sn, N=v.shape[0], acc = 0, nrat = 0
+    cdef int j, pair, sn, N=v.shape[0], acc = 0, nrat = 0
     cdef int jns
     sn = int(N/subblock_len)
     order = [int(a+subblock_len*b) for a in range(subblock_len) for b in range(sn)]
     for j in order:
-        dv = -2.*v[j]
-        ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
-        ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
-        rat = ratup * ratdw
-        if rat<0:
-            nrat += 1
-        if Heatbath:
-            rat = rat/(1.+rat)
+        if uniform(r)>0.5:
+            dv = -2.*v[j]
+            ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
+            ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
+            rat = ratup * ratdw
+            if rat<0:
+                nrat += 1
+            if Heatbath:
+                rat = rat/(1.+rat)
 
-        if rat > uniform(r):
-            acc += 1
-            v[j] *= -1.
-            cgnew(N, &gup[0,0],  dv, j)
-            cgnew(N, &gdw[0,0], -dv, j)
-        elif sn > 4:
+            if rat > uniform(r):
+                acc += 1
+                v[j] *= -1.
+                cgnew(N, &gup[0,0],  dv, j)
+                cgnew(N, &gdw[0,0], -dv, j)
+        elif sn > 1:
+            dv = -2.*v[j]
+            ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
+            ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
+
             jns = j+subblock_len if j<subblock_len else j-subblock_len
             dv = -2.*v[jns]
             ratup *= 1. + (1. - gup[jns, jns])*(exp( dv)-1.)
