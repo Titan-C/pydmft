@@ -25,15 +25,14 @@ void cgnew(size_t N, double *g, double dv, int k){
     ee = exp(dv)-1.;
     a = ee/(1. + (1.-g[k*N + k])*ee);
 
-    std::vector<double> x, y;
-    x.resize(N);
-    y.resize(N);
-
-    for(unsigned int i=0; i<N; i++){
-        x[i] = g[k*N +i];//column fortran
-        y[i] = g[i*N +k];//row fortran
-    }
+    std::vector<double> x(N);
+    std::copy (g + k*N, g + (k+1)*N, x.begin());//column fortran
     x[k] -= 1;
+
+    std::vector<double> y(N);
+
+    for(unsigned int i=0; i<N; i++)
+        y[i] = g[i*N + k];//row fortran
 
     cblas_dger (CblasColMajor, N, N, a, &x[0], 1, &y[0], 1, &g[0], N);
 
