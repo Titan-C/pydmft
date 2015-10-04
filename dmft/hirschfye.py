@@ -274,12 +274,12 @@ def g2flip(g, dv, l, k):
 """
     lk = [l, k]
     d2 = np.eye(len(lk))
-    U = -g[:, lk].copy()
-    np.add.at(U, lk, d2)
+    U = g[:, lk].copy()
+    np.add.at(U, lk, -d2)
     U *= np.exp(dv) - 1.
 
     V = g[lk, :].copy()
-    denom = la.solve(d2 + U[lk, :], V)
+    denom = la.solve(U[lk, :]-d2, V)
 
     g -= np.dot(U, denom)
 
