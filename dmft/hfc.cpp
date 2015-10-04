@@ -55,18 +55,24 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
   U[std::slice(N, N, 1)] += std::valarray<double>(exp(dv[1])-1., N);
 
   for(auto ent: U) std::cout << ent << " ";
+  std::cout<<"\n";
   std::valarray<double> V (2*N);
-    for(size_t i=0; i<N; i++){
-      V[i] = g[i*N + l];
-      V[i+N] = g[i*N + k];
+  int col=0;
+  for(size_t i=0; i<2*N; i++){
+      V[i] = g[col*N + l];
+      V[i+1] = g[col*N + k];
+      col++;
     }
+  for(auto ent: V) std::cout << ent << " ";
+  std::cout<<"\n";
 
-  size_t sel[]= {l, l+N, k, k+N};
+  size_t sel[]= {l, k, l+N, k+N};
   std::valarray<size_t> myselection (sel,4);
   std::valarray<double> mat (U[myselection]);
   mat -= id2;
   int n = 2, info;
   std::valarray<int> ipiv(n);
-  //  LAPACK_dgesv(LAPACK_ROW_MAJOR, &n, &N, &mat[0], &n, &ipiv[0], &V[0], &n, &info);
-
+  info = LAPACKE_dgesv(LAPACK_COL_MAJOR, n, N, &mat[0], n, &ipiv[0], &V[0], n);
+  cblas_dgemm (CblasColMajor, CblasNoTrans, CblasNoTrans,
+	       N, N, n, -1, &U[0], N, &V[0], n, 1., &g[0], N);
 }

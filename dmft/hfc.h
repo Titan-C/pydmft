@@ -26,11 +26,8 @@
 #include <iostream>
 #include <cmath>
 
-extern "C"
-{
-     #include <cblas.h>
-
-}
+#include <cblas.h>
+#include <lapacke.h>
 
 
 void cgnew(size_t N, double *g, double dv, int k);
