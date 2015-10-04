@@ -53,8 +53,6 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
 
   U[std::slice(0, N, 1)] *= std::valarray<double>(exp(dv[0])-1., N);
   U[std::slice(N, N, 1)] *= std::valarray<double>(exp(dv[1])-1., N);
-  for(auto ent: U) std::cout << ent << " ";
-  std::cout<<"\n";
 
   std::valarray<double> V (2*N);
   int col=0;
@@ -62,9 +60,6 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
       V[i*2] = g[i*N + l];
       V[i*2+1] = g[i*N + k];
   }
-
-  for(auto ent: V) std::cout << ent << " ";
-  std::cout<<"\n";
 
   size_t sel[]= {l, k, l+N, k+N};
   std::valarray<size_t> myselection (sel,4);
