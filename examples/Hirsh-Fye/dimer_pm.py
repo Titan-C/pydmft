@@ -43,9 +43,11 @@ def do_input():
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, default=2.,
-                        help='Local interaction strenght')
+                        help='Local interaction strength')
     parser.add_argument('-tp', type=float, default=.25,
                         help='Dimerization strength')
+    parser.add_argument('-df', '--double_flip_prob', type=float, default=0.,
+                        help='Probability for double spin flip on equal sites')
     parser.add_argument('-ofile', default='disk/dim_PM_B{BETA}_t{tp}.h5',
                         help='Output file')
 

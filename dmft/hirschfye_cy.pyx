@@ -45,18 +45,18 @@ def updateDHS(np.ndarray[np.float64_t, ndim=2] gup,
               np.ndarray[np.float64_t, ndim=2] gdw,
               np.ndarray[np.float64_t, ndim=1] v,
               int subblock_len,
+              double double_flip_prob = 0.,
               bool Heatbath = True):
     cdef double dv, ratup, ratdw, rat
     cdef int j, pair, sn, N=v.shape[0], acc = 0, nrat = 0
     cdef int jns
     cdef int[2] slic = [1, 1]
     sn = int(N/subblock_len)
-    order = [int(a+subblock_len*b) for a in range(subblock_len) for b in range(sn)]
-    for j in order:
+    for j in range(N):
         dv = -2.*v[j]
         ratup = 1. + (1. - gup[j, j])*(exp( dv)-1.)
         ratdw = 1. + (1. - gdw[j, j])*(exp(-dv)-1.)
-        if uniform(r)>0.5:
+        if uniform(r)>double_flip_prob:
             rat = ratup * ratdw
             if rat<0:
                 nrat += 1

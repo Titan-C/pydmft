@@ -59,6 +59,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     # Set up default values
     fracp, intp = math.modf(time.time())
     parms = {'global_flip': False,
+             'double_flip_prob': 0.,
              'save_logs': False,
              'n_tau_mc':    64,
              'N_TAU':    2**11,
@@ -99,6 +100,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i, (up, dw) in enumerate(i_pairs):
                 acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
                                              parms['n_tau_mc'],
+                                             parms['double_flip_prob'],
                                              parms['Heat_bath'])
                 acc += acr
                 anrat += nrat

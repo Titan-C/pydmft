@@ -22,13 +22,13 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
+def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arrd = []
     freq_arro = []
     with HDFArchive(filestr.format(beta), 'r') as output_files:
-        for step in output_files[u_str].keys():
+        for step in output_files[u_str].keys()[last:]:
             try:
 
                 giwd = output_files[u_str][step]['G_iwd']

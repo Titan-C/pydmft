@@ -61,7 +61,7 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
       V[i*2+1] = g[i*N + k];
   }
 
-  size_t sel[]= {l, k, l+N, k+N};
+  size_t sel[] = {l, k, l+N, k+N};
   std::valarray<size_t> myselection (sel,4);
   std::valarray<double> mat (U[myselection]);
   mat -= id2;
