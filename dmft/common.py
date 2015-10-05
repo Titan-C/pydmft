@@ -5,8 +5,6 @@ Created on Mon Feb  9 13:24:24 2015
 @author: oscar
 """
 import numpy as np
-from scipy.integrate import romb
-from scipy.linalg.blas import dger
 
 
 def matsubara_freq(beta=16., size=250, fer=1):
@@ -36,19 +34,22 @@ def matsubara_freq(beta=16., size=250, fer=1):
 
 def tau_wn_setup(parms):
     """return two numpy arrays one corresponding to the imaginary time array
-    and the other to the matsubara frequencies.
+    and the other to the matsubara frequencies. The time array is twice as
+    dense for best results in the Fast Fourier Transform.
+
     Parameters
     ----------
     parms: dictionary
-        with keywords BETA, N_TAU, N_MATSUBARA
+        with keywords BETA, N_MATSUBARA
 
     Returns
     -------
     out: tuple (tau real ndarray, w_n real ndarray)
     """
 
-    tau = np.linspace(0, parms['BETA'], parms['N_TAU']+1)
     w_n = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
+    tau = np.arange(0, parms['BETA'], parms['BETA']/2/len(w_n))
+
     return tau, w_n
 
 
@@ -82,7 +83,7 @@ def greenF(w_n, sigma=0, mu=0, D=1):
     return 2./(zeta + sig*sq)
 
 
-def gt_fouriertrans(g_tau, tau, w_n):
+def gt_fouriertrans(g_tau, beta, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta]` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff.
@@ -107,16 +108,14 @@ def gt_fouriertrans(g_tau, tau, w_n):
     out : complex ndarray
             Interacting Greens function in matsubara frequencies
     """
-    beta = tau[-1]
-    power = np.exp(1j * dger(1, w_n, tau))
 
-    g_shape = g_tau.shape
-    g_tau = g_tau.reshape(-1, 1, g_shape[-1]) * power
+    freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
-    return np.squeeze(romb(g_tau, dx=beta/(tau.size-1)))
+    gtau = g_tau - time_tail
+    return beta*np.fft.ifft(gtau*np.exp(1j*np.pi*tau/beta))[...,:len(w_n)]+freq_tail
 
 
-def freq_tail_fourier(tail_coef, tau, w_n):
+def freq_tail_fourier(tail_coef, beta, tau, w_n):
     """Fourier transforms analytically the slow decaying tail_coefs of
     the Greens functions[matsubara]
 
@@ -125,7 +124,6 @@ def freq_tail_fourier(tail_coef, tau, w_n):
     in block
      """
 
-    beta = tau[-1]
     freq_tail =   tail_coef[0]/(1.j*w_n)\
                 + tail_coef[1]/(1.j*w_n)**2\
                 + tail_coef[2]/(1.j*w_n)**3
@@ -137,7 +135,7 @@ def freq_tail_fourier(tail_coef, tau, w_n):
     return freq_tail, time_tail
 
 
-def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
+def gw_invfouriertrans(g_iwn, beta, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -161,10 +159,6 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     ----------
     g_iwn : real float array
             Imaginary time interacting Green function
-    tau : real float array
-            Imaginary time points
-    w_n : real float array
-            fermionic matsubara frequencies. Only use the positive ones
     beta : float
         Inverse temperature of the system
     tail_coef : list of floats size 3
@@ -179,17 +173,14 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     --------
     gt_fouriertrans"""
 
-    beta = tau[-1]
-    w_ntau = dger(1, tau, w_n)
-    fou_cos = np.cos(w_ntau)
-    fou_sin = np.sin(w_ntau)
-    g_shape = g_iwn.shape
+    freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
-    freq_tail, time_tail = freq_tail_fourier(tail_coef, tau, w_n)
+    giwn = g_iwn - freq_tail
 
-    g_iwn = (g_iwn - freq_tail).reshape(-1, 1, g_shape[-1])
-    g_tau = g_iwn.real * fou_cos + g_iwn.imag * fou_sin
-    return np.squeeze(np.sum(g_tau, axis=-1)*2/beta + time_tail)
+    g_tau = np.fft.fft(giwn, len(tau))
+    g_tau *= np.exp(-1j*np.pi*tau/beta)
+
+    return (g_tau*2/beta).real + time_tail
 
 
 def fit_gf(w_n, giw):

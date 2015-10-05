@@ -13,15 +13,15 @@ import pytest
 
 
 @pytest.mark.parametrize("chempot", [0, 0.5, -0.8, 4.])
-def test_fourier_trasforms(chempot, beta=50., n_tau=2**11, n_matsubara=115):
+def test_fourier_trasforms(chempot, beta=50., n_matsubara=128):
     """Test the tail improved fourier transforms"""
-    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara}
+    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara}
     tau, w_n = tau_wn_setup(parms)
     giw = greenF(w_n, mu=chempot)
 
     for gwr in [giw, np.array([giw, giw])]:
-        g_tau = gw_invfouriertrans(gwr, tau, w_n, [1., -chempot, 0.25])
-        g_iomega = gt_fouriertrans(g_tau, tau, w_n)
+        g_tau = gw_invfouriertrans(gwr, beta, tau, w_n, [1., -chempot, 0.25])
+        g_iomega = gt_fouriertrans(g_tau, beta, tau, w_n, [1., -chempot, 0.25])
         assert np.allclose(gwr, g_iomega)
 
 
