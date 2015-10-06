@@ -22,7 +22,7 @@ def solver(u_int, g_0_iwn, w_n, tau):
 
     g_0_tau = gw_invfouriertrans(g_0_iwn, tau, w_n)
     sigma_tau = u_int**2 * g_0_tau**3
-    sigma_iwn = gt_fouriertrans(sigma_tau, tau, w_n)
+    sigma_iwn = gt_fouriertrans(sigma_tau, tau, w_n, [u_int**2/4., 0., 0.])
     g_iwn = g_0_iwn / (1 - sigma_iwn * g_0_iwn)
 
     return g_iwn, sigma_iwn
