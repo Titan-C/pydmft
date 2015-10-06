@@ -134,7 +134,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 def measure_chi(v, chi, parms):
     """Estimates the susceptibility from the Ising auxiliary fields"""
     s = np.sign(np.array([v]*2).flatten())
-    for i in range(lev(v)-1):
+    for i in range(len(v)-1):
         for j in range(1, len(v)):
             chi[i] += s(i+j)*s(j)
 
@@ -182,16 +182,23 @@ def retarded_weiss(g0tau):
     g0tau : 3D ndarray, of retarded weiss field
         First axis numerical values, second and third axis are block indices
     """
-    slices, n1, n2 = g0tau.shape
+    g0t_shape = g0tau.shape
+    if len(g0t_shape) > 1:
+        n1, n2, slices = g0t_shape
+    else:
+        n1, n2, slices = 1, 1, g0t_shape[0]
+        g0tau = g0tau.reshape(1, 1, -1)
+
     delta_tau = np.arange(slices)
 
     gind = slices + np.subtract.outer(delta_tau, delta_tau)
     g0t_mat = np.empty((slices*n1, slices*n2))
+
     for i in range(n1):
         for j in range(n2):
             g0t_mat[i*slices:(i+1)*slices,
                     j*slices:(j+1)*slices] = np.concatenate(
-                        (g0tau[:, i, j], -g0tau[:, i, j]))[gind]
+                        (g0tau[i, j], -g0tau[i, j]))[gind]
     return g0t_mat
 
 
@@ -292,7 +299,7 @@ def interpol(gtau, Lrang):
     matsubara frequencies"""
     t = np.linspace(0, 1, gtau.size)
     f = interp1d(t, gtau)
-    tf = np.linspace(0, 1, Lrang+1)
+    tf = np.linspace(0, 1, Lrang)
     return f(tf)
 
 

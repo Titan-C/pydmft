@@ -22,7 +22,7 @@ def test_hf_fast_updatecond(chempot, u_int, updater, beta=16.,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
     _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
     v = np.squeeze(v)
-    g0ttp = hf.retarded_weiss(g0t[:-1].reshape(-1, 1, 1))
+    g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
 
     groot = hf.gnewclean(g0ttp, v, kroneker)
@@ -46,7 +46,7 @@ def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
     _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
     v = np.abs(np.squeeze(v))
-    g0ttp = hf.retarded_weiss(g0t[:-1].reshape(-1, 1, 1))
+    g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
 
     groot = hf.gnewclean(g0ttp, v, kroneker)
@@ -71,7 +71,7 @@ def test_solver_atom(u_int):
     v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
     tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
     intm = hf.interaction_matrix(1)  # one orbital
-    g0t = -.5 * np.ones(parms['n_tau_mc']).reshape(-1, 1, 1)
+    g0t = -.5 * np.ones(parms['n_tau_mc'])
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(0.5 * (gtu+gtd))
     result = np.polyfit(tau[:10], np.log(g[:10]), 1)
@@ -88,15 +88,14 @@ def test_solver_atom(u_int):
        -0.079, -0.079, -0.08 , -0.081, -0.083, -0.085, -0.088, -0.092, -0.098,
        -0.105, -0.114, -0.127, -0.144, -0.172, -0.222, -0.322, -0.549]))])
 def test_solver(chempot, u_int, gend):
-    parms = {'BETA': 16., 'N_TAU': 2**11, 'N_MATSUBARA': 64,
+    parms = {'BETA': 16., 'N_MATSUBARA': 16,
              't': 0.5, 'SITES': 1, 'BANDS': 1,
              'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
              'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete'}
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
-    G0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
-    g0t = hf.interpol(G0t, parms['n_tau_mc'])[:-1].reshape(-1, 1, 1)
+    g0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(-0.5 * (gtu+gtd))
     assert np.allclose(gend, g, atol=6e-3)
