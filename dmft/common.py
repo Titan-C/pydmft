@@ -83,7 +83,7 @@ def greenF(w_n, sigma=0, mu=0, D=1):
     return 2./(zeta + sig*sq)
 
 
-def gt_fouriertrans(g_tau, beta, tau, w_n, tail_coef=[1., 0., 0.]):
+def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta]` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff.
@@ -109,6 +109,7 @@ def gt_fouriertrans(g_tau, beta, tau, w_n, tail_coef=[1., 0., 0.]):
             Interacting Greens function in matsubara frequencies
     """
 
+    beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
     gtau = g_tau - time_tail
@@ -135,7 +136,7 @@ def freq_tail_fourier(tail_coef, beta, tau, w_n):
     return freq_tail, time_tail
 
 
-def gw_invfouriertrans(g_iwn, beta, tau, w_n, tail_coef=[1., 0., 0.]):
+def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
@@ -173,7 +174,9 @@ def gw_invfouriertrans(g_iwn, beta, tau, w_n, tail_coef=[1., 0., 0.]):
     --------
     gt_fouriertrans"""
 
+    beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
+
 
     giwn = g_iwn - freq_tail
 
