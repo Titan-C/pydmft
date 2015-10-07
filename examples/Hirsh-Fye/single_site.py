@@ -82,14 +82,12 @@ def dmft_loop_pm(simulation):
 
         # patch tail on
         giw.real = 0.
-        giw[setup['n_tau_mc']//2:] = -1j/w_n[setup['n_tau_mc']//2:]
 
         g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
         g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n)
         gtu, gtd = hf.imp_solver([g0tau]*2, v_aux, intm, setup)
-        gt = -np.squeeze(0.5 * (gtu+gtd))
+        gtau = -np.squeeze(0.5 * (gtu+gtd))
 
-        gtau = hf.interpol(gt, setup['N_TAU'])
         giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
         if comm.rank == 0:
