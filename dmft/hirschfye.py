@@ -14,6 +14,7 @@ from h5py import File as h5file
 from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.linalg.blas import dger
+import argparse
 import dmft.hffast as hffast
 import math
 import numpy as np
@@ -61,8 +62,6 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     parms = {'global_flip': False,
              'double_flip_prob': 0.,
              'save_logs': False,
-             'n_tau_mc':    64,
-             'N_TAU':    2**11,
              'N_MATSUBARA': 64,
              't':           0.5,
              'MU':          0.,
@@ -99,9 +98,9 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
         for _ in range(parms['N_meas']):
             for i, (up, dw) in enumerate(i_pairs):
                 acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
-                                             parms['n_tau_mc'],
+                                             2*parms['N_MATSUBARA'],
                                              parms['double_flip_prob'],
-                                             parms['Heat_bath'])
+                                             ['Heat_bath'])
                 acc += acr
                 anrat += nrat
 
@@ -120,7 +119,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps']*comm.Get_size()
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
-    double_occ /= parms['n_tau_mc']*parms['sweeps']
+    double_occ /= 2*parms['N_MATSUBARA']*parms['sweeps']
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
     comm.Allreduce(double_occ.copy(), double_occ)
@@ -140,7 +139,7 @@ def measure_chi(v, chi, parms):
 
 def double_occupation(g, i_pairs, double_occ, parms):
     """Calculates the double occupation of the correlated orbital"""
-    slices = parms['n_tau_mc']
+    slices = parms['N_MATSUBARA']*2
     for i, (up, dw) in enumerate(i_pairs):
         for j in range(parms['SITES']):
             n_up = np.diag(g[up][j*slices:(j+1)*slices, j*slices:(j+1)*slices])
@@ -219,7 +218,7 @@ def avg_gblock(gmat):
 
 
 def avg_g(gst, parms):
-    n1, n2, slices = parms['SITES'], parms['SITES'], parms['n_tau_mc']
+    n1, n2, slices = parms['SITES'], parms['SITES'], parms['N_MATSUBARA']*2
 
     gst_m = np.empty((n1, n2, slices+1))
     for i in range(n1):
@@ -325,8 +324,6 @@ def setup_PM_sim(u_parms):
     """Setup the default state for a Paramagnetic simulation"""
     parms = {'global_flip': False,
              'save_logs': False,
-             'n_tau_mc':    64,
-             'N_TAU':    2**11,
              'N_MATSUBARA': 64,
              't':           0.5,
              'MU':          0.,
@@ -341,10 +338,52 @@ def setup_PM_sim(u_parms):
     tau, w_n = tau_wn_setup(parms)
     giw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
     gtau = gw_invfouriertrans(giw, tau, w_n)
-    gtau = interpol(gtau, parms['n_tau_mc'])
-    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
+    parms['dtau_mc'] = tau[1]
     intm = interaction_matrix(parms['BANDS'])
-    v = ising_v(parms['dtau_mc'], parms['U'], parms['n_tau_mc']*parms['SITES'],
+    v = ising_v(parms['dtau_mc'], parms['U'], len(tau)*parms['SITES'],
                 intm.shape[1])
 
     return tau, w_n, gtau, giw, v, intm
+
+
+def do_input(help_string):
+    """Prepares the input parser for the simulation at hand
+
+    Parameters
+    ----------
+    help_string: Title of the execution script
+
+    Output
+    ------
+    parse: Argument Parser object
+     """
+
+    parser = argparse.ArgumentParser(description=help_string,
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-BETA', metavar='B', type=float,
+                        default=32., help='The inverse temperature')
+    parser.add_argument('-n_freq', '-N_MATSUBARA', metavar='B', type=int,
+                        default=64, help='Number of Matsubara frequencies')
+    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
+                        help='Number Monte Carlo Measurement')
+    parser.add_argument('-therm', type=int, default=int(1e4),
+                        help='Monte Carlo sweeps of thermalization')
+    parser.add_argument('-N_meas', type=int, default=3,
+                        help='Number of Updates before measurements')
+    parser.add_argument('-Niter', metavar='N', type=int,
+                        default=20, help='Number of iterations')
+    parser.add_argument('-U', type=float, default=2.5,
+                        help='Local interaction strenght')
+    parser.add_argument('-mu', '--MU', type=float, default=0.,
+                        help='Chemical potential')
+    parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
+                        help='Output file shelve')
+
+    parser.add_argument('-l', '--save_logs', action='store_true',
+                        help='Store the changes in the auxiliary field')
+    parser.add_argument('-M', '--Heat_bath', action='store_false',
+                        help='Use Metropolis importance sampling')
+    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
+                        metavar=('U_src', 'U_target', 'avg_over'),
+                        help='Resume DMFT loops from on disk data files')
+    return parser

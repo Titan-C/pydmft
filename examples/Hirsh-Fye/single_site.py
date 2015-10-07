@@ -13,47 +13,12 @@ from __future__ import division, absolute_import, print_function
 
 from mpi4py import MPI
 from pytriqs.archive import HDFArchive
-import argparse
 import dmft.common as gf
 import dmft.hirschfye as hf
 import dmft.plot.hf_single_site as pss
 import numpy as np
 import sys
 comm = MPI.COMM_WORLD
-
-
-def do_input():
-    """Prepares the input for the simulation at hand"""
-
-    parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye single band',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-BETA', metavar='B', type=float,
-                        default=32., help='The inverse temperature')
-    parser.add_argument('-n_tau_mc', metavar='B', type=int,
-                        default=64, help='Number of time slices')
-    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
-                        help='Number Monte Carlo Measurement')
-    parser.add_argument('-therm', type=int, default=int(1e4),
-                        help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=3,
-                        help='Number of Updates before measurements')
-    parser.add_argument('-Niter', metavar='N', type=int,
-                        default=20, help='Number of iterations')
-    parser.add_argument('-U', type=float, default=2.5,
-                        help='Local interaction strenght')
-    parser.add_argument('-mu', '--MU', type=float, default=0.,
-                        help='Chemical potential')
-    parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
-                        help='Output file shelve')
-
-    parser.add_argument('-l', '--save_logs', action='store_true',
-                        help='Store the changes in the auxiliary field')
-    parser.add_argument('-M', '--Heat_bath', action='store_false',
-                        help='Use Metropolis importance sampling')
-    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
-                        metavar=('U_src', 'U_target', 'avg_over'),
-                        help='Resume DMFT loops from on disk data files')
-    return vars(parser.parse_args())
 
 
 def set_new_seed(setup):
@@ -121,8 +86,7 @@ def dmft_loop_pm(simulation):
 
         g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
         g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n)
-        g0t = hf.interpol(g0tau, setup['n_tau_mc'])[:-1].reshape(-1, 1, 1)
-        gtu, gtd = hf.imp_solver([g0t, g0t], v_aux, intm, setup)
+        gtu, gtd = hf.imp_solver([g0tau]*2, v_aux, intm, setup)
         gt = -np.squeeze(0.5 * (gtu+gtd))
 
         gtau = hf.interpol(gt, setup['N_TAU'])
@@ -141,5 +105,7 @@ def dmft_loop_pm(simulation):
 
 if __name__ == "__main__":
 
-    SETUP = do_input()
+    SETUP = hf.do_input('DMFT Loop For the single band para-magnetic case')
+    SETUP = vars(SETUP.parse_args())
+
     dmft_loop_pm(SETUP)

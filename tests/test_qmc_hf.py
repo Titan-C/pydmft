@@ -15,11 +15,10 @@ import dmft.hffast as hffast
 
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.gnew, hffast.gnew]))
-def test_hf_fast_updatecond(chempot, u_int, updater, beta=16.,
-                            n_tau=2**11, n_matsubara=64):
-    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
+def test_hf_fast_updatecond(chempot, u_int, updater, beta=16., n_matsubara=32):
+    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
+             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5}
     _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
     v = np.squeeze(v)
     g0ttp = hf.retarded_weiss(g0t)
@@ -39,11 +38,10 @@ def test_hf_fast_updatecond(chempot, u_int, updater, beta=16.,
 
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.g2flip, hffast.g2flip]))
-def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
-                            n_tau=2**11, n_matsubara=64):
-    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
+def test_hf_fast_2flip(chempot, u_int, updater, beta=16., n_matsubara=64):
+    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32, }
+             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5}
     _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
     v = np.abs(np.squeeze(v))
     g0ttp = hf.retarded_weiss(g0t)
@@ -63,15 +61,15 @@ def test_hf_fast_2flip(chempot, u_int, updater, beta=16.,
 @pytest.mark.parametrize("u_int", [1, 2, 2.5])
 @pytest.mark.xfail(raises=AssertionError, reason='Atom is not well described')
 def test_solver_atom(u_int):
-    parms = {'BETA': 16., 'U': u_int, 'n_tau_mc':    64,
+    parms = {'BETA': 16., 'U': u_int, 'N_MATSUBARA': 16,
              'sweeps': 2000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete',
              'global_flip': True, 'SITES': 1, 'BANDS': 1}
-    parms['dtau_mc'] = parms['BETA']/parms['n_tau_mc']
-    v = hf.ising_v(parms['dtau_mc'], parms['U'], L=parms['n_tau_mc'])
-    tau = np.linspace(0, parms['BETA'], parms['n_tau_mc']+1)
+    parms['dtau_mc'] = parms['BETA']/parms['N_MATSUBARA']/2
+    v = hf.ising_v(parms['dtau_mc'], parms['U'], L=2*parms['N_MATSUBARA'])
+    tau = np.linspace(0, parms['BETA'], 2*parms['N_MATSUBARA'])
     intm = hf.interaction_matrix(1)  # one orbital
-    g0t = -.5 * np.ones(parms['n_tau_mc'])
+    g0t = -.5 * np.ones(len(tau))
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
     g = np.squeeze(0.5 * (gtu+gtd))
     result = np.polyfit(tau[:10], np.log(g[:10]), 1)
@@ -90,7 +88,7 @@ def test_solver_atom(u_int):
 def test_solver(chempot, u_int, gend):
     parms = {'BETA': 16., 'N_MATSUBARA': 16,
              't': 0.5, 'SITES': 1, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
+             'MU': chempot, 'U': u_int,
              'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
              'save_logs': False, 'updater': 'discrete'}
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
