@@ -9,8 +9,7 @@ addons:
     packages:
     - gcc-5
     - g++-5
-    - libblas-dev
-    - liblapack-dev
+    - libopenblas-dev
     - libgsl0-dev
     - libopenmpi-dev
     - openmpi-bin
