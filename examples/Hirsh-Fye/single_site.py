@@ -48,12 +48,8 @@ def set_new_seed(setup):
 
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
-    setup = {'N_TAU':    2**11,
-             'N_MATSUBARA': 512,
-             't':           .5,
-             'MU':          0,
+    setup = {'t':           .5,
              'SITES':       1,
-             'save_logs':   False,
              'updater':     'discrete'}
 
     if simulation['new_seed']:
@@ -96,7 +92,7 @@ def dmft_loop_pm(simulation):
                             'g0iw': g0iw.copy(),
                             'setup': setup.copy(),
                             'giw':  giw.copy(),
-                            'gtau': gt.copy(),
+                            'gtau': gtau.copy(),
                             }
         sys.stdout.flush()
 

@@ -62,7 +62,6 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     parms = {'global_flip': False,
              'double_flip_prob': 0.,
              'save_logs': False,
-             'N_MATSUBARA': 64,
              't':           0.5,
              'MU':          0.,
              'SITES':       1,
@@ -358,8 +357,8 @@ def do_input(help_string):
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
-    parser.add_argument('-n_freq', '-N_MATSUBARA', metavar='B', type=int,
-                        default=64, help='Number of Matsubara frequencies')
+    parser.add_argument('-n_freq', '--N_MATSUBARA', metavar='B', type=int,
+                        default=32, help='Number of Matsubara frequencies')
     parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
                         help='Number Monte Carlo Measurement')
     parser.add_argument('-therm', type=int, default=int(1e4),
