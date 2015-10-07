@@ -22,7 +22,7 @@ import scipy.linalg as la
 import time
 
 
-def ising_v(dtau, U, L, fields=1, polar=0.5):
+def ising_v(dtau, U, L, fields=1, polar=0.):
     """initialize the vector V of Ising fields
     .. math:: V = \\lambda (\\sigma_1, \\sigma_2, \\cdots, \\sigma_L)
     where the vector entries :math:`\\sigma_n=\\pm 1` are randomized subject
@@ -109,7 +109,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             double_occupation(g, i_pairs, double_occ, parms)
             #measure_chi(v, parms)
             if parms['save_logs']:
-                vlog.append(np.copy(v))
+                vlog.append(v>0)
                 ar.append(acr)
 
     tGst = np.asarray(Gst)
@@ -159,7 +159,7 @@ def save_output(parms, double_occ, vlog, ar):
     output_file['double_occ'] = double_occ
 
     if parms['save_logs']:
-        output_file['V_ising'] = np.asarray(vlog)
+        output_file['v_ising'] = np.asarray(vlog)
         output_file['acceptance'] = np.asarray(ar)
 
 
@@ -261,8 +261,22 @@ def gnew(g, dv, k):
     g = dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
+def autocorr(a):
+
+    N=a.shape[0]
+    m=a.mean()
+    s=a.std()
+    if len(a.shape)>1:
+        ad=np.dot(a, a.T)
+    else:
+        ad=np.outer(a, a)
+
+    avs=np.array([np.trace(ad, i) for i in range(N)])/(N-np.arange(N))
+    atou=(avs-m**2)/s**2
+    return atou
+
 def g2flip(g, dv, l, k):
-    """Update the interacting Green function at arbitrary spinflips
+    r"""Update the interacting Green function at arbitrary spinflips
 
     Using the Woodbury matrix identity it is possible to perform an
     update of two simultaneous spin flips. I calculate
