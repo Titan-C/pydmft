@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri May 29 13:51:22 2015
+RKKY dimer
+==========
 
-@author: oscar
+Solve scripts
 """
 
 from pytriqs.gf.local import iOmega_n
@@ -47,7 +48,7 @@ def loop_tab(uint, tabr, t, beta, file_str):
     S = Dimer_Solver(U=uint, beta=beta, n_points=n_freq)
     S.setup.update({'t': t, 'U': uint, 'beta': beta, 'n_freq': n_freq})
 
-    init_gf_ins(S.g_iw, w_n, 0, tabr[0], uint)
+    init_gf_ins(S.g_iw, w_n, uint)
 
     for tab in tabr:
         S.setup['tab'] = tab
