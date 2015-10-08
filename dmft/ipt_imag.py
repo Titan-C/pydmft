@@ -29,7 +29,7 @@ def solver(u_int, g_0_iwn, w_n, tau):
 
 
 def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
-    """Performs the paramagnetic(spin degenerate) self-consistent loop in a
+    r"""Performs the paramagnetic(spin degenerate) self-consistent loop in a
     bethe lattice given the input
 
     Parameters

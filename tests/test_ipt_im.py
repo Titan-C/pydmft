@@ -45,21 +45,20 @@ ipt_ref_res = \
 
 
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
-def test_ipt_pm_g(u_int, result, beta=50., n_tau=2**11, n_matsubara=64):
-    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
+def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
+    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'MU': 0, 'U': u_int,
              }
     tau, w_n = tau_wn_setup(parms)
     g_iwn0 = greenF(w_n, D=2*parms['t'])
-    g_iwn, sigma_iwn = ipt_imag.dmft_loop(parms['U'], parms['t'], g_iwn0, w_n, tau)
+    g_iwn, _ = ipt_imag.dmft_loop(parms['U'], parms['t'], g_iwn0, w_n, tau)
 
-    print((result - g_iwn).imag)
     assert np.allclose(result, g_iwn, atol=3e-3)
 
 
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
-def test_ipt_dimer_pm_g(u_int, result, beta=50., n_tau=2**11, n_matsubara=160):
-    parms = {'BETA': beta, 'N_TAU': n_tau, 'N_MATSUBARA': n_matsubara,
+def test_ipt_dimer_pm_g(u_int, result, beta=50., n_matsubara=160):
+    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'MU': 0, 'U': u_int,
              }
     tau, w_n = tau_wn_setup(parms)
