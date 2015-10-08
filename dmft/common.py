@@ -4,6 +4,7 @@ Created on Mon Feb  9 13:24:24 2015
 
 @author: oscar
 """
+from __future__ import division, absolute_import, print_function
 import numpy as np
 
 
