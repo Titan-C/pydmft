@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-@author: Óscar Nájera
-Created on Tue Oct 28 16:33:14 2014
+Simple IPT solver
+=================
+
+Using triqs
 """
 from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt

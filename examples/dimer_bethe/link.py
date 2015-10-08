@@ -755,7 +755,7 @@ def Print_Fp_old_Fp_New(Fp_K, Fp_Knew, Nb0, base):
 def CheckNKSconsistency(all_pseudo, baseNKS):
     " Just checking NKS consistency "
     for i,p in enumerate(all_pseudo):
-        pn = copy(p)
+        pn = copy.copy(p)
         NKS = baseNKS[pn.pop()][:3] # Since we always mixed states with the same N,K,Sz, we can just take this from superstate
         for j in pn:
             if baseNKS[j][:3] != NKS[:3]:

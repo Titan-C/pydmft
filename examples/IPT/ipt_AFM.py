@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-@author: Óscar Nájera
-Created on Thu Nov 06 15:11:14 2014
+Anti-Ferromagnetism in with IPT
+===============================
+
+Abusing the use limits of IPT to get a magnetic solution
+
 """
 from __future__ import division, absolute_import, print_function
 
@@ -121,4 +124,3 @@ def AFM_follow(S, t, U, loops):
 
 if __name__ == "__main__":
     AFM_follow(S=IPTSolver(beta=40), t=0.5, U=2.7, loops=55)
-
