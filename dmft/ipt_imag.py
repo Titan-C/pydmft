@@ -59,9 +59,11 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
         g_iwn_old = g_iwn.copy()
         g_0_iwn = 1. / (iw_n - t**2 * g_iwn_old)
         g_iwn, sigma_iwn = solver(u_int, g_0_iwn, w_n, tau)
+        #Clean for Half-fill
+        g_iwn = 1j*g_iwn.imag
         converged = np.allclose(g_iwn_old, g_iwn, conv)
         loops += 1
-        if loops > 300:
+        if loops > 500:
             converged = True
         g_iwn = mix * g_iwn + (1 - mix) * g_iwn_old
     return g_iwn, sigma_iwn

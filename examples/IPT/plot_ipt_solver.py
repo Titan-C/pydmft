@@ -93,15 +93,14 @@ def ev_on_interaction(U, beta, t, max_loops=300):
     return u_zet
 
 
-if __name__ == "__main__":
 #    ev_on_loops([1,2,5,10, 20], 3, 200, 0.5)
-    U = np.linspace(0, 4, 50)
+U = np.linspace(0, 4, 50)
 #    U = np.concatenate((U, U[-2:11:-1]))
 
-    for beta in [150, 300.]:
-        zet=ev_on_interaction(U, beta, 0.5)
-        plt.plot(U, zet, label='$\\beta={}$'.format(beta))
-    plt.title('Hysteresis loop of the quasiparticle weigth')
-    plt.legend()
-    plt.ylabel('Z')
-    plt.xlabel('U/D')
+for beta in [150, 300.]:
+    zet=ev_on_interaction(U, beta, 0.5)
+    plt.plot(U, zet, label='$\\beta={}$'.format(beta))
+plt.title('Hysteresis loop of the quasiparticle weigth')
+plt.legend()
+plt.ylabel('Z')
+plt.xlabel('U/D')
