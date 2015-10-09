@@ -8,11 +8,11 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 
 
-def matsubara_freq(beta=16., size=250, fer=1):
-    """Calculates an array containing the matsubara frequencies under the
+def matsubara_freq(beta=16., size=256, fer=1):
+    r"""Calculates an array containing the matsubara frequencies under the
     formula
 
-    .. math:: \\omega_n = \\frac{\\pi(2n + f)}{\\beta}
+    .. math:: \omega_n = \frac{\pi(2n + f)}{\beta}
 
     where :math:`f=1` in the case of fermions, and zero for bosons
 
@@ -86,9 +86,9 @@ def greenF(w_n, sigma=0, mu=0, D=1):
 
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs a forward fourier transform for the interacting Green function
-    in which only the interval :math:`[0,\beta]` is required and output given
+    in which only the interval :math:`[0,\beta)` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff.
-    Array sizes need not match between frequencies and times
+    Time array is twice as dense as frequency array
 
     .. math:: G(i\omega_n) = \int_0^\beta G(\tau)
        e^{i\omega_n \tau} d\tau
@@ -101,14 +101,18 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
             Imaginary time points
     w_n : real float array
             fermionic matsubara frequencies. Only use the positive ones
-    beta : float
-        Inverse temperature of the system
+    tail_coef : list of floats size 3
+        The first moments of the tails
 
     Returns
     -------
     out : complex ndarray
             Interacting Greens function in matsubara frequencies
-    """
+
+    See also
+    --------
+    freq_tail_fourier
+    gt_fouriertrans"""
 
     beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
@@ -118,13 +122,26 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
 
 
 def freq_tail_fourier(tail_coef, beta, tau, w_n):
-    """Fourier transforms analytically the slow decaying tail_coefs of
-    the Greens functions[matsubara]
+    r"""Fourier transforms analytically the slow decaying tail_coefs of
+    the Greens functions [matsubara]_.
+
+    +------------------------+-----------------------------------------+
+    | :math:`G(iw)`          | :math:`G(t)`                            |
+    +========================+=========================================+
+    | :math:`(i\omega)^{-1}` | :math:`-\frac{1}{2}`                    |
+    +------------------------+-----------------------------------------+
+    | :math:`(i\omega)^{-2}` | :math:`\frac{1}{2}(\tau-\beta/2)`       |
+    +------------------------+-----------------------------------------+
+    | :math:`(i\omega)^{-3}` | :math:`-\frac{1}{4}(\tau^2 -\beta\tau)` |
+    +------------------------+-----------------------------------------+
+
+    See also
+    --------
+    gw_invfouriertrans
+    gt_fouriertrans
 
     .. [matsubara] https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain
-
-    in block
-     """
+      """
 
     freq_tail =   tail_coef[0]/(1.j*w_n)\
                 + tail_coef[1]/(1.j*w_n)**2\
@@ -141,9 +158,13 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
+    The high frequency tails are transformer analytically up to the third moment.
+
     Output is the real valued positivite imaginary time green function.
-    positive time output :math:`\tau \in [0;\beta]`.
-    Array sizes need not match between frequencies and times
+    For the positive time output :math:`\tau \in [0;\beta)`.
+    Array sizes need not match between frequencies and times, but a time array
+    twice as dense is recommended for best performance of the Fast Fourrier
+    transform.
 
     .. math::
        G(\tau) &= \frac{1}{\beta} \sum_{\omega_n}
@@ -151,20 +172,18 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
        &= \frac{1}{\beta} \sum_{\omega_n}\left( G(i\omega_n)
           -\frac{1}{i\omega_n}\right) e^{-i\omega_n \tau} +
           \frac{1}{\beta} \sum_{\omega_n}\frac{1}{i\omega_n}e^{-i\omega_n \tau} \\
-       &= \frac{2}{\beta} \sum_{\omega_n>0}^{\omega_{max}} \left[
-           \Re e G_{nt}(i\omega_n) \cos(\omega_n \tau)
-            + \Im m G_{nt}(i\omega_n) \sin(\omega_n \tau) \right] - \frac{1}{2}
-
-    where :math:`G_{nt}(i\omega_n)=\left((i\omega_n) -\frac{1}{i\omega_n}\right)`
 
     Parameters
     ----------
     g_iwn : real float array
             Imaginary time interacting Green function
-    beta : float
-        Inverse temperature of the system
+    tau : real float array
+            Imaginary time points
+    w_n : real float array
+            fermionic matsubara frequencies. Only use the positive ones
     tail_coef : list of floats size 3
         The first moments of the tails
+
 
     Returns
     -------
@@ -173,7 +192,9 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
 
     See also
     --------
-    gt_fouriertrans"""
+    gt_fouriertrans
+    freq_tail_fourier
+    """
 
     beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
@@ -188,13 +209,13 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
 
 
 def fit_gf(w_n, giw):
-    """Performs a quadratic fit of the -first- matsubara frequencies
+    """Performs a quadratic fit of the *first's* matsubara frequencies
     to estimate the value at zero energy.
 
     Parameters
     ----------
     w_n : real float array
-            First matsubara frequencies to fit
+            First's matsubara frequencies to fit
     giw : real array
             Function to fit
 
@@ -202,7 +223,6 @@ def fit_gf(w_n, giw):
     -------
     Callable for inter - extrapolate function
     """
-    n = len(w_n)
-    gfit = np.squeeze(giw)[:n]
+    gfit = np.squeeze(giw)[:len(w_n)]
     pf = np.polyfit(w_n, gfit, 2)
     return np.poly1d(pf)
