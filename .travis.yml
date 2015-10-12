@@ -9,7 +9,8 @@ addons:
     packages:
     - gcc-5
     - g++-5
-    - libopenblas-dev
+    - libblas-dev
+    - liblapack-dev
     - libgsl0-dev
     - libopenmpi-dev
     - openmpi-bin
@@ -42,6 +43,8 @@ install:
       joblib
     - source activate testenv
     - pip install slaveparticles sphinx-gallery mako mpi4py
+    - export C_INCLUDE_PATH=$HOME/miniconda/envs/testenv/include:$C_INCLUDE_PATH
+    - export CPLUS_INCLUDE_PATH=$HOME/miniconda/envs/testenv/include:$CPLUS_INCLUDE_PATH
     - python setup.py install
 
 script:
