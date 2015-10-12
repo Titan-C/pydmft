@@ -22,9 +22,7 @@ from joblib import Parallel, delayed
 def mix_gf_dimer(gmix, omega, mu, tab):
     """Dimer formation Green function term
 
-    .. math::
-
-        G_{mix}(i\omega_n) =ao
+    .. math:: G_{mix}(i\omega_n) =ao
     """
     gmix['A', 'A'] = omega + mu
     gmix['A', 'B'] = -tab
@@ -57,7 +55,7 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
 
 
 def init_gf_ins(g_iw, omega, U):
-    """Initializes the green function in the insulator limit given by
+    r"""Initializes the green function in the insulator limit given by
 
     .. math:: G_{11} = (i\omega_n \pm \frac{U^2}{4i\omega_n})^{-1}
     """
@@ -219,16 +217,16 @@ def recover_lastit(S, file_str):
 
 
 def total_energy(file_str):
-    """Calculates the internal energy of the system given by Fetter-Walecka
+    r"""Calculates the internal energy of the system given by Fetter-Walecka
     25-26
 
     .. math:: \langle H \rangle = 1/\beta\sum_{nk}
-    1/2(i\omega_n +  H^0_k + \mu)
-    Tr G(k, i\omega_n)\\
-    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - G^{0,-1}G^0 + G^{-1}G)\\
-    = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 +
-     (i\omega_n - H^0_k +\mu -\Sigma )G)
-    = Tr i\omega_n(G-G^0)
+         1/2(i\omega_n +  H^0_k + \mu)
+         Tr G(k, i\omega_n)\\
+         = Tr 1/2(i\omega_n +  H^0_k + \mu)G - G^{0,-1}G^0 + G^{-1}G)\\
+         = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 +
+          (i\omega_n - H^0_k +\mu -\Sigma )G)
+         = Tr i\omega_n(G-G^0)
 
     """
 

@@ -10,21 +10,6 @@ impurity Anderson model.
 
 DMFT solver for an impurity and a single bath site
 
-    Sets up environment
-
-    Parameters
-    ----------
-    beta : float
-           Inverse temperature of the system
-    t : float
-        Hopping amplitude between first neighbor lattice sites
-    freq_axis : string
-               'real' or 'matsubara' frequencies
-
-    Attributes
-    ----------
-    GF : dictionary
-         Stores the Green functions and self energy
 """
 
 from __future__ import division, absolute_import, print_function
@@ -44,7 +29,23 @@ def m2_weight(t):
 
 
 class TwoSite(object):
-    """Base class for a two site DMFT solver"""
+    """Base class for a two site DMFT solver
+    Sets up environment
+
+    Parameters
+    ----------
+    beta : float
+           Inverse temperature of the system
+    t : float
+        Hopping amplitude between first neighbor lattice sites
+    freq_axis : string
+               'real' or 'matsubara' frequencies
+
+    Attributes
+    ----------
+    GF : dictionary
+         Stores the Green functions and self energy
+    """
 
     def __init__(self, beta, t):
         self.beta = beta
@@ -52,6 +53,7 @@ class TwoSite(object):
         self.m2 = m2_weight(t)
         self.mu = 0.
         self.e_c = 0.
+        self.omega = None
 
         self.eig_energies = None
         self.eig_states = None

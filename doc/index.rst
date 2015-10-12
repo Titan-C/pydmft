@@ -10,21 +10,9 @@ Contents:
 
 .. toctree::
 
-   twosite.rst
-
-.. automodule:: dmft.common
-    :members:
-
-.. automodule:: dmft.twosite
-    :members:
-
-.. automodule:: dmft
-
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-
-   dmft.twosite_dop.dmft_loop_dop
+   twosite
+   reference
+   auto_examples/index
 
 
 Indices and tables

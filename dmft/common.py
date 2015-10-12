@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Feb  9 13:24:24 2015
+Green Functions
+===============
 
-@author: oscar
+Interface to treat arrays as the Green functions. Deals with their
+Fourier Transforms from Matsubara frequencies to Imaginary time.
 """
+
 from __future__ import division, absolute_import, print_function
 import numpy as np
 

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-================================
 QMC Hirsch - Fye Impurity solver
 ================================
 
@@ -28,6 +27,7 @@ def ising_v(dtau, U, L, fields=1, polar=0.):
     where the vector entries :math:`\\sigma_n=\\pm 1` are randomized subject
     to a threshold given by polar. And
     .. math:: \\cosh(\\lambda) = \\exp(\\Delta \\tau \\frac{U}{2})
+
     Parameters
     ----------
     dtau : float
@@ -40,6 +40,7 @@ def ising_v(dtau, U, L, fields=1, polar=0.):
         Number of auxliary ising fields
     polar : float :math:`\\in (0, 1)`
         polarization threshold, probability of :math:`\\sigma_n=+ 1`
+
     Returns
     -------
     out : single dimension ndarray
@@ -228,11 +229,14 @@ def avg_g(gst, parms):
 def gnewclean(g0t, v, kroneker):
     """Returns the interacting function :math:`G_{ij}` for the non-interacting
     propagator :math:`\\mathcal{G}^0_{ij}`
+
     .. math:: G_{ij} = B^{-1}_{ij}\\mathcal{G}^0_{ij}
+
     where
-    .. math::
-        u_j &= \\exp(v_j) - 1 \\\\
+
+    .. math:: u_j &= \\exp(v_j) - 1 \\\\
         B_{ij} &= \\delta_{ij} - u_j ( \\mathcal{G}^0_{ij} - \\delta_{ij})
+
     no sumation on :math:`j`
     for memory and speed the kroneker delta needs to be and input.
     the vector :math:`v_j` contains the effective Ising fields. For
@@ -280,13 +284,15 @@ def g2flip(g, dv, l, k):
 
     Using the Woodbury matrix identity it is possible to perform an
     update of two simultaneous spin flips. I calculate
-    .. math :: G'_{ij} = G_{ij}
+
+    .. math:: G'_{ij} = G_{ij}
               - U_{if}(\delta_{fg} + U_{\bar{k}g})^{-1}G_{\bar{l}j}
 
     where :math:`i,j,l,k\in{1..L}` the time slices and :math:`f,g\in{1,2}`
     the 2 simultaneous spin flips. :math:`\bar{l}` lists the flipped
     spin entry
-    .. math :: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_\bar{l})-1)\delta_{\bar{l}f}
+
+    .. math:: U_{if} = (\delta_{i\bar{l}} - G_{i\bar{l}})(\exp(-2V_{\bar{l}} )-1)\delta_{\bar{l}f}
 
 """
     lk = [l, k]
