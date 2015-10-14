@@ -15,6 +15,7 @@ from pytriqs.operators import c, dagger
 from time import time
 import argparse
 import pytriqs.utility.mpi as mpi
+from dmft.plot.hf_single_site import averager
 
 
 def prepare_interaction(u_int):
@@ -22,11 +23,11 @@ def prepare_interaction(u_int):
 
     using the symmetric anti-symmetric basis"""
 
-    aup = (-c('low_up', 0) + c('high_up', 0))/sqrt(2)
-    adw = (-c('low_dw', 0) + c('high_dw', 0))/sqrt(2)
+    aup = 1/sqrt(2)*(-c('low_up', 0) + c('high_up', 0))
+    adw = 1/sqrt(2)*(-c('low_dw', 0) + c('high_dw', 0))
 
-    bup = (c('low_up', 0) + c('high_up', 0))/sqrt(2)
-    bdw = (c('low_dw', 0) + c('high_dw', 0))/sqrt(2)
+    bup = 1/sqrt(2)*(c('low_up', 0) + c('high_up', 0))
+    bdw = 1/sqrt(2)*(c('low_dw', 0) + c('high_dw', 0))
 
     h_int = u_int * (dagger(aup)*aup*dagger(adw)*adw +
                      dagger(bup)*bup*dagger(bdw)*bdw)
@@ -43,7 +44,7 @@ def set_new_seed(setup):
 
     with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
-        giw = pss.averager(outp[src_U], last_iterations)
+        giw = averager(outp[src_U], last_iterations)
         try:
             dest_count = len(outp[dest_U].keys())
         except KeyError:
