@@ -133,7 +133,7 @@ class Dimer_Solver_hf(Dimer_Solver):
         fixed_co = TailGf(2, 2, 4, -1)
         fixed_co[1] = np.array([[1, 0], [0, 1]])
         fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
-        self.g_iw.fit_tail(fixed_co, 4, self.setup['n_tau_mc']//2,
+        self.g_iw.fit_tail(fixed_co, 4, self.setup['N_MATSUBARA'],
                            self.setup['n_points'])
 
     def solve(self, tau):
@@ -145,8 +145,8 @@ class Dimer_Solver_hf(Dimer_Solver):
         gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
-        gt_D = hf.interpol(gt_D, self.setup['N_TAU']-1)
-        gt_N = hf.interpol(gt_N, self.setup['N_TAU']-1)
+        gt_D = hf.interpol(gt_D, self.setup['N_TAU'], add_edge=True, same_particle=True)
+        gt_N = hf.interpol(gt_N, self.setup['N_TAU'], add_edge=True)
 
         load_gf_from_np(self.g_tau, gt_D, gt_N)
 

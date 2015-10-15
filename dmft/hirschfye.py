@@ -307,11 +307,16 @@ def g2flip(g, dv, l, k):
     g -= np.dot(U, denom)
 
 
-def interpol(gtau, Lrang):
+def interpol(gtau, Lrang, add_edge=False, same_particle=False):
     """This function interpolates :math:`G(\\tau)` to an even numbered anti
     periodic array for it to be directly used by the fourier transform into
     matsubara frequencies"""
     t = np.linspace(0, 1, gtau.size)
+    if add_edge:
+        gtau = np.concatenate((gtau, [-gtau[0]]))
+        t = np.linspace(0, 1, gtau.size) # update size
+        if same_particle:
+            gtau[-1] -= 1.
     f = interp1d(t, gtau)
     tf = np.linspace(0, 1, Lrang)
     return f(tf)
@@ -378,7 +383,8 @@ def do_input(help_string):
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=32., help='The inverse temperature')
     parser.add_argument('-n_freq', '--N_MATSUBARA', metavar='B', type=int,
-                        default=32, help='Number of Matsubara frequencies')
+                        default=32, help='Number of Matsubara frequencies. '
+                        'This influences the Trotter slicing as dtau=beta/2/n_freq')
     parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
                         help='Number Monte Carlo Measurement')
     parser.add_argument('-therm', type=int, default=int(1e4),
