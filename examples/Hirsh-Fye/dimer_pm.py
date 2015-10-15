@@ -24,9 +24,47 @@ import sys
 comm = MPI.COMM_WORLD
 
 
-def dmft_loop_pm(params):
+def averager(it_output, last_iterations):
+    """Averages over the files terminating with the numbers given in vector"""
+    sgiwd = 0
+    sgiwo = 0
+    for step in last_iterations:
+        sgiwd += it_output[step]['G_iwd']
+        sgiwo += it_output[step]['G_iwo']
+
+    sgiwd *= 1./len(last_iterations)
+    sgiwo *= 1./len(last_iterations)
+
+    return sgiwd, sgiwo
+
+
+def set_new_seed(setup):
+    """Generates a new starting Green's function for the DMFT loop
+    based on the finishing state of the system at a diffent parameter set"""
+
+    src_U = 'U' + str(setup['new_seed'][0])
+    dest_U = 'U' + str(setup['new_seed'][1])
+    avg_over = int(setup['new_seed'][2])
+
+    with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
+        last_iterations = outp[src_U].keys()[-avg_over:]
+        giwd, giwo = averager(outp[src_U], last_iterations)
+        try:
+            dest_count = len(outp[dest_U].keys())
+        except KeyError:
+            dest_count = 0
+        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
+
+        outp[dest_group + 'setup/'] = outp[src_U][last_iterations[-1]]['setup']
+        outp[dest_group + 'G_iwd/'] = giwd
+        outp[dest_group + 'G_iwo/'] = giwo
+
+    print(setup['new_seed'])
+
+
+def dmft_loop_pm(simulation):
     """Implementation of the solver"""
-    n_freq = int(15.*params['BETA']/np.pi)
+    n_freq = int(5.*simulation['BETA'])
     setup = {'N_TAU':     2**12,
              'n_points':  n_freq,
              't':         0.5,
@@ -35,9 +73,15 @@ def dmft_loop_pm(params):
              'SITES':     2,
              'save_logs': False,
              'global_flip': True,
-             'updater':   'discrete'}
+             }
 
-    setup.update(params)
+    if simulation['new_seed']:
+        if comm.rank == 0:
+            set_new_seed(simulation)
+        simulation['U'] = simulation['new_seed'][1]
+        return
+
+    setup.update(simulation)
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(setup['U'])
 

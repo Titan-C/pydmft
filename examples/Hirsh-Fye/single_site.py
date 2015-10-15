@@ -50,14 +50,15 @@ def dmft_loop_pm(simulation):
     """Implementation of the solver"""
     setup = {'t':           .5,
              'SITES':       1,
-             'updater':     'discrete'}
+             }
+
+
 
     if simulation['new_seed']:
         if comm.rank == 0:
             set_new_seed(simulation)
         simulation['U'] = simulation['new_seed'][1]
-
-    comm.Barrier()
+        return
 
     current_u = 'U'+str(simulation['U'])
     setup.update(simulation)
