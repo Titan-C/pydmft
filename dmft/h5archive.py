@@ -7,7 +7,7 @@ H5PY interface
 
 from __future__ import division, absolute_import, print_function
 
-import h5py
+from h5py import File
 
 
 def add_attributes(parent, attr):

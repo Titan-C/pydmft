@@ -56,12 +56,12 @@ def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
 
 def averager(it_output, last_iterations):
     """Averages over the files terminating with the numbers given in vector"""
-    sgiw = 0
+    sgtau = 0
     for step in last_iterations:
-        sgiw += it_output[step]['giw']
+        sgtau += it_output[step]['gtau'][:]
 
-    sgiw /= len(last_iterations)
-    return sgiw
+    sgtau /= len(last_iterations)
+    return sgtau
 
 
 def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):

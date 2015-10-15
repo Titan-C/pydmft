@@ -31,17 +31,18 @@ def set_new_seed(setup):
 
     with h5.File(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
-        giw = pss.averager(outp[src_U], last_iterations)
+        gtau = pss.averager(outp[src_U], last_iterations)
         # This is a particular cleaning for the half-filled single band
-        giw.real = 0.
         try:
             dest_count = len(outp[dest_U].keys())
         except KeyError:
             dest_count = 0
         dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
 
-        outp[dest_group + 'giw'] = giw
-        h5.add_attributes(outp[dest_group], outp[src_U][last_iterations[-1]]['setup'])
+        outp[dest_group + 'gtau'] = gtau
+        outp.flush()
+        h5.add_attributes(outp[dest_group],
+                          h5.get_attribites(outp[src_U][last_iterations[-1]]))
 
     print(setup['new_seed'])
 
@@ -67,9 +68,10 @@ def dmft_loop_pm(simulation):
 
 
     try:
-        with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
-            last_loop = len(simulation[current_u].keys())
-            giw = simulation[current_u]['it{:03}'.format(last_loop-1)]['giw']
+        with h5.File(setup['ofile'].format(**setup), 'a') as store:
+            last_loop = len(store[current_u].keys())
+            gtau = store[current_u]['it{:03}'.format(last_loop-1)]['gtau'][:]
+            giw = gf.gt_fouriertrans(gtau, tau, w_n)
     except (IOError, KeyError):
         last_loop = 0
 
@@ -88,13 +90,11 @@ def dmft_loop_pm(simulation):
         giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
         if comm.rank == 0:
-            with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
-                simulation[current_u+'/it{:03}'.format(iter_count)] = {
-                            'g0iw': g0iw.copy(),
-                            'setup': setup.copy(),
-                            'giw':  giw.copy(),
-                            'gtau': gtau.copy(),
-                            }
+            with h5.File(setup['ofile'].format(**setup), 'a') as store:
+                dest_group = current_u+'/it{:03}/'.format(iter_count)
+                store[dest_group + 'gtau'] = gtau
+                store.flush()
+                h5.add_attributes(store[dest_group], setup)
         sys.stdout.flush()
 
 
