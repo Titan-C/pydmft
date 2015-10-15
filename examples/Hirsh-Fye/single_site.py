@@ -12,8 +12,8 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 from __future__ import division, absolute_import, print_function
 
 from mpi4py import MPI
-from pytriqs.archive import HDFArchive
 import dmft.common as gf
+import dmft.h5archive as h5
 import dmft.hirschfye as hf
 import dmft.plot.hf_single_site as pss
 import numpy as np
@@ -29,7 +29,7 @@ def set_new_seed(setup):
     dest_U = 'U' + str(setup['new_seed'][1])
     avg_over = int(setup['new_seed'][2])
 
-    with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
+    with h5.File(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
         giw = pss.averager(outp[src_U], last_iterations)
         # This is a particular cleaning for the half-filled single band
@@ -41,7 +41,7 @@ def set_new_seed(setup):
         dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
 
         outp[dest_group + 'giw'] = giw
-        outp[dest_group + 'setup'] = outp[src_U][last_iterations[-1]]['setup']
+        h5.add_attributes(outp[dest_group], outp[src_U][last_iterations[-1]]['setup'])
 
     print(setup['new_seed'])
 
