@@ -15,7 +15,6 @@ from __future__ import division, absolute_import, print_function
 from mpi4py import MPI
 from pytriqs.archive import HDFArchive
 from pytriqs.gf.local import iOmega_n
-import argparse
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.hirschfye as hf
@@ -25,44 +24,10 @@ import sys
 comm = MPI.COMM_WORLD
 
 
-def do_input():
-    """Prepares the input for the simulation at hand"""
-
-    parser = argparse.ArgumentParser(description='DMFT loop for Hirsh-Fye dimer lattice',
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-BETA', metavar='B', type=float,
-                        default=32., help='The inverse temperature')
-    parser.add_argument('-dtau_mc', metavar='dt', type=float,
-                        default=0.5, help='Trotter time step')
-    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
-                        help='Number Monte Carlo Measurement')
-    parser.add_argument('-therm', type=int, default=int(1e4),
-                        help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=3,
-                        help='Number of Updates before measurements')
-    parser.add_argument('-Niter', metavar='N', type=int,
-                        default=20, help='Number of iterations')
-    parser.add_argument('-U', type=float, default=2.,
-                        help='Local interaction strength')
-    parser.add_argument('-tp', type=float, default=.25,
-                        help='Dimerization strength')
-    parser.add_argument('-df', '--double_flip_prob', type=float, default=0.,
-                        help='Probability for double spin flip on equal sites')
-    parser.add_argument('-ofile', default='disk/dim_PM_B{BETA}_t{tp}.h5',
-                        help='Output file')
-
-    parser.add_argument('-M', '--Heat_bath', action='store_false',
-                        help='Use Metropolis importance sampling')
-    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
-                        metavar=('U_src', 'U_target', 'avg_over'),
-                        help='Resume DMFT loops from on disk data files')
-    return vars(parser.parse_args())
-
-
 def dmft_loop_pm(params):
     """Implementation of the solver"""
     n_freq = int(15.*params['BETA']/np.pi)
-    setup = {'N_TAU':     2**10,
+    setup = {'N_TAU':     2**12,
              'n_points':  n_freq,
              't':         0.5,
              'MU':        0.,
@@ -73,6 +38,7 @@ def dmft_loop_pm(params):
              'updater':   'discrete'}
 
     setup.update(params)
+    setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(setup['U'])
 
     S = rt.Dimer_Solver_hf(**setup)
@@ -117,5 +83,11 @@ def dmft_loop_pm(params):
         sys.stdout.flush()
 
 if __name__ == "__main__":
-    SETUP = do_input()
+    parser = hf.do_input('DMFT loop for Hirsh-Fye dimer lattice')
+    parser.add_argument('-tp', type=float, default=.25,
+                        help='Dimerization strength')
+    parser.add_argument('-df', '--double_flip_prob', type=float, default=0.,
+                        help='Probability for double spin flip on equal sites')
+
+    SETUP = vars(parser.parse_args())
     dmft_loop_pm(SETUP)
