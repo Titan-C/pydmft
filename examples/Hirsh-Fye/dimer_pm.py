@@ -82,7 +82,7 @@ def dmft_loop_pm(params):
     try:  # try reloading data from disk
         with HDFArchive(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
-            last_it = 'it{:02}'.format(last_loop-1)
+            last_it = 'it{:03}'.format(last_loop-1)
             rt.load_gf(S.g_iw, last_run[current_u][last_it]['G_iwd'],
                        last_run[current_u][last_it]['G_iwo'])
     except (IOError, KeyError):  # if no data clean start
@@ -109,7 +109,7 @@ def dmft_loop_pm(params):
 
         if comm.rank == 0:
             with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
-                simulation[current_u+'/it{:02}'.format(loop_count)] = {
+                simulation[current_u+'/it{:03}'.format(loop_count)] = {
                             'setup':  S.setup.copy(),
                             'G_iwd':  S.g_iw['A', 'A'],
                             'G_iwo':  S.g_iw['A', 'B'],

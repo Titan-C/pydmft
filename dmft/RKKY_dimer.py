@@ -139,7 +139,7 @@ class Dimer_Solver_hf(Dimer_Solver):
     def solve(self, tau):
 
         self.g0_tau << InverseFourier(self.g0_iw)
-        g0t = np.asarray([self.g0_tau(t).real for t in tau])
+        g0t = np.rollaxis(np.asarray([self.g0_tau(t).real for t in tau]), 0, 3)
 
         gtu, gtd = hf.imp_solver([g0t]*2, self.V_field, self.intm, self.setup)
         gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
