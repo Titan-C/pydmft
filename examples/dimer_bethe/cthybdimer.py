@@ -77,6 +77,7 @@ def dmft_loop(setup):
             last_it = 'it{:03}'.format(last_loop-1)
             imp_sol.G_iw = outp[src_U][last_it]['G_iw']
     except (KeyError, IOError):
+        last_loop = 0
         for name, gblock in imp_sol.G_iw:
             gblock << SemiCircular(1)
 

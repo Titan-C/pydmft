@@ -43,8 +43,10 @@ def self_consistency(omega, Gd, Gc, mu, tab, t2):
 
     return Dd, Dc
 
-
+######################################################################
 # Real frequency spectral function
+# ================================
+
 w = 1e-3j+np.linspace(-4, 4, 2**10)
 mu, t = 0, 0.5
 t2 = t**2
@@ -66,7 +68,10 @@ plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega)$')
 
 
+######################################################################
 # Matsubara frequency Green's function
+# ====================================
+
 w_n = gf.matsubara_freq(50., 512)
 iw_n = 1j*w_n
 plt.figure()
