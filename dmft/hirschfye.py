@@ -308,9 +308,22 @@ def g2flip(g, dv, l, k):
 
 
 def interpol(gtau, Lrang, add_edge=False, same_particle=False):
-    """This function interpolates :math:`G(\\tau)` to an even numbered anti
-    periodic array for it to be directly used by the fourier transform into
-    matsubara frequencies"""
+    """This function interpolates :math:`G(\\tau)` onto a different array
+
+    it keep track of the shape of the Greens functions in Beta^-.
+
+    Parameters
+    ----------
+    gtau: ndarray
+        Green function to interpolate
+    Lrang: int
+        number of points to describe
+    add_edge: bool
+        if the point Beta^- is missing add it
+    same_particle: bool
+        because fermion commutation relations if same fermion the
+        edge has an extra -1
+    """
     t = np.linspace(0, 1, gtau.size)
     if add_edge:
         gtau = np.concatenate((gtau, [-gtau[0]]))
