@@ -14,6 +14,7 @@ from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met, \
 from pytriqs.gf.local import iOmega_n
 import pytest
 import tempfile
+import shutil
 import os
 
 
@@ -72,5 +73,6 @@ def test_ipt_dimer_pm_g(u_int, result, beta=50., n_matsubara=160):
     dimer(S, gmix, file_str, '/U{U}/')
     g_iwn = S.g_iw.data[:64,0,0]
 
-
     assert np.allclose(result, g_iwn, atol=3e-3)
+
+    shutil.rmtree(tmp_cache)

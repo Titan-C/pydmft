@@ -8,18 +8,21 @@ Created on Tue Nov 25 12:44:23 2014
 from __future__ import division, absolute_import, print_function
 from itertools import product
 import numpy as np
+import shutil
 import dmft.hirschfye as hf
 import pytest
 import dmft.hffast as hffast
 
 
+UPDATE_PARAMS = {'BETA': 16., 'N_MATSUBARA': 16, 't': 0.5, 'BANDS': 1}
+
+
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.gnew, hffast.gnew]))
-def test_hf_fast_updatecond(chempot, u_int, updater, beta=16., n_matsubara=32):
-    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
-             't': 0.5, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5}
-    _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
+def test_hf_fast_updatecond(chempot, u_int, updater):
+    """Test over the fast update after a spin flip"""
+    UPDATE_PARAMS.update(MU=chempot, U=u_int)
+    _, _, g0t, _, v, _ = hf.setup_PM_sim(UPDATE_PARAMS)
     v = np.squeeze(v)
     g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
@@ -38,11 +41,10 @@ def test_hf_fast_updatecond(chempot, u_int, updater, beta=16., n_matsubara=32):
 
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.g2flip, hffast.g2flip]))
-def test_hf_fast_2flip(chempot, u_int, updater, beta=16., n_matsubara=64):
-    parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
-             't': 0.5, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5}
-    _, _, g0t, _, v, _ = hf.setup_PM_sim(parms)
+def test_hf_fast_2flip(chempot, u_int, updater):
+    """Test over the fast update after simultaneous 2 site spin flip"""
+    UPDATE_PARAMS.update(MU=chempot, U=u_int)
+    _, _, g0t, _, v, _ = hf.setup_PM_sim(UPDATE_PARAMS)
     v = np.abs(np.squeeze(v))
     g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
@@ -58,14 +60,17 @@ def test_hf_fast_2flip(chempot, u_int, updater, beta=16., n_matsubara=64):
     assert np.allclose(g_flip, g_fast_flip)
 
 
+SOLVER_PARAMS = UPDATE_PARAMS
+SOLVER_PARAMS.update({'sweeps': 3000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
+                      'save_logs': False, 'global_flip': True,
+                      'SITES': 1, 'BANDS': 1,
+                      'ofile': '/tmp/testdmft{}.h5'.format(np.random.rand()),
+                      'dtau_mc': 0.5})
 @pytest.mark.parametrize("u_int", [1, 2, 2.5])
 @pytest.mark.xfail(raises=AssertionError, reason='Atom is not well described')
 def test_solver_atom(u_int):
-    parms = {'BETA': 16., 'U': u_int, 'N_MATSUBARA': 16,
-             'sweeps': 2000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
-             'save_logs': False, 'updater': 'discrete',
-             'global_flip': True, 'SITES': 1, 'BANDS': 1}
-    parms['dtau_mc'] = parms['BETA']/parms['N_MATSUBARA']/2
+    parms = SOLVER_PARAMS
+    parms.update(U=u_int, group='atom{}/'.format(u_int))
     v = hf.ising_v(parms['dtau_mc'], parms['U'], L=2*parms['N_MATSUBARA'])
     tau = np.linspace(0, parms['BETA'], 2*parms['N_MATSUBARA'])
     intm = hf.interaction_matrix(1)  # one orbital
@@ -86,11 +91,8 @@ SINGLE_BAND_GF_REF = \
        -0.105, -0.114, -0.127, -0.144, -0.172, -0.222, -0.322]))]
 @pytest.mark.parametrize("chempot, u_int, gend", SINGLE_BAND_GF_REF)
 def test_solver(chempot, u_int, gend):
-    parms = {'BETA': 16., 'N_MATSUBARA': 16,
-             't': 0.5, 'SITES': 1, 'BANDS': 1,
-             'MU': chempot, 'U': u_int,
-             'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
-             'save_logs': False, 'updater': 'discrete'}
+    parms = SOLVER_PARAMS
+    parms.update(U=u_int, MU=chempot, group='1band{}/'.format(u_int))
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
     g0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
@@ -101,11 +103,9 @@ def test_solver(chempot, u_int, gend):
 
 @pytest.mark.parametrize("chempot, u_int, gend", SINGLE_BAND_GF_REF)
 def test_solver_dimer(chempot, u_int, gend):
-    parms = {'BETA': 16., 'N_MATSUBARA': 16,
-             't': 0.5, 'SITES': 2, 'BANDS': 1,
-             'MU': chempot, 'U': u_int, 'dtau_mc': 0.5, 'n_tau_mc':    32,
-             'sweeps': 5000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
-             'save_logs': False, 'updater': 'discrete'}
+    parms = SOLVER_PARAMS
+    parms.update(U=u_int, MU=chempot, group='dimer{}/'.format(u_int),
+                 SITES=2)
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
     G0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])

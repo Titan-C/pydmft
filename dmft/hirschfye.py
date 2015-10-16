@@ -62,16 +62,13 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     fracp, intp = math.modf(time.time())
     parms = {'global_flip': False,
              'double_flip_prob': 0.,
-             'save_logs': False,
              't':           0.5,
-             'MU':          0.,
              'SITES':       1,
-             'loops':       1,
-             'sweeps':      50000,
-             'therm':       5000,
-             'N_meas':      4,
+             'BANDS':       1,
              'SEED':        int(intp+comm.Get_rank()*341*fracp),
              'Heat_bath':   True,
+             'ofile':       'hf_out.h5',
+             'group':       'temp/'+time.asctime(),
              }
     parms.update(parms_user)
 
@@ -351,26 +348,13 @@ def interaction_matrix(bands):
     return int_matrix
 
 
-def setup_PM_sim(u_parms):
+def setup_PM_sim(parms):
     """Setup the default state for a Paramagnetic simulation"""
-    parms = {'global_flip': False,
-             'save_logs': False,
-             'N_MATSUBARA': 64,
-             't':           0.5,
-             'MU':          0.,
-             'BANDS':       1,
-             'SITES':       1,
-             'loops':       1,
-             'sweeps':      50000,
-             'therm':       5000,
-             'N_meas':      4,
-             'updater':     'discrete'}
-    parms.update(u_parms)
     tau, w_n = tau_wn_setup(parms)
     giw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
     gtau = gw_invfouriertrans(giw, tau, w_n)
     parms['dtau_mc'] = tau[1]
-    intm = interaction_matrix(parms['BANDS'])
+    intm = interaction_matrix(parms.get('BANDS', 1))
     v = ising_v(parms['dtau_mc'], parms['U'], len(tau)*parms['SITES'],
                 intm.shape[1])
 
