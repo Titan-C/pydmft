@@ -120,30 +120,6 @@ class Dimer_Solver(object):
         self.g_iw << inverse(inverse(self.g0_iw) - self.sigma_iw)
 
 
-class Dimer_Solver_hf(Dimer_Solver):
-
-    def __init__(self, **params):
-        super(Dimer_Solver_hf, self).__init__(**params)
-        self.g0_tau = GfImTime(indices=['A', 'B'], beta=self.beta,
-                               n_points=self.setup['N_TAU'])
-        self.g_tau = self.g0_tau.copy()
-        self.intm = hf.interaction_matrix(params['BANDS'])
-        self.tau, self.w_n = gf.tau_wn_setup(params)
-
-    def solve(self):
-
-        self.g0_tau << InverseFourier(self.g0_iw)
-        g0t = np.rollaxis(np.asarray([self.g0_tau(t).real for t in self.tau]), 0, 3)
-
-        gtu, gtd = hf.imp_solver([g0t]*2, self.V_field, self.intm, self.setup)
-        gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
-        gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
-
-        giw_D = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
-        giw_N = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
-
-        load_gf_from_np(self.g_iw, giw_D, giw_N)
-
 
 def gf_symetrizer(G):
     gd = 1j*np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data)).imag

@@ -61,6 +61,39 @@ def set_new_seed(setup):
 
     print(setup['new_seed'])
 
+class Dimer_Solver_hf(Dimer_Solver):
+
+    def __init__(self, **params):
+        super(Dimer_Solver_hf, self).__init__(**params)
+        self.g0_tau = GfImTime(indices=['A', 'B'], beta=self.beta,
+                               n_points=self.setup['N_TAU'])
+        self.g_tau = self.g0_tau.copy()
+        self.intm = hf.interaction_matrix(params['BANDS'])
+        self.tau, self.w_n = gf.tau_wn_setup(params)
+
+    def solve(self):
+
+        self.g0_tau << InverseFourier(self.g0_iw)
+        g0t = np.rollaxis(np.asarray([self.g0_tau(t).real for t in self.tau]), 0, 3)
+
+        gtu, gtd = hf.imp_solver([g0t]*2, self.V_field, self.intm, self.setup)
+        gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
+        gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
+
+        giw_D = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
+        giw_N = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
+
+        load_gf_from_np(self.g_iw, giw_D, giw_N)
+
+
+def init_gf_met(omega, mu, tab, tn, t):
+    """Gives a metalic seed of a non-interacting system
+
+    """
+    G1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
+    G2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
+    return .5*(G1 + G2), .5*(G1 - G2)
+
 
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
@@ -83,35 +116,37 @@ def dmft_loop_pm(simulation):
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(setup['U'])
 
-    S = rt.Dimer_Solver_hf(**setup)
-    rt.init_gf_met(S.g_iw, S.w_n, setup['MU'], setup['tp'], 0., setup['t'])
+    tau, w_n = gf.tau_wn_setup(setup)
+    setup['n_tau_mc'] = len(tau)
+    giw_D, giw_N = init_gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
 
     try:  # try reloading data from disk
         with HDFArchive(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
             last_it = 'it{:03}'.format(last_loop-1)
-            rt.load_gf(S.g_iw, last_run[current_u][last_it]['G_iwd'],
-                       last_run[current_u][last_it]['G_iwo'])
+            giw_D = last_run[current_u][last_it]['G_iwd']
+            giw_N = last_run[current_u][last_it]['G_iwo']
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
-    S.setup['n_tau_mc'] = len(S.tau)
 
-    gmix = rt.mix_gf_dimer(S.g_iw.copy(), iOmega_n, setup['MU'], setup['tp'])
-
-    S.V_field = hf.ising_v(S.setup['dtau_mc'], S.U,
-                           L=S.setup['SITES']*S.setup['n_tau_mc'])
+    V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
+                           L=setup['SITES']*setup['n_tau_mc'])
 
     for loop_count in range(last_loop, last_loop + setup['Niter']):
         if comm.rank == 0:
-            print('B', S.beta, 'tp', S.setup['tp'], 'U:', S.U, 'l:', loop_count)
+            print('On loop', loop_count, 'beta', setup['BETA'],
+                  'U', setup['U'], 'tp', setup['tp'])
 
-        rt.gf_symetrizer(S.g_iw)
 
         # Bethe lattice bath
-        S.g0_iw << gmix - 0.25 * S.g_iw
-        S.g0_iw.invert()
-        S.solve()
+        giw0_D = w_n - 0.25 * giw_D
+        giw0_N = -setup['tp'] - 0.25 * giw_N
+
+        det = giw_D**2 - giw_N**2
+        giw0_D /= det
+        giw0_N /= det
+        solve()
 
         if comm.rank == 0:
             with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
