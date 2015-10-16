@@ -84,8 +84,7 @@ def dmft_loop_pm(simulation):
     current_u = 'U'+str(setup['U'])
 
     S = rt.Dimer_Solver_hf(**setup)
-    w_n = gf.matsubara_freq(setup['BETA'], setup['n_points'])
-    rt.init_gf_met(S.g_iw, w_n, setup['MU'], setup['tp'], 0., setup['t'])
+    rt.init_gf_met(S.g_iw, S.w_n, setup['MU'], setup['tp'], 0., setup['t'])
 
     try:  # try reloading data from disk
         with HDFArchive(setup['ofile'].format(**setup), 'r') as last_run:

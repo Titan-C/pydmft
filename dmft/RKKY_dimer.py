@@ -97,7 +97,7 @@ class Dimer_Solver(object):
         self.setup = params
 
         self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta,
-                             n_points=params['n_points'])
+                             n_points=params['N_MATSUBARA'])
         self.g0_iw = self.g_iw.copy()
         self.sigma_iw = self.g_iw.copy()
 
@@ -128,6 +128,7 @@ class Dimer_Solver_hf(Dimer_Solver):
                                n_points=self.setup['N_TAU'])
         self.g_tau = self.g0_tau.copy()
         self.intm = hf.interaction_matrix(params['BANDS'])
+        self.tau, self.w_n = gf.tau_wn_setup(params)
 
     def patch_tail(self):
         fixed_co = TailGf(2, 2, 4, -1)
@@ -145,13 +146,12 @@ class Dimer_Solver_hf(Dimer_Solver):
         gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
-        gt_D = hf.interpol(gt_D, self.setup['N_TAU'], add_edge=True, same_particle=True)
-        gt_N = hf.interpol(gt_N, self.setup['N_TAU'], add_edge=True)
+        np.savez('gtraw', D=gt_D, N=gt_N)
 
-        load_gf_from_np(self.g_tau, gt_D, gt_N)
+        giw_D = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
+        giw_N = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
 
-        self.g_iw << Fourier(self.g_tau)
-        self.patch_tail()
+        load_gf_from_np(self.g_iw, giw_D, giw_N)
 
 
 def gf_symetrizer(G):
