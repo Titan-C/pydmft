@@ -66,7 +66,6 @@ def dmft_loop_pm(simulation):
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
 
-
     try:
         with h5.File(setup['ofile'].format(**setup), 'a') as store:
             last_loop = len(store[current_u].keys())
@@ -76,6 +75,10 @@ def dmft_loop_pm(simulation):
         last_loop = 0
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
+        # For saving in the h5 file
+        dest_group = current_u+'/it{:03}/'.format(iter_count)
+        setup['group'] = dest_group
+
         if comm.rank == 0:
             print('On loop', iter_count, 'beta', setup['BETA'], 'U', setup['U'])
 
@@ -91,7 +94,6 @@ def dmft_loop_pm(simulation):
 
         if comm.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
-                dest_group = current_u+'/it{:03}/'.format(iter_count)
                 store[dest_group + 'gtau'] = gtau
                 store.flush()
                 h5.add_attributes(store[dest_group], setup)

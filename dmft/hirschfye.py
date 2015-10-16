@@ -152,16 +152,14 @@ def susceptibility(v):
     pass
 
 
-def save_output(parms, double_occ, vlog, ar):
-    """Saves the simulation status to the out.h5 file. Overwrites"""
+def save_output(params, double_occ, vlog, ar):
+    """Saves the simulation status"""
 
-    output_file = h5file('temp_out.h5', 'w')
-
-    output_file['double_occ'] = double_occ
-
-    if parms['save_logs']:
-        output_file['v_ising'] = np.asarray(vlog)
-        output_file['acceptance'] = np.asarray(ar)
+    with h5file(params['ofile'].format(**params), 'a') as save_file:
+        save_file[params['group'] + 'double_occ'] = double_occ
+        if params['save_logs']:
+            save_file[params['group'] + 'v_ising'] = np.asarray(vlog)
+            save_file[params['group'] + 'acceptance'] = np.asarray(ar)
 
 
 def retarded_weiss(g0tau):
