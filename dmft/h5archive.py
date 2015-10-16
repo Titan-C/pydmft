@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
 H5PY interface
+==============
 """
 # Created Thu Oct 15 19:06:28 2015
 # Author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
-
 from h5py import File
 
 

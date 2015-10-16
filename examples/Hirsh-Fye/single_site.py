@@ -95,7 +95,6 @@ def dmft_loop_pm(simulation):
         if comm.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
                 store[dest_group + 'gtau'] = gtau
-                store.flush()
                 h5.add_attributes(store[dest_group], setup)
         sys.stdout.flush()
 
