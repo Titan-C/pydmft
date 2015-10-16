@@ -130,23 +130,14 @@ class Dimer_Solver_hf(Dimer_Solver):
         self.intm = hf.interaction_matrix(params['BANDS'])
         self.tau, self.w_n = gf.tau_wn_setup(params)
 
-    def patch_tail(self):
-        fixed_co = TailGf(2, 2, 4, -1)
-        fixed_co[1] = np.array([[1, 0], [0, 1]])
-        fixed_co[2] = self.setup['tp']*np.array([[0, 1], [1, 0]])
-        self.g_iw.fit_tail(fixed_co, 4, self.setup['N_MATSUBARA'],
-                           self.setup['n_points'])
-
-    def solve(self, tau):
+    def solve(self):
 
         self.g0_tau << InverseFourier(self.g0_iw)
-        g0t = np.rollaxis(np.asarray([self.g0_tau(t).real for t in tau]), 0, 3)
+        g0t = np.rollaxis(np.asarray([self.g0_tau(t).real for t in self.tau]), 0, 3)
 
         gtu, gtd = hf.imp_solver([g0t]*2, self.V_field, self.intm, self.setup)
         gt_D = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gt_N = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
-
-        np.savez('gtraw', D=gt_D, N=gt_N)
 
         giw_D = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)
         giw_N = gf.gt_fouriertrans(gt_D, self.tau, self.w_n)

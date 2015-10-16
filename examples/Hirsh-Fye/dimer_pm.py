@@ -95,8 +95,7 @@ def dmft_loop_pm(simulation):
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
-    tau = np.arange(0, S.setup['BETA'], S.setup['dtau_mc'])
-    S.setup['n_tau_mc'] = len(tau)
+    S.setup['n_tau_mc'] = len(S.tau)
 
     gmix = rt.mix_gf_dimer(S.g_iw.copy(), iOmega_n, setup['MU'], setup['tp'])
 
@@ -112,7 +111,7 @@ def dmft_loop_pm(simulation):
         # Bethe lattice bath
         S.g0_iw << gmix - 0.25 * S.g_iw
         S.g0_iw.invert()
-        S.solve(tau)
+        S.solve()
 
         if comm.rank == 0:
             with HDFArchive(setup['ofile'].format(**setup), 'a') as simulation:
