@@ -5,8 +5,8 @@ Plotting utilities for the Single site DMFT phase diagram
 """
 
 from __future__ import division, print_function, absolute_import
-from pytriqs.archive import HDFArchive
 import dmft.common as gf
+import dmft.h5archive as h5
 import matplotlib.pyplot as plt
 import numpy as np
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
@@ -29,11 +29,12 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arr = []
-    with HDFArchive(filestr.format(beta), 'r') as output_files:
-        w_n = gf.matsubara_freq(output_files[u_str]['it000']['setup']['BETA'],
-                                output_files[u_str]['it000']['setup']['N_MATSUBARA'])
+    with h5.File(filestr.format(beta), 'r') as output_files:
+        setup = h5.get_attribites(output_files[u_str]['it000'])
+        tau, w_n = gf.tau_wn_setup(setup)
         for step in sorted(output_files[u_str].keys()):
-            giw = output_files[u_str][step]['giw']
+            gtau = output_files[u_str][step]['gtau'][:]
+            giw = gf.gt_fouriertrans(gtau, tau, w_n)
             axes[0].plot(w_n, giw.imag)
             freq_arr.append(giw.imag[:n_freq])
 
@@ -46,8 +47,8 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
 
 
 def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
-    """Provides a list of all convergence plots at a given temperature"""
-    with HDFArchive(filestr.format(beta), 'r') as output_files:
+    """Plots in individual figures for all interactions the DMFT loops"""
+    with h5.File(filestr.format(beta), 'r') as output_files:
         urange = output_files.keys()
 
     for u_str in urange:
@@ -81,15 +82,16 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
     u_range = []
     figiw = []
     lgiw = []
-    w_n = gf.matsubara_freq(beta, 3)
 
-    with HDFArchive(filestr.format(beta), 'r') as output_files:
+    with h5.File(filestr.format(beta), 'r') as output_files:
         for u_str in sorted(output_files.keys()):
             u_range.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            giw = averager(output_files[u_str], last_iterations)
+            tau, w_n = gf.tau_wn_setup(h5.get_attribites(output_files[u_str]))
+            gtau = averager(output_files[u_str], last_iterations)
+            giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
-            gfit = gf.fit_gf(w_n, giw.imag)
+            gfit = gf.fit_gf(w_n[:3], giw.imag)
             figiw.append(gfit)
             lgiw.append(giw)
 
