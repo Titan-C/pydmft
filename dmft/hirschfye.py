@@ -371,7 +371,7 @@ def do_input(help_string):
     Output
     ------
     parse: Argument Parser object
-     """
+    """
 
     parser = argparse.ArgumentParser(description=help_string,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -382,14 +382,14 @@ def do_input(help_string):
                         'This influences the Trotter slicing as dtau=beta/2/n_freq')
     parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
                         help='Number Monte Carlo Measurement')
-    parser.add_argument('-therm', type=int, default=int(1e4),
+    parser.add_argument('-therm', type=int, default=int(5e3),
                         help='Monte Carlo sweeps of thermalization')
     parser.add_argument('-N_meas', type=int, default=3,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
     parser.add_argument('-U', type=float, default=2.5,
-                        help='Local interaction strenght')
+                        help='Local interaction strength')
     parser.add_argument('-mu', '--MU', type=float, default=0.,
                         help='Chemical potential')
     parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',

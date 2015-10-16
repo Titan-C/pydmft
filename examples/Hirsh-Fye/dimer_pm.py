@@ -64,9 +64,7 @@ def set_new_seed(setup):
 
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
-    n_freq = int(5.*simulation['BETA'])
     setup = {'N_TAU':     2**12,
-             'n_points':  n_freq,
              't':         0.5,
              'MU':        0.,
              'BANDS':     1,

@@ -57,9 +57,6 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
     graf = r'$G(i\omega_n)$'
     label_convergence(beta, u_str, axes, graf, n_freq, xlim)
 
-    plt.show()
-    plt.close()
-
 
 def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
     """Plot all Hirsch - Fye iterations of a given file at
