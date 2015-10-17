@@ -63,7 +63,7 @@ def test_ipt_dimer_pm_g(u_int, result, beta=50., n_matsubara=160):
              't': 0.5, 'MU': 0, 'U': u_int,
              }
     tau, w_n = tau_wn_setup(parms)
-    S = Dimer_Solver(U=u_int, BETA=beta, n_points=len(w_n))
+    S = Dimer_Solver(**parms)
     S.setup.update({'t':  parms['t'], 'tn': 0., 'U': u_int})
     gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0., 0.)
     init_gf_met(S.g_iw, w_n, 0., 0., 0., parms['t'])
