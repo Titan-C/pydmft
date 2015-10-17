@@ -121,7 +121,7 @@ def dmft_loop_pm(simulation):
         g0iw_D = 1.j*w_n - 0.25 * giw_D
         g0iw_N = -setup['tp'] - 0.25 * giw_N
 
-        det = giw_D**2 - giw_N**2
+        det = g0iw_D**2 - g0iw_N**2
         g0iw_D /= det
         g0iw_N /= -det
 
