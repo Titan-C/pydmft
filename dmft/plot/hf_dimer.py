@@ -6,13 +6,10 @@ Created on Thu Jul 23 14:08:23 2015
 """
 
 from __future__ import division, print_function, absolute_import
-from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
-from pytriqs.gf.local import GfReFreq
-from pytriqs.archive import HDFArchive
-from pytriqs.plot.mpl_interface import oplot
 from dmft.plot.hf_single_site import label_convergence
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
+import dmft.h5archive as h5
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
@@ -27,19 +24,20 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
     freq_arrd = []
     freq_arro = []
-    with HDFArchive(filestr.format(beta), 'r') as output_files:
+    with h5.File(filestr.format(beta), 'r') as output_files:
+        setup = h5.get_attribites(output_files[u_str]['it000'])
+        tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[last:]:
-            try:
+            gtaud = output_files[u_str][step]['gtau_d'][:]
+            giwd = gf.gt_fouriertrans(gtaud, tau, w_n)
+            gtauo = output_files[u_str][step]['gtau_o'][:]
+            giwo = gf.gt_fouriertrans(gtauo, tau, w_n,
+                                      [0., setup['tp'], 0.])
+            axes[0].plot(w_n, giwd.imag, 'bo:')
+            axes[0].plot(w_n, giwo.real, 'gs:')
 
-                giwd = output_files[u_str][step]['G_iwd']
-                giwo = output_files[u_str][step]['G_iwo']
-                axes[0].oplot(giwd, 'bo:', RI='I')
-                axes[0].oplot(giwo, 'gs:', RI='R')
-            except (KeyError, TypeError):
-                continue
-
-            freq_arrd.append(giwd.data.imag[:n_freq, 0, 0])
-            freq_arro.append(giwo.data.real[:n_freq, 0, 0])
+            freq_arrd.append(giwd.imag[:n_freq])
+            freq_arro.append(giwo.real[:n_freq])
 
     freq_arrd = np.asarray(freq_arrd).T
     freq_arro = np.asarray(freq_arro).T
@@ -57,58 +55,7 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
     graf = r'$G(i\omega_n)$'
     label_convergence(beta, u_str, axes, graf, n_freq, xlim)
 
-
-def plot_gf_iter(R, ru, gfin, w_n, nf, gflen):
-    """Plot all Hirsch - Fye iterations of a given file at
-    the specified interaction strength"""
-    diag_f = []
-    offdiag_f = []
-
-    for u_iter in R[ru].keys():
-        try:
-            diag_f.append(R[ru][u_iter]['G_iwd'].data[:nf, 0, 0].imag)
-            offdiag_f.append(R[ru][u_iter]['G_iwo'].data[:nf, 0, 0].real)
-            gfin.oplot(R[ru][u_iter]['G_iwd'], 'bs:', RI='I')
-            gfin.oplot(R[ru][u_iter]['G_iwo'], 'gs:', RI='R')
-        except KeyError:
-            pass
-    diag_f = np.asarray(diag_f).T
-    offdiag_f = np.asarray(offdiag_f).T
-#    gfin.plot(w_n[2*nf:], -1/w_n[2*nf:])  # tails
-#    gfin.plot(w_n[2*nf:], -tab/w_n[2*nf:]**2)
-    gfin.set_xlim([0, 5])
-    gfin.set_xticks(gfin.get_xlim())
-    gfin.set_yticks(gfin.get_ylim())
-    gfin.legend_.remove()
-
-    return diag_f, offdiag_f
-
-
-def plot_gf_loopU(beta, tab, U, filestr, nf,
-                  in_box=[0.16, 0.17, 0.20, 0.25]):
-    """Loop over all interaction strengths for a given file
-    to plot all its iterations"""
-    with rt.HDFArchive(filestr.format(tab, beta), 'r') as R:
-
-        f, ax = plt.subplots(1, 2, figsize=(18, 8), sharex=True)
-        f.subplots_adjust(hspace=0.2)
-        gfin = f.add_axes(in_box)
-        gflen = 3*nf
-        w_n = gf.matsubara_freq(beta, gflen)
-        ru = 'U'+str(U)
-        diag_f, offdiag_f = plot_gf_iter(R, ru, gfin, w_n, nf, gflen)
-
-        plt.axhline()
-        for freq, (hd, ho) in enumerate(zip(diag_f, offdiag_f)):
-            ax[0].plot(hd, 'o-.', label='n='+str(freq+1))
-            ax[1].plot(ho, 'o-.', label='n='+str(freq+1))
-        ax[1].legend(loc=9, ncol=nf)
-        ax[0].set_title('First frequencies of the Matsubara GF, at iteration\n'
-                        '@ U/D={} $t_{{ab}}/D={}$ $\\beta D={}$'.format(ru,
-                                                                        tab,
-                                                                        beta))
-        plt.show()
-        plt.close()
+    return axes
 
 
 def plot_acc(filelist):
@@ -142,40 +89,24 @@ def plot_acc(filelist):
         plt.close()
 
 
-def get_selfE(G_iwd, G_iwo):
-    nf = len(G_iwd.mesh)
-    beta = G_iwd.beta
+def get_selfE(gtau_d, gtau_o):
+    nf = len(gtau_d.mesh)
+    beta = gtau_d.beta
     g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=nf)
-    rt.load_gf(g_iw, G_iwd, G_iwo)
+    rt.load_gf(g_iw, gtau_d, gtau_o)
     gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, 0, 0.2)
     sigma = g_iw.copy()
     sigma << gmix - 0.25*g_iw - inverse(g_iw)
     return sigma
 
 
-def getGiw(saveblock):
-    gd = saveblock['G_iwd']
-    nf = len(gd.mesh)
-    beta = gd.beta
-    g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=nf)
-    rt.load_gf(g_iw, gd, saveblock['G_iwo'])
-    return g_iw
-
-
-def plot_tails(beta, U, tp):
-    w_n = gf.matsubara_freq(beta, beta)
-    plt.plot(w_n, -1/w_n, '--')
-    plt.plot(w_n, -tp/w_n**2, '--')
-    plt.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
-
-
-def plotGiw(saveblock):
-    giw = getGiw(saveblock)
-    oplot(giw['A', 'B'], RI='R')
-    oplot(giw['A', 'A'], RI='I')
-    plot_tails(giw)
-    plt.xlim(xmax=10)
-    plt.ylim(ymin=-1.2)
+def plot_tails(beta, U, tp, ax=None):
+    w_n = gf.matsubara_freq(beta, beta, beta/2.)
+    if ax is None:
+        ax = plt
+    ax.plot(w_n, -1/w_n, '--')
+    ax.plot(w_n, -tp/w_n**2, '--')
+    ax.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
 
 def phase_diag(beta):
@@ -184,10 +115,10 @@ def phase_diag(beta):
     w_n = gf.matsubara_freq(beta, 3)
     for tp in np.arange(0.18, 0.3, 0.01):
         filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-        with rt.HDFArchive(filestr, 'r') as results:
+        with h5.File(filestr, 'r') as results:
             for u in results.keys():
                 lastit = results[u].keys()[-1]
-                fl_dos.append(gf.fit_gf(w_n, results[u][lastit]['G_iwd'].imag)(0.))
+                fl_dos.append(gf.fit_gf(w_n, results[u][lastit]['gtau_d'].imag)(0.))
     return np.asarray(fl_dos)
 
 
@@ -198,12 +129,12 @@ def compare_last_gf(tp, beta, contl=2, ylim=-1):
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     w_n = gf.matsubara_freq(beta, 3)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.HDFArchive(filestr, 'r') as results:
+    with h5.File(filestr, 'r') as results:
         for u in results.keys():
             lastit = results[u].keys()[-1]
-            gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
-            go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
-            giw = results[u][lastit]['G_iwd']
+            gd.oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
+            go.oplot(results[u][lastit]['gtau_o'], '+-', RI='R', label=u)
+            giw = results[u][lastit]['gtau_d']
 
             fit = gf.fit_gf(w_n, giw[0, 0].imag)
             w = np.arange(0, contl, 0.05)
@@ -225,12 +156,12 @@ def plot_gf(tp, beta, runsolver, xlim=4, ylim=1.4):
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     w_n = gf.matsubara_freq(beta, beta)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.HDFArchive(filestr, 'r') as results:
+    with h5.File(filestr, 'r') as results:
         for u in results.keys():
             if runsolver == 'HF':
                 lastit = results[u].keys()[-1]
-                gd.oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
-                go.oplot(results[u][lastit]['G_iwo'], '+-', RI='R', label=u)
+                gd.oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
+                go.oplot(results[u][lastit]['gtau_o'], '+-', RI='R', label=u)
             if runsolver == 'cthyb':
                 lastit = 'cthyb'
                 giw = 0.5 * (results[u][lastit]['G_iw']['up'] +
@@ -253,7 +184,7 @@ def diag_sys(tp, beta):
     rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.HDFArchive(filestr, 'r') as results:
+    with rt.h5.File(filestr, 'r') as results:
         for u in results.keys():
             lastit = results[u].keys()[-1]
             g_iw = rot*getGiw(results[u][lastit])*rot
@@ -273,7 +204,7 @@ def spectral(tp, U, beta, pade_fit_pts):
     rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
     f, (gl, gd) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.HDFArchive(filestr, 'r') as results:
+    with h5.File(filestr, 'r') as results:
         u = 'U'+str(U)
         lastit = results[u].keys()[-1]
         g_iw = getGiw(results[u][lastit])
@@ -298,10 +229,10 @@ def spectral(tp, U, beta, pade_fit_pts):
 def plotginta():
     U, tp, beta = 2.8, 0.18, 60.
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-    with rt.HDFArchive(filestr, 'r') as results:
+    with h5.File(filestr, 'r') as results:
         u = 'U'+str(U)
         lastit = results[u].keys()[-1]
-        oplot(results[u][lastit]['G_iwd'], 'x-', RI='I', label=u)
+        oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
         w_n = gf.matsubara_freq(beta, beta)
         plt.plot(w_n, -1/w_n, '--')
         plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
