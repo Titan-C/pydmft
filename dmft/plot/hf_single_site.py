@@ -55,16 +55,6 @@ def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
         show_conv(beta, u_str, filestr, n_freq, xlim)
 
 
-def averager(it_output, last_iterations):
-    """Averages over the files terminating with the numbers given in vector"""
-    sgtau = 0
-    for step in last_iterations:
-        sgtau += it_output[step]['gtau'][:]
-
-    sgtau /= len(last_iterations)
-    return sgtau
-
-
 def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
     """Fits for all Green's functions at a given beta their
     density of states at the Fermi energy

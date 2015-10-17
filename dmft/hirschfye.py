@@ -403,3 +403,12 @@ def do_input(help_string):
                         metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
     return parser
+
+
+def averager(h5parent, h5child, last_iterations):
+    """Given an H5 file parent averages over the iterations with the child"""
+    sum_child = 0.
+    for step in last_iterations:
+        sum_child += h5parent[step][h5child][:]
+
+    return sum_child / len(last_iterations)

@@ -15,7 +15,6 @@ from mpi4py import MPI
 import dmft.common as gf
 import dmft.h5archive as h5
 import dmft.hirschfye as hf
-import dmft.plot.hf_single_site as pss
 import numpy as np
 import sys
 comm = MPI.COMM_WORLD
@@ -31,7 +30,7 @@ def set_new_seed(setup):
 
     with h5.File(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
-        gtau = pss.averager(outp[src_U], last_iterations)
+        gtau = hf.averager(outp[src_U], 'gtau', last_iterations)
         # This is a particular cleaning for the half-filled single band
         try:
             dest_count = len(outp[dest_U].keys())
