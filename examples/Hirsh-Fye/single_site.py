@@ -53,8 +53,6 @@ def dmft_loop_pm(simulation):
              'SITES':       1,
              }
 
-
-
     if simulation['new_seed']:
         if comm.rank == 0:
             set_new_seed(simulation)
