@@ -9,12 +9,12 @@ Quantum Monte Carlo algorithm
 
 from __future__ import division, absolute_import, print_function
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
-from h5py import File as h5file
 from mpi4py import MPI
 from scipy.interpolate import interp1d
 from scipy.linalg.blas import dger
 import argparse
 import dmft.hffast as hffast
+import dmft.h5archive as h5
 import math
 import numpy as np
 import scipy.linalg as la
@@ -152,7 +152,7 @@ def susceptibility(v):
 def save_output(params, double_occ, vlog, ar):
     """Saves the simulation status"""
 
-    with h5file(params['ofile'].format(**params), 'a') as save_file:
+    with h5.File(params['ofile'].format(**params), 'a') as save_file:
         save_file[params['group'] + 'double_occ'] = double_occ
         if params['save_logs']:
             save_file[params['group'] + 'v_ising'] = np.asarray(vlog)
@@ -412,3 +412,32 @@ def averager(h5parent, h5child, last_iterations):
         sum_child += h5parent[step][h5child][:]
 
     return sum_child / len(last_iterations)
+
+
+def set_new_seed(setup, targets):
+    """Generates a new starting Green's function for the DMFT loop
+    based on the finishing state of the system at a diffent parameter set"""
+
+    src_U = 'U' + str(setup['new_seed'][0])
+    dest_U = 'U' + str(setup['new_seed'][1])
+    avg_over = int(setup['new_seed'][2])
+    averages = []
+
+    with h5.File(setup['ofile'].format(**setup), 'a') as outp:
+        last_iterations = outp[src_U].keys()[-avg_over:]
+        for target in targets:
+            averages.append(averager(outp[src_U], target, last_iterations))
+
+        try:
+            dest_count = len(outp[dest_U].keys())
+        except KeyError:
+            dest_count = 0
+
+        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
+        for target, avg in zip(targets, averages):
+            outp[dest_group + target + '/'] = avg
+        outp.flush()
+        h5.add_attributes(outp[dest_group],
+                          h5.get_attribites(outp[src_U][last_iterations[-1]]))
+
+    print(setup['new_seed'])

@@ -20,32 +20,6 @@ import sys
 comm = MPI.COMM_WORLD
 
 
-def set_new_seed(setup):
-    """Generates a new starting Green's function for the DMFT loop
-    based on the finishing state of the system at a diffent parameter set"""
-
-    src_U = 'U' + str(setup['new_seed'][0])
-    dest_U = 'U' + str(setup['new_seed'][1])
-    avg_over = int(setup['new_seed'][2])
-
-    with h5.File(setup['ofile'].format(**SETUP), 'a') as outp:
-        last_iterations = outp[src_U].keys()[-avg_over:]
-        gtau = hf.averager(outp[src_U], 'gtau', last_iterations)
-        # This is a particular cleaning for the half-filled single band
-        try:
-            dest_count = len(outp[dest_U].keys())
-        except KeyError:
-            dest_count = 0
-        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
-
-        outp[dest_group + 'gtau'] = gtau
-        outp.flush()
-        h5.add_attributes(outp[dest_group],
-                          h5.get_attribites(outp[src_U][last_iterations[-1]]))
-
-    print(setup['new_seed'])
-
-
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
     setup = {'t':           .5,
@@ -54,7 +28,7 @@ def dmft_loop_pm(simulation):
 
     if simulation['new_seed']:
         if comm.rank == 0:
-            set_new_seed(simulation)
+            hf.set_new_seed(simulation, ['gtau'])
         simulation['U'] = simulation['new_seed'][1]
         return
 
