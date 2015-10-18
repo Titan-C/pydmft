@@ -8,20 +8,25 @@ Performs a quick run of the examples to keep tests upon them
 
 from __future__ import division, print_function, absolute_import
 import subprocess
+import pytest
 # matplotlib back end has to be called before it gets loaded elsewhere
 import matplotlib
 matplotlib.use('Agg')
 import dmft.plot.hf_single_site as pss
+import dmft.plot.hf_dimer as pdp
 
 
-def test_example():
-    """Testing a very fast single site execution of HF"""
-    command = "examples/Hirsh-Fye/single_site.py -sweeps 100 -therm 400 -Niter 4 -ofile /tmp/testhfss"
+@pytest.mark.parametrize("case, ofile, plot",
+                         [('single_site', 'testhfss', pss),
+                          ('dimer_pm', 'testdp', pdp)])
+def test_example(case, ofile, plot):
+    """Testing a very fast HF runs"""
+    command = "examples/Hirsh-Fye/{}.py -sweeps 100 -therm 400 -Niter 2 -ofile /tmp/{}".format(case, ofile)
     command = command.split()
     assert not subprocess.call(command)
-    pss.show_conv(4, 'U2.5', '/tmp/testhfss', xlim=8)
+    plot.show_conv(4, 'U2.5', '/tmp/'+ofile, xlim=8)
 
     command += '-new_seed 2.5 2.8 4'.split()
     print(command)
     assert not subprocess.call(command)
-    pss.show_conv(4, 'U2.8', '/tmp/testhfss', xlim=8)
+    plot.show_conv(4, 'U2.8', '/tmp/'+ofile, xlim=8)
