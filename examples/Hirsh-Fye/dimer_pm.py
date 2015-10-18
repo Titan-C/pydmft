@@ -52,13 +52,13 @@ def dmft_loop_pm(simulation):
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
-    giw_D, giw_N = init_gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
+    giw_d, giw_o = init_gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
             last_it = 'it{:03}'.format(last_loop-1)
-            giw_D, giw_N = pd.get_giw(last_run[current_u], last_it,
+            giw_d, giw_o = pd.get_giw(last_run[current_u], last_it,
                                       tau, w_n, setup['tp'])
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
@@ -75,30 +75,30 @@ def dmft_loop_pm(simulation):
             print('On loop', loop_count, 'beta', setup['BETA'],
                   'U', setup['U'], 'tp', setup['tp'])
 
-
         # Bethe lattice bath
-        g0iw_D = 1.j*w_n - 0.25 * giw_D
-        g0iw_N = -setup['tp'] - 0.25 * giw_N
+        g0iw_d = 1.j*w_n - 0.25 * giw_d
+        g0iw_o = -setup['tp'] - 0.25 * giw_o
 
-        det = g0iw_D**2 - g0iw_N**2
-        g0iw_D /= det
-        g0iw_N /= -det
+        det = g0iw_d**2 - g0iw_o**2
+        g0iw_d /= det
+        g0iw_o /= -det
 
-        g0tau_D = gf.gw_invfouriertrans(g0iw_D, tau, w_n)
-        g0tau_N = gf.gw_invfouriertrans(g0iw_N, tau, w_n,
+        g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n)
+        g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n,
                                         [0., setup['tp'], 0.])
 
-        g0t = np.array([[g0tau_D, g0tau_N], [g0tau_N, g0tau_D]])
+        # Impurity solver
+        g0t = np.array([[g0tau_d, g0tau_o], [g0tau_o, g0tau_d]])
 
         gtu, gtd = hf.imp_solver([g0t]*2, V_field, intm, setup)
         gtau_d = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gtau_o = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
-        giw_D = gf.gt_fouriertrans(gtau_d, tau, w_n)
-        giw_N = gf.gt_fouriertrans(gtau_o, tau, w_n,
+        giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
+        giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n,
                                    [0., setup['tp'], 0.])
 
-
+        # Save output
         if comm.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
                 store[dest_group + 'gtau_d'] = gtau_d

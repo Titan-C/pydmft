@@ -22,10 +22,10 @@ def get_giw(h5parent, iteration, tau, w_n, tp):
     """Recovers with Fourier Transform G_iw from H5 file"""
     gtau_d = h5parent[iteration]['gtau_d'][:]
     gtau_o = h5parent[iteration]['gtau_o'][:]
-    giw_D = gf.gt_fouriertrans(gtau_d, tau, w_n)
-    giw_N = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+    giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
+    giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
 
-    return giw_D, giw_N
+    return giw_d, giw_o
 
 
 def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
