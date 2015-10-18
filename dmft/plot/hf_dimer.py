@@ -18,6 +18,15 @@ import re
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
+def get_giw(h5parent, iteration, tau, w_n, tp):
+    """Recovers with Fourier Transform G_iw from H5 file"""
+    gtau_d = h5parent[iteration]['gtau_d'][:]
+    gtau_o = h5parent[iteration]['gtau_o'][:]
+    giw_D = gf.gt_fouriertrans(gtau_d, tau, w_n)
+    giw_N = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+
+    return giw_D, giw_N
+
 
 def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
@@ -28,11 +37,8 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, last=5):
         setup = h5.get_attribites(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[last:]:
-            gtaud = output_files[u_str][step]['gtau_d'][:]
-            giwd = gf.gt_fouriertrans(gtaud, tau, w_n)
-            gtauo = output_files[u_str][step]['gtau_o'][:]
-            giwo = gf.gt_fouriertrans(gtauo, tau, w_n,
-                                      [0., setup['tp'], 0.])
+            giwd, giwo = get_giw(output_files[u_str], step,
+                                 tau, w_n, setup['tp'])
             axes[0].plot(w_n, giwd.imag, 'bo:')
             axes[0].plot(w_n, giwo.real, 'gs:')
 

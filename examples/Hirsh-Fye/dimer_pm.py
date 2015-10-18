@@ -14,24 +14,11 @@ from mpi4py import MPI
 import dmft.h5archive as h5
 import dmft.common as gf
 import dmft.hirschfye as hf
+import dmft.plot.hf_dimer as pd
 import numpy as np
 import sys
 
 comm = MPI.COMM_WORLD
-
-
-def averager(it_output, last_iterations):
-    """Averages over the files terminating with the numbers given in vector"""
-    sgtau_d = 0
-    sgtau_o = 0
-    for step in last_iterations:
-        sgtau_d += it_output[step]['gtau_d'][:]
-        sgtau_o += it_output[step]['gtau_o'][:]
-
-    sgtau_d *= 1./len(last_iterations)
-    sgtau_o *= 1./len(last_iterations)
-
-    return sgtau_d, sgtau_o
 
 
 def set_new_seed(setup):
@@ -44,16 +31,19 @@ def set_new_seed(setup):
 
     with h5.File(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
-        giwd, giwo = averager(outp[src_U], last_iterations)
+        gtaud = hf.averager(outp[src_U], 'gtau_d', last_iterations)
+        gtauo = hf.averager(outp[src_U], 'gtau_o', last_iterations)
         try:
             dest_count = len(outp[dest_U].keys())
         except KeyError:
             dest_count = 0
         dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
 
-        outp[dest_group + 'setup/'] = outp[src_U][last_iterations[-1]]['setup']
-        outp[dest_group + 'G_iwd/'] = giwd
-        outp[dest_group + 'G_iwo/'] = giwo
+        outp[dest_group + 'gtau_d/'] = gtaud
+        outp[dest_group + 'gtau_o/'] = gtauo
+        outp.flush()
+        h5.add_attributes(outp[dest_group],
+                          h5.get_attribites(outp[src_U][last_iterations[-1]]))
 
     print(setup['new_seed'])
 
@@ -95,14 +85,10 @@ def dmft_loop_pm(simulation):
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
             last_it = 'it{:03}'.format(last_loop-1)
-            gtau_d = last_run[current_u][last_it]['gtau_d']
-            gtau_o = last_run[current_u][last_it]['gtau_o']
-            giw_D = gf.gt_fouriertrans(gtau_d, tau, w_n)
-            giw_N = gf.gt_fouriertrans(gtau_o, tau, w_n,
-                                       [0., setup['tp'], 0.])
+            giw_D, giw_N = pd.get_giw(last_run[current_u], last_it,
+                                      tau, w_n, setup['tp'])
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
-
 
     V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
                            L=setup['SITES']*setup['n_tau_mc'])
