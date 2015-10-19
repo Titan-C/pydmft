@@ -17,7 +17,7 @@ import pandas as pd
 import re
 import os
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
-                                'axes.titlesize': 22})
+                                'axes.titlesize': 22, 'figure.autolayout': True})
 
 def get_giw(h5parent, iteration, tau, w_n, tp):
     """Recovers with Fourier Transform G_iw from H5 file"""

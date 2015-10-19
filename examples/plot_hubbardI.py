@@ -21,7 +21,7 @@ from __future__ import division, absolute_import, print_function
 import matplotlib.pyplot as plt
 import numpy as np
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
-                                'axes.titlesize': 22})
+                                'axes.titlesize': 22, 'figure.autolayout': True})
 
 
 def hubbard_aprox(n, U, dmu, omega):

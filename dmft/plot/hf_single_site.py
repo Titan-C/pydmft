@@ -10,7 +10,7 @@ import dmft.h5archive as h5
 import matplotlib.pyplot as plt
 import numpy as np
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
-                                'axes.titlesize': 22})
+                                'axes.titlesize': 22, 'figure.autolayout': True})
 
 
 def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
