@@ -85,12 +85,15 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     double_occ = np.zeros((len(i_pairs), parms['SITES']))
     hffast.set_seed(parms['SEED'])
 
+    update = False
     for mcs in xrange(parms['sweeps'] + parms['therm']):
-        if mcs % parms['therm'] == 0:
-            if parms['global_flip']:
+        if mcs % parms['therm'] == 0 and parms['global_flip']:
                 v *= -1
+                update = True
+        if mcs % 500 == 0 or update:  # dirty update clean up
             int_v = np.dot(interaction, v)
             g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
+            update = False
 
         for _ in range(parms['N_meas']):
             for i, (up, dw) in enumerate(i_pairs):
