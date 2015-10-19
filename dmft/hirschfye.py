@@ -120,11 +120,10 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
     comm.Allreduce(double_occ.copy(), double_occ)
-    comm.Allreduce(acc.copy(), acc)
 
     if comm.rank == 0:
         save_output(parms, double_occ/comm.Get_size(),
-                    acc/comm.Get_size(), vlog, ar)
+                    acc, vlog, ar)
 
     return [avg_g(gst, parms) for gst in Gst]
 

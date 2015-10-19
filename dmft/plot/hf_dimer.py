@@ -108,6 +108,10 @@ def report_acc(BETA, u_int, tp, filestr):
     for fname in files:
         with open(fname) as log:
             data+=log.read()
+
+    if len(files) == 0:
+        return -1., -1
+
     last_step = re.findall(r'On loop (\d+) beta ([\d\.]+) U ([\d\.]+) tp ([\d\.]+)\s'
                            r'((?:docc.*\s)+)', data, flags=re.M)[-1]
 
