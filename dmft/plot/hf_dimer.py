@@ -15,6 +15,7 @@ import matplotlib.lines as mlines
 import numpy as np
 import pandas as pd
 import re
+import os
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
@@ -28,12 +29,12 @@ def get_giw(h5parent, iteration, tau, w_n, tp):
     return giw_d, giw_o
 
 
-def show_conv(beta, u_str, tp=0.25, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
+def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5', n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arrd = []
     freq_arro = []
-    with h5.File(filestr.format(tp, beta), 'r') as output_files:
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         setup = h5.get_attribites(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
@@ -59,27 +60,30 @@ def show_conv(beta, u_str, tp=0.25, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, ski
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
     graf = r'$G(i\omega_n)$'
-    label_convergence(beta, u_str+'\n$t_\\perp={}$'.format(tp),
+    label_convergence(BETA, u_str+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
     return axes
 
-def list_show_conv(beta, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
+def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
-    with h5.File(filestr.format(tp, beta), 'r') as output_files:
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         urange = output_files.keys()
 
     for u_str in urange:
-        show_conv(beta, u_str, tp, filestr, n_freq, xlim, skip)
+        show_conv(BETA, u_str, tp, filestr, n_freq, xlim, skip)
+        docc, acc = report_acc(BETA, float(u_str[1:]), tp, filestr)
 
         plt.show()
         plt.close()
+        print('Last step double occupation: {:.6}'.format(docc),
+              'The acceptance rate is:{:.1%}'.format(acc))
 
 
-def data_hist(beta, u_str, filestr='SB_PM_B{}.h5', skip=5):
+def data_hist(BETA, u_str, filestr='SB_PM_B{}.h5', skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True)
-    with h5.File(filestr.format(beta), 'r') as output_files:
+    with h5.File(filestr.format(BETA), 'r') as output_files:
         setup = h5.get_attribites(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
@@ -89,13 +93,32 @@ def data_hist(beta, u_str, filestr='SB_PM_B{}.h5', skip=5):
             axes[1].plot(tau, gtau_o, 'g:')
 
     graf = r'$G(\tau)$'
-    axes[0].set_xlim([0, beta])
+    axes[0].set_xlim([0, BETA])
     axes[0].set_xlabel(r'$\tau$')
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
+    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
     axes[0].set_ylabel(graf+'$_{AA}$')
     axes[1].set_ylabel(graf+'$_{AB}$')
 
     return axes
+
+def report_acc(BETA, u_int, tp, filestr):
+    elements = ['BETA '+str(BETA)[:-1], 'tp {}.o'.format(tp), 'U '+str(u_int), filestr]
+    files = [a for a in os.listdir('.') if all([x in a for x in elements])]
+    data = ''
+    for fname in files:
+        with open(fname) as log:
+            data+=log.read()
+    last_step = re.findall(r'On loop (\d+) beta ([\d\.]+) U ([\d\.]+) tp ([\d\.]+)\s'
+                           r'((?:docc.*\s)+)', data, flags=re.M)[-1]
+
+    info_block = re.findall(r'([\d\.]+)  ([\d\.]+)\]\] acc  ([\d\.]+) nsign (\d+)',
+                            last_step[4], flags=re.M)
+
+    stats = np.array(info_block).astype(np.float)
+    docc = stats[:, :2].mean()
+    acc = stats[:, 2].mean()
+    return docc, acc
+
 
 
 def plot_acc(filelist):
@@ -110,7 +133,7 @@ def plot_acc(filelist):
                           'B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) '
                           'l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
     infosum = np.array(infocols).astype(np.float)
-    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'beta', 'tp', 'U',
+    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'BETA', 'tp', 'U',
                                            'loop', 'dist'])
     tpg = table.groupby('tp')
     for tp_key, group in tpg:
@@ -140,8 +163,8 @@ def get_selfE(gtau_d, gtau_o):
     return sigma
 
 
-def plot_tails(beta, U, tp, ax=None):
-    w_n = gf.matsubara_freq(beta, beta, beta/2.)
+def plot_tails(BETA, U, tp, ax=None):
+    w_n = gf.matsubara_freq(BETA, BETA, BETA/2.)
     if ax is None:
         ax = plt
     ax.plot(w_n, -1/w_n, '--')
@@ -149,12 +172,12 @@ def plot_tails(beta, U, tp, ax=None):
     ax.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
 
-def phase_diag(beta):
+def phase_diag(BETA):
 
     fl_dos = []
-    w_n = gf.matsubara_freq(beta, 3)
+    w_n = gf.matsubara_freq(BETA, 3)
     for tp in np.arange(0.18, 0.3, 0.01):
-        filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+        filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
         with h5.File(filestr, 'r') as results:
             for u in results.keys():
                 lastit = results[u].keys()[-1]
@@ -162,12 +185,12 @@ def phase_diag(beta):
     return np.asarray(fl_dos)
 
 
-def compare_last_gf(tp, beta, contl=2, ylim=-1):
+def compare_last_gf(tp, BETA, contl=2, ylim=-1):
     """Compartes in a plot the last GF of the HF simulation with the one CTHYB
        run done with this seed"""
 
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-    w_n = gf.matsubara_freq(beta, 3)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
+    w_n = gf.matsubara_freq(BETA, 3)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with h5.File(filestr, 'r') as results:
         for u in results.keys():
@@ -188,13 +211,13 @@ def compare_last_gf(tp, beta, contl=2, ylim=-1):
     go.set_xlim([0, 4])
     go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
 
 
-def plot_gf(tp, beta, runsolver, xlim=4, ylim=1.4):
+def plot_gf(tp, BETA, runsolver, xlim=4, ylim=1.4):
 
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
-    w_n = gf.matsubara_freq(beta, beta)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
+    w_n = gf.matsubara_freq(BETA, BETA)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with h5.File(filestr, 'r') as results:
         for u in results.keys():
@@ -217,12 +240,12 @@ def plot_gf(tp, beta, runsolver, xlim=4, ylim=1.4):
     go.legend(loc=0)
     gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
     go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
 
 
-def diag_sys(tp, beta):
+def diag_sys(tp, BETA):
     rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
     f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
     with rt.h5.File(filestr, 'r') as results:
         for u in results.keys():
@@ -237,12 +260,12 @@ def diag_sys(tp, beta):
     go.set_xlim([0, 4])
     go.legend(loc=0, prop={'size': 18})
     go.set_ylabel(r'$\Re e G_{2}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, beta))
+    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
 
 
-def spectral(tp, U, beta, pade_fit_pts):
+def spectral(tp, U, BETA, pade_fit_pts):
     rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
     f, (gl, gd) = plt.subplots(1, 2, figsize=(18, 8))
     with h5.File(filestr, 'r') as results:
         u = 'U'+str(U)
@@ -267,13 +290,13 @@ def spectral(tp, U, beta, pade_fit_pts):
 
 
 def plotginta():
-    U, tp, beta = 2.8, 0.18, 60.
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, beta)
+    U, tp, BETA = 2.8, 0.18, 60.
+    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
     with h5.File(filestr, 'r') as results:
         u = 'U'+str(U)
         lastit = results[u].keys()[-1]
         oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
-        w_n = gf.matsubara_freq(beta, beta)
+        w_n = gf.matsubara_freq(BETA, BETA)
         plt.plot(w_n, -1/w_n, '--')
         plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
     plt.xlim([0, 6])
