@@ -102,9 +102,10 @@ def data_hist(BETA, u_str, tp, filestr='SB_PM_B{}.h5', skip=5):
     return axes
 
 
-def plot_it(BETA, u_str, tp, it, space, filestr='SB_PM_B{}.h5'):
+def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
+    if axes is None:
+        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         step = 'it{:03}'.format(it)
         setup = h5.get_attribites(output_files[u_str][step])
@@ -112,22 +113,22 @@ def plot_it(BETA, u_str, tp, it, space, filestr='SB_PM_B{}.h5'):
         gtau_d = output_files[u_str][step]['gtau_d'][:]
         gtau_o = output_files[u_str][step]['gtau_o'][:]
         if space == 'tau':
-            axes[0].plot(tau, gtau_d, 'b')
-            axes[1].plot(tau, gtau_o, 'g')
+            axes[0].plot(tau, gtau_d, '-', label=label)
+            axes[1].plot(tau, gtau_o, '-', label=label)
             graf = r'$G(\tau)$'
             axes[0].set_xlabel(r'$\tau$')
             axes[0].set_xlim([0, BETA])
         else:
             giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
             giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
-            axes[0].plot(w_n, giw_d.real, 'gs:')
-            axes[0].plot(w_n, giw_d.imag, 'bo:')
-            axes[1].plot(w_n, giw_o.real, 'gs:')
-            axes[1].plot(w_n, giw_o.imag, 'bo:')
+            axes[0].plot(w_n, giw_d.real, 's:')
+            axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
+            axes[1].plot(w_n, giw_o.real, 's:', label=label)
+            axes[1].plot(w_n, giw_o.imag, 'o:')
 
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')
-            axes[0].set_xlim([0, max(w_n)])
+            axes[0].set_xlim([0, 2.])
 
 
     axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
