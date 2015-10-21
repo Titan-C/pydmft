@@ -89,7 +89,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
         for u_str in sorted(output_files.keys()):
             u_range.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str]))
+            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str]['it000']))
             gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
             giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
@@ -105,7 +105,7 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
     u_range, fit_gf, lgiw = fit_dos(beta, avg, filestr)
-    w_n = gf.matsubara_freq(beta, 512)
+    w_n = gf.matsubara_freq(beta, len(lgiw[0]))
     omega = np.arange(0, w_n[2], 0.05)
     for u_int, gfit, giw in zip(u_range, fit_gf, lgiw):
         axes[0].plot(w_n, giw.imag, 'o:', label='U='+str(u_int))
@@ -118,12 +118,12 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
     plt.close()
 
 
-def phases():
+def phases(beta_array):
     """Scatter plot of the DOS at Fermi level
 
     Shows the phase diagram of the impurity model of DMFT"""
 
-    for beta in np.array([32., 40., 50., 64.]):
+    for beta in beta_array:
         u_int, gfit, _ = fit_dos(beta, 2)
         temp = np.ones(len(u_int)) * 2 / beta
         plt.scatter(u_int, temp, s=300, c=[dos(0) for dos in gfit],
