@@ -75,6 +75,10 @@ def dmft_loop_pm(simulation):
             print('On loop', loop_count, 'beta', setup['BETA'],
                   'U', setup['U'], 'tp', setup['tp'])
 
+        # Cleaning the input to half-filling
+        giw_d.real = 0.
+        giw_o.imag = 0.
+
         # Bethe lattice bath
         g0iw_d = 1.j*w_n - 0.25 * giw_d
         g0iw_o = -setup['tp'] - 0.25 * giw_o
