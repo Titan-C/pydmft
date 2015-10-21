@@ -91,6 +91,9 @@ def dmft_loop_pm(simulation):
         g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n,
                                         [0., setup['tp'], 0.])
 
+        # Cleaning to casual
+        g0tau_d[g0tau_d > -1e-7] = -1e-7
+
         # Impurity solver
         g0t = np.array([[g0tau_d, g0tau_o], [g0tau_o, g0tau_d]])
 
