@@ -443,6 +443,6 @@ def set_new_seed(setup, targets):
             outp[dest_group + target + '/'] = avg
         outp.flush()
         h5.add_attributes(outp[dest_group],
-                          h5.get_attribites(outp[src_U][last_iterations[-1]]))
+                          h5.get_attributes(outp[src_U][last_iterations[-1]]))
 
     print(setup['new_seed'])

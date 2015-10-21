@@ -7,6 +7,7 @@ Plotting utilities for the Single site DMFT phase diagram
 from __future__ import division, print_function, absolute_import
 import dmft.common as gf
 import dmft.h5archive as h5
+import dmft.hirschfye as hf
 import matplotlib.pyplot as plt
 import numpy as np
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
@@ -25,12 +26,20 @@ def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
     axes[1].set_xlabel('iterations')
 
 
-def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
+def get_giw(h5parent, iteration, tau, w_n, tp):
+    """Recovers with Fourier Transform G_iw from H5 file"""
+    gtau = h5parent[iteration]['gtau'][:]
+    giw = gf.gt_fouriertrans(gtau, tau, w_n)
+
+    return gtau, giw
+
+
+def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
     with h5.File(filestr.format(beta), 'r') as output_files:
-        setup = h5.get_attribites(output_files[u_str]['it000'])
+        setup = h5.get_attributes(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in sorted(output_files[u_str].keys()):
             gtau = output_files[u_str][step]['gtau'][:]
@@ -45,14 +54,17 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
 
     label_convergence(beta, u_str, axes, graf, n_freq, xlim)
 
+    return axes
 
-def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2):
+def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
     with h5.File(filestr.format(beta), 'r') as output_files:
         urange = output_files.keys()
 
     for u_str in urange:
-        show_conv(beta, u_str, filestr, n_freq, xlim)
+        show_conv(beta, u_str, filestr, n_freq, xlim, skip)
+        plt.show()
+        plt.close()
 
 
 def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
@@ -77,8 +89,8 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
         for u_str in sorted(output_files.keys()):
             u_range.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            tau, w_n = gf.tau_wn_setup(h5.get_attribites(output_files[u_str]))
-            gtau = averager(output_files[u_str], last_iterations)
+            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str]))
+            gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
             giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
             gfit = gf.fit_gf(w_n[:3], giw.imag)

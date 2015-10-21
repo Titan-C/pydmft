@@ -19,6 +19,7 @@ import os
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
+
 def get_giw(h5parent, iteration, tau, w_n, tp):
     """Recovers with Fourier Transform G_iw from H5 file"""
     gtau_d = h5parent[iteration]['gtau_d'][:]
@@ -35,7 +36,7 @@ def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5', n_freq=5, xlim=
     freq_arrd = []
     freq_arro = []
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        setup = h5.get_attribites(output_files[u_str]['it000'])
+        setup = h5.get_attributes(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
             giwd, giwo = get_giw(output_files[u_str], step,
@@ -84,7 +85,7 @@ def data_hist(BETA, u_str, tp, filestr='SB_PM_B{}.h5', skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        setup = h5.get_attribites(output_files[u_str]['it000'])
+        setup = h5.get_attributes(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
             gtau_d = output_files[u_str][step]['gtau_d'][:]
@@ -105,10 +106,10 @@ def data_hist(BETA, u_str, tp, filestr='SB_PM_B{}.h5', skip=5):
 def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
     """Plot the evolution of the Green's function in DMFT iterations"""
     if axes is None:
-        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
+        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         step = 'it{:03}'.format(it)
-        setup = h5.get_attribites(output_files[u_str][step])
+        setup = h5.get_attributes(output_files[u_str][step])
         tau, w_n = gf.tau_wn_setup(setup)
         gtau_d = output_files[u_str][step]['gtau_d'][:]
         gtau_o = output_files[u_str][step]['gtau_o'][:]
@@ -121,14 +122,11 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
         else:
             giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
             giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
-            axes[0].plot(w_n, giw_d.real, 's:')
             axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
             axes[1].plot(w_n, giw_o.real, 's:', label=label)
-            axes[1].plot(w_n, giw_o.imag, 'o:')
 
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')
-            axes[0].set_xlim([0, 2.])
 
 
     axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
@@ -170,9 +168,9 @@ def plot_acc(filelist):
         with open(fname) as fcontent:
             rawdata += fcontent.read()
 
-    infocols = re.findall('acc\s+([\d\.]+?) nsign (\d)\s+'
-                          'B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) '
-                          'l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
+    infocols = re.findall(r'acc\s+([\d\.]+?) nsign (\d)\s+'
+                          r'B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) '
+                          r'l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
     infosum = np.array(infocols).astype(np.float)
     table = pd.DataFrame(infosum, columns=['acc', 'sign', 'BETA', 'tp', 'U',
                                            'loop', 'dist'])

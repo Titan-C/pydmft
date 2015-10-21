@@ -23,7 +23,7 @@ def add_attributes(parent, attr):
             parent.attrs[key] = item
 
 
-def get_attribites(parent):
+def get_attributes(parent):
     """
     get the attributes from the h5py data item
 
