@@ -42,7 +42,7 @@ def hamiltonian(U, mu, tp):
     sigma_zb = b_up.T*b_up - b_dw.T*b_dw
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += -tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
     return H, [a_up, a_dw, b_up, b_dw]
 
 
@@ -64,14 +64,14 @@ def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names):
     gwp, axwn = plt.subplots(2, sharex=True)
     gwp.subplots_adjust(hspace=0)
     gtp, axt = plt.subplots()
-    wn = matsubara_freq(beta, 64)
-    tau = np.linspace(0, beta, 2**10)
+    wn = matsubara_freq(beta, beta)
+    tau = np.arange(0, beta, .5)
     gfs = [op.gf_lehmann(eig_e, eig_v, c.T, beta, 1j*wn, d) for c, d in oper_pair]
     for giw, color, name in zip(gfs, c_v, names):
         axwn[0].plot(wn, giw.real, color+'s-', label=r'${}$'.format(name))
         axwn[1].plot(wn, giw.imag, color+'o-')
 
-        tail =  [0., -tp, 0.] if name[0]!=name[1] else [1., 0., 0.]
+        tail =  [0., tp, 0.] if name[0]!=name[1] else [1., 0., 0.]
         gt = gw_invfouriertrans(giw, tau, wn, tail)
         axt.plot(tau, gt, label=r'${}$'.format(name))
 
