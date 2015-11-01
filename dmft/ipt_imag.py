@@ -13,7 +13,7 @@ the contribution of the Hartree-term is not included here as it is cancelled
 """
 from __future__ import division, absolute_import, print_function
 
-from dmft.common import gt_fouriertrans, gw_invfouriertrans
+from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF
 import numpy as np
 
 
@@ -66,3 +66,32 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
             converged = True
         g_iwn = mix * g_iwn + (1 - mix) * g_iwn_old
     return g_iwn, sigma_iwn
+
+
+###############################################################################
+# Dimer Bethe lattice
+
+def dimer_gf_met(omega, mu, tab, tn, t):
+    """Double semi-circular density of states to represent the
+    non-interacting dimer """
+
+    g_1 = greenF(omega, mu=mu-tab, D=2*(t+tn))
+    g_2 = greenF(omega, mu=mu+tab, D=2*abs(t-tn))
+    g_d = .5*(g_1 + g_2)
+    g_o = .5*(g_1 - g_2)
+
+    return g_d, g_o
+
+
+def dimer_mat_inv(a, b):
+    """Inverts the relevant entries of the dimer Green's function matrix
+
+    .. math:: [a, b]^-1 = [a, -b]/(a^2 - b^2)
+    """
+    det = a*a - b*b
+    return a/det, -b/det
+
+
+def dimer_mat_mul(a, b, c, d):
+    """Multiplies two Matrices of the dimer Green's Functions"""
+    return a*c + b*d, a*d + b*c

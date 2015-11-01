@@ -45,6 +45,21 @@ ipt_ref_res = \
        -0.134, -0.132, -0.13 , -0.128, -0.126, -0.124, -0.122, -0.121]))]
 
 
+def test_GF():
+    """Test the Matrix product and Matrix inversion of a 2x2 Matrix
+    which for the case of the dimer has a symmetric structure in which
+    only requires the first row"""
+
+    tau, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
+    giwd, giwo = ipt_imag.dimer_gf_met(w_n, 0., 0.25, 0., 0.5)
+    inv_giwd, inv_giwo = ipt_imag.dimer_mat_inv(giwd, giwo)
+    one, zero = ipt_imag.dimer_mat_mul(inv_giwd, inv_giwo, giwd, giwo)
+    assert np.allclose(one, 1.)
+    assert np.allclose(zero, 0.)
+
+
+
+
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
 def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
     parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
