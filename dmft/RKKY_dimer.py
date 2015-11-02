@@ -22,7 +22,7 @@ from joblib import Parallel, delayed
 ###############################################################################
 # Dimer Bethe lattice
 
-def dimer_gf_met(omega, mu, tab, tn, t):
+def gf_met(omega, mu, tab, tn, t):
     """Double semi-circular density of states to represent the
     non-interacting dimer """
 
@@ -34,7 +34,7 @@ def dimer_gf_met(omega, mu, tab, tn, t):
     return g_d, g_o
 
 
-def dimer_mat_inv(a, b):
+def mat_inv(a, b):
     """Inverts the relevant entries of the dimer Green's function matrix
 
     .. math:: [a, b]^-1 = [a, -b]/(a^2 - b^2)
@@ -43,7 +43,7 @@ def dimer_mat_inv(a, b):
     return a/det, -b/det
 
 
-def dimer_mat_mul(a, b, c, d):
+def mat_mul(a, b, c, d):
     """Multiplies two Matrices of the dimer Green's Functions"""
     return a*c + b*d, a*d + b*c
 
@@ -73,7 +73,7 @@ def init_gf_met(g_iw, omega, mu, tab, tn, t):
 
     """
 
-    Gd, Gc = dimer_gf_met(omega, mu, tab, tn, t)
+    Gd, Gc = gf_met(omega, mu, tab, tn, t)
     load_gf_from_np(g_iw, Gd, Gc)
 
     if isinstance(g_iw, GfImFreq):

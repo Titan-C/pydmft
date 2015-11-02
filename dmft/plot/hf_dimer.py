@@ -80,7 +80,7 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
               'The acceptance rate is:{:.1%}'.format(acc))
 
 
-def plot_it(BETA, u_str, tp, skip, space, label='', filestr='SB_PM_B{}.h5', axes=None):
+def plot_it(BETA, u_str, tp, skip, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
     """Plot the evolution of the Green's function in DMFT iterations
 
     Parameters
@@ -100,7 +100,7 @@ def plot_it(BETA, u_str, tp, skip, space, label='', filestr='SB_PM_B{}.h5', axes
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         setup = h5.get_attributes(output_files[u_str]['it001'])
         tau, w_n = gf.tau_wn_setup(setup)
-        for step in output_files[u_str].keys()[skip:]:
+        for step in output_files[u_str].keys()[skip:it]:
             gtau_d = output_files[u_str][step]['gtau_d'][:]
             gtau_o = output_files[u_str][step]['gtau_o'][:]
             if space == 'tau':

@@ -14,20 +14,12 @@ from mpi4py import MPI
 import dmft.h5archive as h5
 import dmft.common as gf
 import dmft.hirschfye as hf
+import dmft.RKKY_dimer as dimer
 import dmft.plot.hf_dimer as pd
 import numpy as np
 import sys
 
 comm = MPI.COMM_WORLD
-
-
-def init_gf_met(omega, mu, tab, tn, t):
-    """Gives a metalic seed of a non-interacting system
-
-    """
-    G1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
-    G2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
-    return .5*(G1 + G2), .5*(G1 - G2)
 
 
 def dmft_loop_pm(simulation):
@@ -52,7 +44,7 @@ def dmft_loop_pm(simulation):
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
-    giw_d, giw_o = init_gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
+    giw_d, giw_o = dimer.gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
@@ -83,9 +75,8 @@ def dmft_loop_pm(simulation):
         g0iw_d = 1.j*w_n - 0.25 * giw_d
         g0iw_o = -setup['tp'] - 0.25 * giw_o
 
-        det = g0iw_d**2 - g0iw_o**2
-        g0iw_d /= det
-        g0iw_o /= -det
+        g0iw_d, g0iw_o = dimer.mat_inv(g0iw_d, g0iw_o)
+
 
         g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n)
         g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n,
