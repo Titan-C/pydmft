@@ -73,7 +73,7 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
 
     for u_str in urange:
         show_conv(BETA, u_str, tp, filestr, n_freq, xlim, skip)
-        docc, acc = report_acc(BETA, float(u_str[1:]), tp, filestr)
+        docc, acc = report_acc(BETA, u_str, tp, filestr)
 
         plt.show()
         plt.close()
@@ -136,26 +136,16 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
     return axes
 
 
-def report_acc(BETA, u_int, tp, filestr):
-    elements = ['BETA '+str(BETA)[:-1], 'tp {}.o'.format(tp), 'U '+str(u_int), filestr]
-    files = [a for a in os.listdir('.') if all([x in a for x in elements])]
-    data = ''
-    for fname in files:
-        with open(fname) as log:
-            data+=log.read()
+def report_acc(BETA, u_str, tp, filestr):
 
-    if len(files) == 0:
-        return -1., -1
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
+        last_iter = output_files[u_str].keys()[-1]
+        try:
+            docc = output_files[u_str][last_iter]['double_occ'][:].mean()
+            acc = output_files[u_str][last_iter]['acceptance'].value
+        except KeyError:
+            docc, acc = -1., -1.
 
-    last_step = re.findall(r'On loop (\d+) beta ([\d\.]+) U ([\d\.]+) tp ([\d\.]+)\s'
-                           r'((?:docc.*\s)+)', data, flags=re.M)[-1]
-
-    info_block = re.findall(r'([\d\.]+)  ([\d\.]+)\]\] acc  ([\d\.]+) nsign (\d+)',
-                            last_step[4], flags=re.M)
-
-    stats = np.array(info_block).astype(np.float)
-    docc = stats[:, :2].mean()
-    acc = stats[:, 2].mean()
     return docc, acc
 
 
