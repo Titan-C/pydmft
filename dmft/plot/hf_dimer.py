@@ -13,8 +13,6 @@ import dmft.h5archive as h5
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
-import pandas as pd
-import re
 import os
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
@@ -30,7 +28,8 @@ def get_giw(h5parent, iteration, tau, w_n, tp):
     return giw_d, giw_o
 
 
-def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5', n_freq=5, xlim=2, skip=5):
+def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
+              n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arrd = []
@@ -73,7 +72,7 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
 
     for u_str in urange:
         show_conv(BETA, u_str, tp, filestr, n_freq, xlim, skip)
-        docc, acc = report_acc(BETA, u_str, tp, filestr)
+        docc, acc = report_docc_acc(BETA, u_str, tp, filestr)
 
         plt.show()
         plt.close()
@@ -81,53 +80,45 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
               'The acceptance rate is:{:.1%}'.format(acc))
 
 
-def data_hist(BETA, u_str, tp, filestr='SB_PM_B{}.h5', skip=5):
-    """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True)
+def plot_it(BETA, u_str, tp, skip, space, label='', filestr='SB_PM_B{}.h5', axes=None):
+    """Plot the evolution of the Green's function in DMFT iterations
+
+    Parameters
+    ----------
+    skip: int, -1 is last iteration
+    space: string, tau or iw
+    label: string to identify plot
+    axes: Matplotlib axes, use to superpose plots
+
+    Returns
+    -------
+    Matplotlig axes
+    """
+
+    if axes is None:
+        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        setup = h5.get_attributes(output_files[u_str]['it000'])
+        setup = h5.get_attributes(output_files[u_str]['it001'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
             gtau_d = output_files[u_str][step]['gtau_d'][:]
             gtau_o = output_files[u_str][step]['gtau_o'][:]
-            axes[0].plot(tau, gtau_d, 'b:')
-            axes[1].plot(tau, gtau_o, 'g:')
+            if space == 'tau':
+                axes[0].plot(tau, gtau_d, '-', label=label)
+                axes[1].plot(tau, gtau_o, '-', label=label)
+            else:
+                giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
+                giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+                axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
+                axes[1].plot(w_n, giw_o.real, 's:', label=label)
 
-    graf = r'$G(\tau)$'
-    axes[0].set_xlim([0, BETA])
-    axes[0].set_xlabel(r'$\tau$')
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
-    axes[0].set_ylabel(graf+'$_{AA}$')
-    axes[1].set_ylabel(graf+'$_{AB}$')
-
-    return axes
-
-
-def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
-    """Plot the evolution of the Green's function in DMFT iterations"""
-    if axes is None:
-        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True)
-    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        step = 'it{:03}'.format(it)
-        setup = h5.get_attributes(output_files[u_str][step])
-        tau, w_n = gf.tau_wn_setup(setup)
-        gtau_d = output_files[u_str][step]['gtau_d'][:]
-        gtau_o = output_files[u_str][step]['gtau_o'][:]
         if space == 'tau':
-            axes[0].plot(tau, gtau_d, '-', label=label)
-            axes[1].plot(tau, gtau_o, '-', label=label)
             graf = r'$G(\tau)$'
             axes[0].set_xlabel(r'$\tau$')
             axes[0].set_xlim([0, BETA])
         else:
-            giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
-            giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
-            axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
-            axes[1].plot(w_n, giw_o.real, 's:', label=label)
-
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')
-
 
     axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
     axes[0].set_ylabel(graf+'$_{AA}$')
@@ -136,7 +127,8 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
     return axes
 
 
-def report_acc(BETA, u_str, tp, filestr):
+def report_docc_acc(BETA, u_str, tp, filestr):
+    """Returns the last iteration mean double occupation and acceptance rate"""
 
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         last_iter = output_files[u_str].keys()[-1]
@@ -227,35 +219,6 @@ def compare_last_gf(tp, BETA, contl=2, ylim=-1):
     plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
 
 
-def plot_gf(tp, BETA, runsolver, xlim=4, ylim=1.4):
-
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
-    w_n = gf.matsubara_freq(BETA, BETA)
-    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with h5.File(filestr, 'r') as results:
-        for u in results.keys():
-            if runsolver == 'HF':
-                lastit = results[u].keys()[-1]
-                gd.oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
-                go.oplot(results[u][lastit]['gtau_o'], '+-', RI='R', label=u)
-            if runsolver == 'cthyb':
-                lastit = 'cthyb'
-                giw = 0.5 * (results[u][lastit]['G_iw']['up'] +
-                             results[u][lastit]['G_iw']['down'])
-                gd.oplot(giw[0, 0], 'x-', RI='I', label=u)
-                go.oplot(giw[0, 1], '+-', RI='R', label=u)
-
-            gd.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
-    gd.set_xlim([0, xlim])
-    go.set_xlim([0, xlim])
-    gd.set_ylim([-ylim, 0])
-    gd.legend(loc=0)
-    go.legend(loc=0)
-    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
-    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
-
-
 def diag_sys(tp, BETA):
     rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
@@ -300,17 +263,3 @@ def spectral(tp, U, BETA, pade_fit_pts):
 
     plt.show()
     plt.close()
-
-
-def plotginta():
-    U, tp, BETA = 2.8, 0.18, 60.
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
-    with h5.File(filestr, 'r') as results:
-        u = 'U'+str(U)
-        lastit = results[u].keys()[-1]
-        oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
-        w_n = gf.matsubara_freq(BETA, BETA)
-        plt.plot(w_n, -1/w_n, '--')
-        plt.plot(w_n, -1/w_n + float(u[1:])**2/4/w_n**3, '--')
-    plt.xlim([0, 6])
-    plt.ylim([-.6, 0])
