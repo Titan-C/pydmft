@@ -9,8 +9,9 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 from dmft import ipt_imag
 from dmft.common import greenF, tau_wn_setup
+import dmft.RKKY_dimer as dimer
 from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met, \
-    Dimer_Solver, dimer
+    Dimer_Solver
 from pytriqs.gf.local import iOmega_n
 import pytest
 import tempfile
@@ -51,13 +52,11 @@ def test_GF():
     only requires the first row"""
 
     tau, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
-    giwd, giwo = ipt_imag.dimer_gf_met(w_n, 0., 0.25, 0., 0.5)
-    inv_giwd, inv_giwo = ipt_imag.dimer_mat_inv(giwd, giwo)
-    one, zero = ipt_imag.dimer_mat_mul(inv_giwd, inv_giwo, giwd, giwo)
+    giwd, giwo = dimer.dimer_gf_met(w_n, 0., 0.25, 0., 0.5)
+    inv_giwd, inv_giwo = dimer.dimer_mat_inv(giwd, giwo)
+    one, zero = dimer.dimer_mat_mul(inv_giwd, inv_giwo, giwd, giwo)
     assert np.allclose(one, 1.)
     assert np.allclose(zero, 0.)
-
-
 
 
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
@@ -85,7 +84,7 @@ def test_ipt_dimer_pm_g(u_int, result, beta=50., n_matsubara=160):
 
     tmp_cache = tempfile.mkdtemp()
     file_str = os.path.join(tmp_cache, 'test_ipt_dimer.h5')
-    dimer(S, gmix, file_str, '/U{U}/')
+    dimer.dimer(S, gmix, file_str, '/U{U}/')
     g_iwn = S.g_iw.data[:64,0,0]
 
     assert np.allclose(result, g_iwn, atol=3e-3)
