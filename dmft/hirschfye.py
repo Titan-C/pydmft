@@ -161,7 +161,7 @@ def save_output(params, double_occ, acceptance, vlog, ar):
         save_file[params['group'] + 'acceptance'] = acceptance
         if params['save_logs']:
             save_file[params['group'] + 'v_ising'] = np.asarray(vlog)
-            save_file[params['group'] + 'acceptance'] = np.asarray(ar)
+            save_file[params['group'] + 'acceptance_log'] = np.asarray(ar)
 
 
 def retarded_weiss(g0tau):
