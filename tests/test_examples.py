@@ -9,6 +9,7 @@ Performs a quick run of the examples to keep tests upon them
 from __future__ import division, print_function, absolute_import
 import subprocess
 import os
+import sys
 import pytest
 # matplotlib back end has to be called before it gets loaded elsewhere
 import matplotlib
@@ -34,6 +35,7 @@ def test_example(case, ofile, plot):
 
 plot_list = [pfl for pfl in os.listdir('examples') if pfl.startswith('plot')
                                                     and pfl.endswith('.py')]
+sys.path.append('examples')
 @pytest.mark.parametrize("plot", plot_list)
 def test_plots(plot):
-    assert not subprocess.call(['python', 'examples/'+plot])
+    exec('import '+plot[:-3])
