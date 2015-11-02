@@ -149,36 +149,20 @@ def report_acc(BETA, u_str, tp, filestr):
     return docc, acc
 
 
+def plot_acc(BETA, u_str, tp, filestr, skip=5):
+    """Plot the evolution of the acceptance rate in each DMFT loop"""
+    acceptance_log = []
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
+        for it_name in output_files[u_str].keys()[skip:]:
+            try:
+                acceptance_log.append(output_files[u_str][it_name]['acceptance'].value)
+            except KeyError:
+                acceptance_log.append(0.)
 
-def plot_acc(filelist):
-    """Plot the evolution of the acceptance rate in each DMFT loop
-    extracting the status information of the jobs"""
-    rawdata = ''
-    for fname in filelist:
-        with open(fname) as fcontent:
-            rawdata += fcontent.read()
-
-    infocols = re.findall(r'acc\s+([\d\.]+?) nsign (\d)\s+'
-                          r'B ([\d\.]+) tp ([\d\.]+) U: ([\d\.]+) '
-                          r'l: (\d+) \w+ ([\d\.]+)', rawdata, flags=re.M)
-    infosum = np.array(infocols).astype(np.float)
-    table = pd.DataFrame(infosum, columns=['acc', 'sign', 'BETA', 'tp', 'U',
-                                           'loop', 'dist'])
-    tpg = table.groupby('tp')
-    for tp_key, group in tpg:
-        tpg_ug = group.groupby('U')
-        f, tp_ax = plt.subplots(1, 2, figsize=(18, 8))
-        for U_key, ugroup in tpg_ug:
-            ugroup.plot(x='loop', y='acc', ax=tp_ax[0], marker='o',
-                        label='U='+str(U_key),
-                        title='Acceptance rate @ $t\\perp=$'+str(tp_key))
-            ugroup.plot(x='loop', y='dist', ax=tp_ax[1], marker='o',
-                        label='U='+str(U_key), logy=True, legend=False,
-                        title='Convergence @ $t\\perp=$'+str(tp_key))
-        tp_ax[0].legend(loc=0, ncol=2)
-        tp_ax[1].axhline(y=4e-3, ls=':')
-        plt.show()
-        plt.close()
+    plt.plot(acceptance_log, 'o-')
+    plt.title(r'Change of acceptance @ $\beta={}$, U={}'.format(BETA, u_str[1:]))
+    plt.ylabel('Acceptance rate')
+    plt.xlabel('iterations')
 
 
 def get_selfE(gtau_d, gtau_o):
