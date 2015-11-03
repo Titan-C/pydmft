@@ -28,7 +28,7 @@ def dmft_loop_pm(simulation):
              'BANDS':     1,
              'SITES':     2,
              'save_logs': False,
-             'global_flip': True,
+             'global_flip': False,
              }
 
     if simulation['new_seed']:
