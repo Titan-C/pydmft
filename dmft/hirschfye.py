@@ -265,19 +265,33 @@ def gnew(g, dv, k):
     g = dger(a, x, y, 1, 1, g, 1, 1, 1)
 
 
-def autocorr(a):
+def autocorrelation_function(spins_log):
+    """Calculates the autocorrelation function of the auxiliary Ising fields
 
-    N=a.shape[0]
-    m=a.mean()
-    s=a.std()
-    if len(a.shape)>1:
-        ad=np.dot(a, a.T)
+    Parameters
+    ----------
+    spins_log: ndarray 1D or 2D
+        Monte Carlo time evolution of the auxiliary Ising field
+    Returns
+    -------
+    ndarray
+    """
+
+    if spins_log.dtype == np.dtype('bool'):
+        spins_log = 2.0*(spins_log-0.5)
+    meas = spins_log.shape[0]
+    avg = spins_log.mean()
+    std = spins_log.std()
+    if len(spins_log.shape) > 1:
+        cor_dt = np.dot(spins_log, spins_log.T)
+        cor_dt /= spins_log.shape[1]
     else:
-        ad=np.outer(a, a)
+        cor_dt = np.outer(spins_log, spins_log)
 
-    avs=np.array([np.trace(ad, i) for i in range(N)])/(N-np.arange(N))
-    atou=(avs-m**2)/s**2
-    return atou
+    avs = np.array([np.trace(cor_dt, i) for i in range(meas)])
+    avs /= meas-np.arange(meas)
+
+    return (avs-avg**2)/std**2
 
 def g2flip(g, dv, l, k):
     r"""Update the interacting Green function at arbitrary spinflips

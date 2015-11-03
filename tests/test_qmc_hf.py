@@ -18,6 +18,14 @@ UPDATE_PARAMS = {'BETA': 16., 'N_MATSUBARA': 16, 't': 0.5, 'BANDS': 1,
                  'spin_polarization': 0.5}
 
 
+def test_autocorrelation_function():
+    """Test the autocorrelation of an array of random numbers"""
+    sample = np.random.rand(2000)
+    autocorrelation = hf.autocorrelation_function(sample)
+    assert abs(autocorrelation[0]-1.) < 1e-13
+    assert (np.max(autocorrelation[1:500]) < 0.1).all()
+
+
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.gnew, hffast.gnew]))
 def test_hf_fast_updatecond(chempot, u_int, updater):
