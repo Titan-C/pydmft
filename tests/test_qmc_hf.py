@@ -14,7 +14,8 @@ import pytest
 import dmft.hffast as hffast
 
 
-UPDATE_PARAMS = {'BETA': 16., 'N_MATSUBARA': 16, 't': 0.5, 'BANDS': 1}
+UPDATE_PARAMS = {'BETA': 16., 'N_MATSUBARA': 16, 't': 0.5, 'BANDS': 1,
+                 'spin_polarization': 0.5}
 
 
 @pytest.mark.parametrize("chempot, u_int, updater",

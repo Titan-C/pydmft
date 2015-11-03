@@ -27,8 +27,6 @@ def dmft_loop_pm(simulation):
     setup = {'t':         0.5,
              'BANDS':     1,
              'SITES':     2,
-             'save_logs': False,
-             'global_flip': False,
              }
 
     if simulation['new_seed']:
@@ -56,7 +54,8 @@ def dmft_loop_pm(simulation):
         last_loop = 0
 
     V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
-                           L=setup['SITES']*setup['n_tau_mc'])
+                         L=setup['SITES']*setup['n_tau_mc'],
+                         polar=setup['spin_polarization'])
 
     for loop_count in range(last_loop, last_loop + setup['Niter']):
         # For saving in the h5 file

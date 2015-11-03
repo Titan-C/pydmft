@@ -361,7 +361,7 @@ def setup_PM_sim(parms):
     parms['dtau_mc'] = tau[1]
     intm = interaction_matrix(parms.get('BANDS', 1))
     v = ising_v(parms['dtau_mc'], parms['U'], len(tau)*parms['SITES'],
-                intm.shape[1])
+                intm.shape[1], parms['spin_polarization'])
 
     return tau, w_n, gtau, giw, v, intm
 
@@ -402,6 +402,13 @@ def do_input(help_string):
 
     parser.add_argument('-l', '--save_logs', action='store_true',
                         help='Store the changes in the auxiliary field')
+    parser.add_argument('-spin_polarization', type=float, default=0.5,
+                        help='Probability distribution of up/down'
+                        'auxiliary spins for initial guess')
+    parser.add_argument('-gf', '--global_flip', action='store_true',
+                        help='Perform a global flip of the auxiliary'
+                        'Ising spins with a period equal to the'
+                        'thermalization steps ')
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
