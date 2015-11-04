@@ -209,6 +209,34 @@ def recover_lastit(S, file_str):
         pass
 
 
+def pot_energy(file_str):
+    r"""Calculates the internal energy of the system given by Fetter-Walecka
+    25-26
+    """
+
+    results = HDFArchive(file_str, 'r')
+    ftr_key = results.keys()[0]
+    setup = results[ftr_key]['setup']
+    beta = setup['beta']
+    n_freq = len(results[ftr_key]['G_iwd'].mesh)
+
+    Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
+                     n_points=n_freq)
+
+    total_e = []
+    Giw = Gfree.copy()
+    Siw = Gfree.copy()
+    for uint in results:
+        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iwo'])
+        load_gf(Siw, results[uint]['S_iwd'], results[uint]['S_iwo'])
+        energ = 0.5*Siw*Giw
+        u = results[uint]['setup']['U']+1e-15
+        total_e.append(energ.total_density()/u + .25)
+
+    del results
+
+    return np.asarray(total_e)
+
 def total_energy(file_str):
     r"""Calculates the internal energy of the system given by Fetter-Walecka
     25-26
@@ -281,7 +309,7 @@ def fermi_level_dos(file_str, n=5):
     fl_dos = []
     w_n = gf.matsubara_freq(results[ftr_key]['G_iwd'].beta, n)
     for uint in results:
-        fl_dos.append(abs(gf.fit_gf(w_n, results[uint]['G_iwd'].imag)(0.)))
+        fl_dos.append(abs(gf.fit_gf(w_n, results[uint]['G_iwd'].data.imag)(0.)))
     del results
     return np.asarray(fl_dos)
 
