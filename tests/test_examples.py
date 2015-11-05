@@ -35,7 +35,10 @@ def test_example(case, ofile, plot):
 
 plot_list = [pfl for pfl in os.listdir('examples') if pfl.startswith('plot')
                                                     and pfl.endswith('.py')]
+plot_list += [pfl for pfl in os.listdir('examples/IPT') if pfl.startswith('plot')
+                                                    and pfl.endswith('.py')]
 sys.path.append('examples')
+sys.path.append('examples/IPT')
 @pytest.mark.parametrize("plot", plot_list)
 def test_plots(plot):
     exec('import '+plot[:-3])

@@ -25,6 +25,10 @@ def test_autocorrelation_function():
     assert abs(autocorrelation[0]-1.) < 1e-13
     assert (np.max(autocorrelation[1:500]) < 0.1).all()
 
+    autocorrelation = hf.autocorrelation_function(sample.reshape(-1, 4) > 0.5)
+    assert abs(autocorrelation[0]-1.) < 1e-13
+    assert (np.max(autocorrelation[1:500]) < 0.1).all()
+
 
 @pytest.mark.parametrize("chempot, u_int, updater",
                          product([0, 0.3], [2, 2.3], [hf.gnew, hffast.gnew]))
