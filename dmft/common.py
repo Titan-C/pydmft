@@ -126,7 +126,7 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
 
 def freq_tail_fourier(tail_coef, beta, tau, w_n):
     r"""Fourier transforms analytically the slow decaying tail_coefs of
-    the Greens functions [matsubara]_.
+    the Greens functions [matsubara]_
 
     +------------------------+-----------------------------------------+
     | :math:`G(iw)`          | :math:`G(t)`                            |
@@ -143,8 +143,11 @@ def freq_tail_fourier(tail_coef, beta, tau, w_n):
     gw_invfouriertrans
     gt_fouriertrans
 
+    References
+    ----------
     .. [matsubara] https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain
-      """
+
+    """
 
     freq_tail =   tail_coef[0]/(1.j*w_n)\
                 + tail_coef[1]/(1.j*w_n)**2\
