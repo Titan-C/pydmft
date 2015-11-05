@@ -22,7 +22,7 @@ def averager(h5parent, h5child, last_iterations):
     for step in last_iterations:
         sum_child += h5parent[step][h5child]
 
-    return sum_child / len(last_iterations)
+    return  1. / len(last_iterations) * sum_child
 
 
 def prepare_interaction(u_int):
