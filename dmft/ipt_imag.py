@@ -6,10 +6,10 @@ IPT Solver Single Band
 Within the iterative perturbative theory (IPT) the aim is to express the
 self-energy of the impurity problem as
 
-.. math:: \Sigma(\tau)_\sigma \approx U\mathcal{G}_\sigma^0(0)
-          -U^2 \mathcal{G}_\sigma^0(\tau)
-               \mathcal{G}_\bar{\sigma}^0(-\tau)
-               \mathcal{G}_\bar{\sigma}^0(\tau)
+.. math:: \Sigma_\sigma(\tau) \approx U\mathcal{G}_\sigma^0(0)
+    -U^2 \mathcal{G}_\sigma^0(\tau)
+         \mathcal{G}_{\bar{\sigma}}^0(-\tau)
+         \mathcal{G}_{\bar{\sigma}}^0(\tau)
 
 The contribution of the Hartree-term is drooped because at half-filling
 it cancels with the chemical potential. The next equalities are
@@ -22,7 +22,8 @@ symmetry the last equality is fulfilled
 As such for the single band paramagnetic case at half-filling the self
 energy is estimated by
 
-.. math:: \Sigma(\tau) \approx -U^2 \mathcal{G}^0(\tau)^3
+.. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3
+
 """
 
 from __future__ import division, absolute_import, print_function
@@ -32,9 +33,9 @@ import numpy as np
 
 
 def single_band_ipt_solver(u_int, g_0_iwn, w_n, tau):
-    """Given a Green function it returns a dressed one and the self-energy
+    r"""Given a Green function it returns a dressed one and the self-energy
 
-    .. math:: \Sigma(\tau) \approx -U^2 \mathcal{G}^0(\tau)^3
+    .. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3
 
     .. math:: G = \mathcal{G}^0(i\omega_n)/(1 - \Sigma(i\omega_n)\mathcal{G}^0(i\omega_n))
 

@@ -32,7 +32,7 @@ def hysteresis(beta, u_range):
 U = np.linspace(0.1, 3.8, 41)
 U = np.concatenate((U, np.linspace(3.6, 2.4, 16)-0.05))
 results = []
-betarange = [16, 25, 50, 100, 200]
+betarange = [16, 25, 50, 100, 200, 512]
 for beta in betarange:
     results.append(hysteresis(beta, U))
 

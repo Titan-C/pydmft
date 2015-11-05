@@ -30,10 +30,10 @@ def hubbard_aprox(n, U, dmu, omega):
 
     mu = U/2 + dmu
 
-    sigma = n*U/2 + n/2*(1-n/2)*U**2/(omega + mu - (1 - n/2)*U)
+    sigma = n*U/2 + n/2*(1-n/2)*U**2/(omega + 0.05j + mu - (1 - n/2)*U)
     eps_k = -2*np.cos(k)
 
-    lat_gf = 1/(np.subtract.outer(omega + mu - sigma,  eps_k))
+    lat_gf = 1/(np.subtract.outer(omega + 0.05j + mu - sigma,  eps_k))
     A_kw = -lat_gf.imag/np.pi
 
     plt.figure()
@@ -70,7 +70,7 @@ def hubbard_aprox(n, U, dmu, omega):
 # this simple ilustration the 1D problem is worked on as the Self-energy
 # is still momentum independent.
 
-omega = np.linspace(-4, 4, 600) + 0.05j
+omega = np.linspace(-4, 4, 600)
 hubbard_aprox(1, 3, 0, omega)
 
 ###############################################################################
