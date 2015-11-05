@@ -83,8 +83,10 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
 
     Returns
     -------
-    out : complex ndarray
-            Interacting Greens function in matsubara frequencies"""
+    tuple 2 complex ndarrays
+            Interacting Green's function in matsubara frequencies
+            Self energy
+    """
 
     converged = False
     loops = 0

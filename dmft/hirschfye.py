@@ -36,7 +36,7 @@ def ising_v(dtau, U, L, fields=1, polar=0.5):
         local Coulomb repulsion
     L : integer
         length of the array
-    fields: integer
+    fields : integer
         Number of auxliary ising fields
     polar : float :math:`\\in (0, 1)`
         polarization threshold, probability of :math:`\\sigma_n=+ 1`
@@ -270,8 +270,9 @@ def autocorrelation_function(spins_log):
 
     Parameters
     ----------
-    spins_log: ndarray 1D or 2D
+    spins_log : ndarray 1D or 2D
         Monte Carlo time evolution of the auxiliary Ising field
+
     Returns
     -------
     ndarray
@@ -328,13 +329,13 @@ def interpol(gtau, Lrang, add_edge=False, same_particle=False):
 
     Parameters
     ----------
-    gtau: ndarray
+    gtau : ndarray
         Green function to interpolate
-    Lrang: int
+    Lrang : int
         number of points to describe
-    add_edge: bool
+    add_edge : bool
         if the point Beta^- is missing add it
-    same_particle: bool
+    same_particle : bool
         because fermion commutation relations if same fermion the
         edge has an extra -1
     """
@@ -385,11 +386,11 @@ def do_input(help_string):
 
     Parameters
     ----------
-    help_string: Title of the execution script
+    help_string : Title of the execution script
 
-    Output
-    ------
-    parse: Argument Parser object
+    Returns
+    -------
+    parse : Argument Parser object
     """
 
     parser = argparse.ArgumentParser(description=help_string,

@@ -30,7 +30,7 @@ def matsubara_freq(beta=16., size=256, fer=1):
 
     Returns
     -------
-    out : real ndarray
+    real ndarray
     """
 
     return np.pi*(fer+2*np.arange(size)) / beta
@@ -43,12 +43,12 @@ def tau_wn_setup(parms):
 
     Parameters
     ----------
-    parms: dictionary
+    parms : dictionary
         with keywords BETA, N_MATSUBARA
 
     Returns
     -------
-    out: tuple (tau real ndarray, w_n real ndarray)
+    tuple (tau real ndarray, w_n real ndarray)
     """
 
     w_n = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
@@ -77,7 +77,7 @@ def greenF(w_n, sigma=0, mu=0, D=1):
 
     Returns
     -------
-    out : complex ndarray
+    complex ndarray
             Interacting Greens function in matsubara frequencies, all odd
             entries are zeros
     """
@@ -109,7 +109,7 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
 
     Returns
     -------
-    out : complex ndarray
+    complex ndarray
             Interacting Greens function in matsubara frequencies
 
     See also
@@ -190,7 +190,7 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
 
     Returns
     -------
-    out : complex ndarray
+    complex ndarray
             Interacting Greens function in matsubara frequencies
 
     See also
