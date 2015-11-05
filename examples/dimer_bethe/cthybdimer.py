@@ -15,7 +15,14 @@ from pytriqs.operators import c, dagger
 from time import time
 import argparse
 import pytriqs.utility.mpi as mpi
-from dmft.plot.hf_single_site import averager
+
+def averager(h5parent, h5child, last_iterations):
+    """Given an H5 file parent averages over the iterations with the child"""
+    sum_child = 0.
+    for step in last_iterations:
+        sum_child += h5parent[step][h5child]
+
+    return sum_child / len(last_iterations)
 
 
 def prepare_interaction(u_int):
@@ -44,7 +51,7 @@ def set_new_seed(setup):
 
     with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
-        giw = averager(outp[src_U], last_iterations)
+        giw = averager(outp[src_U], 'G_iw', last_iterations)
         try:
             dest_count = len(outp[dest_U].keys())
         except KeyError:
