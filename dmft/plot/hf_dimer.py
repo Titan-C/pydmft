@@ -141,6 +141,23 @@ def report_docc_acc(BETA, u_str, tp, filestr):
     return docc, acc
 
 
+def docc_plot(BETA, tp, filestr):
+    """Plots double occupation"""
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
+        for u_str in output_files:
+            last_iter = output_files[u_str].keys()[-1]
+            try:
+                docc = output_files[u_str][last_iter]['double_occ'][:].mean()
+                marker = 'bo' if docc>0.05 else 'rs'
+                plt.plot(float(u_str[1:]), docc, marker)
+            except KeyError:
+                docc = np.nan
+
+    plt.title('Hysteresis loop of the double occupation')
+    plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
+    plt.xlabel('U/D')
+
+
 def plot_acc(BETA, u_str, tp, filestr, skip=5):
     """Plot the evolution of the acceptance rate in each DMFT loop"""
     acceptance_log = []
