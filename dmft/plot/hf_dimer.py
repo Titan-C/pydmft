@@ -80,12 +80,12 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
               'The acceptance rate is:{:.1%}'.format(acc))
 
 
-def plot_it(BETA, u_str, tp, skip, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
+def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
     """Plot the evolution of the Green's function in DMFT iterations
 
     Parameters
     ----------
-    skip: int, -1 is last iteration
+    it: int, iteration to plot
     space: string, tau or iw
     label: string to identify plot
     axes: Matplotlib axes, use to superpose plots
@@ -98,31 +98,36 @@ def plot_it(BETA, u_str, tp, skip, it, space, label='', filestr='SB_PM_B{}.h5', 
     if axes is None:
         _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        setup = h5.get_attributes(output_files[u_str]['it001'])
+        step = 'it{:03}'.format(it)
+        setup = h5.get_attributes(output_files[u_str][step])
         tau, w_n = gf.tau_wn_setup(setup)
-        for step in output_files[u_str].keys()[skip:it]:
-            gtau_d = output_files[u_str][step]['gtau_d'][:]
-            gtau_o = output_files[u_str][step]['gtau_o'][:]
-            if space == 'tau':
-                axes[0].plot(tau, gtau_d, '-', label=label)
-                axes[1].plot(tau, gtau_o, '-', label=label)
-            else:
-                giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
-                giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
-                axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
-                axes[1].plot(w_n, giw_o.real, 's:', label=label)
+
+        gtau_d = output_files[u_str][step]['gtau_d'][:]
+        gtau_o = output_files[u_str][step]['gtau_o'][:]
+        if label == '':
+            label = step
 
         if space == 'tau':
+            axes[0].plot(tau, gtau_d, '-', label=label)
+            axes[1].plot(tau, gtau_o, '-', label=label)
+
             graf = r'$G(\tau)$'
             axes[0].set_xlabel(r'$\tau$')
             axes[0].set_xlim([0, BETA])
         else:
+            giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
+            giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+            axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
+            axes[1].plot(w_n, giw_o.real, 's:', label=label)
+
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')
 
     axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
     axes[0].set_ylabel(graf+'$_{AA}$')
+    axes[0].legend(loc=0)
     axes[1].set_ylabel(graf+'$_{AB}$')
+    axes[1].legend(loc=0)
 
     return axes
 
