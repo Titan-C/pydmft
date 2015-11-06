@@ -146,21 +146,47 @@ def report_docc_acc(BETA, u_str, tp, filestr):
     return docc, acc
 
 
-def docc_plot(BETA, tp, filestr):
+def docc_plot(BETA, tp, filestr, ax=None):
     """Plots double occupation"""
+    if ax is None:
+        _, ax = plt.subplots()
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
+        docc = []
         for u_str in output_files:
             last_iter = output_files[u_str].keys()[-1]
             try:
-                docc = output_files[u_str][last_iter]['double_occ'][:].mean()
-                marker = 'bo' if docc>0.05 else 'rs'
-                plt.plot(float(u_str[1:]), docc, marker)
+                docc.append([float(u_str[1:]),
+                             output_files[u_str][last_iter]['double_occ'][:].mean()])
             except KeyError:
                 docc = np.nan
 
-    plt.title('Hysteresis loop of the double occupation')
-    plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
-    plt.xlabel('U/D')
+        docc = np.array(docc).T
+        ax.scatter(docc[0], docc[1], c=docc[1],
+                    s=120, marker='<', vmin=0, vmax=0.2)
+    ax.set_title(r'double occupation @'
+                 r'$\beta={}$, tp={}'.format(BETA, tp))
+    ax.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
+    ax.set_xlabel('U/D')
+
+
+def dos_plot(BETA, tp, filestr, ax=None):
+    """Plots double occupation"""
+    if ax is None:
+        _, ax = plt.subplots()
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:
+        fl_dos = []
+        tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+        for u_str in results:
+            lastit = results[u_str].keys()[-1]
+            giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+            fl_dos.append(-1./np.pi*gf.fit_gf(w_n[:3], giwd.imag)(0.))
+
+        u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
+        ax.scatter(u_range, fl_dos,
+                    s=120, marker='>', vmin=0, vmax=2./np.pi)
+    ax.set_title('Hysteresis loop of the \n density of states')
+    ax.set_ylabel(r'$A(\omega=0)$')
+    ax.set_xlabel('U/D')
 
 
 def plot_acc(BETA, u_str, tp, filestr, skip=5):
@@ -199,46 +225,24 @@ def plot_tails(BETA, U, tp, ax=None):
     ax.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
 
-def phase_diag(BETA):
+def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
 
-    fl_dos = []
-    w_n = gf.matsubara_freq(BETA, 3)
-    for tp in np.arange(0.18, 0.3, 0.01):
-        filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
-        with h5.File(filestr, 'r') as results:
-            for u in results.keys():
-                lastit = results[u].keys()[-1]
-                fl_dos.append(gf.fit_gf(w_n, results[u][lastit]['gtau_d'].imag)(0.))
-    return np.asarray(fl_dos)
+    for tp in tp_range:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+        with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:
+            fl_dos = []
+            for u_str in results.keys():
+                lastit = results[u_str].keys()[-1]
+                giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+                fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
-
-def compare_last_gf(tp, BETA, contl=2, ylim=-1):
-    """Compartes in a plot the last GF of the HF simulation with the one CTHYB
-       run done with this seed"""
-
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
-    w_n = gf.matsubara_freq(BETA, 3)
-    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with h5.File(filestr, 'r') as results:
-        for u in results.keys():
-            lastit = results[u].keys()[-1]
-            gd.oplot(results[u][lastit]['gtau_d'], 'x-', RI='I', label=u)
-            go.oplot(results[u][lastit]['gtau_o'], '+-', RI='R', label=u)
-            giw = results[u][lastit]['gtau_d']
-
-            fit = gf.fit_gf(w_n, giw[0, 0].imag)
-            w = np.arange(0, contl, 0.05)
-            gcont = fit(w)
-            gd.plot(w, gcont, 'k:')
-
-    gd.set_xlim([0, 4])
-    gd.set_ylim([ylim, 0])
-    gd.legend(loc=0, prop={'size': 18})
-    gd.set_ylabel(r'$\Im m G_{AA}(i\omega_n)$')
-    go.set_xlim([0, 4])
-    go.legend(loc=0, prop={'size': 18})
-    go.set_ylabel(r'$\Re e G_{AB}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
+            u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
+            plt.scatter(u_range, np.ones(len(fl_dos))*tp, c=fl_dos,
+                        s=150, vmin=-2, vmax=0)
+    plt.ylim([0, 1])
+    plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
+    plt.ylabel(r'$t_\perp/D$')
+    plt.xlabel('$U/D$')
 
 
 def diag_sys(tp, BETA):
