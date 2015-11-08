@@ -19,6 +19,7 @@ import math
 import numpy as np
 import scipy.linalg as la
 import time
+import numba
 
 
 def ising_v(dtau, U, L, fields=1, polar=0.5):
@@ -83,6 +84,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
     acc, anrat = 0, 0
     double_occ = np.zeros((len(i_pairs), parms['SITES']))
+    ntau = 2*parms['N_MATSUBARA']
+    chi = np.zeros(ntau)
     hffast.set_seed(parms['SEED'])
 
     update = False
@@ -108,7 +111,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
             double_occupation(g, i_pairs, double_occ, parms)
-            #measure_chi(v, parms)
+            chi += measure_chi(v, ntau)
             if parms['save_logs']:
                 vlog.append(v>0)
                 ar.append(acr)
@@ -120,23 +123,31 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
     acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
     double_occ /= 2*parms['N_MATSUBARA']*parms['sweeps']
+
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
     comm.Allreduce(double_occ.copy(), double_occ)
+    comm.Allreduce(chi.copy(), chi)
 
     if comm.rank == 0:
         save_output(parms, double_occ/comm.Get_size(),
-                    acc, vlog, ar)
+                    chi, acc, vlog, ar)
 
     return [avg_g(gst, parms) for gst in Gst]
 
-
-def measure_chi(v, chi, parms):
+@numba.jit(nopython=True)
+def measure_chi(v, slices):
     """Estimates the susceptibility from the Ising auxiliary fields"""
-    s = np.sign(np.array([v]*2).flatten())
-    for i in range(len(v)-1):
-        for j in range(1, len(v)):
-            chi[i] += s(i+j)*s(j)
+    chi = np.zeros(slices)
+    s = np.sign(v)
+    for i in range(slices):
+        for j in range(slices):
+            k = i + j
+            if k> slices:
+                k -= slices # Ising fields are bosonic and have PBC
+            chi[i] += s[k]*s[j]
+
+    return chi
 
 def double_occupation(g, i_pairs, double_occ, parms):
     """Calculates the double occupation of the correlated orbital"""
@@ -153,12 +164,14 @@ def susceptibility(v):
     pass
 
 
-def save_output(params, double_occ, acceptance, vlog, ar):
+def save_output(params, double_occ, acceptance, chi, vlog, ar):
     """Saves the simulation status"""
 
     with h5.File(params['ofile'].format(**params), 'a') as save_file:
         save_file[params['group'] + 'double_occ'] = double_occ
         save_file[params['group'] + 'acceptance'] = acceptance
+        save_file[params['group'] + 'chi'] = chi
+
         if params['save_logs']:
             save_file[params['group'] + 'v_ising'] = np.asarray(vlog)
             save_file[params['group'] + 'acceptance_log'] = np.asarray(ar)
