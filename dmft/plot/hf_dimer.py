@@ -167,6 +167,7 @@ def docc_plot(BETA, tp, filestr, ax=None):
                  r'$\beta={}$, tp={}'.format(BETA, tp))
     ax.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
     ax.set_xlabel('U/D')
+    return ax
 
 
 def dos_plot(BETA, tp, filestr, ax=None):
