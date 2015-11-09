@@ -44,7 +44,7 @@ before_install:
 install:
     - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
       matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
-      joblib pandas
+      joblib pandas numba
     - source activate testenv
     - pip install slaveparticles sphinx-gallery mako mpi4py
     - export C_INCLUDE_PATH=$HOME/miniconda3/envs/testenv/include:$C_INCLUDE_PATH
