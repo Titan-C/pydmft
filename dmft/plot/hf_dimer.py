@@ -225,6 +225,26 @@ def plot_tails(BETA, U, tp, ax=None):
     ax.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
 
 
+def phase_diag_b(BETA_range, tp, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
+
+    for BETA in BETA_range:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+        with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:
+            fl_dos = []
+            for u_str in results.keys():
+                lastit = results[u_str].keys()[-1]
+                giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+                fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
+
+            u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
+            plt.scatter(u_range, np.ones(len(fl_dos))/BETA, c=fl_dos,
+                        s=150, vmin=-2, vmax=0)
+    plt.ylim([0, 0.04])
+    plt.title(r'Phase diagram at $t_\perp={}$'.format(tp))
+    plt.ylabel(r'$T/D$')
+    plt.xlabel('$U/D$')
+
+
 def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
 
     for tp in tp_range:
