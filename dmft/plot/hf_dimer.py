@@ -18,8 +18,30 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
 
-def get_giw(h5parent, iteration, tau, w_n, tp):
-    """Recovers with Fourier Transform G_iw from H5 file"""
+def get_giw(h5parent, iteration, tau, w_n):
+    """Recovers with Fourier Transform G_iw from H5 file
+
+    Parameters
+    ----------
+    h5parent : h5py parent object
+    iteration : string
+        group where the measurements are stored, name of iteration
+    tau : real float array
+            Imaginary time points
+    w_n : real float array
+            fermionic matsubara frequencies. Only use the positive ones
+
+    Returns
+    -------
+    tuple complex ndarray
+            Interacting Greens function in matsubara frequencies
+            diagonal and off diagonal
+
+
+    See also
+    --------
+    get_sigmaiw
+    """
 
     setup = h5.get_attributes(h5parent[iteration])
     mu, tp, U = setup['MU'], setup['tp'], setup['U']
@@ -32,6 +54,43 @@ def get_giw(h5parent, iteration, tau, w_n, tp):
     return giw_d, giw_o
 
 
+def get_sigmaiw(h5parent, iteration, tau, w_n):
+    """Calculates the Self-Energy in Matsubara Frequencies by the
+    Dyson equation from the Monte Carlo data
+
+    Parameters
+    ----------
+    h5parent : h5py parent object
+    iteration : string
+        group where the measurements are stored, name of iteration
+    tau : real float array
+            Imaginary time points
+    w_n : real float array
+            fermionic matsubara frequencies. Only use the positive ones
+
+    Returns
+    -------
+    tuple complex ndarray
+            Self-Energy in matsubara frequencies
+            diagonal and off diagonal
+
+    See also
+    --------
+    get_giw
+    """
+
+    giw_d, giw_o = get_giw(h5parent, iteration, tau, w_n)
+    giw_d_inv, giw_o_inv = rt.mat_inv(giw_d, giw_o)
+
+    setup = h5.get_attributes(h5parent[iteration])
+    tp, t = setup['tp'], setup['t']
+
+    sigmaiw_d = 1j*w_n - t**2 * giw_d - giw_d_inv
+    sigmaiw_o = -tp    - t**2 * giw_o - giw_o_inv
+
+    return sigmaiw_d, sigmaiw_o
+
+
 def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
               n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
@@ -42,8 +101,7 @@ def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
         setup = h5.get_attributes(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in output_files[u_str].keys()[skip:]:
-            giwd, giwo = get_giw(output_files[u_str], step,
-                                 tau, w_n, setup['tp'])
+            giwd, giwo = get_giw(output_files[u_str], step, tau, w_n)
             axes[0].plot(w_n, giwd.imag, 'bo:')
             axes[0].plot(w_n, giwo.real, 'gs:')
 
@@ -182,7 +240,7 @@ def dos_plot(BETA, tp, filestr, ax=None):
         tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
         for u_str in results:
             lastit = results[u_str].keys()[-1]
-            giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+            giwd, _ = get_giw(results[u_str], lastit, tau, w_n)
             fl_dos.append(-1./np.pi*gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
         u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
