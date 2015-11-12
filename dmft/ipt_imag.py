@@ -112,6 +112,13 @@ def dimer_sigma(g0t_d, g0t_o, U):
     return g0t_d*g0t_d*g0t_d*U*U, -g0t_o*g0t_o*g0t_o*U*U
 
 
+def gw_fourier(giwd, giwo, tau, w_n, u_int, tp):
+    gt_d = gw_invfouriertrans(giwd, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
+    gt_o = gw_invfouriertrans(giwo, tau, w_n, [0., tp, 0.])
+
+    return gt_d, gt_o
+
+
 def dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau):
     r"""Given a Green function it returns a dressed one and the self-energy
 
@@ -137,8 +144,7 @@ def dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau):
         Imaginary time points, not included edge point of :math:`\beta^-`
     """
 
-    g0t_d = gw_invfouriertrans(g0iw_d, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
-    g0t_o = gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, 0.])
+    g0t_d, g0t_o = gw_fourier(g0iw_d, g0iw_o, tau, w_n, u_int, tp)
 
     st_d, st_o = dimer_sigma(g0t_d, g0t_o, u_int)
 

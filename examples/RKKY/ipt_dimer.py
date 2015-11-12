@@ -19,7 +19,7 @@ import dmft.h5archive as h5
 import numpy as np
 
 
-def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-5):
+def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
 
     converged = False

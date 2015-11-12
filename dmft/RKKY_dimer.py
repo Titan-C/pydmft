@@ -9,15 +9,17 @@ Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 from __future__ import division, print_function, absolute_import
 from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
     Fourier, inverse, TailGf, iOmega_n
-import numpy as np
-from pytriqs.archive import HDFArchive
-import dmft.common as gf
-import slaveparticles.quantum.dos as dos
-from scipy.integrate import quad
-from dmft.twosite import matsubara_Z
-import dmft.hirschfye as hf
-from joblib import Parallel, delayed
 
+from dmft.twosite import matsubara_Z
+from joblib import Parallel, delayed
+from pytriqs.archive import HDFArchive
+from scipy.integrate import quad
+import dmft.common as gf
+import dmft.ipt_imag as ipt
+import dmft.hirschfye as hf
+import dmft.h5archive as h5
+import numpy as np
+import slaveparticles.quantum.dos as dos
 
 ###############################################################################
 # Dimer Bethe lattice
@@ -292,36 +294,39 @@ def total_energy(file_str):
 
     return np.asarray(total_e)
 
-
-def complexity(file_str):
+def complexity(filestr):
     """Extracts the loopcount for convergence"""
-    results = HDFArchive(file_str, 'r')
-    dif = []
-    for uint in results:
-        nl = results[uint]['setup']
-        dif.append(nl['loops'])
-    del results
-    return np.asarray(dif)
+    with h5.File(filestr, 'r') as results:
+        comp = [results[uint]['loops'].value for uint in results]
+    return np.asarray(comp)
 
 
-def quasiparticle(file_str):
-    results = HDFArchive(file_str, 'r')
+def quasiparticle(filestr, beta, tp):
     zet = []
-    for uint in results:
-        S_iw = results[uint]['S_iwd']
-        zet.append(matsubara_Z(S_iw.data[:, 0, 0].imag, S_iw.beta))
-    del results
+    with h5.File(filestr, 'r') as results:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        iw_n = 1j*w_n
+        for ustr in results:
+            g0d, g0o = self_consistency(iw_n,
+                                        results[ustr]['giw_d'][:],
+                                        results[ustr]['giw_o'][:],
+                                        0., tp, 0.25)
+
+            u_int = float(ustr[1:])
+            g0td, g0to = ipt.gw_fourier(g0d, g0o, tau, w_n, u_int, tp)
+            st_d, _ = ipt.dimer_sigma(g0td, g0to, u_int)
+            sw_d = gf.gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4])
+
+
+            zet.append(matsubara_Z(sw_d.imag, beta))
+            print(u_int, sw_d[:2], zet[-1])
     return np.asarray(zet)
 
 
-def fermi_level_dos(file_str, n=5):
-    results = HDFArchive(file_str, 'r')
-    ftr_key = results.keys()[0]
-    fl_dos = []
-    w_n = gf.matsubara_freq(results[ftr_key]['G_iwd'].beta, n)
-    for uint in results:
-        fl_dos.append(abs(gf.fit_gf(w_n, results[uint]['G_iwd'].data.imag)(0.)))
-    del results
+def fermi_level_dos(filestr, beta, n=3):
+    with h5.File(filestr, 'r') as results:
+        w_n = gf.matsubara_freq(beta, n)
+        fl_dos = [gf.fit_gf(w_n, results[uint]['giw_d'][:n].imag)(0.) for uint in results]
     return np.asarray(fl_dos)
 
 
