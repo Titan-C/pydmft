@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 r"""
+======================
 IPT Solver for a dimer
+======================
+
+Simple IPT solver for a dimer
 """
 # Created Thu Nov 12 17:55:48 2015
 # Author: Óscar Nájera
@@ -11,12 +15,12 @@ from dmft.ipt_imag import dimer_solver
 import argparse
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
+import dmft.h5archive as h5
 import numpy as np
 
 
-def dimer_dmft_loop(BETA, u_int, tp, giw, conv=1e-3):
+def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-5):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
-    giw_d, giw_o = giw
 
     converged = False
     loops = 0
@@ -39,15 +43,20 @@ def dimer_dmft_loop(BETA, u_int, tp, giw, conv=1e-3):
 
         loops += 1
 
-        if loops > 500:
-            converged = True
+    return giw_d, giw_o, loops
 
-    return giw_d, giw_o
 
 def loop_u(urange, tp, BETA, filestr):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
-    giw = rt.gf_met(w_n, 0., tp, 0.5, 0.)
+    giw_d, giw_o = rt.gf_met(w_n, 0., tp, 0.5, 0.)
+    for u_int in urange:
+        giw_d, giw_o, loops = dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o)
 
+        with h5.File(filestr.format(tp=tp, BETA=BETA), 'a') as store:
+            u_group = '/U{}/'.format(u_int)
+            store[u_group+'giw_d'] = giw_d
+            store[u_group+'giw_o'] = giw_o
+            store[u_group+'loops'] = loops
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DMFT loop for a dimer Bethe'
@@ -62,5 +71,7 @@ if __name__ == "__main__":
     ur = np.arange(0, 4.5, 0.1)
 
     #print(BETA)
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur, tp, 0.5, 0., BETA, 'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1], tp, 0.5, 0., BETA, 'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
+    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur, tp, 0.5, 0., BETA,
+             'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
+    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1], tp, 0.5, 0., BETA,
+             'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
