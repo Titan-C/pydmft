@@ -42,20 +42,22 @@ def dmft_loop_pm(simulation):
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
-    giw_d, giw_o = dimer.gf_met(w_n, setup['MU'], setup['tp'], 0., 0.5)
+    mu, tp, U = setup['MU'], setup['tp'], setup['U']
+    giw_d, giw_o = dimer.gf_met(w_n, mu, tp, 0., 0.5)
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
             last_it = 'it{:03}'.format(last_loop-1)
             giw_d, giw_o = pd.get_giw(last_run[current_u], last_it,
-                                      tau, w_n, setup['tp'])
+                                      tau, w_n, tp)
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
     V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
                          L=setup['SITES']*setup['n_tau_mc'],
                          polar=setup['spin_polarization'])
+
 
     for loop_count in range(last_loop, last_loop + setup['Niter']):
         # For saving in the h5 file
@@ -64,7 +66,7 @@ def dmft_loop_pm(simulation):
 
         if comm.rank == 0:
             print('On loop', loop_count, 'beta', setup['BETA'],
-                  'U', setup['U'], 'tp', setup['tp'])
+                  'U', U, 'tp', tp)
 
         # Cleaning the input to half-filling
         giw_d.real = 0.
@@ -72,14 +74,17 @@ def dmft_loop_pm(simulation):
 
         # Bethe lattice bath
         g0iw_d = 1.j*w_n - 0.25 * giw_d
-        g0iw_o = -setup['tp'] - 0.25 * giw_o
+        g0iw_o = -tp - 0.25 * giw_o
 
         g0iw_d, g0iw_o = dimer.mat_inv(g0iw_d, g0iw_o)
 
 
-        g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n)
+        g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n,
+                                        [1., -mu, U**2/4 +
+                                         tp**2+mu**2])
         g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n,
-                                        [0., setup['tp'], 0.])
+                                        [0., tp,
+                                         -10.*mu*tp**2])
 
         # Cleaning to casual
         g0tau_d[g0tau_d > -1e-7] = -1e-7
@@ -91,9 +96,13 @@ def dmft_loop_pm(simulation):
         gtau_d = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
         gtau_o = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
 
-        giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
+        giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n,
+                                   [1., -mu, U**2/4 +
+                                    tp**2+mu**2])
+
         giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n,
-                                   [0., setup['tp'], 0.])
+                                   [0., tp, -10.*mu*tp**2])
+
 
         # Save output
         if comm.rank == 0:
