@@ -250,7 +250,7 @@ def pot_energy(file_str):
 
     return np.asarray(total_e)
 
-def total_energy(file_str):
+def total_energy(filestr, beta, tp):
     r"""Calculates the internal energy of the system given by Fetter-Walecka
     25-26
 
@@ -264,33 +264,28 @@ def total_energy(file_str):
 
     """
 
-    results = HDFArchive(file_str, 'r')
-    ftr_key = results.keys()[0]
-    setup = results[ftr_key]['setup']
-    beta, tab, tn, t = setup['beta'], setup['tab'], setup['tn'], setup['t']
-    n_freq = len(results[ftr_key]['G_iwd'].mesh)
+    with h5.File(filestr, 'r') as results:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        iw_n = 1j*w_n
+        giw_free_d, giw_free_o = gf_met(w_n, 0., tp, 0.5, 0.)
 
-    Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
-                     n_points=n_freq)
-    w_n = gf.matsubara_freq(beta, n_freq)
-    om_id = mix_gf_dimer(Gfree.copy(), iOmega_n, 0., 0.)
-    init_gf_met(Gfree, w_n, 0., tab, tn, t)
+        mean_free_ekin = quad(dos.bethe_fermi_ene, -1, 1,
+                          args=(1., tp, 0.5, beta))[0] \
+                        - tp*quad(dos.bethe_fermi, -tp, tp,
+                                args=(1., 0., 0.5, beta))[0]
 
-    mean_free_ekin = quad(dos.bethe_fermi_ene, -2*t, 2*t,
-                          args=(1., tab, t, beta))[0] \
-                     - tab*quad(dos.bethe_fermi, -tab, tab,
-                                args=(1., 0., t, beta))[0]
+        total_e = []
+        for ustr in results:
+            giw_d, giw_o = results[ustr]['giw_d'][:], results[ustr]['giw_o'][:]
+            g0iw_d, g0iw_o = self_consistency(1j*w_n, giw_d, giw_o, 0., tp, 0.25)
+            u_int = float(ustr[1:])
+            siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-    total_e = []
-    Giw = Gfree.copy()
-    Siw = Gfree.copy()
-    for uint in results:
-        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iwo'])
-        load_gf(Siw, results[uint]['S_iwd'], results[uint]['S_iwo'])
-        energ = om_id * (Giw - Gfree) - 0.5*Siw*Giw
-        total_e.append(energ.total_density() + 2*mean_free_ekin)
+            # keep track of one half, here the trace duplicates the entries
+            Sigma_Giw_d = mat_mul(siw_d, siw_o, giw_d, giw_o)[0]
+            e_iw = iw_n * (giw_d - giw_free_d) - Sigma_Giw_d
 
-    del results
+            total_e.append(e_iw.sum() + 2*mean_free_ekin)
 
     return np.asarray(total_e)
 
