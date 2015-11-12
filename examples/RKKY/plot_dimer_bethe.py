@@ -12,15 +12,6 @@ import dmft.common as gf
 import dmft.RKKY_dimer as rt
 
 
-def self_consistency(omega, Gd, Gc, mu, tab, t2):
-    """Sets the dimer Bethe lattice self consistent condition for the diagonal
-    and out of diagonal block
-    """
-
-    Dd = omega + mu - t2 * Gd
-    Dc = -tab + t2 * Gc
-
-    return Dd, Dc
 
 ######################################################################
 # Real frequency spectral function
@@ -34,8 +25,7 @@ plt.figure()
 for tab in [0, 0.25, 0.5, 0.75, 1.1]:
 
     Gd, Gc = rt.gf_met(-1j*w, mu, tab, t, 0.)
-    Dd, Dc = self_consistency(w, Gd, Gc, mu, tab, t2)
-    Gd, Gc = rt.mat_inv(Dd, Dc)
+    Gd, Gc = rt.self_consistency(w, Gd, Gc, mu, tab, t2)
 
     plt.plot(w.real, -Gd.imag/np.pi, label=r'$t_c={}$'.format(tab))
 #    plt.plot(w.real, Gd.real, label=r'$\Re e Gd$')
@@ -57,8 +47,7 @@ plt.figure()
 for tab in [0, 0.25, 0.5, 0.75, 1.1]:
 
     Gd, Gc = rt.gf_met(w_n, mu, tab, t, 0.)
-    Dd, Dc = self_consistency(iw_n, Gd, Gc, mu, tab, t2)
-    Gd, Gc = rt.mat_inv(Dd, Dc)
+    Gd, Gc = rt.self_consistency(iw_n, Gd, Gc, mu, tab, t2)
 
     plt.plot(w_n, Gd.imag, 'o-', label=r'$t_c={}$'.format(tab))
 

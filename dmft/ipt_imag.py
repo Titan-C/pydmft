@@ -28,7 +28,9 @@ energy is estimated by
 
 from __future__ import division, absolute_import, print_function
 
-from dmft.common import gt_fouriertrans, gw_invfouriertrans, greenF
+from dmft.common import gt_fouriertrans, gw_invfouriertrans
+from numba import jit
+import dmft.RKKY_dimer as rt
 import numpy as np
 
 
@@ -71,7 +73,7 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
     u_int : float
         Local interation strength
     t : float
-        Hopping amplitude between bethe lattice nearest neightbours
+        Hopping amplitude between bethe lattice nearest neighbors
     g_iwn : complex float ndarray
             Matsubara frequencies starting guess Green function
     tau : real float ndarray
@@ -103,3 +105,48 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
             converged = True
         g_iwn = mix * g_iwn + (1 - mix) * g_iwn_old
     return g_iwn, sigma_iwn
+
+
+@jit(nopython=True)
+def dimer_sigma(g0t_d, g0t_o, U):
+    return g0t_d*g0t_d*g0t_d*U*U, -g0t_o*g0t_o*g0t_o*U*U
+
+
+def dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau):
+    r"""Given a Green function it returns a dressed one and the self-energy
+
+    .. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3
+
+    .. math:: G = \mathcal{G}^0(i\omega_n)/(1 - \Sigma(i\omega_n)\mathcal{G}^0(i\omega_n))
+
+    The Fourier transforms use as tail expansion of the atomic limit self-enegy
+
+    .. math:: \Sigma(i\omega_n\rightarrow \infty) = \frac{U^2}{4i\omega_n}
+
+    Parameters
+    ----------
+    u_int : float, local contact interaction
+    tp : float, dimer hybridization strength
+    g0iw_d : complex 1D ndarray
+        *bare* local Green function, the Weiss field
+    g0iw_o : complex 1D ndarray
+        *bare* hybridizing Green function, the Weiss field
+    w_n: real 1D ndarray
+        Matsubara frequencies
+    tau: real 1D array
+        Imaginary time points, not included edge point of :math:`\beta^-`
+    """
+
+    g0t_d = gw_invfouriertrans(g0iw_d, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
+    g0t_o = gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, 0.])
+
+    st_d, st_o = dimer_sigma(g0t_d, g0t_o, u_int)
+
+    sw_d = gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4])
+    sw_o = gt_fouriertrans(st_o, tau, w_n, [0., tp**2*u_int**2/4, 0.])
+
+    sgd, sgo = rt.mat_mul(g0iw_d, g0iw_o, -sw_d, -sw_o)
+    sgd += 1.
+    dend, dendo = rt.mat_inv(sgd, sgo)
+
+    return rt.mat_mul(dend, dendo, g0iw_d, g0iw_o)

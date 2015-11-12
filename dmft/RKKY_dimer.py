@@ -48,6 +48,17 @@ def mat_mul(a, b, c, d):
     return a*c + b*d, a*d + b*c
 
 
+def self_consistency(omega, Gd, Gc, mu, tp, t2):
+    """Sets the dimer Bethe lattice self consistent condition for the diagonal
+    and out of diagonal block
+    """
+
+    Dd = omega + mu - t2 * Gd
+    Dc = -tp + t2 * Gc
+
+    return mat_inv(Dd, Dc)
+
+
 def mix_gf_dimer(gmix, omega, mu, tab):
     """Dimer formation Green function term
 
