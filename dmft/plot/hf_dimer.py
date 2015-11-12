@@ -20,10 +20,14 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 def get_giw(h5parent, iteration, tau, w_n, tp):
     """Recovers with Fourier Transform G_iw from H5 file"""
+
+    setup = h5.get_attributes(h5parent[iteration])
+    mu, tp, U = setup['MU'], setup['tp'], setup['U']
     gtau_d = h5parent[iteration]['gtau_d'][:]
     gtau_o = h5parent[iteration]['gtau_o'][:]
-    giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
-    giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+    giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n,
+                               [1., -mu, 0.25 + U**2/4 + tp**2 + mu**2])
+    giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, -10.*mu*tp**2])
 
     return giw_d, giw_o
 
@@ -115,8 +119,7 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
             axes[0].set_xlabel(r'$\tau$')
             axes[0].set_xlim([0, BETA])
         else:
-            giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n)
-            giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, 0.])
+            giw_d, giw_o = get_giw(output_files[u_str], step, tau, w_n)
             axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
             axes[1].plot(w_n, giw_o.real, 's:', label=label)
 
