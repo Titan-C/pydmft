@@ -54,7 +54,7 @@ def self_consistency(omega, Gd, Gc, mu, tp, t2):
     """
 
     Dd = omega + mu - t2 * Gd
-    Dc = -tp + t2 * Gc
+    Dc = -tp - t2 * Gc
 
     return mat_inv(Dd, Dc)
 
