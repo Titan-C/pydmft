@@ -15,7 +15,7 @@
 import sys
 import os
 from datetime import date
-import sphinxgallery
+import sphinx_gallery
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,7 +41,7 @@ extensions = [
     'sphinx.ext.pngmath',
     'matplotlib.sphinxext.plot_directive',
     'sphinx.ext.ifconfig',
-    'sphinxgallery.gen_gallery',
+    'sphinx_gallery.gen_gallery',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -276,7 +276,7 @@ texinfo_documents = [
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
 
-sphinxgallery_conf = {
+sphinx_gallery_conf = {
     'doc_module': 'dmft',
     'reference_url': {
         'dmft': None,
