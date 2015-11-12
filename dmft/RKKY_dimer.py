@@ -22,12 +22,12 @@ from joblib import Parallel, delayed
 ###############################################################################
 # Dimer Bethe lattice
 
-def gf_met(omega, mu, tab, t, tn):
+def gf_met(omega, mu, tp, t, tn):
     """Double semi-circular density of states to represent the
     non-interacting dimer """
 
-    g_1 = gf.greenF(omega, mu=mu-tab, D=2*(t+tn))
-    g_2 = gf.greenF(omega, mu=mu+tab, D=2*abs(t-tn))
+    g_1 = gf.greenF(omega, mu=mu-tp, D=2*(t+tn))
+    g_2 = gf.greenF(omega, mu=mu+tp, D=2*abs(t-tn))
     g_d = .5*(g_1 + g_2)
     g_o = .5*(g_1 - g_2)
 

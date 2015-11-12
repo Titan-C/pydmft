@@ -52,7 +52,7 @@ def test_GF():
     only requires the first row"""
 
     tau, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
-    giwd, giwo = dimer.gf_met(w_n, 0., 0.25, 0., 0.5)
+    giwd, giwo = dimer.gf_met(w_n, 0., 0.25, 0.5, 0.)
     inv_giwd, inv_giwo = dimer.mat_inv(giwd, giwo)
     one, zero = dimer.mat_mul(inv_giwd, inv_giwo, giwd, giwo)
     assert np.allclose(one, 1.)

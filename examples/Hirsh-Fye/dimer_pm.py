@@ -43,7 +43,7 @@ def dmft_loop_pm(simulation):
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
     mu, tp, U = setup['MU'], setup['tp'], setup['U']
-    giw_d, giw_o = dimer.gf_met(w_n, mu, tp, 0., 0.5)
+    giw_d, giw_o = dimer.gf_met(w_n, mu, tp, 0.5, 0.)
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:

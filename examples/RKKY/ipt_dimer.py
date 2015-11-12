@@ -44,6 +44,10 @@ def dimer_dmft_loop(BETA, u_int, tp, giw, conv=1e-3):
 
     return giw_d, giw_o
 
+def loop_u(urange, tp, BETA, filestr):
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
+    giw = rt.gf_met(w_n, 0., tp, 0.5, 0.)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DMFT loop for a dimer Bethe'
