@@ -108,18 +108,10 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
 
 
 @jit(nopython=True)
-def dimer_sigma(g0t_d, g0t_o, U):
+def _dimer_sigma(g0t_d, g0t_o, U):
     return g0t_d*g0t_d*g0t_d*U*U, -g0t_o*g0t_o*g0t_o*U*U
 
-
-def gw_fourier(giwd, giwo, tau, w_n, u_int, tp):
-    gt_d = gw_invfouriertrans(giwd, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
-    gt_o = gw_invfouriertrans(giwo, tau, w_n, [0., tp, 0.])
-
-    return gt_d, gt_o
-
-
-def dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau):
+def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
     r"""Given a Green function it returns a dressed one and the self-energy
 
     .. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3
@@ -138,20 +130,26 @@ def dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau):
         *bare* local Green function, the Weiss field
     g0iw_o : complex 1D ndarray
         *bare* hybridizing Green function, the Weiss field
-    w_n: real 1D ndarray
-        Matsubara frequencies
     tau: real 1D array
         Imaginary time points, not included edge point of :math:`\beta^-`
+    w_n: real 1D ndarray
+        Matsubara frequencies
     """
 
-    g0t_d, g0t_o = gw_fourier(g0iw_d, g0iw_o, tau, w_n, u_int, tp)
+    g0t_d = gw_invfouriertrans(g0iw_d, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
+    g0t_o = gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, 0.])
 
-    st_d, st_o = dimer_sigma(g0t_d, g0t_o, u_int)
+    st_d, st_o = _dimer_sigma(g0t_d, g0t_o, u_int)
 
     sw_d = gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4])
     sw_o = gt_fouriertrans(st_o, tau, w_n, [0., tp**2*u_int**2/4, 0.])
 
-    sgd, sgo = rt.mat_mul(g0iw_d, g0iw_o, -sw_d, -sw_o)
+    return sw_d, sw_o
+
+
+def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
+
+    sgd, sgo = rt.mat_mul(g0iw_d, g0iw_o, -siw_d, -siw_o)
     sgd += 1.
     dend, dendo = rt.mat_inv(sgd, sgo)
 

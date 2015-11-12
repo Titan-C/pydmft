@@ -11,13 +11,12 @@ Simple IPT solver for a dimer
 
 from __future__ import division, absolute_import, print_function
 from joblib import Parallel, delayed
-from dmft.ipt_imag import dimer_solver
 import argparse
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.h5archive as h5
+import dmft.ipt_imag as ipt
 import numpy as np
-
 
 def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
@@ -36,7 +35,8 @@ def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
 
         g0iw_d, g0iw_o = rt.self_consistency(iw_n, giw_d, giw_o, 0., tp, 0.25)
 
-        giw_d, giw_o = dimer_solver(u_int, tp, g0iw_d, g0iw_o, w_n, tau)
+        siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+        giw_d, giw_o = ipt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
 
         converged = np.allclose(giw_d_old, giw_d, conv)
         converged *= np.allclose(giw_o_old, giw_o, conv)

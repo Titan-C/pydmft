@@ -305,21 +305,16 @@ def quasiparticle(filestr, beta, tp):
     zet = []
     with h5.File(filestr, 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
-        iw_n = 1j*w_n
         for ustr in results:
-            g0d, g0o = self_consistency(iw_n,
-                                        results[ustr]['giw_d'][:],
-                                        results[ustr]['giw_o'][:],
-                                        0., tp, 0.25)
-
+            g0iw_d, g0iw_o = self_consistency(1j*w_n,
+                                              results[ustr]['giw_d'][:],
+                                              results[ustr]['giw_o'][:],
+                                              0., tp, 0.25)
             u_int = float(ustr[1:])
-            g0td, g0to = ipt.gw_fourier(g0d, g0o, tau, w_n, u_int, tp)
-            st_d, _ = ipt.dimer_sigma(g0td, g0to, u_int)
-            sw_d = gf.gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4])
+            siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
+            zet.append(matsubara_Z(siw_d.imag, beta))
 
-            zet.append(matsubara_Z(sw_d.imag, beta))
-            print(u_int, sw_d[:2], zet[-1])
     return np.asarray(zet)
 
 
