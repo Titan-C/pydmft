@@ -30,7 +30,6 @@ from __future__ import division, absolute_import, print_function
 
 from dmft.common import gt_fouriertrans, gw_invfouriertrans
 from numba import jit
-import dmft.RKKY_dimer as rt
 import numpy as np
 
 
@@ -145,12 +144,3 @@ def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
     sw_o = gt_fouriertrans(st_o, tau, w_n, [0., tp**2*u_int**2/4, 0.])
 
     return sw_d, sw_o
-
-
-def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
-
-    sgd, sgo = rt.mat_mul(g0iw_d, g0iw_o, -siw_d, -siw_o)
-    sgd += 1.
-    dend, dendo = rt.mat_inv(sgd, sgo)
-
-    return rt.mat_mul(dend, dendo, g0iw_d, g0iw_o)

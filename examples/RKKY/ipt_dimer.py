@@ -36,7 +36,7 @@ def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
         g0iw_d, g0iw_o = rt.self_consistency(iw_n, giw_d, giw_o, 0., tp, 0.25)
 
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
-        giw_d, giw_o = ipt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
+        giw_d, giw_o = rt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
 
         converged = np.allclose(giw_d_old, giw_d, conv)
         converged *= np.allclose(giw_o_old, giw_o, conv)

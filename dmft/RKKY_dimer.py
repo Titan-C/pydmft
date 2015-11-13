@@ -61,6 +61,15 @@ def self_consistency(omega, Gd, Gc, mu, tp, t2):
     return mat_inv(Dd, Dc)
 
 
+def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
+
+    sgd, sgo = mat_mul(g0iw_d, g0iw_o, -siw_d, -siw_o)
+    sgd += 1.
+    dend, dendo = mat_inv(sgd, sgo)
+
+    return mat_mul(dend, dendo, g0iw_d, g0iw_o)
+
+
 def mix_gf_dimer(gmix, omega, mu, tab):
     """Dimer formation Green function term
 
