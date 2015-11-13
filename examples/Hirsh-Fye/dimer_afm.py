@@ -21,6 +21,9 @@ import sys
 
 comm = MPI.COMM_WORLD
 
+def mat_2_inv(A):
+    det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
+    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
 
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
@@ -45,8 +48,17 @@ def dmft_loop_pm(simulation):
     mu, tp, U = setup['MU'], setup['tp'], setup['U']
     giw_d_up, giw_o_up = dimer.gf_met(w_n, 1e-3, tp, 0.5, 0.)
     giw_d_dw, giw_o_dw = dimer.gf_met(w_n, -1e-3, tp, 0.5, 0.)
-    giw_d = np.asarray([giw_d_up, giw_d_dw])
-    giw_o = np.asarray([giw_o_up, giw_o_dw])
+    gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
+                       [-tp*np.ones_like(w_n), 1j*w_n]])
+    g0tail = [np.eye(2).reshape(2, 2, 1),
+              tp*np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
+              np.array([[tp**2, 0], [0, tp**2]]).reshape(2, 2, 1)]
+    gtail = [np.eye(2).reshape(2, 2, 1),
+             tp*np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
+             np.array([[tp**2+U**2/4, 0], [0, tp**2 + U**2/4]]).reshape(2, 2, 1)]
+
+    giw_up = np.array([[giw_d_up, giw_o_up], [giw_o_dw, giw_d_dw]])
+    giw_dw = np.array([[giw_d_dw, giw_o_dw], [giw_o_up, giw_d_up]])
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
@@ -72,37 +84,24 @@ def dmft_loop_pm(simulation):
                   'U', U, 'tp', tp)
 
         # Bethe lattice bath
-        g0iw_d, g0iw_o = dimer.self_consistency(1j*w_n,
-                                                giw_d[[1, 0]],
-                                                giw_o[[1, 0]], mu, tp, 0.25)
+        g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
+        g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
 
-        g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n, [1., -mu, tp**2+mu**2])
-        g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, -10.*mu*tp**2])
-
-        # Cleaning to casual
-        g0tau_d[g0tau_d > -1e-7] = -1e-7
+        g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, g0tail)
+        g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, g0tail)
 
         # Impurity solver
-        g0t_up = np.array([[g0tau_d[0], g0tau_o[0]], [g0tau_o[0], g0tau_d[0]]])
-        g0t_dw = np.array([[g0tau_d[1], g0tau_o[1]], [g0tau_o[1], g0tau_d[1]]])
 
-        gtu, gtd = hf.imp_solver([g0t_up, g0t_dw], V_field, intm, setup)
-        gtau_d = -0.5 * np.array([gtu[0, 0] + gtu[1, 1], gtd[0, 0] + gtd[1, 1]])
-        gtau_o = -0.5 * np.array([gtu[0, 1] + gtu[1, 0], gtd[0, 1] + gtd[1, 0]])
+        gtu, gtd = hf.imp_solver([g0tau_up, g0tau_dw], V_field, intm, setup)
 
-        giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n,
-                                    [1., -mu, U**2/4 +
-                                    tp**2+mu**2])
-
-        giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n,
-                                    [0., tp, -10.*mu*tp**2])
-
+        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gtail)
+        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gtail)
 
         # Save output
         if comm.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
-                store[dest_group + 'gtau_d'] = gtau_d
-                store[dest_group + 'gtau_o'] = gtau_o
+                store[dest_group + 'gtau_u'] = -gtu
+                store[dest_group + 'gtau_d'] = -gtd
                 h5.add_attributes(store[dest_group], setup)
         sys.stdout.flush()
 
