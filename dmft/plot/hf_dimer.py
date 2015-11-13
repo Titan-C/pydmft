@@ -170,16 +170,18 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
             label = step
 
         if space == 'tau':
-            axes[0].plot(tau, gtau_d, '-', label=label)
-            axes[1].plot(tau, gtau_o, '-', label=label)
+            axes[0].plot(tau, gtau_d.T, '-', label=label)
+            axes[1].plot(tau, gtau_o.T, '-', label=label)
 
             graf = r'$G(\tau)$'
             axes[0].set_xlabel(r'$\tau$')
             axes[0].set_xlim([0, BETA])
         else:
             giw_d, giw_o = get_giw(output_files[u_str], step, tau, w_n)
-            axes[0].plot(w_n, giw_d.imag, 'o:', label=label)
-            axes[1].plot(w_n, giw_o.real, 's:', label=label)
+            axes[0].plot(w_n, giw_d.real.T, 'o-', label=label)
+            axes[0].plot(w_n, giw_d.imag.T, 'o:', label=label)
+            axes[1].plot(w_n, giw_o.real.T, 's:', label=label)
+            axes[1].plot(w_n, giw_o.imag.T, 's-', label=label)
 
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')

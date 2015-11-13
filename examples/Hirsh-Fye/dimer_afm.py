@@ -45,6 +45,8 @@ def dmft_loop_pm(simulation):
     mu, tp, U = setup['MU'], setup['tp'], setup['U']
     giw_d_up, giw_o_up = dimer.gf_met(w_n, 1e-3, tp, 0.5, 0.)
     giw_d_dw, giw_o_dw = dimer.gf_met(w_n, -1e-3, tp, 0.5, 0.)
+    giw_d = np.asarray([giw_d_up, giw_d_dw])
+    giw_o = np.asarray([giw_o_up, giw_o_dw])
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
@@ -70,8 +72,9 @@ def dmft_loop_pm(simulation):
                   'U', U, 'tp', tp)
 
         # Bethe lattice bath
-        g0iw_d, g0iw_o = dimer.self_consistency(1j*w_n, giw_d, giw_o, mu, tp, 0.25)
-
+        g0iw_d, g0iw_o = dimer.self_consistency(1j*w_n,
+                                                giw_d[[1, 0]],
+                                                giw_o[[1, 0]], mu, tp, 0.25)
 
         g0tau_d = gf.gw_invfouriertrans(g0iw_d, tau, w_n, [1., -mu, tp**2+mu**2])
         g0tau_o = gf.gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, -10.*mu*tp**2])

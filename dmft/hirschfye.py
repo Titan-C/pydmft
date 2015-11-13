@@ -111,7 +111,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
             double_occupation(g, i_pairs, double_occ, parms)
-            chi += measure_chi(v, ntau)
+            #chi += measure_chi(v, ntau)
             if parms['save_logs']:
                 vlog.append(v>0)
                 ar.append(acr)
@@ -413,7 +413,7 @@ def do_input(help_string):
     parser.add_argument('-n_freq', '--N_MATSUBARA', metavar='B', type=int,
                         default=32, help='Number of Matsubara frequencies. '
                         'This influences the Trotter slicing as dtau=beta/2/n_freq')
-    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(5e4),
+    parser.add_argument('-sweeps', metavar='MCS', type=int, default=int(1e4),
                         help='Number Monte Carlo Measurement')
     parser.add_argument('-therm', type=int, default=int(5e3),
                         help='Monte Carlo sweeps of thermalization')
