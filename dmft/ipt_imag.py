@@ -55,7 +55,7 @@ def single_band_ipt_solver(u_int, g_0_iwn, w_n, tau):
         Imaginary time points, not included edge point of :math:`\beta^-`
     """
 
-    g_0_tau = gw_invfouriertrans(g_0_iwn, tau, w_n)
+    g_0_tau = gw_invfouriertrans(g_0_iwn, tau, w_n, [1., 0., 0.25])
     sigma_tau = u_int**2 * g_0_tau**3
     sigma_iwn = gt_fouriertrans(sigma_tau, tau, w_n, [u_int**2/4., 0., 0.])
     g_iwn = g_0_iwn / (1 - sigma_iwn * g_0_iwn)
@@ -135,7 +135,7 @@ def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
         Matsubara frequencies
     """
 
-    g0t_d = gw_invfouriertrans(g0iw_d, tau, w_n, [1., 0., u_int**2/4 +tp**2 + 0.25])
+    g0t_d = gw_invfouriertrans(g0iw_d, tau, w_n, [1., 0., tp**2 + 0.25])
     g0t_o = gw_invfouriertrans(g0iw_o, tau, w_n, [0., tp, 0.])
 
     st_d, st_o = _dimer_sigma(g0t_d, g0t_o, u_int)
