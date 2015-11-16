@@ -10,6 +10,7 @@ Contents:
 
 .. toctree::
 
+   energies
    twosite
    reference
    auto_examples/index

@@ -45,11 +45,11 @@ figz, axz = plt.subplots()
 for beta, result in zip(betarange, results):
     u_zet = [matsubara_Z(sigma.imag, beta) for _, sigma in result]
     axz.plot(U, u_zet, '+-', label='$\\beta={}$'.format(beta))
-axz.set_title('Hysteresis loop of the quasiparticle weigth')
-axz.legend(loc=0)
-axz.set_ylabel('Z')
-axz.set_xlabel('U/D')
-axz.set_title('Hysteresis loop of the Density of states')
+    axz.set_title('Hysteresis loop of the quasiparticle weigth')
+    axz.legend(loc=0)
+    axz.set_ylabel('Z')
+    axz.set_xlabel('U/D')
+    axz.set_title('Hysteresis loop of the Density of states')
 
 
 ###############################################################################
@@ -70,29 +70,33 @@ axf.set_xlabel('U/D')
 # Double occupation
 # -----------------
 #
-# Is proportional to the Potential energy which is described according to
-# [Fetter_Walecka]_ in equation 23.14 then transformed to Matsubara frequencies
-# can be described as
+# Is proportional to the Potential energy by the relation
 #
-# .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{k,n} \frac{1}{2}\left(
-#    i\omega_n - \epsilon_k^0 \right)Tr G(k, i\omega_n)
+# .. math:: \langle n_\uparrow n_\downarrow \rangle = \frac{2}{U}\langle V \rangle+\frac{1}{4}
 #
-# After some work
+# taking the expression from :ref:`potential_energy`
 #
 # .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2}
 #     Tr(\Sigma(i\omega_n)G(i\omega_n))
 #
-# The tail behaves as
+# Which tail behaves as
 #
-# .. math:: \Sigma G(i\omega_n\rightarrow \infty)= \frac{U^2}{8(i\omega_n)^2}
+# .. math:: \Sigma G(i\omega_n\rightarrow \infty) = \frac{U^2}{4(i\omega_n)^2}
 #
+# Upon which one can perform the sum including the tail
+# analytically. The trace for the single band does not influence in
+# this case. The required numerical expression becomes:
+#
+# .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n=1}^{n_{max}}\Re e \left( \Sigma(i\omega_n)G(i\omega_n) + \frac{U^2}{4\omega_n^2} \right)-\frac{U^2\beta}{32}
+#
+
 
 
 figd, axd = plt.subplots()
 for beta, result in zip(betarange, results):
     tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
-    V = np.asarray([2*(0.5*s*g+u**2/8./w_n**2).real.sum()/beta
-                    for (g, s), u in zip(result, U)]) - 0.25*beta*U**2/8.
+    V = np.asarray([(s*g+u**2/4./w_n**2).real.sum()/beta
+                    for (g, s), u in zip(result, U)]) - beta*U**2/32.
 
     D = 2./U*V + 0.25
     axd.plot(U, D, '-', label='$\\beta={}$'.format(beta))
@@ -101,12 +105,3 @@ axd.set_title('Hysteresis loop of the double occupation')
 axd.legend(loc=0)
 axd.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 axd.set_xlabel('U/D')
-
-## Energies
-#T=[1j*w_n*(g[i]-gfree_iwn)-s[i]*g[i] for i in range(len(g))]
-#Tn=np.asarray([2*a.sum() for a in T]).real/200. +emean
-#H=[1j*w_n*(g[i]-gfree_iwn)-0.5*s[i]*g[i] for i in range(len(g))]
-#Hn=np.asarray([2*a.sum() for a in H]).real/200.+emean
-
-###############################################################################
-# .. [Fetter_Walecka] Fetter, Walecka, Quantum Theory of many-particle systems
