@@ -49,8 +49,7 @@ def dmft_loop_pm(simulation):
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
             last_it = 'it{:03}'.format(last_loop-1)
-            giw_d, giw_o = pd.get_giw(last_run[current_u], last_it,
-                                      tau, w_n, tp)
+            giw_d, giw_o = pd.get_giw(last_run[current_u], last_it, tau, w_n)
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
