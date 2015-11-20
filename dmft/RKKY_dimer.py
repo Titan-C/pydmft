@@ -231,47 +231,30 @@ def recover_lastit(S, file_str):
         pass
 
 
-def pot_energy(file_str):
-    r"""Calculates the internal energy of the system given by Fetter-Walecka
-    25-26
-    """
+def epot(filestr, beta):
+    V = []
 
-    results = HDFArchive(file_str, 'r')
-    ftr_key = results.keys()[0]
-    setup = results[ftr_key]['setup']
-    beta = setup['beta']
-    n_freq = len(results[ftr_key]['G_iwd'].mesh)
+    with h5.File(filestr, 'r') as results:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        wsqr_4 = 4*w_n*w_n
+        for tpstr in results:
+            tp = float(tpstr[2:])
+            tprec = results[tpstr]
+            for ustr in tprec:
+                Igiw_d, Rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*Igiw_d, Rgiw_o,
+                                                  0., tp, 0.25)
+                u_int = float(ustr[1:])
+                siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-    Gfree = GfImFreq(indices=['A', 'B'], beta=beta,
-                     n_points=n_freq)
+                V.append((-Igiw_d*siw_d.imag + Rgiw_o*siw_o.real + u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
+        array_shape = (len(results.keys()), len(tprec.keys()))
 
-    total_e = []
-    Giw = Gfree.copy()
-    Siw = Gfree.copy()
-    for uint in results:
-        load_gf(Giw, results[uint]['G_iwd'], results[uint]['G_iwo'])
-        load_gf(Siw, results[uint]['S_iwd'], results[uint]['S_iwo'])
-        energ = 0.5*Siw*Giw
-        u = results[uint]['setup']['U']+1e-15
-        total_e.append(energ.total_density()/u + .25)
+    return np.asarray(V).reshape(array_shape)
 
-    del results
-
-    return np.asarray(total_e)
 
 def total_energy(filestr, beta, tp):
-    r"""Calculates the internal energy of the system given by Fetter-Walecka
-    25-26
-
-    .. math:: \langle H \rangle = 1/\beta\sum_{nk}
-         1/2(i\omega_n +  H^0_k + \mu)
-         Tr G(k, i\omega_n)\\
-         = Tr 1/2(i\omega_n +  H^0_k + \mu)G - G^{0,-1}G^0 + G^{-1}G)\\
-         = Tr 1/2(i\omega_n +  H^0_k + \mu)G - (i\omega_n - H^0_k + \mu)G^0 +
-          (i\omega_n - H^0_k +\mu -\Sigma )G)
-         = Tr i\omega_n(G-G^0)
-
-    """
+    r"""Calculates the internal energy of the system given by Fetter-Walecka"""
 
     with h5.File(filestr, 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
@@ -301,32 +284,43 @@ def total_energy(filestr, beta, tp):
 def complexity(filestr):
     """Extracts the loopcount for convergence"""
     with h5.File(filestr, 'r') as results:
-        comp = [results[uint]['loops'].value for uint in results]
-    return np.asarray(comp)
+        comp = [results[tpstr][uint]['loops'].value
+                for tpstr in results
+                for uint in results[tpstr]]
+        array_column = len(results.keys())
+    return np.asarray(comp).reshape((array_column, -1))
 
 
-def quasiparticle(filestr, beta, tp):
+def quasiparticle(filestr, beta):
     zet = []
     with h5.File(filestr, 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
-        for ustr in results:
-            g0iw_d, g0iw_o = self_consistency(1j*w_n,
-                                              results[ustr]['giw_d'][:],
-                                              results[ustr]['giw_o'][:],
-                                              0., tp, 0.25)
-            u_int = float(ustr[1:])
-            siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+        for tpstr in results:
+            tp = float(tpstr[2:])
+            tprec = results[tpstr]
+            for ustr in tprec:
+                g0iw_d, g0iw_o = self_consistency(1j*w_n,
+                                                  1j*tprec[ustr]['giw_d'][:],
+                                                  tprec[ustr]['giw_o'][:],
+                                                  0., tp, 0.25)
+                u_int = float(ustr[1:])
+                siw_d, _ = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-            zet.append(matsubara_Z(siw_d.imag, beta))
+                zet.append(matsubara_Z(siw_d.imag, beta))
+        array_shape = (len(results.keys()), len(tprec.keys()))
 
-    return np.asarray(zet)
+    return np.asarray(zet).reshape(array_shape)
 
 
 def fermi_level_dos(filestr, beta, n=3):
     with h5.File(filestr, 'r') as results:
         w_n = gf.matsubara_freq(beta, n)
-        fl_dos = [gf.fit_gf(w_n, results[uint]['giw_d'][:n].imag)(0.) for uint in results]
-    return np.asarray(fl_dos)
+        fl = []
+        for tpstr in results:
+            fl.append(np.array([gf.fit_gf(w_n,
+                                          results[tpstr][uint]['giw_d'][:n])(0.)
+                                for uint in results[tpstr]]))
+    return np.asarray(fl)
 
 
 def proc_files(filelist):

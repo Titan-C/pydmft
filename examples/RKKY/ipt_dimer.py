@@ -53,16 +53,16 @@ def loop_u(urange, tp, BETA, filestr):
         giw_d, giw_o, loops = dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o)
 
         with h5.File(filestr.format(tp=tp, BETA=BETA), 'a') as store:
-            u_group = '/U{}/'.format(u_int)
-            store[u_group+'giw_d'] = giw_d
-            store[u_group+'giw_o'] = giw_o
+            u_group = '/tp{}/U{}/'.format(tp, u_int)
+            store[u_group+'giw_d'] = giw_d.imag
+            store[u_group+'giw_o'] = giw_o.real
             store[u_group+'loops'] = loops
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='DMFT loop for a dimer Bethe'
                                      'lattice solved by IPT')
     parser.add_argument('beta', metavar='B', type=float,
-                        default=150., help='The inverse temperature')
+                        default=128., help='The inverse temperature')
 
     tabra = np.hstack((np.arange(0, 0.5, 0.02), np.arange(0.5, 1.1, 0.05)))
     args = parser.parse_args()
@@ -71,7 +71,6 @@ if __name__ == "__main__":
     ur = np.arange(0, 4.5, 0.1)
 
     #print(BETA)
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur, tp, 0.5, 0., BETA,
-             'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur[::-1], tp, 0.5, 0., BETA,
-             'disk/Dimer_ipt_tp{tp}_B{BETA}.h5') for tp in tabra)
+    [loop_u(ur, tp, BETA, 'disk/Dimer_ipt_B{BETA}.h5') for tp in tabra]
+    #Parallel(n_jobs=-1, verbose=5)(delayed(loop_u)(ur, tp, BETA,
+             #'disk/Dimer_ipt_B{BETA}.h5') for tp in tabra)
