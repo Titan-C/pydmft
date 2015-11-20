@@ -14,6 +14,7 @@ from dmft.twosite import matsubara_Z
 from joblib import Parallel, delayed
 from pytriqs.archive import HDFArchive
 from scipy.integrate import quad
+from scipy.optimize import fsolve
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 import dmft.hirschfye as hf
@@ -233,7 +234,6 @@ def recover_lastit(S, file_str):
 
 def epot(filestr, beta):
     V = []
-
     with h5.File(filestr, 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
         wsqr_4 = 4*w_n*w_n
@@ -247,39 +247,46 @@ def epot(filestr, beta):
                 u_int = float(ustr[1:])
                 siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-                V.append((-Igiw_d*siw_d.imag + Rgiw_o*siw_o.real + u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
+                V.append((Rgiw_o*siw_o.real - Igiw_d*siw_d.imag + u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
         array_shape = (len(results.keys()), len(tprec.keys()))
 
     return np.asarray(V).reshape(array_shape)
 
 
-def total_energy(filestr, beta, tp):
-    r"""Calculates the internal energy of the system given by Fetter-Walecka"""
+def n_fill(mu, tp, beta):
+    return quad(dos.bethe_fermi, -1., 1., args=(1., mu + tp, 0.5, beta))[0] + \
+           quad(dos.bethe_fermi, -1., 1., args=(1., mu - tp, 0.5, beta))[0]-1.
 
+def ekin(filestr, beta):
+    r"""Calculates the internal energy of the system given by Fetter-Walecka"""
+    T = []
     with h5.File(filestr, 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
         iw_n = 1j*w_n
-        giw_free_d, giw_free_o = gf_met(w_n, 0., tp, 0.5, 0.)
+        for tpstr in results:
+            tp = float(tpstr[2:])
+            tprec = results[tpstr]
+            giw_free_d, giw_free_o = gf_met(w_n, 0., tp, 0.5, 0.)
+            mu = fsolve(n_fill, 0., (tp, beta))[0]
+            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu+tp, 0.5, beta))[0] + \
+                     quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu-tp, 0.5, beta))[0] - \
+                     tp*(quad(dos.bethe_fermi, -1., 1., args=(1., mu+tp, 0.5, beta))[0] - \
+                         quad(dos.bethe_fermi, -1., 1., args=(1., mu-tp, 0.5, beta))[0])
+            e_mean *= 0.5
+            print(mu, e_mean)
+            for ustr in tprec:
+                Igiw_d, Rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*Igiw_d, Rgiw_o,
+                                                  0., tp, 0.25)
+                u_int = float(ustr[1:])
+                siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-        mean_free_ekin = quad(dos.bethe_fermi_ene, -1, 1,
-                          args=(1., tp, 0.5, beta))[0] \
-                        - tp*quad(dos.bethe_fermi, -tp, tp,
-                                args=(1., 0., 0.5, beta))[0]
+                T.append(2*(w_n*(giw_free_d.imag - Igiw_d) +
+                          Igiw_d*siw_d.imag - Rgiw_o*siw_o.real).sum()/beta + e_mean)
+        array_shape = (len(results.keys()), len(tprec.keys()))
 
-        total_e = []
-        for ustr in results:
-            giw_d, giw_o = results[ustr]['giw_d'][:], results[ustr]['giw_o'][:]
-            g0iw_d, g0iw_o = self_consistency(1j*w_n, giw_d, giw_o, 0., tp, 0.25)
-            u_int = float(ustr[1:])
-            siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+    return np.asarray(T).reshape(array_shape)
 
-            # keep track of one half, here the trace duplicates the entries
-            Sigma_Giw_d = mat_mul(siw_d, siw_o, giw_d, giw_o)[0]
-            e_iw = iw_n * (giw_d - giw_free_d) - Sigma_Giw_d
-
-            total_e.append(e_iw.sum() + 2*mean_free_ekin)
-
-    return np.asarray(total_e)
 
 def complexity(filestr):
     """Extracts the loopcount for convergence"""
