@@ -42,9 +42,7 @@ if __name__ == "__main__":
     ur = np.arange(0, 4.5, 0.1)
     BETARANGE = np.round(np.hstack(([768, 512], np.logspace(8, -4.5, 41, base=2))), 2)
 
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_tp_u)(ur, tpr, BETA,
-                                                      'disk/Dimer_ipt_B{}.h5')
-                                   for BETA in BETARANGE)
-    Parallel(n_jobs=-1, verbose=5)(delayed(loop_tp_u)(ur, tpr, BETA,
-                                                      'disk/Dimer_ins_ipt_B{}.h5', False)
-                                   for BETA in BETARANGE)
+    jobs = [(ur, tpr, BETA, 'disk/Dimer_ipt_B{}.h5') for BETA in BETARANGE]
+    jobs+= [(ur[::-1], tpr, BETA, 'disk/Dimer_ins_ipt_B{}.h5', False) for BETA in BETARANGE]
+
+    Parallel(n_jobs=-1, verbose=5)(delayed(loop_tp_u)(*job) for job in jobs)

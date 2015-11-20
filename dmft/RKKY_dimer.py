@@ -91,6 +91,11 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
         converged *= np.allclose(giw_o_old, giw_o, conv)
 
         loops += 1
+        if loops > 2000:
+            converged = True
+            print('B', BETA, 'tp', tp, 'U', u_int)
+            print('Failed to converge in less than 2000 iterations')
+
 
     return giw_d, giw_o, loops
 
