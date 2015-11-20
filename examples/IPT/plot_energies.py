@@ -10,17 +10,21 @@ To study the stability of the solutions in the coexistence region
 
 from __future__ import division, absolute_import, print_function
 
+
+from dmft.common import greenF, tau_wn_setup
 from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, fit_gf
-from dmft.twosite import matsubara_Z
+from math import log
+from scipy.integrate import quad
+from scipy.integrate import simps
 from scipy.optimize import fsolve
 import slaveparticles.quantum.dos as dos
-from scipy.integrate import quad
-
 import numpy as np
 import matplotlib.pylab as plt
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+from joblib import Memory
 
-
+memory = Memory(cachedir='/tmp/docbuild_cache', verbose=0)
 
 ###############################################################################
 # Total energy
@@ -45,45 +49,166 @@ import matplotlib.pylab as plt
 #
 # .. math::  \langle T \rangle = Tr \frac{1}{\beta} \sum_n \left( i\omega_n \left( G(i\omega_n)- G(i\omega_n)^{free} \right) - \Sigma(i\omega_n)G(i\omega_n) \right) + \int_{\infty}^\mu \epsilon\rho(\epsilon)n_F(\epsilon) d\epsilon
 
+@memory.cache
 def hysteresis(beta, u_range):
     log_g_sig = []
-    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
+    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(6*beta, 256)))
     g_iwn = greenF(w_n)
     for u_int in u_range:
         g_iwn, sigma = dmft_loop(u_int, 0.5, g_iwn, w_n, tau)
         log_g_sig.append((g_iwn, sigma))
-    return log_g_sig
+    return log_g_sig, tau, w_n
 
+
+def ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree):
+    return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + e_mean
+
+
+def epot(g_iw, s_iw, u, beta, w_n):
+    return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32.
+
+
+def etot(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree):
+    return ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree) + \
+           epot(g_iw, s_iw, u, beta, w_n)
+
+
+def n_half(mu, beta):
+    return quad(dos.bethe_fermi, -1., 1., args=(1., mu, 0.5, beta))[0]-0.5
 
 def energy(beta, u_range, g_s_results):
-    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSu_rangeBARA=beta))
-    gfree = greenF(w_n)
-    n_half = lambda e: quad(dos.bethe_fermi, -1, e, args=(1., 0., 0.5, beta))[0]-0.5
-    mu = fsolve(n_half, 0.)[0]
-    e_mean = quad(dos.bethe_fermi_ene, -1, mu, args=(1., 0., 0.5, beta))[0]
-    T = np.asarray([2*(1j*w_n*(g-gfree) - s*g).real.sum()/beta + e_mean
-                    for (g, s), u in zip(g_s_results, u_range)])
-    V = np.asarray([(s*g+u**2/4./w_n**2).real.sum()/beta
-                    for (g, s), u in zip(g_s_results, u_range)]) - beta*u_range**2/32.
+    g_s_iw_log, tau, w_n = g_s_results
+    g_iwfree = greenF(w_n)
+    mu = fsolve(n_half, 0., beta)[0]
+    e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu, 0.5, beta))[0]
+    T = np.asarray([ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree)
+                    for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
+    V = np.asarray([epot(g_iw, s_iw, u, beta, w_n)
+                    for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
 
     return T, V
 
 U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
-fige, axe = plt.subplots(nrows=3, sharex=True, sharey=True)
+
+E_log = []
+BETARANGE = np.logspace(-4.5, 10, 35, base=2)[::-1]
+
+for i, BETA in enumerate(BETARANGE):
+    Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
+    Tm, Vm = energy(BETA, U, hysteresis(BETA, U))
+    E_log.append((Tm, Vm, Ti[::-1], Vi[::-1]))
+
+fige, axe = plt.subplots(nrows=3, sharex=True)
 fige.subplots_adjust(hspace=0.)
-betarange = [50, 200, 512]
-for i, beta in enumerate(betarange):
-    Ti, Vi = energy(beta, rU, hysteresis(beta, rU))
-    Tm, Vm = energy(beta, U, hysteresis(beta, U))
+for i, j in zip([0, 9, 12], ['b', 'g', 'r']):
+    BETA = BETARANGE[i]
+    Tm, Vm, Ti, Vi = E_log[i]
+    axe[0].plot(U, Tm, j, label=r'$\beta={:.0f}$'.format(BETA))
+    axe[0].plot(U, Ti, j)
+    axe[1].plot(U, Vm, j)
+    axe[1].plot(U, Vi, j)
+    axe[2].plot(U, (Ti+Vi)-(Tm+Vm), j+'-')
 
-    axe[0].plot(rU, Ti+Vi, '--', label=r'$\langle T \rangle$')
-    axe[1].plot(rU, Tm+Vm, '--', label=r'$\langle V \rangle$')
-    axe[2].plot(rU, Ti+Vi-(Tm+Vm), '--', label=r'$\langle H \rangle$')
+axe[0].set_ylabel(r'$\langle T \rangle$')
+axe[1].set_ylabel(r'$\langle V \rangle$')
+axe[2].set_ylabel(r'$\Delta \langle  H \rangle$')
+axe[0].legend(loc=0)
+axe[2].set_xlabel('U/D')
 
-    axe[i].set_ylabel(r'$\langle E \rangle$ @ $\beta={}$'.format(beta))
-    axe[i].set_xlabel('U/D')
-    axe[i].set_xlim([2, 3.5])
+###############################################################################
+# Change of the internal energy with temperature
+# ----------------------------------------------
+#
+# The next plots show the internal energy. The zoomed insets are also
+# rendered in logarithmic scale for the temperature axis. One can see
+# the existence of the 2 solutions for the metallic and insulating
+# case.
 
-axe[0].set_title('Hysteresis loop of energies')
-axe[2].legend(loc=0)
+E_log = np.rollaxis(np.rollaxis(np.asarray(E_log), 2), 2)
+Tm, Vm, Ti, Vi = E_log[0], E_log[1], E_log[2], E_log[3]
+Hm = Tm + Vm
+Hi = Ti + Vi
+fig, ax = plt.subplots()
+ax.plot(1/BETARANGE, Hm[0], label='U='+str(U[0]))
+ax.plot(1/BETARANGE, Hm[26], label='U='+str(U[26]))
+ax.plot(1/BETARANGE, Hm[40], label='U='+str(U[40]))
+ax.set_xlim([0, 8])
+axins = zoomed_inset_axes(ax, 12, loc=5)
+axins.semilogx(1/BETARANGE, Hm[0], 'b+-')
+axins.semilogx(1/BETARANGE, Hi[0], 'b+-')
+axins.set_xlim([1/1240, .4])
+axins.set_ylim([-.333, -0.32])
+mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
+plt.yticks(visible=False)
+axins = zoomed_inset_axes(ax, 12, loc=4)
+axins.semilogx(1/BETARANGE, Hm[26], 'g+-')
+axins.semilogx(1/BETARANGE, Hi[26], 'g+-')
+axins.set_xlim([1/1240, .4])
+axins.set_ylim([-.419, -0.412])
+mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
+plt.xticks(visible=False)
+plt.yticks(visible=False)
+
+ax.set_xlabel('T/D')
+ax.set_ylabel(r'$\langle  H \rangle$')
+ax.legend(loc=1)
+
+###############################################################################
+# The heat Capacity
+# -----------------
+#
+# Is obtained by differentiating the interval Energy by Temperature
+#
+# .. math:: C_v = \frac{\partial\langle  H \rangle}{\partial T}
+#
+# The discontinuity in the internal energy originated from the
+# existence of two solution cause a sudden jump to negative values in
+# the numerical approximation of the derivative to estimate the Heat
+# Capacity. As such those points are replaced by zero. This
+# approximation is here justified in the spirit that at the low
+# temperatures where this happens the calculated density of points is
+# high and as such little information is lost when integrating over
+# the heat capacity if this values are missing.
+
+
+def heat_capacity(H, T):
+    return (np.ediff1d(H)/np.ediff1d(T)).clip(0)
+
+T = 1/BETARANGE
+plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U='+str(U[0]))
+plt.semilogx(T[:-1], heat_capacity(Hm[26], T), label='met U='+str(U[26]))
+plt.semilogx(T[:-1], heat_capacity(Hi[26], T), '--', label='ins U='+str(U[26]))
+plt.xlim([1/1240, 10])
+plt.legend(loc=0)
+plt.xlabel('T/D')
+plt.ylabel('Heat Capacity')
+
+###############################################################################
+# The entropy
+# -----------
+#
+# .. math:: S(T) = \ln 2 - \int_T^\infty \frac{C_v}{T'} dT'
+#
+# The use of the saturation value of the entropy at high temperatures
+# allows to more reliably estimate the entropy as the high temperature
+# behavior of the system is smoother
+
+def entropy(H, T):
+    cv_T = np.hstack((heat_capacity(H, T)/T[:-1], 0))
+    S = np.array([simps(cv_T[i:], T[i:]) for i in range(len(T))])
+    return log(2.) - S
+
+plt.semilogx(T, entropy(Hm[0], T), label='U='+str(U[0]))
+plt.semilogx(T, entropy(Hm[26], T), label='U='+str(U[26]))
+plt.semilogx(T, entropy(Hi[26], T), '--', label='U='+str(U[26]))
+plt.xlim([1/1240, 10])
+plt.legend(loc=0)
+plt.xlabel('T/D')
+plt.ylabel('Entropy')
+
+###############################################################################
+# The Free Energy landscape
+# -------------------------
+#
+#
