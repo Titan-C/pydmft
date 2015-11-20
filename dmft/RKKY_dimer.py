@@ -6,24 +6,20 @@ Dimer Bethe lattice
 Non interacting dimer of a Bethe lattice
 Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
-from __future__ import division, print_function, absolute_import
-from pytriqs.gf.local import GfImFreq, GfImTime, InverseFourier, \
-    Fourier, inverse, TailGf, iOmega_n
 
+from __future__ import division, print_function, absolute_import
 from dmft.twosite import matsubara_Z
-from joblib import Parallel, delayed
-from pytriqs.archive import HDFArchive
 from scipy.integrate import quad
 from scipy.optimize import fsolve
 import dmft.common as gf
-import dmft.ipt_imag as ipt
-import dmft.hirschfye as hf
 import dmft.h5archive as h5
+import dmft.ipt_imag as ipt
 import numpy as np
 import slaveparticles.quantum.dos as dos
 
 ###############################################################################
 # Dimer Bethe lattice
+
 
 def gf_met(omega, mu, tp, t, tn):
     """Double semi-circular density of states to represent the
@@ -71,183 +67,23 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
     return mat_mul(dend, dendo, g0iw_d, g0iw_o)
 
 
-def mix_gf_dimer(gmix, omega, mu, tab):
-    """Dimer formation Green function term
-
-    .. math:: G_{mix}(i\omega_n) =ao
-    """
-    gmix['A', 'A'] = omega + mu
-    gmix['A', 'B'] = -tab
-    gmix['B', 'A'] = -tab
-    gmix['B', 'B'] = omega + mu
-    return gmix
-
-
-def fit_tail(g_iw):
-    """Fits a tail with the known first moment decay as 1/w"""
-    fixed_co = TailGf(2, 2, 3, -1)
-    fixed_co[1] = np.array([[1, 0], [0, 1]])
-    mesh = len(g_iw.mesh)
-    g_iw.fit_tail(fixed_co, 8, int(0.65*mesh), mesh)
-
-
-def init_gf_met(g_iw, omega, mu, tab, tn, t):
-    """Gives a metalic seed of a non-interacting system
-
-    """
-
-    Gd, Gc = gf_met(omega, mu, tab, tn, t)
-    load_gf_from_np(g_iw, Gd, Gc)
-
-    if isinstance(g_iw, GfImFreq):
-        fit_tail(g_iw)
-
-
-def init_gf_ins(g_iw, omega, U):
-    r"""Initializes the green function in the insulator limit given by
-
-    .. math:: G_{11} = (i\omega_n \pm \frac{U^2}{4i\omega_n})^{-1}
-    """
-    G1 = 1./(1j*omega + U**2 / 4j/omega)
-    G2 = 1./(1j*omega - U**2 / 4j/omega)
-
-    Gd = .5*(G1 + G2)
-    Gc = .5*(G1 - G2)
-
-    load_gf_from_np(g_iw, Gd, Gc)
-
-
-def load_gf_from_np(g_iw, g_iwd, g_iwo):
-    """Loads into the first greenfunction the equal diagonal terms and the
-    offdiagonals. Input is numpy array"""
-
-    g_iw['A', 'A'].data[:, 0, 0] = g_iwd
-    g_iw['A', 'B'].data[:, 0, 0] = g_iwo
-    g_iw['B', 'A'] << g_iw['A', 'B']
-    g_iw['B', 'B'] << g_iw['A', 'A']
-
-
-def load_gf(g_iw, g_iwd, g_iwo):
-    """Loads into the first greenfunction the equal diagonal terms and the
-    offdiagonals. Input in GF_view"""
-
-    g_iw['A', 'A'] << g_iwd
-    g_iw['B', 'B'] << g_iwd
-    g_iw['A', 'B'] << g_iwo
-    g_iw['B', 'A'] << g_iwo
-
-
-class Dimer_Solver(object):
-
-    def __init__(self, **params):
-
-        self.U = params['U']
-        self.beta = params['BETA']
-        self.setup = params
-
-        self.g_iw = GfImFreq(indices=['A', 'B'], beta=self.beta,
-                             n_points=params['N_MATSUBARA'])
-        self.g0_iw = self.g_iw.copy()
-        self.sigma_iw = self.g_iw.copy()
-
-        # Imaginary time
-        self.g0_tau = GfImTime(indices=['A', 'B'], beta=self.beta)
-        self.sigma_tau = self.g0_tau.copy()
-
-    def solve(self):
-
-        self.g0_tau << InverseFourier(self.g0_iw)
-        for name in [('A', 'A'), ('A', 'B'), ('B', 'A'), ('B', 'B')]:
-            self.sigma_tau[name].data[:] = self.U**2 * \
-                                           self.g0_tau[name].data * \
-                                           self.g0_tau[name].data * \
-                                           self.g0_tau[name].data[::-1]
-
-        self.sigma_iw << Fourier(self.sigma_tau)
-
-        # Dyson equation to get G
-        self.g_iw << inverse(inverse(self.g0_iw) - self.sigma_iw)
-
-
-
-def gf_symetrizer(G):
-    gd = 1j*np.squeeze(0.5*(G['A', 'A'].data + G['B', 'B'].data)).imag
-    gn = np.squeeze(0.5*(G['A', 'B'].data + G['B', 'A'].data)).real
-    load_gf_from_np(G, gd, gn)
-
-
-def dimer(S, gmix, filename, step):
-
-    converged = False
-    loops = 0
-    t_hop = np.matrix([[S.setup['t'], S.setup['tn']],
-                       [S.setup['tn'], S.setup['t']]])
-    while not converged:
-        # Enforce DMFT Paramagnetic, IPT conditions
-        # Pure imaginary GF in diagonals
-        S.g_iw.data[:, 0, 0] = 1j*S.g_iw.data[:, 0, 0].imag
-        S.g_iw['B', 'B'] << S.g_iw['A', 'A']
-        # Pure real GF in off-diagonals
-#        S.g_iw.data[:, 0, 1] = S.g_iw.data[:, 1, 0].real
-        S.g_iw['B', 'A'] << 0.5*(S.g_iw['A', 'B'] + S.g_iw['B', 'A'])
-        S.g_iw['A', 'B'] << S.g_iw['B', 'A']
-
-        oldg = S.g_iw.data.copy()
-        # Bethe lattice bath
-        S.g0_iw << gmix - t_hop * S.g_iw * t_hop
-        S.g0_iw.invert()
-        S.solve()
-#        import pdb; pdb.set_trace()
-
-        converged = np.allclose(S.g_iw.data, oldg, atol=1e-5)
-        loops += 1
-#        mix = mixer(loops)
-        if loops > 2000:
-            converged = True
-
-    S.setup.update({'U': S.U, 'loops': loops})
-
-    store_sim(S, filename, step)
-
-
-def store_sim(S, file_str, step_str):
-    file_name = file_str.format(**S.setup)
-    step = step_str.format(**S.setup)
-    with HDFArchive(file_name, 'a') as R:
-        R[step+'setup'] = S.setup
-        R[step+'G_iwd'] = S.g_iw['A', 'A']
-        R[step+'G_iwo'] = S.g_iw['A', 'B']
-
-
-def recover_lastit(S, file_str):
-    try:
-        file_name = file_str.format(**S.setup)
-        with HDFArchive(file_name, 'r') as R:
-            ru = 'U'+str(S.U)
-            lastit = R[ru].keys()[-1]
-            load_gf(S.g_iw, R[ru][lastit]['G_iwd'], R[ru][lastit]['G_iwo'])
-            S.setup['loops'] = R[ru][lastit]['setup']['loops']
-            S.setup['max_loops'] += S.setup['loops']
-    except (IOError, KeyError):
-        pass
-
-
 def epot(filestr, beta):
     V = []
-    with h5.File(filestr, 'r') as results:
+    with h5.File(filestr.format(beta), 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
         wsqr_4 = 4*w_n*w_n
         for tpstr in results:
             tp = float(tpstr[2:])
             tprec = results[tpstr]
             for ustr in tprec:
-                Igiw_d, Rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*Igiw_d, Rgiw_o,
+                jgiw_d, rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
                                                   0., tp, 0.25)
                 u_int = float(ustr[1:])
                 siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-                V.append((Rgiw_o*siw_o.real - Igiw_d*siw_d.imag + u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
+                V.append((rgiw_o*siw_o.real - jgiw_d*siw_d.imag +
+                          u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
         array_shape = (len(results.keys()), len(tprec.keys()))
 
     return np.asarray(V).reshape(array_shape)
@@ -257,40 +93,43 @@ def n_fill(mu, tp, beta):
     return quad(dos.bethe_fermi, -1., 1., args=(1., mu + tp, 0.5, beta))[0] + \
            quad(dos.bethe_fermi, -1., 1., args=(1., mu - tp, 0.5, beta))[0]-1.
 
+
+def free_ekin(tp, beta):
+    mu = fsolve(n_fill, 0., (tp, beta))[0]
+    e_mean = quad(dos.bethe_fermi_ene, -1., 1., (1., mu+tp, 0.5, beta))[0] + \
+             quad(dos.bethe_fermi_ene, -1., 1., (1., mu-tp, 0.5, beta))[0] - \
+             tp*(quad(dos.bethe_fermi, -1., 1., (1., mu+tp, 0.5, beta))[0] -
+                 quad(dos.bethe_fermi, -1., 1., (1., mu-tp, 0.5, beta))[0])
+    return e_mean * 0.5
+
+
 def ekin(filestr, beta):
     r"""Calculates the internal energy of the system given by Fetter-Walecka"""
     T = []
-    with h5.File(filestr, 'r') as results:
+    with h5.File(filestr.format(beta), 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
-        iw_n = 1j*w_n
         for tpstr in results:
             tp = float(tpstr[2:])
             tprec = results[tpstr]
-            giw_free_d, giw_free_o = gf_met(w_n, 0., tp, 0.5, 0.)
-            mu = fsolve(n_fill, 0., (tp, beta))[0]
-            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu+tp, 0.5, beta))[0] + \
-                     quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu-tp, 0.5, beta))[0] - \
-                     tp*(quad(dos.bethe_fermi, -1., 1., args=(1., mu+tp, 0.5, beta))[0] - \
-                         quad(dos.bethe_fermi, -1., 1., args=(1., mu-tp, 0.5, beta))[0])
-            e_mean *= 0.5
-            print(mu, e_mean)
+            giw_free_d, _ = gf_met(w_n, 0., tp, 0.5, 0.)
+            e_mean = free_ekin(tp, beta)
             for ustr in tprec:
-                Igiw_d, Rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*Igiw_d, Rgiw_o,
+                jgiw_d, rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
                                                   0., tp, 0.25)
                 u_int = float(ustr[1:])
                 siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-                T.append(2*(w_n*(giw_free_d.imag - Igiw_d) +
-                          Igiw_d*siw_d.imag - Rgiw_o*siw_o.real).sum()/beta + e_mean)
+                T.append(2*(w_n*(giw_free_d.imag - jgiw_d) +
+                         jgiw_d*siw_d.imag - rgiw_o*siw_o.real).sum()/beta + e_mean)
         array_shape = (len(results.keys()), len(tprec.keys()))
 
     return np.asarray(T).reshape(array_shape)
 
 
-def complexity(filestr):
+def complexity(filestr, beta):
     """Extracts the loopcount for convergence"""
-    with h5.File(filestr, 'r') as results:
+    with h5.File(filestr.format(beta), 'r') as results:
         comp = [results[tpstr][uint]['loops'].value
                 for tpstr in results
                 for uint in results[tpstr]]
@@ -300,7 +139,7 @@ def complexity(filestr):
 
 def quasiparticle(filestr, beta):
     zet = []
-    with h5.File(filestr, 'r') as results:
+    with h5.File(filestr.format(beta), 'r') as results:
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
         for tpstr in results:
             tp = float(tpstr[2:])
@@ -320,50 +159,9 @@ def quasiparticle(filestr, beta):
 
 
 def fermi_level_dos(filestr, beta, n=3):
-    with h5.File(filestr, 'r') as results:
+    with h5.File(filestr.format(beta), 'r') as results:
         w_n = gf.matsubara_freq(beta, n)
-        fl = []
-        for tpstr in results:
-            fl.append(np.array([gf.fit_gf(w_n,
-                                          results[tpstr][uint]['giw_d'][:n])(0.)
-                                for uint in results[tpstr]]))
-    return np.asarray(fl)
-
-
-def proc_files(filelist):
-    """Extracts the diffulty, quasiparticle weigth, fermi_lev dos, and Energy
-
-    Parameters
-    ----------
-    filelist:
-        list that contains the paths to files to be processed
-
-    Returns
-    -------
-    4-tuple of 2D ndarrays. First axis corresponds to filelist, second to file
-    data. Keep in mind H5 files return keys in alphabetical and not write order
-    """
-
-    dif = np.asarray(Parallel(n_jobs=-1)(delayed(complexity)(f)
-                                         for f in filelist))
-    zet = np.asarray(Parallel(n_jobs=-1)(delayed(quasiparticle)(f)
-                                         for f in filelist))
-    imet = np.asarray(Parallel(n_jobs=-1)(delayed(fermi_level_dos)(f)
-                                          for f in filelist))
-    H = np.asarray(Parallel(n_jobs=-1)(delayed(total_energy)(f)
-                                       for f in filelist))
-
-    return dif, zet, imet, H
-
-
-def result_pros(tabra, beta):
-    filelist = ['met_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta)
-                for it in tabra]
-    met_sol = proc_files(filelist)
-    filelist = ['ins_fuloop_t0.5_tab{}_B{}.h5'.format(it, beta)
-                for it in tabra]
-    ins_sol = proc_files(filelist)
-
-    np.savez('results_fuloop_t0.5_B{}'.format(beta),
-             difm=met_sol[0], zetm=met_sol[1], imetm=met_sol[2], Hm=met_sol[3],
-             difi=ins_sol[0], zeti=ins_sol[1], imeti=ins_sol[2], Hi=ins_sol[3])
+        dos_fl = np.array([gf.fit_gf(w_n, results[tpstr][uint]['giw_d'][:n])(0.)
+                           for tpstr in results for uint in results[tpstr]])
+        dos_fl = dos_fl.reshape((len(results.keys()), -1))
+    return dos_fl
