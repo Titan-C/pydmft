@@ -9,20 +9,18 @@ To study the stability of the solutions in the coexistence region
 """
 
 from __future__ import division, absolute_import, print_function
-
-
 from dmft.common import greenF, tau_wn_setup
 from dmft.ipt_imag import dmft_loop
+from joblib import Memory
 from math import log
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset
+from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 from scipy.integrate import quad
 from scipy.integrate import simps
 from scipy.optimize import fsolve
-import slaveparticles.quantum.dos as dos
-import numpy as np
 import matplotlib.pylab as plt
-from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
-from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-from joblib import Memory
+import numpy as np
+import slaveparticles.quantum.dos as dos
 
 memory = Memory(cachedir='/tmp/docbuild_cache', verbose=0)
 
@@ -30,24 +28,9 @@ memory = Memory(cachedir='/tmp/docbuild_cache', verbose=0)
 # Total energy
 # ------------
 #
-# Starting first with the kinetic energy
-#
-# .. math:: \langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \epsilon_k^0 G(k, i\omega_n)
-#
-# It can be transformed into a treatable form relying on local quantities
-#
-# .. math:: \langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + G(k, i\omega_n)^{-1}G(k, i\omega_n) - G^{free}(k, i\omega_n)^{-1}G^{free}(k, i\omega_n) \right)
-#
-# .. math::  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + (i\omega_n - \epsilon_k^0 - \Sigma(i\omega_n))G(k, i\omega_n) - (i\omega_n - \epsilon_k^0)G^{free}(k, i\omega_n) \right)
-#
-# .. math::  = Tr \frac{1}{\beta} \sum_{k,n} \left( i\omega_n \left( G(k, i\omega_n)- G(k, i\omega_n)^{free} \right) - \Sigma(i\omega_n) G(k, i\omega_n) \epsilon_k^0 G(k, i\omega_n) + \epsilon_k^0G^{free}(k, i\omega_n) \right)
-#
-# The first two terms can be summed in reciprocal space to yield a
-# local the quantities that come out of the DMFT self-consistency and
-# the last term as it belongs to the non-interacting system is
-# trivially solvable
-#
-# .. math::  \langle T \rangle = Tr \frac{1}{\beta} \sum_n \left( i\omega_n \left( G(i\omega_n)- G(i\omega_n)^{free} \right) - \Sigma(i\omega_n)G(i\omega_n) \right) + \int_{\infty}^\mu \epsilon\rho(\epsilon)n_F(\epsilon) d\epsilon
+# One uses the formula for the :ref:`kinetic_energy` and
+# :ref:`potential_energy` and adds them up.
+
 
 @memory.cache
 def hysteresis(beta, u_range):
@@ -57,10 +40,10 @@ def hysteresis(beta, u_range):
     for u_int in u_range:
         g_iwn, sigma = dmft_loop(u_int, 0.5, g_iwn, w_n, tau)
         log_g_sig.append((g_iwn, sigma))
-    return log_g_sig, tau, w_n
+    return log_g_sig, w_n
 
 
-def ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree):
+def ekin(g_iw, s_iw, beta, w_n, e_mean, g_iwfree):
     return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + e_mean
 
 
@@ -68,31 +51,29 @@ def epot(g_iw, s_iw, u, beta, w_n):
     return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32.
 
 
-def etot(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree):
-    return ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree) + \
-           epot(g_iw, s_iw, u, beta, w_n)
-
-
 def n_half(mu, beta):
     return quad(dos.bethe_fermi, -1., 1., args=(1., mu, 0.5, beta))[0]-0.5
 
+
 def energy(beta, u_range, g_s_results):
-    g_s_iw_log, tau, w_n = g_s_results
+    g_s_iw_log, w_n = g_s_results
     g_iwfree = greenF(w_n)
     mu = fsolve(n_half, 0., beta)[0]
     e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu, 0.5, beta))[0]
-    T = np.asarray([ekin(g_iw, s_iw, u, beta, w_n, e_mean, g_iwfree)
-                    for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
-    V = np.asarray([epot(g_iw, s_iw, u, beta, w_n)
-                    for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
+    kin = np.asarray([ekin(g_iw, s_iw, beta, w_n, e_mean, g_iwfree)
+                      for g_iw, s_iw in g_s_iw_log])
+    pot = np.asarray([epot(g_iw, s_iw, u, beta, w_n)
+                      for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
 
-    return T, V
+    return kin, pot
+
 
 U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.logspace(-4.5, 10, 35, base=2)[::-1]
+BETARANGE = np.hstack((1/np.linspace(1/1024, 1/8, 20),
+                       [4, 2, 1, 1/2, 1/4, 1/8, 1/16, 1/32]))
 
 for i, BETA in enumerate(BETARANGE):
     Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
@@ -105,10 +86,10 @@ for i, j in zip([0, 9, 12], ['b', 'g', 'r']):
     BETA = BETARANGE[i]
     Tm, Vm, Ti, Vi = E_log[i]
     axe[0].plot(U, Tm, j, label=r'$\beta={:.0f}$'.format(BETA))
-    axe[0].plot(U, Ti, j)
+    axe[0].plot(U, Ti, j + '--')
     axe[1].plot(U, Vm, j)
-    axe[1].plot(U, Vi, j)
-    axe[2].plot(U, (Ti+Vi)-(Tm+Vm), j+'-')
+    axe[1].plot(U, Vi, j + '--')
+    axe[2].plot(U, (Tm+Vm)-(Ti+Vi), j+'-')
 
 axe[0].set_ylabel(r'$\langle T \rangle$')
 axe[1].set_ylabel(r'$\langle V \rangle$')
@@ -173,7 +154,7 @@ ax.legend(loc=1)
 
 
 def heat_capacity(H, T):
-    return (np.ediff1d(H)/np.ediff1d(T)).clip(0)
+    return (np.ediff1d(H)/np.ediff1d(T)).clip(1e-5)
 
 T = 1/BETARANGE
 plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U='+str(U[0]))
@@ -194,6 +175,7 @@ plt.ylabel('Heat Capacity')
 # allows to more reliably estimate the entropy as the high temperature
 # behavior of the system is smoother
 
+
 def entropy(H, T):
     cv_T = np.hstack((heat_capacity(H, T)/T[:-1], 0))
     S = np.array([simps(cv_T[i:], T[i:]) for i in range(len(T))])
@@ -211,4 +193,13 @@ plt.ylabel('Entropy')
 # The Free Energy landscape
 # -------------------------
 #
-#
+# The final IPT coexistence region as described by the Free Energy. It
+# can be seen how in general the insulating solution is more favorable
+# as the difference in free energy is positive there. The first order
+# transition line can also be seen.
+
+Sm = np.array([entropy(Hm[i], T) for i in range(len(U))])
+Si = np.array([entropy(Hi[i], T) for i in range(len(U))])
+twosol = (Hm-Hi-T*(Sm-Si))*(np.abs((Hm-Hi)) > 1.2e-4)
+plt.pcolormesh(U, T[:19], twosol.T[:19], cmap=plt.get_cmap('inferno'), alpha=1)
+plt.colorbar()
