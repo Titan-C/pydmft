@@ -10,9 +10,6 @@ import numpy as np
 from dmft import ipt_imag
 from dmft.common import greenF, tau_wn_setup
 import dmft.RKKY_dimer as dimer
-from dmft.RKKY_dimer import mix_gf_dimer, init_gf_met, \
-    Dimer_Solver
-from pytriqs.gf.local import iOmega_n
 import pytest
 import tempfile
 import shutil
@@ -88,16 +85,7 @@ def test_ipt_dimer_pm_g(u_int, result, beta=50., n_matsubara=160):
              't': 0.5, 'MU': 0, 'U': u_int,
              }
     tau, w_n = tau_wn_setup(parms)
-    S = Dimer_Solver(**parms)
-    S.setup.update({'t':  parms['t'], 'tn': 0., 'U': u_int})
-    gmix = mix_gf_dimer(S.g_iw.copy(), iOmega_n, 0., 0.)
-    init_gf_met(S.g_iw, w_n, 0., 0., 0., parms['t'])
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0, 0.5, 0.)
+    giw_d = dimer.ipt_dmft_loop(beta, u_int, 0, giw_d, giw_o)[0]
 
-    tmp_cache = tempfile.mkdtemp()
-    file_str = os.path.join(tmp_cache, 'test_ipt_dimer.h5')
-    dimer.dimer(S, gmix, file_str, '/U{U}/')
-    g_iwn = S.g_iw.data[:64,0,0]
-
-    assert np.allclose(result, g_iwn, atol=3e-3)
-
-    shutil.rmtree(tmp_cache)
+    assert np.allclose(result, giw_d, atol=3e-3)

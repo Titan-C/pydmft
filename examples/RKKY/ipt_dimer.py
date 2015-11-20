@@ -18,40 +18,13 @@ import dmft.h5archive as h5
 import dmft.ipt_imag as ipt
 import numpy as np
 
-def dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
-
-    converged = False
-    loops = 0
-    iw_n = 1j*w_n
-
-    while not converged:
-        # Half-filling, particle-hole cleaning
-        giw_d.real = 0.
-        giw_o.imag = 0.
-
-        giw_d_old = giw_d.copy()
-        giw_o_old = giw_o.copy()
-
-        g0iw_d, g0iw_o = rt.self_consistency(iw_n, giw_d, giw_o, 0., tp, 0.25)
-
-        siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
-        giw_d, giw_o = rt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
-
-        converged = np.allclose(giw_d_old, giw_d, conv)
-        converged *= np.allclose(giw_o_old, giw_o, conv)
-
-        loops += 1
-
-    return giw_d, giw_o, loops
-
 
 def loop_tp_u(urange, tprange, BETA, filestr):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
     for tp in tprange:
         giw_d, giw_o = rt.gf_met(w_n, 0., tp, 0.5, 0.)
         for u_int in urange:
-            giw_d, giw_o, loops = dimer_dmft_loop(BETA, u_int, tp, giw_d, giw_o)
+            giw_d, giw_o, loops = ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o)
 
             with h5.File(filestr.format(BETA), 'a') as store:
                 u_group = '/tp{}/U{}/'.format(tp, u_int)

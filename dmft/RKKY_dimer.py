@@ -67,6 +67,34 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
     return mat_mul(dend, dendo, g0iw_d, g0iw_o)
 
 
+def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
+
+    converged = False
+    loops = 0
+    iw_n = 1j*w_n
+
+    while not converged:
+        # Half-filling, particle-hole cleaning
+        giw_d.real = 0.
+        giw_o.imag = 0.
+
+        giw_d_old = giw_d.copy()
+        giw_o_old = giw_o.copy()
+
+        g0iw_d, g0iw_o = self_consistency(iw_n, giw_d, giw_o, 0., tp, 0.25)
+
+        siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+        giw_d, giw_o = dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
+
+        converged = np.allclose(giw_d_old, giw_d, conv)
+        converged *= np.allclose(giw_o_old, giw_o, conv)
+
+        loops += 1
+
+    return giw_d, giw_o, loops
+
+
 def epot(filestr, beta):
     V = []
     with h5.File(filestr.format(beta), 'r') as results:
