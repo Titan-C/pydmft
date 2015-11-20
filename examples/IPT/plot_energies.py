@@ -11,7 +11,6 @@ To study the stability of the solutions in the coexistence region
 from __future__ import division, absolute_import, print_function
 from dmft.common import greenF, tau_wn_setup
 from dmft.ipt_imag import dmft_loop
-from joblib import Memory
 from math import log
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
@@ -22,7 +21,6 @@ import matplotlib.pylab as plt
 import numpy as np
 import slaveparticles.quantum.dos as dos
 
-memory = Memory(cachedir='/tmp/docbuild_cache', verbose=0)
 
 ###############################################################################
 # Total energy
@@ -32,7 +30,6 @@ memory = Memory(cachedir='/tmp/docbuild_cache', verbose=0)
 # :ref:`potential_energy` and adds them up.
 
 
-@memory.cache
 def hysteresis(beta, u_range):
     log_g_sig = []
     tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(6*beta, 256)))
@@ -72,8 +69,7 @@ U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.hstack((1/np.linspace(1/1024, 1/8, 20),
-                       [4, 2, 1, 1/2, 1/4, 1/8, 1/16, 1/32]))
+BETARANGE = np.hstack(([1024, 512], np.logspace(8, -4.5, 41, base=2)))
 
 for i, BETA in enumerate(BETARANGE):
     Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
@@ -153,8 +149,8 @@ ax.legend(loc=1)
 # the heat capacity if this values are missing.
 
 
-def heat_capacity(H, T):
-    return (np.ediff1d(H)/np.ediff1d(T)).clip(1e-5)
+def heat_capacity(H, temp):
+    return (np.ediff1d(H)/np.ediff1d(temp)).clip(1e-5)
 
 T = 1/BETARANGE
 plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U='+str(U[0]))
@@ -176,9 +172,9 @@ plt.ylabel('Heat Capacity')
 # behavior of the system is smoother
 
 
-def entropy(H, T):
-    cv_T = np.hstack((heat_capacity(H, T)/T[:-1], 0))
-    S = np.array([simps(cv_T[i:], T[i:]) for i in range(len(T))])
+def entropy(H, temp):
+    cv_temp = np.hstack((heat_capacity(H, temp)/temp[:-1], 0))
+    S = np.array([simps(cv_temp[i:], T[i:]) for i in range(len(T))])
     return log(2.) - S
 
 plt.semilogx(T, entropy(Hm[0], T), label='U='+str(U[0]))
@@ -201,5 +197,6 @@ plt.ylabel('Entropy')
 Sm = np.array([entropy(Hm[i], T) for i in range(len(U))])
 Si = np.array([entropy(Hi[i], T) for i in range(len(U))])
 twosol = (Hm-Hi-T*(Sm-Si))*(np.abs((Hm-Hi)) > 1.2e-4)
-plt.pcolormesh(U, T[:19], twosol.T[:19], cmap=plt.get_cmap('inferno'), alpha=1)
+rT = T[T < 0.07]
+plt.pcolormesh(U, rT, twosol.T[:len(rT)], cmap=plt.get_cmap('inferno'))
 plt.colorbar()
