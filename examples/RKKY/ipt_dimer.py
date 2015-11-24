@@ -20,7 +20,7 @@ import numpy as np
 
 
 def loop_tp_u(urange, tprange, BETA, filestr, metal=True):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=max(5*BETA, 256)))
     for tp in tprange:
         giw_d, giw_o = rt.gf_met(w_n, 0., tp, 0.5, 0.)
         if not metal:

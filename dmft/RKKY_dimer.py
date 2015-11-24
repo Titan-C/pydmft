@@ -68,7 +68,7 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
 
 
 def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=5*BETA))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=max(5*BETA, 256)))
 
     converged = False
     loops = 0
@@ -103,7 +103,7 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
 def epot(filestr, beta):
     V = []
     with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
         wsqr_4 = 4*w_n*w_n
         for tpstr in results:
             tp = float(tpstr[2:])
@@ -140,7 +140,7 @@ def ekin(filestr, beta):
     r"""Calculates the internal energy of the system given by Fetter-Walecka"""
     T = []
     with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
         for tpstr in results:
             tp = float(tpstr[2:])
             tprec = results[tpstr]
@@ -173,7 +173,7 @@ def complexity(filestr, beta):
 def quasiparticle(filestr, beta):
     zet = []
     with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
         for tpstr in results:
             tp = float(tpstr[2:])
             tprec = results[tpstr]
