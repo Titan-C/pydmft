@@ -232,3 +232,29 @@ def fit_gf(w_n, giw):
     gfit = np.squeeze(giw)[:len(w_n)]
     pf = np.polyfit(w_n, gfit, 2)
     return np.poly1d(pf)
+
+## Pade Analytical Continuation
+## Algorithm from Vidberg & Serene J. Low Temperature Phys. 29, 3-4, 179 (1977)
+def pade_coefficients(g_iw, w_n):
+    """Find the Pade coefficients for the desired green Function"""
+    G = np.zeros((len(g_iw), len(g_iw)), dtype=np.complex)
+    G[0] = g_iw
+    for i in range(1, len(g_iw)):
+        G[i, i:] = 1j*(G[i-1, i-1]/G[i-1, i:]-1.)/(w_n[i-1]-w_n[i:])
+
+    return np.diag(G)
+
+
+def pade_rec(pc, w, w_n):
+    """Pade recursion formula for continued Fractions"""
+    an_1 = 0.
+    an = pc[0]
+    bn = 1.
+    bn_1 = 1.
+    iw_n = 1j*w_n
+    for i in range(len(pc)-2):
+        anp = an+(w-iw_n[i])*pc[i+1]*an_1
+        bnp = bn+(w-iw_n[i])*pc[i+1]*bn_1
+        an_1, an = an, anp
+        bn_1, bn = bn, bnp
+    return an/bn
