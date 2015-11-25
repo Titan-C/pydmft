@@ -14,6 +14,7 @@ from scipy.optimize import fsolve
 import dmft.common as gf
 import dmft.h5archive as h5
 import dmft.ipt_imag as ipt
+import matplotlib.pyplot as plt
 import numpy as np
 import slaveparticles.quantum.dos as dos
 
@@ -59,6 +60,7 @@ def self_consistency(omega, Gd, Gc, mu, tp, t2):
 
 
 def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
+    """Returns Dressed Green Function from G0 and Sigma"""
 
     sgd, sgo = mat_mul(g0iw_d, g0iw_o, -siw_d, -siw_o)
     sgd += 1.
@@ -198,3 +200,27 @@ def fermi_level_dos(filestr, beta, n=3):
                            for tpstr in results for uint in results[tpstr]])
         dos_fl = dos_fl.reshape((len(results.keys()), -1))
     return dos_fl
+
+# plots
+def plot_giw(beta, tp, u_int, label, filestr, axes=None):
+    if axes is None:
+        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
+    u_group = '/tp{}/U{}/'.format(tp, u_int)
+    w_n = gf.matsubara_freq(beta, max(5*beta, 256))
+    with h5.File(filestr.format(beta), 'r') as results:
+        jgiw_d, rgiw_o = results[u_group + 'giw_d'][:], results[u_group + 'giw_o'][:]
+
+        axes[0].plot(w_n, jgiw_d, 'o:', label=label)
+        axes[1].plot(w_n, rgiw_o, 's:', label=label)
+
+        graf = r'$G(i\omega_n)$'
+        axes[0].set_xlabel(r'$i\omega$')
+        axes[0].set_xlim([0, 4])
+
+    axes[0].set_title(r'Solutions at $\beta={}$ and $t_\perp={}$'.format(beta, tp))
+    axes[0].set_ylabel(graf+'$_{AA}$')
+    axes[0].legend(loc=0)
+    axes[1].set_ylabel(graf+'$_{AB}$')
+    axes[1].legend(loc=0)
+
+    return axes
