@@ -269,17 +269,6 @@ def plot_acc(BETA, u_str, tp, filestr, skip=5):
     plt.xlabel('iterations')
 
 
-def get_selfE(gtau_d, gtau_o):
-    nf = len(gtau_d.mesh)
-    beta = gtau_d.beta
-    g_iw = GfImFreq(indices=['A', 'B'], beta=beta, n_points=nf)
-    rt.load_gf(g_iw, gtau_d, gtau_o)
-    gmix = rt.mix_gf_dimer(g_iw.copy(), iOmega_n, 0, 0.2)
-    sigma = g_iw.copy()
-    sigma << gmix - 0.25*g_iw - inverse(g_iw)
-    return sigma
-
-
 def plot_tails(BETA, U, tp, ax=None):
     w_n = gf.matsubara_freq(BETA, BETA, BETA/2.)
     if ax is None:
@@ -297,7 +286,7 @@ def phase_diag_b(BETA_range, tp, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
             fl_dos = []
             for u_str in results.keys():
                 lastit = results[u_str].keys()[-1]
-                giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+                giwd, _ = get_giw(results[u_str], lastit, tau, w_n)
                 fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
@@ -317,36 +306,16 @@ def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
             fl_dos = []
             for u_str in results.keys():
                 lastit = results[u_str].keys()[-1]
-                giwd, _ = get_giw(results[u_str], lastit, tau, w_n, tp)
+                giwd, _ = get_giw(results[u_str], lastit, tau, w_n)
                 fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
-            plt.scatter(u_range, np.ones(len(fl_dos))*tp, c=fl_dos,
+            plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
                         s=150, vmin=-2, vmax=0)
     plt.ylim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
     plt.ylabel(r'$t_\perp/D$')
     plt.xlabel('$U/D$')
-
-
-def diag_sys(tp, BETA):
-    rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
-    filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
-    f, (gd, go) = plt.subplots(1, 2, figsize=(18, 8))
-    with rt.h5.File(filestr, 'r') as results:
-        for u in results.keys():
-            lastit = results[u].keys()[-1]
-            g_iw = rot*getGiw(results[u][lastit])*rot
-            gd.oplot(g_iw['A', 'A'], 'x-', label=u)
-            go.oplot(g_iw['B', 'B'], '+-', label=u)
-
-    gd.set_xlim([0, 4])
-    gd.legend(loc=0, prop={'size': 18})
-    gd.set_ylabel(r'$\Im m G_{1}(i\omega_n)$')
-    go.set_xlim([0, 4])
-    go.legend(loc=0, prop={'size': 18})
-    go.set_ylabel(r'$\Re e G_{2}(i\omega_n)$')
-    plt.suptitle('Matsubara GF $t_{{ab}}/D={}$ $\\beta D={}$'.format(tp, BETA))
 
 
 def spectral(tp, U, BETA, pade_fit_pts):
