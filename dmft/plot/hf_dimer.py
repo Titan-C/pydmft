@@ -311,11 +311,11 @@ def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
-                        s=150, vmin=-2, vmax=0)
-    plt.ylim([0, 1])
+                        s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
+    plt.xlim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
-    plt.ylabel(r'$t_\perp/D$')
-    plt.xlabel('$U/D$')
+    plt.xlabel(r'$t_\perp/D$')
+    plt.ylabel('$U/D$')
 
 
 def spectral(tp, U, BETA, pade_fit_pts):
