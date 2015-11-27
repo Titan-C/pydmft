@@ -131,7 +131,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
     if comm.rank == 0:
         save_output(parms, double_occ/comm.Get_size(),
-                    chi, acc, vlog, ar)
+                    acc, chi, vlog, ar)
 
     return [avg_g(gst, parms) for gst in Gst]
 
