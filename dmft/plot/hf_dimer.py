@@ -138,8 +138,11 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
 
         plt.show()
         plt.close()
-        print('Last step double occupation: {:.6}'.format(docc),
+        try:
+            print('Last step double occupation: {:.6}'.format(docc),
               'The acceptance rate is:{:.1%}'.format(acc))
+        except ValueError:
+            pass
 
 
 def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
