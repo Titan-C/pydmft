@@ -39,9 +39,10 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
     with h5.File(filestr.format(beta), 'r') as output_files:
-        setup = h5.get_attributes(output_files[u_str]['it000'])
+        keys = output_files[u_str].keys()
+        setup = h5.get_attributes(output_files[u_str][keys[-1]])
         tau, w_n = gf.tau_wn_setup(setup)
-        for step in sorted(output_files[u_str].keys()):
+        for step in sorted(keys):
             gtau = output_files[u_str][step]['gtau'][:]
             giw = gf.gt_fouriertrans(gtau, tau, w_n)
             axes[0].plot(w_n, giw.imag)
@@ -89,7 +90,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
         for u_str in sorted(output_files.keys()):
             u_range.append(float(u_str[1:]))
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str]['it000']))
+            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str][last_iterations[-1]]))
             gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
             giw = gf.gt_fouriertrans(gtau, tau, w_n)
 
