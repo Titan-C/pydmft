@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
 import os
+from random import choice
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
@@ -160,6 +161,8 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
     Matplotlig axes
     """
 
+
+    colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
     if axes is None:
         _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
@@ -181,10 +184,11 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
             axes[0].set_xlim([0, BETA])
         else:
             giw_d, giw_o = get_giw(output_files[u_str], step, tau, w_n)
-            axes[0].plot(w_n, giw_d.real.T, 'o-', label=label)
-            axes[0].plot(w_n, giw_d.imag.T, 'o:', label=label)
-            axes[1].plot(w_n, giw_o.real.T, 's:', label=label)
-            axes[1].plot(w_n, giw_o.imag.T, 's-', label=label)
+            #c = choice(colors)
+            #axes[0].plot(w_n, giw_d.real.T, c + 'o-', label='R ' + label)
+            axes[0].plot(w_n, giw_d.imag.T, 's:', label='I ' + label)
+            axes[1].plot(w_n, giw_o.real.T, 'o-', label='R ' + label)
+            #axes[1].plot(w_n, giw_o.imag.T, c + 's:', label='I ' + label)
 
             graf = r'$G(i\omega_n)$'
             axes[0].set_xlabel(r'$i\omega$')

@@ -210,8 +210,8 @@ def plot_giw(beta, tp, u_int, label, filestr, axes=None):
     with h5.File(filestr.format(beta), 'r') as results:
         jgiw_d, rgiw_o = results[u_group + 'giw_d'][:], results[u_group + 'giw_o'][:]
 
-        axes[0].plot(w_n, jgiw_d, 'o:', label=label)
-        axes[1].plot(w_n, rgiw_o, 's:', label=label)
+        axes[0].plot(w_n, jgiw_d, 's:', label=label)
+        axes[1].plot(w_n, rgiw_o, 'o:', label=label)
 
         graf = r'$G(i\omega_n)$'
         axes[0].set_xlabel(r'$i\omega$')
