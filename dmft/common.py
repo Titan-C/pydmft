@@ -214,7 +214,7 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     return (g_tau*2/beta).real + time_tail
 
 
-def fit_gf(w_n, giw):
+def fit_gf(w_n, giw, p=2):
     """Performs a quadratic fit of the *first's* matsubara frequencies
     to estimate the value at zero energy.
 
@@ -230,7 +230,7 @@ def fit_gf(w_n, giw):
     Callable for inter - extrapolate function
     """
     gfit = np.squeeze(giw)[:len(w_n)]
-    pf = np.polyfit(w_n, gfit, 2)
+    pf = np.polyfit(w_n, gfit, p)
     return np.poly1d(pf)
 
 ## Pade Analytical Continuation
