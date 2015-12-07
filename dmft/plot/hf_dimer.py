@@ -215,6 +215,22 @@ def report_docc_acc(BETA, u_str, tp, filestr):
 
     return docc, acc
 
+def epot(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
+         n_freq=5, xlim=2, skip=5):
+    V = []
+    with h5.File(filestr.format(BETA), 'r') as results:
+        last_iter = results[u_str].keys()[-1]
+        setup = h5.get_attributes(results[u_str][last_iter])
+        tau, w_n = gf.tau_wn_setup(setup)
+        wsqr_4 = 4*w_n*w_n
+        giwd, giwo = get_giw(results[u_str], last_iter, tau, w_n)
+        siwd, siwo = get_giw(results[u_str], last_iter, tau, w_n)
+
+        u_int = float(u_str[1:])
+
+        V.append((giwo*siwo + giwd*siwd +
+                    u_int**2/wsqr_4).sum()/BETA - BETA*u_int**2/32)
+    return np.asarray(V)
 
 def docc_plot(BETA, tp, filestr, ax=None):
     """Plots double occupation"""
