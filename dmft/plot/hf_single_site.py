@@ -28,8 +28,11 @@ def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
 
 def get_giw(h5parent, iteration, tau, w_n, tp):
     """Recovers with Fourier Transform G_iw from H5 file"""
+    setup = h5.get_attributes(h5parent[iteration])
+    mu, U = setup['MU'], setup['U']
     gtau = h5parent[iteration]['gtau'][:]
-    giw = gf.gt_fouriertrans(gtau, tau, w_n)
+    giw = gf.gt_fouriertrans(gtau, tau, w_n,
+                             [1., -mu, 0.25 + U**2/4])
 
     return gtau, giw
 
@@ -92,7 +95,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
             tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str][last_iterations[-1]]))
             gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
-            giw = gf.gt_fouriertrans(gtau, tau, w_n)
+            giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., 0.25 + U**2/4])
 
             gfit = gf.fit_gf(w_n[:3], giw.imag)
             figiw.append(gfit)
