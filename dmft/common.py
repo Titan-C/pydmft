@@ -9,6 +9,7 @@ Fourier Transforms from Matsubara frequencies to Imaginary time.
 
 from __future__ import division, absolute_import, print_function
 import numpy as np
+from numpy.fft import fft, ifft
 
 
 def matsubara_freq(beta=16., size=256, fer=1):
@@ -121,7 +122,7 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
     gtau = g_tau - time_tail
-    return beta*np.fft.ifft(gtau*np.exp(1j*np.pi*tau/beta))[...,:len(w_n)]+freq_tail
+    return beta*ifft(gtau*np.exp(1j*np.pi*tau/beta))[..., :len(w_n)]+freq_tail
 
 
 def freq_tail_fourier(tail_coef, beta, tau, w_n):
@@ -205,11 +206,9 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
-
     giwn = g_iwn - freq_tail
 
-    g_tau = np.fft.fft(giwn, len(tau))
-    g_tau *= np.exp(-1j*np.pi*tau/beta)
+    g_tau = fft(giwn, len(tau)) * np.exp(-1j*np.pi*tau/beta)
 
     return (g_tau*2/beta).real + time_tail
 
@@ -233,10 +232,19 @@ def fit_gf(w_n, giw, p=2):
     pf = np.polyfit(w_n, gfit, p)
     return np.poly1d(pf)
 
-## Pade Analytical Continuation
-## Algorithm from Vidberg & Serene J. Low Temperature Phys. 29, 3-4, 179 (1977)
+
+# Pade Analytical Continuation
+# Algorithm from Vidberg & Serene J. Low Temperature Phys. 29, 3-4, 179 (1977)
 def pade_coefficients(g_iw, w_n):
-    """Find the Pade coefficients for the desired green Function"""
+    """Find the Pade coefficients for the desired green Function
+
+    Parameters
+    ----------
+    g_iw : complex ndarray
+        single axis
+    w_n : real ndarray
+        Matsubara frequencies
+    """
     G = np.zeros((len(g_iw), len(g_iw)), dtype=np.complex)
     G[0] = g_iw
     for i in range(1, len(g_iw)):
@@ -246,7 +254,17 @@ def pade_coefficients(g_iw, w_n):
 
 
 def pade_rec(pc, w, w_n):
-    """Pade recursion formula for continued Fractions"""
+    """Pade recursion formula for continued Fractions
+
+    Parameters
+    ----------
+    pc : complex ndarray
+        pade coefficients
+    w : real ndarray
+        real frequencies
+    w_n : real ndarray
+        Matsubara frequencies
+    """
     an_1 = 0.
     an = pc[0]
     bn = 1.
