@@ -215,20 +215,22 @@ def report_docc_acc(BETA, u_str, tp, filestr):
 
     return docc, acc
 
-def ekin(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
+def ekin(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
     e_mean = rt.free_ekin(tp, BETA)
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+    giw_free_d, _ = rt.gf_met(w_n, 0., tp, 0.5, 0.)
+    T = []
 
-    with h5.File(filestr.format(BETA), 'r') as results:
-        last_iter = results[u_str].keys()[-1]
-        setup = h5.get_attributes(results[u_str][last_iter])
-        tau, w_n = gf.tau_wn_setup(setup)
-        giw_free_d, _ = rt.gf_met(w_n, 0., tp, 0.5, 0.)
-        giwd, giwo = get_giw(results[u_str], last_iter, tau, w_n)
-        siwd, siwo = get_giw(results[u_str], last_iter, tau, w_n)
+    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:
+        for u_str in results:
+            last_iter = results[u_str].keys()[-1]
+            giwd, giwo = get_giw(results[u_str], last_iter, tau, w_n)
+            siwd, siwo = get_sigmaiw(results[u_str], last_iter, tau, w_n)
 
-        T = 2*(w_n*(giw_free_d - giwd).imag +
-               giwd.imag*siwd.imag - giwo.real*siwo.real).sum()/BETA + e_mean
-    return T
+            T.append(2*(w_n*(giw_free_d - giwd).imag +
+                     giwd.imag*siwd.imag - giwo.real*siwo.real).sum()/BETA + e_mean)
+        ur = np.array([float(u_str[1:]) for u_str in results])
+    return np.array(T), ur
 
 
 def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
@@ -243,7 +245,7 @@ def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
 
             u_int = float(u_str[1:])
 
-            V.append((giwo.real*siwo.real - giwd.imag*siwd.imag + u_int**2/wsqr_4).sum()/BETA)
+            V.append((giwo*siwo + giwd*siwd + u_int**2/wsqr_4).real.sum()/BETA)
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V) - BETA*ur**2/32, ur
