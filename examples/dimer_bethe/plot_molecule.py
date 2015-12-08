@@ -11,39 +11,11 @@ spectral function are evaluated by means of the Lehmann representation
 
 from __future__ import division, absolute_import, print_function
 from dmft.common import matsubara_freq, gw_invfouriertrans
+import dmft.RKKY_dimer as rt
 from itertools import product
-from math import sqrt
-from slaveparticles.quantum import fermion
 import slaveparticles.quantum.operators as op
 import matplotlib.pyplot as plt
 import numpy as np
-
-
-
-def hamiltonian(U, mu, tp):
-    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
-    symmetry. Include chemical potential for grand Canonical calculations
-
-    .. math::
-        \mathcal{H} - \mu N =
-        -\frac{U}{2}(n_{a\uparrow} - n_{a\downarrow})^2
-        -\frac{U}{2}(n_{b\uparrow} - n_{b\downarrow})^2  +
-        t_\perp (a^\dagger_\uparrow b_\uparrow +
-                 b^\dagger_\uparrow a_\uparrow +
-                 a^\dagger_\downarrow b_\downarrow +
-                 b^\dagger_\downarrow a_\downarrow)
-
-        - \mu(n_{a\uparrow} + n_{a\downarrow})
-        - \mu(n_{b\uparrow} + n_{b\downarrow})
-
-    """
-    a_up, a_dw, b_up, b_dw = [fermion.destruct(4, sigma) for sigma in range(4)]
-    sigma_za = a_up.T*a_up - a_dw.T*a_dw
-    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
-    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
-    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, [a_up, a_dw, b_up, b_dw]
 
 
 def plot_real_gf(eig_e, eig_v, oper_pair, c_v, names):
@@ -95,7 +67,7 @@ tp = 0.25
 c_v = ['b', 'g', 'r', 'k']
 names = [r'a\uparrow', r'a\downarrow', r'b\uparrow', r'b\downarrow']
 
-h_at, oper = hamiltonian(U, mu, tp)
+h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
 eig_e, eig_v = op.diagonalize(h_at.todense())
 oper_pair = list(product([oper[0], oper[2]], repeat=2))
 names = list(product('AB', repeat=2))
@@ -108,27 +80,7 @@ plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names)
 # ======================================
 #
 
-def hamiltonian_bond(U, mu, tp):
-    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
-    symmetry. Include chemical potential for grand Canonical calculations
-
-    .. math::
-    """
-    as_up, as_dw, s_up, s_dw = [fermion.destruct(4, sigma) for sigma in range(4)]
-
-    a_up = (-as_up + s_up)/sqrt(2)
-    b_up = ( as_up + s_up)/sqrt(2)
-    a_dw = (-as_dw + s_dw)/sqrt(2)
-    b_dw = ( as_dw + s_dw)/sqrt(2)
-
-    sigma_za = a_up.T*a_up - a_dw.T*a_dw
-    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
-    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
-    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, [as_up, as_dw, s_up, s_dw]
-
-h_at, oper = hamiltonian_bond(U, mu, tp)
+h_at, oper = rt.dimer_hamiltonian_bond(U, mu, tp)
 eig_e, eig_v = op.diagonalize(h_at.todense())
 
 oper_pair = product([oper[0], oper[2]], repeat=2)

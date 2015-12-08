@@ -17,6 +17,70 @@ import dmft.ipt_imag as ipt
 import matplotlib.pyplot as plt
 import numpy as np
 import slaveparticles.quantum.dos as dos
+from slaveparticles.quantum import fermion
+
+
+# Molecule
+def sorted_basis():
+    """Sorts the basis of states for the electrons in the molecule
+    Enforces ordering in particle number an Sz projection"""
+
+    ind = np.array([0, 1, 2, 4, 8, 5, 10, 6, 9, 12, 3, 7, 11, 13, 14, 15])
+    basis = [fermion.destruct(4, sigma)[ind][:, ind] for sigma in range(4)]
+    return basis
+
+
+def dimer_hamiltonian(U, mu, tp):
+    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
+    symmetry. Include chemical potential for grand Canonical calculations
+
+    .. math::
+        \mathcal{H} - \mu N =
+        -\frac{U}{2}(n_{a\uparrow} - n_{a\downarrow})^2
+        -\frac{U}{2}(n_{b\uparrow} - n_{b\downarrow})^2  +
+        t_\perp (a^\dagger_\uparrow b_\uparrow +
+                 b^\dagger_\uparrow a_\uparrow +
+                 a^\dagger_\downarrow b_\downarrow +
+                 b^\dagger_\downarrow a_\downarrow)
+
+        - \mu(n_{a\uparrow} + n_{a\downarrow})
+        - \mu(n_{b\uparrow} + n_{b\downarrow})
+
+    """
+    a_up, a_dw, b_up, b_dw = sorted_basis()
+    sigma_za = a_up.T*a_up - a_dw.T*a_dw
+    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
+    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
+    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
+    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    return H, [a_up, a_dw, b_up, b_dw]
+
+
+def dimer_hamiltonian_bond(U, mu, tp):
+    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
+    symmetry. Include chemical potential for grand Canonical calculations
+
+    This in the basis of Bonding and Anti-bonding states
+
+    See also
+    --------
+    dimer_hamiltonian
+    """
+    from math import sqrt
+    as_up, as_dw, s_up, s_dw = sorted_basis()
+
+    a_up = (-as_up + s_up)/sqrt(2)
+    b_up = ( as_up + s_up)/sqrt(2)
+    a_dw = (-as_dw + s_dw)/sqrt(2)
+    b_dw = ( as_dw + s_dw)/sqrt(2)
+
+    sigma_za = a_up.T*a_up - a_dw.T*a_dw
+    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
+    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
+    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
+    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    return H, [as_up, as_dw, s_up, s_dw]
+
 
 ###############################################################################
 # Dimer Bethe lattice

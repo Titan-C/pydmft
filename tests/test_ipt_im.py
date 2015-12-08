@@ -10,10 +10,8 @@ import numpy as np
 from dmft import ipt_imag
 from dmft.common import greenF, tau_wn_setup
 import dmft.RKKY_dimer as dimer
+import slaveparticles.quantum.operators as op
 import pytest
-import tempfile
-import shutil
-import os
 
 
 ipt_ref_res = \
@@ -48,7 +46,7 @@ def test_GF():
     which for the case of the dimer has a symmetric structure in which
     only requires the first row"""
 
-    tau, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
+    _, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
     giwd, giwo = dimer.gf_met(w_n, 0., 0.25, 0.5, 0.)
     inv_giwd, inv_giwo = dimer.mat_inv(giwd, giwo)
     one, zero = dimer.mat_mul(inv_giwd, inv_giwo, giwd, giwo)
@@ -59,16 +57,16 @@ def test_GF():
 @pytest.mark.parametrize("tp", [0., 0.2, -0.6])
 def test_selfconsistency(tp):
     """Check that the Bethe lattice self-consistency is working"""
-    tau, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
+    _, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
     giwd, giwo = dimer.gf_met(w_n, 0., tp, 0.5, 0.)
     g0iwd, g0iwo = dimer.self_consistency(1j*w_n, giwd, giwo, 0., tp, 0.25)
     assert np.allclose(giwd, g0iwd)
     assert np.allclose(giwo, g0iwo)
 
 
-
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
 def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
+    """Test the solution of the single band impurity problem"""
     parms = {'BETA': beta, 'N_MATSUBARA': n_matsubara,
              't': 0.5, 'MU': 0, 'U': u_int,
              }
@@ -86,3 +84,14 @@ def test_ipt_dimer_pm_g(u_int, result, beta=50.):
     giw_d = dimer.ipt_dmft_loop(beta, u_int, 0, giw_d, giw_o)[0][:64]
 
     assert np.allclose(result, giw_d, atol=3e-3)
+
+
+def test_sorted_basis():
+    basis = dimer.sorted_basis()
+    for i in range(4):
+        for j in range(4):
+            ant = op.anticommutator(basis[i], basis[j].T).todense()
+            if i == j:
+                assert np.allclose(ant, np.eye(16))
+            else:
+                assert np.allclose(ant, 0)
