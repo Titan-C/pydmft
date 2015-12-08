@@ -13,12 +13,12 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_str, tp=0.25, filestr='B{}_U{}.h5', block=2, n_freq=2, xlim=2):
+def show_conv(beta, u_str, tp=0.25, filestr='B{}_U{}.h5', block=2, n_freq=2, xlim=2, skip=0):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
     with HDFArchive(filestr.format(tp=tp, BETA=beta), 'r') as datarecord:
-        for step in datarecord[u_str]:
+        for step in datarecord[u_str].keys()[skip:]:
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw'][labels[block]]
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
@@ -41,7 +41,7 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
         urange = output_files.keys()
 
     for u_str in urange:
-        show_conv(BETA, u_str, tp, filestr, 2, n_freq, xlim)
+        show_conv(BETA, u_str, tp, filestr, 2, n_freq, xlim, skip)
 
         plt.show()
         plt.close()
