@@ -67,21 +67,15 @@ axf.set_xlabel('U/D')
 # Double occupation
 # -----------------
 #
-# Is proportional to the Potential energy which is described according to
-# [Fetter_Walecka]_ in equation 23.14 then transformed to Matsubara frequencies
-# can be described as
-#
-# .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{k,n} \frac{1}{2}\left(
-#    i\omega_n - \epsilon_k^0 \right)Tr G(k, i\omega_n)
-#
-# After some work
-#
-# .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2}
-#     Tr(\Sigma(i\omega_n)G(i\omega_n))
-#
-# The tail behaves as
+# Is proportional to the Potential energy which is defined in
+# :ref:`potential_energy` the tail of this function behaves as
 #
 # .. math:: \Sigma G(i\omega_n\rightarrow \infty)= \frac{U^2}{8(i\omega_n)^2}
+#
+# Then to find out the double occupation one uses the relation
+#
+# .. math:: \langle n_\uparrow n_\downarrow \rangle = \frac{2\langle V \rangle}{U}+\frac{1}{4}
+#
 #
 
 
@@ -98,12 +92,3 @@ axd.set_title('Hysteresis loop of the double occupation')
 axd.legend(loc=0)
 axd.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 axd.set_xlabel('U/D')
-
-## Energies
-#T=[1j*w_n*(g[i]-gfree_iwn)-s[i]*g[i] for i in range(len(g))]
-#Tn=np.asarray([2*a.sum() for a in T]).real/200. +emean
-#H=[1j*w_n*(g[i]-gfree_iwn)-0.5*s[i]*g[i] for i in range(len(g))]
-#Hn=np.asarray([2*a.sum() for a in H]).real/200.+emean
-
-###############################################################################
-# .. [Fetter_Walecka] Fetter, Walecka, Quantum Theory of many-particle systems
