@@ -81,7 +81,7 @@ def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
 
 @pytest.mark.parametrize("u_int, result", ipt_ref_res)
 def test_ipt_dimer_pm_g(u_int, result, beta=50.):
-    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=5*beta))
+    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=256))
     giw_d, giw_o = dimer.gf_met(w_n, 0., 0, 0.5, 0.)
     giw_d = dimer.ipt_dmft_loop(beta, u_int, 0, giw_d, giw_o)[0][:64]
 
