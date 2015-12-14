@@ -39,6 +39,8 @@ params = {'n_cycles': int(1e5),
           'n_warmup_cycles': int(5e4),
           }
 
+fixed = TailGf(1, 1, 3, 1)
+fixed[1] = np.array([[1]])
 # Initalize the Green's function to a semi-circular density of states
 
 g_iw = S.G_iw['up'].copy()
@@ -46,14 +48,17 @@ g_iw << SemiCircular(half_bandwidth)
 for name, g in S.G_iw:
     g << g_iw
 
-fixed = TailGf(1, 1, 3, 1)
-fixed[1] = np.array([[1]])
+for name, g in S.G_tau:
+    g.tail[1] = np.array([[1]])
 
 
 def dmft_loop_pm(U):
     chemical_potential = U/2.0
 
     fixed[3] = np.array([[U**2/4 + .25]])
+    for name, g in S.G_tau:
+        g.tail[3] = fixed[3]
+
     try:
         with HDFArchive("CH_sb_b{}.h5".format(args.beta), 'r') as R:
             last_loop = len(R['U{}'.format(U)].keys())
