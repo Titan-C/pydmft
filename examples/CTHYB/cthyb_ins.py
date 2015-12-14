@@ -31,7 +31,7 @@ n_loops = args.Niter
 
 # Construct the CTQMC solver
 S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]},
-           n_iw=int(2*beta), n_tau=int(4*beta+1))
+           n_iw=int(2*beta))
 
 # Set the solver parameters
 params = {'n_cycles': int(1e6),
@@ -46,19 +46,15 @@ g_iw << SemiCircular(half_bandwidth)
 for name, g in S.G_iw:
     g << g_iw
 
-fixed = TailGf(1, 1, 5, -1)
+fixed = TailGf(1, 1, 2, 1)
 fixed[1] = np.array([[1]])
-fixedg0 = TailGf(1, 1, 4, -1)
-fixedg0[1] = np.array([[1]])
 
 
 def dmft_loop_pm(U):
     chemical_potential = U/2.0
 
-    fixed[3] = np.array([[U**2/4]])
-    fixedg0[2] = np.array([[-chemical_potential]])
+    fixed[3] = np.array([[U**2/4 + .25]])
 
-    print 'got here'
     # Now do the DMFT loop
     for it in range(n_loops):
 
@@ -75,8 +71,7 @@ def dmft_loop_pm(U):
         # Some intermediate saves
         if mpi.is_master_node():
             with HDFArchive("CH_sb_b{}.h5".format(args.beta)) as R:
-                R["U{}/G_tau-{}".format(U, it)] = S.G_tau
-                R["U{}/G_iw-{}".format(U, it)] = S.G_iw
+                R["U{}/it{:03}/giw".format(U, it)] = S.G_iw
 
 for u in args.U:
     dmft_loop_pm(u)
