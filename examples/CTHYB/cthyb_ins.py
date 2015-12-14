@@ -34,8 +34,8 @@ S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]},
            n_iw=int(2*beta))
 
 # Set the solver parameters
-params = {'n_cycles': int(1e6),
-          'length_cycle': 200,
+params = {'n_cycles': int(1e5),
+          'length_cycle': 30,
           'n_warmup_cycles': int(5e4),
           }
 
@@ -46,7 +46,7 @@ g_iw << SemiCircular(half_bandwidth)
 for name, g in S.G_iw:
     g << g_iw
 
-fixed = TailGf(1, 1, 2, 1)
+fixed = TailGf(1, 1, 3, 1)
 fixed[1] = np.array([[1]])
 
 
@@ -54,9 +54,17 @@ def dmft_loop_pm(U):
     chemical_potential = U/2.0
 
     fixed[3] = np.array([[U**2/4 + .25]])
+    try:
+        with HDFArchive("CH_sb_b{}.h5".format(args.beta), 'r') as R:
+            last_loop = len(R['U{}'.format(U)].keys())
+            S.G_iw << R['U{}'.format(U)]['it{:03}'.format(last_loop-1)]['giw']
+    except(IOError, KeyError):
+        last_loop = 0
 
     # Now do the DMFT loop
-    for it in range(n_loops):
+    for it in range(last_loop, last_loop + n_loops):
+        if mpi.is_master_node():
+            print('it', it)
 
         # Compute S.G0_iw with the self-consistency condition while imposing paramagnetism
         g_iw << 0.5*(S.G_iw['up']+S.G_iw['down'])
