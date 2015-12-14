@@ -110,13 +110,13 @@ def plot_fit_dos(beta, avg, filestr='B{}_U{}/Gf.out.*', xlim=2):
     plt.close()
 
 
-def phases(dirstr):
+def phases(beta_array):
     """Scatter plot of the DOS at Fermi level
 
     Shows the phase diagram of the impurity model of DMFT"""
-    for beta in np.array([20., 40., 64., 100., 160.]):
-        u_range, gfit, _ = fit_dos(beta, 2, dirstr)
-        temp = np.ones(len(u_range)) * 4 / beta
+    for beta in beta_array:
+        u_range, gfit, _ = fit_dos(beta, 2)
+        temp = np.ones(len(u_range)) / beta
         plt.scatter(u_range, temp, s=300, c=[dos(0) for dos in gfit],
                     vmin=-2, vmax=0)
 
