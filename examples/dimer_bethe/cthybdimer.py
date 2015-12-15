@@ -117,11 +117,11 @@ def do_setup():
 
     parser = argparse.ArgumentParser(description='DMFT loop for CTHYB dimer',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e6),
+    parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e5),
                         help='Number MonteCarlo Measurement')
     parser.add_argument('-therm', type=int, default=int(1e4),
                         help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=200,
+    parser.add_argument('-N_meas', type=int, default=30,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')

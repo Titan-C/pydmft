@@ -82,7 +82,7 @@ def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
             tail_clean(gf_iw, u_int)
             gf_iw.data.real = 0.
 
-            V.append(gf_iw.total_density()
+            V.append(gf_iw.total_density())
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V) - BETA*ur**2/32, ur
