@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from dmft.plot.hf_single_site import label_convergence
 from pytriqs.archive import HDFArchive
-from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, GfReFreq
+from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, GfReFreq, \
+    TailGf
 from pytriqs.plot.mpl_interface import oplot
 import dmft.common as gf
 import dmft.plot.cthyb_h_single_site as pss
@@ -58,7 +59,30 @@ def phase_diag(beta_array, filestr='CH_sb_b{BETA}.h5'):
             temp = np.ones(len(u_range)) / BETA
             plt.scatter(u_range, temp, c=fl_dos,
                         s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
-    plt.xlim([0, 1])
     plt.title(r'Phase diagram single impurity')
     plt.xlabel('$U/D$')
     plt.ylabel(r'$T/D$')
+
+def tail_clean(gf_iw, U):
+    fixed = TailGf(1, 1, 3, 1)
+    fixed[1] = np.array([[1]])
+    fixed[3] = np.array([[U**2/4 + .25]])
+    gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
+
+def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+    wsqr_4 = 4*w_n*w_n
+    V = []
+    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-1]
+            gf_iw = results[u_str][lastit]['giw']
+            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
+            u_int = float(u_str[1:])
+            tail_clean(gf_iw, u_int)
+            gf_iw.data.real = 0.
+
+            V.append(gf_iw.total_density()
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.array(V) - BETA*ur**2/32, ur

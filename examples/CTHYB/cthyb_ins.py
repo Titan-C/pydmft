@@ -14,6 +14,7 @@ from pytriqs.applications.impurity_solvers.cthyb import Solver
 import numpy as np
 import pytriqs.utility.mpi as mpi
 import argparse
+import dmft.plot.triqs_sb as tsb
 
 # Set up a few parameters
 parser = argparse.ArgumentParser(description='DMFT loop for single site Bethe lattice in CTHYB')
@@ -39,8 +40,6 @@ params = {'n_cycles': int(1e5),
           'n_warmup_cycles': int(5e4),
           }
 
-fixed = TailGf(1, 1, 3, 1)
-fixed[1] = np.array([[1]])
 # Initalize the Green's function to a semi-circular density of states
 
 g_iw = S.G_iw['up'].copy()
@@ -55,9 +54,8 @@ for name, g in S.G_tau:
 def dmft_loop_pm(U):
     chemical_potential = U/2.0
 
-    fixed[3] = np.array([[U**2/4 + .25]])
     for name, g in S.G_tau:
-        g.tail[3] = fixed[3]
+        g.tail[3] = np.array([[U**2/4 + .25]])
 
     try:
         with HDFArchive("CH_sb_b{}.h5".format(args.beta), 'r') as R:
@@ -73,8 +71,8 @@ def dmft_loop_pm(U):
 
         # Compute S.G0_iw with the self-consistency condition while imposing paramagnetism
         g_iw << 0.5*(S.G_iw['up']+S.G_iw['down'])
-        g_iw.fit_tail(fixed, 5, int(beta), len(g_iw.mesh))
-        g_iw.data[:] = 1j*g_iw.data.imag
+        tsb.tail_clean(g_iw, U)
+        g_iw.data[:].real = 0.
 
         for name, g0 in S.G0_iw:
             g0 << inverse(iOmega_n + chemical_potential - (half_bandwidth/2.0)**2 * g_iw)
