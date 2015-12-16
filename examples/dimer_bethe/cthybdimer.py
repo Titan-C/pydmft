@@ -8,12 +8,13 @@ Dimer in Bethe lattice
 
 from __future__ import division, absolute_import, print_function
 from math import sqrt, modf
-from pytriqs.applications.impurity_solvers.cthyb import Solver
-from pytriqs.archive import HDFArchive
-from pytriqs.gf.local import inverse, iOmega_n, SemiCircular
-from pytriqs.operators import c, dagger
 from time import time
 import argparse
+import numpy as np
+from pytriqs.applications.impurity_solvers.cthyb import Solver
+from pytriqs.archive import HDFArchive
+from pytriqs.gf.local import inverse, iOmega_n, SemiCircular, TailGf
+from pytriqs.operators import c, dagger
 import pytriqs.utility.mpi as mpi
 
 def averager(h5parent, h5child, last_iterations):
@@ -63,6 +64,12 @@ def set_new_seed(setup):
 
     print(setup['new_seed'])
 
+def tail_clean(gf_iw, U, tp):
+    fixed = TailGf(1, 1, 3, 1)
+    fixed[1] = np.array([[1]])
+    fixed[2] = np.array([[-tp]])
+    fixed[3] = np.array([[U**2/4 + tp**2 + .25]])
+    gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
 
 def dmft_loop(setup, u_int, imp_sol):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
@@ -80,7 +87,7 @@ def dmft_loop(setup, u_int, imp_sol):
     src_U = 'U'+str(u_int)
 
     try:
-        with HDFArchive(setup['ofile'].format(**setup), 'a') as outp:
+        with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
             last_loop = len(outp[src_U].keys())
             last_it = 'it{:03}'.format(last_loop-1)
             imp_sol.G_iw = outp[src_U][last_it]['G_iw']
@@ -94,14 +101,17 @@ def dmft_loop(setup, u_int, imp_sol):
 
         imp_sol.G_iw['asym_up'] << 0.5 * (imp_sol.G_iw['asym_up'] +
                                          imp_sol.G_iw['asym_dw'])
+        tail_clean(imp_sol.G_iw['asym_up'], u_int, setup['tp'])
+
         imp_sol.G_iw['sym_up'] << 0.5 * (imp_sol.G_iw['sym_up'] +
                                           imp_sol.G_iw['sym_dw'])
+        tail_clean(imp_sol.G_iw['sym_up'], u_int, -setup['tp'])
 
         imp_sol.G_iw['asym_dw'] << imp_sol.G_iw['asym_up']
         imp_sol.G_iw['sym_dw'] << imp_sol.G_iw['sym_up']
 
         for name, g0block in imp_sol.G0_iw:
-            shift = -1. if 'sym' in name else 1
+            shift = 1. if 'asym' in name else -1
             g0block << inverse(iOmega_n + u_int/2. + shift * setup['tp'] -
                                0.25*imp_sol.G_iw[name])
 
