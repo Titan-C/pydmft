@@ -17,44 +17,48 @@ import argparse
 import dmft.plot.triqs_sb as tsb
 
 # Set up a few parameters
-parser = argparse.ArgumentParser(description='DMFT loop for single site Bethe lattice in CTHYB')
+parser = argparse.ArgumentParser(description='DMFT loop for single site Bethe lattice in CTHYB',
+                                formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('-beta', metavar='B', type=float,
                     default=32., help='The inverse temperature')
 parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of DMFT Loops')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strength')
+parser.add_argument('-mcs', metavar='MCS', type=int, default=int(1e4),
+                    help='Number Monte Carlo Measurement')
+parser.add_argument('-therm', type=int, default=int(5e4),
+                    help='Monte Carlo sweeps of thermalization')
+parser.add_argument('-meas', type=int, default=30,
+                    help='Number of Updates before measurements')
 
 args = parser.parse_args()
 half_bandwidth = 1.0
 beta = args.beta
-n_loops = args.Niter
 
 # Construct the CTQMC solver
 S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]},
            n_iw=int(2*beta))
 
 # Set the solver parameters
-params = {'n_cycles': int(1e5),
-          'length_cycle': 30,
-          'n_warmup_cycles': int(5e4),
-          }
-
+params = {'n_cycles': args.mcs,
+          'length_cycle': args.meas,
+          'n_warmup_cycles': args.therm,
+         }
 # Initalize the Green's function to a semi-circular density of states
-
 g_iw = S.G_iw['up'].copy()
 g_iw << SemiCircular(half_bandwidth)
-for name, g in S.G_iw:
+for _, g in S.G_iw:
     g << g_iw
 
-for name, g in S.G_tau:
+for _, g in S.G_tau:
     g.tail[1] = np.array([[1]])
 
 
 def dmft_loop_pm(U):
     chemical_potential = U/2.0
 
-    for name, g in S.G_tau:
+    for _, g in S.G_tau:
         g.tail[3] = np.array([[U**2/4 + .25]])
 
     try:
@@ -65,16 +69,17 @@ def dmft_loop_pm(U):
         last_loop = 0
 
     # Now do the DMFT loop
-    for it in range(last_loop, last_loop + n_loops):
+    for i in range(last_loop, last_loop + args.Niter):
         if mpi.is_master_node():
-            print('it', it)
+            print('it', i)
 
-        # Compute S.G0_iw with the self-consistency condition while imposing paramagnetism
+        # Compute S.G0_iw with the self-consistency condition while
+        # imposing paramagnetism
         g_iw << 0.5*(S.G_iw['up']+S.G_iw['down'])
-        tsb.tail_clean(g_iw, U)
         g_iw.data[:].real = 0.
+        tsb.tail_clean(g_iw, U)
 
-        for name, g0 in S.G0_iw:
+        for _, g0 in S.G0_iw:
             g0 << inverse(iOmega_n + chemical_potential - (half_bandwidth/2.0)**2 * g_iw)
         # Run the solver
         S.solve(h_int=U * n('up', 0) * n('down', 0), **params)
@@ -82,7 +87,8 @@ def dmft_loop_pm(U):
         # Some intermediate saves
         if mpi.is_master_node():
             with HDFArchive("CH_sb_b{}.h5".format(args.beta)) as R:
-                R["U{}/it{:03}/giw".format(U, it)] = S.G_iw
+                R["U{}/it{:03}/giw".format(U, i)] = S.G_iw
+
 
 for u in args.U:
     dmft_loop_pm(u)

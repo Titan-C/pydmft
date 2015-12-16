@@ -317,7 +317,7 @@ def plot_tails(BETA, U, tp, ax=None):
         ax = plt
     ax.plot(w_n, -1/w_n, '--')
     ax.plot(w_n, -tp/w_n**2, '--')
-    ax.plot(w_n, -1/w_n + U**2/4/w_n**3, '--')
+    ax.plot(w_n, -1/w_n + (U**2/4+0.25)/w_n**3, '--')
 
 
 def phase_diag_b(BETA_range, tp, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
