@@ -25,7 +25,7 @@ parser.add_argument('-Niter', metavar='N', type=int,
                     default=10, help='Number of DMFT Loops')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strength')
-parser.add_argument('-mcs', metavar='MCS', type=int, default=int(1e4),
+parser.add_argument('-mcs', metavar='MCS', type=int, default=int(1e5),
                     help='Number Monte Carlo Measurement')
 parser.add_argument('-therm', type=int, default=int(5e4),
                     help='Monte Carlo sweeps of thermalization')

@@ -30,11 +30,11 @@ def prepare_interaction(u_int):
 
     using the symmetric anti-symmetric basis"""
 
-    aup = 1/sqrt(2)*(-c('low_up', 0) + c('high_up', 0))
-    adw = 1/sqrt(2)*(-c('low_dw', 0) + c('high_dw', 0))
+    aup = 1/sqrt(2)*(-c('asym_up', 0) + c('sym_up', 0))
+    adw = 1/sqrt(2)*(-c('asym_dw', 0) + c('sym_dw', 0))
 
-    bup = 1/sqrt(2)*(c('low_up', 0) + c('high_up', 0))
-    bdw = 1/sqrt(2)*(c('low_dw', 0) + c('high_dw', 0))
+    bup = 1/sqrt(2)*(c('asym_up', 0) + c('sym_up', 0))
+    bdw = 1/sqrt(2)*(c('asym_dw', 0) + c('sym_dw', 0))
 
     h_int = u_int * (dagger(aup)*aup*dagger(adw)*adw +
                      dagger(bup)*bup*dagger(bdw)*bdw)
@@ -64,19 +64,20 @@ def set_new_seed(setup):
     print(setup['new_seed'])
 
 
-def dmft_loop(setup):
+def dmft_loop(setup, u_int, imp_sol):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
 
     if setup['new_seed']:
         set_new_seed(setup)
         return
 
-    imp_sol = Solver(beta=setup['BETA'],
-                     gf_struct={'low_up': [0], 'high_up': [0],
-                                'low_dw': [0], 'high_dw': [0]})
-    h_int = prepare_interaction(setup['U'])
+    if imp_sol is None:
+        imp_sol = Solver(beta=setup['BETA'],
+                        gf_struct={'asym_up': [0], 'sym_up': [0],
+                                    'asym_dw': [0], 'sym_dw': [0]})
+    h_int = prepare_interaction(u_int)
 
-    src_U = 'U'+str(setup['U'])
+    src_U = 'U'+str(u_int)
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'a') as outp:
@@ -91,25 +92,27 @@ def dmft_loop(setup):
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
 
-        imp_sol.G_iw['low_up'] << 0.5 * (imp_sol.G_iw['low_up'] +
-                                         imp_sol.G_iw['low_dw'])
-        imp_sol.G_iw['high_up'] << 0.5 * (imp_sol.G_iw['high_up'] +
-                                          imp_sol.G_iw['high_dw'])
+        imp_sol.G_iw['asym_up'] << 0.5 * (imp_sol.G_iw['asym_up'] +
+                                         imp_sol.G_iw['asym_dw'])
+        imp_sol.G_iw['sym_up'] << 0.5 * (imp_sol.G_iw['sym_up'] +
+                                          imp_sol.G_iw['sym_dw'])
 
-        imp_sol.G_iw['low_dw'] << imp_sol.G_iw['low_up']
-        imp_sol.G_iw['high_dw'] << imp_sol.G_iw['high_up']
+        imp_sol.G_iw['asym_dw'] << imp_sol.G_iw['asym_up']
+        imp_sol.G_iw['sym_dw'] << imp_sol.G_iw['sym_up']
 
         for name, g0block in imp_sol.G0_iw:
-            shift = 1. if 'high' in name else -1
-            g0block << inverse(iOmega_n + setup['U']/2. + shift * setup['tp'] -
+            shift = -1. if 'sym' in name else 1
+            g0block << inverse(iOmega_n + u_int/2. + shift * setup['tp'] -
                                0.25*imp_sol.G_iw[name])
 
         imp_sol.solve(h_int=h_int, **setup['s_params'])
 
         if mpi.is_master_node():
             with HDFArchive(setup['ofile'].format(**setup)) as last_run:
-                last_run['/U{}/it{:03}/G_iw'.format(setup['U'], loop)] = imp_sol.G_iw
-                last_run['/U{}/it{:03}/setup'.format(setup['U'], loop)] = setup
+                last_run['/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
+                last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
+
+    return imp_sol
 
 
 def do_setup():
@@ -119,16 +122,16 @@ def do_setup():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e5),
                         help='Number MonteCarlo Measurement')
-    parser.add_argument('-therm', type=int, default=int(1e4),
+    parser.add_argument('-therm', type=int, default=int(5e4),
                         help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=30,
+    parser.add_argument('-meas', type=int, default=30,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
     parser.add_argument('-BETA', metavar='B', type=float,
-                        default=32., help='The inverse temperature')
-    parser.add_argument('-U', type=float,
-                        default=2.5, help='Local interaction strenght')
+                        default=200., help='The inverse temperature')
+    parser.add_argument('-U', nargs='+', type=float,
+                        default=[2.7], help='Local interaction strength')
     parser.add_argument('-tp', default=0.18, type=float,
                         help='The dimerization strength')
     parser.add_argument('-ofile', default='DIMER_PM_B{BETA}_tp{tp}.h5',
@@ -143,7 +146,7 @@ def do_setup():
     setup.update({'s_params': {'move_double': True,
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
-                               'length_cycle': setup['N_meas'],
+                               'length_cycle': setup['meas'],
                                'measure_pert_order': True,
                                'random_seed': int(intp+mpi.rank*341*fracp)}})
 
@@ -151,4 +154,6 @@ def do_setup():
 
 if __name__ == "__main__":
     SETUP = do_setup()
-    dmft_loop(SETUP)
+    solver = None
+    for u_loop in SETUP['U']:
+        solver = dmft_loop(SETUP, u_loop, solver)
