@@ -22,8 +22,8 @@ def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0)
             gf_iw = .5*(gf_iw['up']+gf_iw['down'])
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
-            freq_arr.append([gf_iw.data[:n_freq, 0, 0].real,
-                             gf_iw.data[:n_freq, 0, 0].imag])
+            gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
+            freq_arr.append([gf_iw.real, gf_iw.imag])
     freq_arr = np.asarray(freq_arr).T
     for num, (rfreqs, ifreqs) in enumerate(freq_arr):
         axes[1].plot(rfreqs, 's-.', label=str(num))
@@ -53,7 +53,8 @@ def phase_diag(beta_array, filestr='CH_sb_b{BETA}.h5'):
                 lastit = results[u_str].keys()[-1]
                 gf_iw = results[u_str][lastit]['giw']
                 gf_iw = .5*(gf_iw['up']+gf_iw['down'])
-                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.data[:, 0, 0].imag)(0.))
+                gf_iw = np.squeeze([gf_iw(i) for i in range(3)])
+                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             temp = np.ones(len(u_range)) / BETA

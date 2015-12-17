@@ -24,8 +24,8 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
             gf_iw = datarecord[u_str][step]['G_iw'][labels[block]]
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
-            freq_arr.append([gf_iw.data[:n_freq, 0, 0].real,
-                             gf_iw.data[:n_freq, 0, 0].imag])
+            gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
+            freq_arr.append([gf_iw.real, gf_iw.imag])
     freq_arr = np.asarray(freq_arr).T
     for num, (rfreqs, ifreqs) in enumerate(freq_arr):
         axes[1].plot(rfreqs, 's-.', label=str(num))
@@ -59,7 +59,8 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
                 lastit = results[u_str].keys()[-1]
                 labels = [name for name in results[u_str][lastit]['G_iw'].indices]
                 gf_iw = results[u_str][lastit]['G_iw'][labels[2]]
-                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.data[:, 0, 0].imag)(0.))
+                gf_iw = np.squeeze([gf_iw(i) for i in range(3)])
+                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
