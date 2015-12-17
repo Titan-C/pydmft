@@ -13,7 +13,8 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_str, tp=0.25, filestr='B{}_U{}.h5', block=2, n_freq=2, xlim=2, skip=0):
+def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
+              block=2, n_freq=2, xlim=2, skip=0):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
@@ -35,7 +36,8 @@ def show_conv(beta, u_str, tp=0.25, filestr='B{}_U{}.h5', block=2, n_freq=2, xli
                       axes, graf, n_freq, xlim)
 
 
-def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
+def list_show_conv(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
+                   block=2, n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
     with HDFArchive(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         urange = output_files.keys()

@@ -91,9 +91,10 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
 
     with h5.File(filestr.format(beta), 'r') as output_files:
         for u_str in sorted(output_files.keys()):
-            u_range.append(float(u_str[1:]))
+            U = float(u_str[1:])
+            u_range.append(U)
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            tau, w_n = gf.tau_wn_setup(h5.get_attributes(output_files[u_str][last_iterations[-1]]))
+            tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
             gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
             giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., 0.25 + U**2/4])
 
@@ -129,7 +130,7 @@ def phases(beta_array):
 
     for beta in beta_array:
         u_int, gfit, _ = fit_dos(beta, 2)
-        temp = np.ones(len(u_int)) * 2 / beta
+        temp = np.ones(len(u_int)) / beta
         plt.scatter(u_int, temp, s=300, c=[dos(0) for dos in gfit],
                     vmin=-2, vmax=0)
 

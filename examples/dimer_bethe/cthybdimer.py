@@ -143,7 +143,7 @@ def do_setup():
     parser.add_argument('-meas', type=int, default=40,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
-                        default=20, help='Number of iterations')
+                        default=10, help='Number of iterations')
     parser.add_argument('-BETA', metavar='B', type=float,
                         default=200., help='The inverse temperature')
     parser.add_argument('-U', nargs='+', type=float,
