@@ -71,6 +71,19 @@ def tail_clean(gf_iw, U, tp):
     fixed[3] = np.array([[U**2/4 + tp**2 + .25]])
     gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
 
+def paramagnetic_hf_clean(G_iw, u_int, tp):
+    """Performs the average over up & dw of the green functions to
+    enforce paramagnetism"""
+
+    G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
+    tail_clean(G_iw['asym_up'], u_int, tp)
+
+    G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
+    tail_clean(G_iw['sym_up'], u_int, -tp)
+
+    G_iw['asym_dw'] << G_iw['asym_up']
+    G_iw['sym_dw'] << G_iw['sym_up']
+
 def dmft_loop(setup, u_int, imp_sol):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
 
@@ -99,16 +112,7 @@ def dmft_loop(setup, u_int, imp_sol):
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
 
-        imp_sol.G_iw['asym_up'] << 0.5 * (imp_sol.G_iw['asym_up'] +
-                                         imp_sol.G_iw['asym_dw'])
-        tail_clean(imp_sol.G_iw['asym_up'], u_int, setup['tp'])
-
-        imp_sol.G_iw['sym_up'] << 0.5 * (imp_sol.G_iw['sym_up'] +
-                                          imp_sol.G_iw['sym_dw'])
-        tail_clean(imp_sol.G_iw['sym_up'], u_int, -setup['tp'])
-
-        imp_sol.G_iw['asym_dw'] << imp_sol.G_iw['asym_up']
-        imp_sol.G_iw['sym_dw'] << imp_sol.G_iw['sym_up']
+        paramagnetic_hf_clean(imp_sol, u_int, setup['tp'])
 
         for name, g0block in imp_sol.G0_iw:
             shift = 1. if 'asym' in name else -1
@@ -153,7 +157,7 @@ def do_setup():
     setup = vars(parser.parse_args())
 
     fracp, intp = modf(time())
-    setup.update({'s_params': {'move_double': True,
+    setup.update({'s_params': {'move_double': False,
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
