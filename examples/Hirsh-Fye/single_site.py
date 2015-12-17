@@ -28,12 +28,11 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     if simulation['new_seed']:
         if COMM.rank == 0:
             hf.set_new_seed(simulation, ['gtau'])
-        simulation['U'] = simulation['new_seed'][1]
         return
 
     current_u = 'U'+str(U)
     setup.update(simulation)
-    simulation['U'] = U
+    setup['U'] = U
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
     if setup['AFM']:
@@ -96,5 +95,5 @@ if __name__ == "__main__":
     SETUP = vars(SETUP.parse_args())
 
     G_iw = None
-    for u in SETUP.U:
+    for u in SETUP['U']:
         G_iw = dmft_loop_pm(SETUP, u, G_iw)
