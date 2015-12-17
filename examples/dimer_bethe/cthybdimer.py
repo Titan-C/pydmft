@@ -84,17 +84,16 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     G_iw['asym_dw'] << G_iw['asym_up']
     G_iw['sym_dw'] << G_iw['sym_up']
 
-def dmft_loop(setup, u_int, imp_sol):
+def dmft_loop(setup, u_int, G_iw):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
 
     if setup['new_seed']:
         set_new_seed(setup)
         return
 
-    if imp_sol is None:
-        imp_sol = Solver(beta=setup['BETA'],
-                        gf_struct={'asym_up': [0], 'sym_up': [0],
-                                    'asym_dw': [0], 'sym_dw': [0]})
+    imp_sol = Solver(beta=setup['BETA'],
+                     gf_struct={'asym_up': [0], 'sym_up': [0],
+                                'asym_dw': [0], 'sym_dw': [0]})
     h_int = prepare_interaction(u_int)
 
     src_U = 'U'+str(u_int)
@@ -108,6 +107,8 @@ def dmft_loop(setup, u_int, imp_sol):
         last_loop = 0
         for name, gblock in imp_sol.G_iw:
             gblock << SemiCircular(1)
+        if G_iw is not None:
+            imp_sol.G_iw = G_iw
 
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
@@ -126,7 +127,7 @@ def dmft_loop(setup, u_int, imp_sol):
                 last_run['/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
                 last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
 
-    return imp_sol
+    return imp_sol.G_iw
 
 
 def do_setup():
@@ -168,6 +169,6 @@ def do_setup():
 
 if __name__ == "__main__":
     SETUP = do_setup()
-    solver = None
+    G_iw = None
     for u_loop in SETUP['U']:
-        solver = dmft_loop(SETUP, u_loop, solver)
+        G_iw = dmft_loop(SETUP, u_loop, G_iw)
