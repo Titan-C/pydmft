@@ -78,6 +78,7 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
     tail_clean(G_iw['asym_up'], u_int, tp)
 
+
     G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
     tail_clean(G_iw['sym_up'], u_int, -tp)
 
@@ -113,7 +114,7 @@ def dmft_loop(setup, u_int, G_iw):
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
 
-        paramagnetic_hf_clean(imp_sol, u_int, setup['tp'])
+        paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
 
         for name, g0block in imp_sol.G0_iw:
             shift = 1. if 'asym' in name else -1
@@ -139,7 +140,7 @@ def do_setup():
                         help='Number MonteCarlo Measurement')
     parser.add_argument('-therm', type=int, default=int(5e4),
                         help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-meas', type=int, default=30,
+    parser.add_argument('-meas', type=int, default=40,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
@@ -162,7 +163,7 @@ def do_setup():
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
-                               'measure_pert_order': True,
+                               'measure_pert_order': False,
                                'random_seed': int(intp+mpi.rank*341*fracp)}})
 
     return setup
