@@ -22,7 +22,7 @@ import sys
 comm = MPI.COMM_WORLD
 
 
-def dmft_loop_pm(simulation):
+def dmft_loop_pm(simulation, U, g_iw_start=None):
     """Implementation of the solver"""
     setup = {'t':         0.5,
              'BANDS':     1,
@@ -37,13 +37,16 @@ def dmft_loop_pm(simulation):
 
     setup.update(simulation)
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
-    current_u = 'U'+str(setup['U'])
+    current_u = 'U'+str(U)
 
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
-    mu, tp, U = setup['MU'], setup['tp'], setup['U']
+    mu, tp = setup['MU'], setup['tp']
     giw_d, giw_o = dimer.gf_met(w_n, mu, tp, 0.5, 0.)
+
+    if g_iw_start is not None:
+        giw_d, giw_o = g_iw_start
 
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
@@ -53,7 +56,7 @@ def dmft_loop_pm(simulation):
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
-    V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
+    V_field = hf.ising_v(setup['dtau_mc'], U,
                          L=setup['SITES']*setup['n_tau_mc'],
                          polar=setup['spin_polarization'])
 
@@ -114,4 +117,5 @@ if __name__ == "__main__":
                         help='Probability for double spin flip on equal sites')
 
     SETUP = vars(parser.parse_args())
-    dmft_loop_pm(SETUP)
+    for U in SETUP['U']:
+        dmft_loop_pm(SETUP, U)
