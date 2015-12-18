@@ -250,10 +250,9 @@ def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
 
     return np.array(V) - BETA*ur**2/32, ur
 
-def docc_plot(BETA, tp, filestr, ax=None):
-    """Plots double occupation"""
-    if ax is None:
-        _, ax = plt.subplots()
+
+def get_docc(BETA, tp, filestr):
+    """Recovers the double occupation from results files"""
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         docc = []
         for u_str in output_files:
@@ -265,9 +264,16 @@ def docc_plot(BETA, tp, filestr, ax=None):
                 pass
 
         docc=np.array(docc).T
-        ax.scatter(docc[0], docc[1], c=docc[1],
-                    s=120, marker='<', vmin=0, vmax=0.2)
-        ax.plot(docc[0], docc[1], ':')
+        return docc[0], docc[1]
+
+
+def docc_plot(BETA, tp, filestr, ax=None):
+    """Plots double occupation"""
+    if ax is None:
+        _, ax = plt.subplots()
+    ur, docc = get_docc(BETA, tp, filestr)
+    ax.scatter(ur, docc, c=docc, s=120, marker='<', vmin=0, vmax=0.2)
+    ax.plot(ur, docc, ':')
     ax.set_title(r'double occupation @'
                  r'$\beta={}$, tp={}'.format(BETA, tp))
     ax.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')

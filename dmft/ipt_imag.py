@@ -119,15 +119,15 @@ def epot(g_iw, s_iw, u, beta, w_n):
     return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32. + u/8
 
 
-def n_half(mu, beta):
-    """Returns the deviation from half-filling in semicircle dos D=1"""
-    return quad(dos.bethe_fermi, -1., 1., args=(1., mu, 0.5, beta))[0]-0.5
+def n_half(mu, beta, D=1):
+    """Returns the deviation from half-filling in semicircle dos"""
+    return quad(dos.bethe_fermi, -D, D, args=(1., mu, D/2., beta))[0]-0.5
 
 
-def e_mean(beta):
-    """Returns the average kinetic Energy per particle in semicircle dos D=1"""
+def e_mean(beta, D=1):
+    """Returns the average kinetic Energy per particle in semicircle dos"""
     mu = fsolve(n_half, 0., beta)[0]
-    return quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu, 0.5, beta))[0]
+    return quad(dos.bethe_fermi_ene, -D, D, args=(1., mu, D/2., beta))[0]
 
 
 @jit(nopython=True)
