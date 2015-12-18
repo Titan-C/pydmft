@@ -28,9 +28,12 @@ energy is estimated by
 
 from __future__ import division, absolute_import, print_function
 
-from dmft.common import gt_fouriertrans, gw_invfouriertrans
 from numba import jit
+from scipy.integrate import quad
+from scipy.optimize import fsolve
 import numpy as np
+from dmft.common import gt_fouriertrans, gw_invfouriertrans
+import slaveparticles.quantum.dos as dos
 
 
 def single_band_ipt_solver(u_int, g_0_iwn, w_n, tau):
@@ -104,6 +107,27 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
             converged = True
         g_iwn = mix * g_iwn + (1 - mix) * g_iwn_old
     return g_iwn, sigma_iwn
+
+###############################################################################
+# Energy calculations
+
+def ekin(g_iw, s_iw, beta, w_n, ek_mean, g_iwfree):
+    return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + ek_mean
+
+
+def epot(g_iw, s_iw, u, beta, w_n):
+    return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32. + u/8
+
+
+def n_half(mu, beta):
+    """Returns the deviation from half-filling in semicircle dos D=1"""
+    return quad(dos.bethe_fermi, -1., 1., args=(1., mu, 0.5, beta))[0]-0.5
+
+
+def e_mean(beta):
+    """Returns the average kinetic Energy per particle in semicircle dos D=1"""
+    mu = fsolve(n_half, 0., beta)[0]
+    return quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu, 0.5, beta))[0]
 
 
 @jit(nopython=True)

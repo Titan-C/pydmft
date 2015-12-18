@@ -262,7 +262,7 @@ def docc_plot(BETA, tp, filestr, ax=None):
                 docc.append([float(u_str[1:]),
                              output_files[u_str][last_iter]['double_occ'][:].mean()])
             except KeyError:
-                docc = np.nan
+                pass
 
         docc=np.array(docc).T
         ax.scatter(docc[0], docc[1], c=docc[1],

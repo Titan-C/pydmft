@@ -10,7 +10,7 @@ To study the stability of the solutions in the coexistence region
 
 from __future__ import division, absolute_import, print_function
 from dmft.common import greenF, tau_wn_setup
-from dmft.ipt_imag import dmft_loop
+from dmft.ipt_imag import dmft_loop, n_half, ekin, epot
 from math import log
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
@@ -38,18 +38,6 @@ def hysteresis(beta, u_range):
         g_iwn, sigma = dmft_loop(u_int, 0.5, g_iwn, w_n, tau)
         log_g_sig.append((g_iwn, sigma))
     return log_g_sig, w_n
-
-
-def ekin(g_iw, s_iw, beta, w_n, e_mean, g_iwfree):
-    return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + e_mean
-
-
-def epot(g_iw, s_iw, u, beta, w_n):
-    return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32.
-
-
-def n_half(mu, beta):
-    return quad(dos.bethe_fermi, -1., 1., args=(1., mu, 0.5, beta))[0]-0.5
 
 
 def energy(beta, u_range, g_s_results):

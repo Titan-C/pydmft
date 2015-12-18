@@ -5,11 +5,12 @@ Plotting utilities for the Single site DMFT phase diagram
 """
 
 from __future__ import division, print_function, absolute_import
-import dmft.common as gf
-import dmft.h5archive as h5
-import dmft.hirschfye as hf
 import matplotlib.pyplot as plt
 import numpy as np
+import dmft.common as gf
+import dmft.ipt_imag as ipt
+import dmft.h5archive as h5
+import dmft.hirschfye as hf
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
@@ -26,7 +27,7 @@ def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
     axes[1].set_xlabel('iterations')
 
 
-def get_giw(h5parent, iteration, tau, w_n, tp):
+def get_giw(h5parent, iteration, tau, w_n):
     """Recovers with Fourier Transform G_iw from H5 file"""
     setup = h5.get_attributes(h5parent[iteration])
     mu, U = setup['MU'], setup['U']
@@ -36,18 +37,22 @@ def get_giw(h5parent, iteration, tau, w_n, tp):
 
     return gtau, giw
 
+def get_sigmaiw(h5parent, iteration, tau, w_n):
+    """Returns the self-energy with the Dyson equation"""
+    _, giw = get_giw(h5parent, iteration, tau, w_n)
+    return 1j*w_n - .25*giw - 1/giw
+
 
 def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
     with h5.File(filestr.format(beta), 'r') as output_files:
-        keys = output_files[u_str].keys()
+        keys = output_files[u_str].keys()[skip:]
         setup = h5.get_attributes(output_files[u_str][keys[-1]])
         tau, w_n = gf.tau_wn_setup(setup)
-        for step in sorted(keys):
-            gtau = output_files[u_str][step]['gtau'][:]
-            giw = gf.gt_fouriertrans(gtau, tau, w_n)
+        for step in keys:
+            _, giw = get_giw(output_files[u_str], step, tau, w_n)
             axes[0].plot(w_n, giw.imag)
             freq_arr.append(giw.imag[:n_freq])
 
@@ -136,3 +141,36 @@ def phases(beta_array):
 
     plt.xlabel('U/D')
     plt.ylabel('T/t')
+
+
+def energies(beta, filestr='SB_PM_B{}.h5'):
+    """returns the potential, and kinetic energy
+
+    Parameters
+    ----------
+    beta : float, inverse temperature
+    filestr : string, results file name, beta is replaced in format
+
+    Returns
+    -------
+    tuple of 3 ndarrays
+        Contains, potential energy, Kinetic energy, values of U
+    """
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
+    giw_free = gf.greenF(w_n)
+    e_mean = ipt.e_mean(beta)
+    ekin = []
+    epot = []
+    with h5.File(filestr.format(beta), 'r') as results:
+        for u_str in results:
+            last_iter = results[u_str].keys()[-1]
+            _, giw = get_giw(results[u_str], last_iter, tau, w_n)
+            siw = get_sigmaiw(results[u_str], last_iter, tau, w_n)
+
+            u_int = float(u_str[1:])
+
+            epot.append(ipt.epot(giw, siw, u_int, beta, w_n))
+            ekin.append(ipt.ekin(giw, siw, beta, w_n, e_mean, giw_free))
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.array(epot), np.array(ekin), ur
