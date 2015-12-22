@@ -43,7 +43,7 @@ def list_show_conv(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
         urange = output_files.keys()
 
     for u_str in urange:
-        show_conv(BETA, u_str, tp, filestr, 2, n_freq, xlim, skip)
+        show_conv(BETA, u_str, tp, filestr, block, n_freq, xlim, skip)
 
         plt.show()
         plt.close()

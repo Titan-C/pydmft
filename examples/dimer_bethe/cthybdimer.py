@@ -17,13 +17,14 @@ from pytriqs.gf.local import inverse, iOmega_n, SemiCircular, TailGf
 from pytriqs.operators import c, dagger
 import pytriqs.utility.mpi as mpi
 
+
 def averager(h5parent, h5child, last_iterations):
     """Given an H5 file parent averages over the iterations with the child"""
     sum_child = 0.
     for step in last_iterations:
         sum_child += h5parent[step][h5child]
 
-    return  1. / len(last_iterations) * sum_child
+    return 1. / len(last_iterations) * sum_child
 
 
 def prepare_interaction(u_int):
@@ -64,12 +65,14 @@ def set_new_seed(setup):
 
     print(setup['new_seed'])
 
+
 def tail_clean(gf_iw, U, tp):
     fixed = TailGf(1, 1, 3, 1)
     fixed[1] = np.array([[1]])
     fixed[2] = np.array([[-tp]])
     fixed[3] = np.array([[U**2/4 + tp**2 + .25]])
     gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
+
 
 def paramagnetic_hf_clean(G_iw, u_int, tp):
     """Performs the average over up & dw of the green functions to
@@ -78,12 +81,12 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
     tail_clean(G_iw['asym_up'], u_int, tp)
 
-
     G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
     tail_clean(G_iw['sym_up'], u_int, -tp)
 
     G_iw['asym_dw'] << G_iw['asym_up']
     G_iw['sym_dw'] << G_iw['sym_up']
+
 
 def dmft_loop(setup, u_int, G_iw):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
