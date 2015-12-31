@@ -46,7 +46,7 @@ S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]},
 params = {'n_cycles': args.mcs,
           'length_cycle': args.meas,
           'n_warmup_cycles': args.therm,
-          'random_seed': struct.unpack("I", os.urandom(4)),
+          'random_seed': struct.unpack("I", os.urandom(4))[0],
          }
 # Initalize the Green's function to a semi-circular density of states
 g_iw = S.G_iw['up'].copy()

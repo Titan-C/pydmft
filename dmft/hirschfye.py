@@ -68,7 +68,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              't':           0.5,
              'SITES':       1,
              'BANDS':       1,
-             'SEED':        struct.unpack("I", os.urandom(4)),
+             'SEED':        struct.unpack("I", os.urandom(4))[0],
              'Heat_bath':   True,
              'ofile':       'hf_out.h5',
              'group':       'temp/'+time.asctime(),
