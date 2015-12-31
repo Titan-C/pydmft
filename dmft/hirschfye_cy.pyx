@@ -35,7 +35,7 @@ cdef extern from "gsl/gsl_randist.h":
 
 cdef gsl_rng *r = gsl_rng_alloc(gsl_rng_mt19937)
 
-def set_seed(seed=84263):
+def set_seed(seed):
     cyset_seed(r, seed)
 
 @cython.boundscheck(False)
