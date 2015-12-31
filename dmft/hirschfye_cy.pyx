@@ -8,14 +8,14 @@ from libcpp cimport bool
 
 
 cdef extern from "hfc.h":
-    void cgnew(size_t N, double *g, double dv, int k)
-    void cg2flip(size_t N, double *g, double *dv, int l, int k)
+    void cgnew(size_t N, double *g, double dv, size_t k)
+    void cg2flip(size_t N, double *g, double *dv, size_t l, size_t k)
 
-def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, int k):
+def gnew(np.ndarray[np.float64_t, ndim=2] g, double dv, size_t k):
     cdef int N=g.shape[0]
     cgnew(N, &g[0,0], dv, k)
 
-def g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, int l, int k):
+def g2flip(np.ndarray[np.float64_t, ndim=2] g, double[::1] dv, size_t l, size_t k):
     cdef int N=g.shape[0]
     cg2flip(N, &g[0,0], &dv[0], l, k)
 

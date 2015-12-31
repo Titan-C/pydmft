@@ -30,7 +30,7 @@
 #include <lapacke.h>
 
 
-void cgnew(size_t N, double *g, double dv, int k);
-void cg2flip(size_t N, double *g, double *dv, int l, int k);
+void cgnew(size_t N, double *g, double dv, size_t k);
+void cg2flip(size_t N, double *g, double *dv, size_t l, size_t k);
 
 #endif // HFC_H

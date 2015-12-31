@@ -19,7 +19,7 @@
 
 #include "hfc.h"
 
-void cgnew(size_t N, double *g, double dv, int k){
+void cgnew(size_t N, double *g, double dv, size_t k){
     double ee, a;
 
     ee = exp(dv)-1.;
@@ -41,7 +41,7 @@ void cgnew(size_t N, double *g, double dv, int k){
 
 }
 
-void cg2flip(size_t N, double *g, double *dv, int l, int k){
+void cg2flip(size_t N, double *g, double *dv, size_t l, size_t k){
   std::valarray<double> id2 (0., 4);
   id2[0] = id2[3] = 1.;
 
@@ -55,7 +55,6 @@ void cg2flip(size_t N, double *g, double *dv, int l, int k){
   U[std::slice(N, N, 1)] *= std::valarray<double>(exp(dv[1])-1., N);
 
   std::valarray<double> V (2*N);
-  int col=0;
   for(size_t i=0; i<N; i++){
       V[i*2] = g[i*N + l];
       V[i*2+1] = g[i*N + k];
