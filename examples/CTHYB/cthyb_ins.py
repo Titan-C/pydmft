@@ -15,6 +15,8 @@ import numpy as np
 import pytriqs.utility.mpi as mpi
 import argparse
 import dmft.plot.triqs_sb as tsb
+import os
+import struct
 
 # Set up a few parameters
 parser = argparse.ArgumentParser(description='DMFT loop for single site Bethe lattice in CTHYB',
@@ -44,6 +46,7 @@ S = Solver(beta=beta, gf_struct={'up': [0], 'down': [0]},
 params = {'n_cycles': args.mcs,
           'length_cycle': args.meas,
           'n_warmup_cycles': args.therm,
+          'random_seed': struct.unpack("I", os.urandom(4)),
          }
 # Initalize the Green's function to a semi-circular density of states
 g_iw = S.G_iw['up'].copy()

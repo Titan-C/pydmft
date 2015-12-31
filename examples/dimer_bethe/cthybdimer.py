@@ -11,6 +11,8 @@ from math import sqrt, modf
 from time import time
 import argparse
 import numpy as np
+import os
+import struct
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 from pytriqs.archive import HDFArchive
 from pytriqs.gf.local import inverse, iOmega_n, SemiCircular, TailGf
@@ -167,7 +169,7 @@ def do_setup():
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
                                'measure_pert_order': False,
-                               'random_seed': int(intp+mpi.rank*341*fracp)}})
+                               'random_seed': struct.unpack("I", os.urandom(4))}})
 
     return setup
 
