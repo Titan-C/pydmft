@@ -20,6 +20,8 @@ import numpy as np
 import scipy.linalg as la
 import time
 import numba
+import os
+import struct
 
 
 def ising_v(dtau, U, L, fields=1, polar=0.5):
@@ -66,7 +68,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              't':           0.5,
              'SITES':       1,
              'BANDS':       1,
-             'SEED':        int(intp+comm.Get_rank()*341*fracp),
+             'SEED':        struct.unpack("I", os.urandom(4)),
              'Heat_bath':   True,
              'ofile':       'hf_out.h5',
              'group':       'temp/'+time.asctime(),
