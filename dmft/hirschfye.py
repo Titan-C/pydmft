@@ -91,7 +91,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     hffast.set_seed(parms['SEED'])
 
     update = False
-    for mcs in xrange(parms['sweeps'] + parms['therm']):
+    for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0 and parms['global_flip']:
                 v *= -1
                 update = True

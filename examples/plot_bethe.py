@@ -15,7 +15,7 @@ omega = 1e-3j+np.linspace(-4, 4, 800)
 gf_w = np.zeros_like(omega)
 t = 0.5
 
-for i in xrange(1, int(1e4+1)):
+for i in range(1, int(1e4+1)):
     gf_w = 1/(omega - t**2 * gf_w)
     if i in [1, 4, 10000]:
         plt.plot(omega.real, gf_w.real, label='iteration '+str(i))
