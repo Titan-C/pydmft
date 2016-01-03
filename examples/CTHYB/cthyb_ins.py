@@ -64,6 +64,8 @@ def dmft_loop_pm(U):
     for _, g in S.G_tau:
         g.tail[3] = np.array([[U**2/4 + .25]])
 
+    mpi.barrier()
+
     try:
         with HDFArchive("CH_sb_b{}.h5".format(args.beta), 'r') as R:
             last_loop = len(R['U{}'.format(U)].keys())
