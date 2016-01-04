@@ -122,7 +122,7 @@ def ekin_tau(g_iw, tau, w_n, u_int):
 
 
 def epot(g_iw, s_iw, u, beta, w_n):
-    """Calculates the Potential Energy
+    r"""Calculates the Potential Energy
 
     Using the local Green Function and self energy the potential
     energy is calculated using :ref:`potential_energy`
@@ -130,13 +130,13 @@ def epot(g_iw, s_iw, u, beta, w_n):
     Taking the tail of this product to decay in the half-filled single
     band case as:
 
-    .. math:: \Sigma G \rightarrow \frac{U^2}{4i\omega_n}
+    .. math:: \Sigma G \rightarrow \frac{U^2}{4i\omega_n^2}
 
     The potential energy per spin is calculated by
 
-    .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2} (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} + \frac{U^2}{4i\omega_n})
-    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} + \frac{1}{2\beta} \sum_{n} \frac{U^2}{4i\omega_n})
-    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} - \frac{U^2}{32})
+    .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2} (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n^2} + \frac{U^2}{4i\omega_n^2})
+    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n^2}) + \frac{U^2}{8\beta} \sum_{n} \frac{1}{i\omega_n^2}
+    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n^2}) - \frac{U^2}{32}
 
     """
     # the last u/8 is because sigma to zero order has the Hartree term
