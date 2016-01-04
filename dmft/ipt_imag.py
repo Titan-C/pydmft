@@ -112,6 +112,8 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
 # Energy calculations
 
 def ekin(g_iw, s_iw, beta, w_n, ek_mean, g_iwfree):
+    """Calculates the Kinetic Energy
+    """
     return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + ek_mean
 
 def ekin_tau(g_iw, tau, w_n, u_int):
@@ -120,6 +122,26 @@ def ekin_tau(g_iw, tau, w_n, u_int):
 
 
 def epot(g_iw, s_iw, u, beta, w_n):
+    """Calculates the Potential Energy
+
+    Using the local Green Function and self energy the potential
+    energy is calculated using :ref:`potential_energy`
+
+    Taking the tail of this product to decay in the half-filled single
+    band case as:
+
+    .. math:: \Sigma G \rightarrow \frac{U^2}{4i\omega_n}
+
+    The potential energy per spin is calculated by
+
+    .. math:: \langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2} (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} + \frac{U^2}{4i\omega_n})
+    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} + \frac{1}{2\beta} \sum_{n} \frac{U^2}{4i\omega_n})
+    .. math:: = \frac{1}{\beta} \sum_{n>0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4i\omega_n} - \frac{U^2}{32})
+
+    """
+    # the last u/8 is because sigma to zero order has the Hartree term
+    # that is avoided in IPT Sigma=U/2. Then times G->1/2 after sum
+    # and times 1/2 of the formula
     return (s_iw*g_iw+u**2/4./w_n**2).real.sum()/beta - beta*u**2/32. + u/8
 
 
