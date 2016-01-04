@@ -2,17 +2,22 @@
 from dmft.plot.hf_single_site import label_convergence
 from pytriqs.archive import HDFArchive
 from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, GfReFreq, \
-    TailGf
+    TailGf, SemiCircular, GfImTime, InverseFourier
 from pytriqs.plot.mpl_interface import oplot
 import dmft.common as gf
+from dmft.ipt_imag import n_half
 import dmft.plot.cthyb_h_single_site as pss
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.optimize import fsolve
+from scipy.integrate import quad, simps
+import slaveparticles.quantum.dos as dos
+
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0):
+def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0, sig=False):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
@@ -20,6 +25,11 @@ def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0)
         for step in datarecord[u_str].keys()[skip:]:
             gf_iw = datarecord[u_str][step]['giw']
             gf_iw = .5*(gf_iw['up']+gf_iw['down'])
+            if sig:
+                u_int = float(u_str[1:])
+                gf_iw.data.real = 0.
+                tail_clean(gf_iw, u_int)
+                gf_iw << iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
             gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
@@ -28,17 +38,18 @@ def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0)
     for num, (rfreqs, ifreqs) in enumerate(freq_arr):
         axes[1].plot(rfreqs, 's-.', label=str(num))
         axes[1].plot(ifreqs, 'o-.', label=str(num))
-    graf = r'$G(i\omega_n)$'
+    graf = r'$G$' if not sig else r'$\Sigma$'
+    graf += r'$(i\omega_n)$'
     label_convergence(beta, u_str,
                       axes, graf, n_freq, xlim)
 
 
-def list_show_conv(BETA, filestr='CH_sb_b{BETA}.h5', n_freq=5, xlim=2, skip=5):
+def list_show_conv(BETA, filestr='CH_sb_b{BETA}.h5', n_freq=5, xlim=2, skip=5, sig=False):
     """Plots in individual figures for all interactions the DMFT loops"""
     with HDFArchive(filestr.format(BETA=BETA), 'r') as output_files:
         urange = output_files.keys()
     for u_str in urange:
-        show_conv(BETA, u_str, filestr, n_freq, xlim, skip)
+        show_conv(BETA, u_str, filestr, n_freq, xlim, skip, sig)
         plt.show()
         plt.close()
 
@@ -80,12 +91,54 @@ def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
             gf_iw = results[u_str][lastit]['giw']
             gf_iw = .5*(gf_iw['up']+gf_iw['down'])
             u_int = float(u_str[1:])
-            tail_clean(gf_iw, u_int)
             gf_iw.data.real = 0.
+            tail_clean(gf_iw, u_int)
 
-            sig_iw = iOmega + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
+            sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
 
-            V.append((gf_iw*sig_iw).total_density())
+            gf_iw << gf_iw*sig_iw
+            V.append((gf_iw).total_density())
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V), ur
+
+def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+    V = []
+    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-1]
+            gf_iw = results[u_str][lastit]['giw']
+            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
+            u_int = float(u_str[1:])
+            gf_iw.data.real = 0.
+            tail_clean(gf_iw, u_int)
+            sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
+
+            gf_iw << (iOmega_n + u_int/2.)*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
+            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., u_int/2., 0.5, BETA))[0]
+            V.append((gf_iw).total_density() + e_mean)
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.array(V), ur
+
+def ekin2(BETA, filestr='CH_sb_b{BETA}.h5'):
+    T = []
+    gt = GfImTime(beta=BETA, indices=[0])
+    tau = np.linspace(0, BETA, len(gt.mesh))
+    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-1]
+            gf_iw = results[u_str][lastit]['giw']
+            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
+            u_int = float(u_str[1:])
+            gf_iw.data.real = 0.
+            tail_clean(gf_iw, u_int)
+            gt << InverseFourier(gf_iw)
+            gt = gt*gt
+
+            T.append(simps(np.squeeze(gt.data)*.5, tau))
+
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.asarray(T), ur
