@@ -29,7 +29,7 @@ energy is estimated by
 from __future__ import division, absolute_import, print_function
 
 from numba import jit
-from scipy.integrate import quad
+from scipy.integrate import quad, simps
 from scipy.optimize import fsolve
 import numpy as np
 from dmft.common import gt_fouriertrans, gw_invfouriertrans
@@ -113,6 +113,10 @@ def dmft_loop(u_int, t, g_iwn, w_n, tau, mix=1, conv=1e-3):
 
 def ekin(g_iw, s_iw, beta, w_n, ek_mean, g_iwfree):
     return 2*(1j*w_n*(g_iw-g_iwfree) - s_iw*g_iw).real.sum()/beta + ek_mean
+
+def ekin_tau(g_iw, tau, w_n, u_int):
+    gt = gw_invfouriertrans(g_iw, tau, w_n, [1., 0., u_int**2/4 + 0.25])
+    return -0.5*simps(gt*gt, tau)
 
 
 def epot(g_iw, s_iw, u, beta, w_n):
