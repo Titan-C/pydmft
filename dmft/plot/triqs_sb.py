@@ -97,14 +97,14 @@ def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
             sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
 
             gf_iw << gf_iw*sig_iw
-            V.append((gf_iw).total_density())
+            V.append(0.5*(gf_iw).total_density())
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V), ur
 
 def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
-    V = []
+    T = []
     with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
         for u_str in results:
             lastit = results[u_str].keys()[-1]
@@ -113,14 +113,14 @@ def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
             u_int = float(u_str[1:])
             gf_iw.data.real = 0.
             tail_clean(gf_iw, u_int)
-            sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
+            sig_iw = iOmega_n - 0.25 * gf_iw - inverse(gf_iw)
 
-            gf_iw << (iOmega_n + u_int/2.)*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
-            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., u_int/2., 0.5, BETA))[0]
-            V.append((gf_iw).total_density() + e_mean)
+            gf_iw << iOmega_n*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
+            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., 0., 0.5, BETA))[0]
+            T.append((gf_iw).total_density() + e_mean)
         ur = np.array([float(u_str[1:]) for u_str in results])
 
-    return np.array(V), ur
+    return np.array(T), ur
 
 def ekin2(BETA, filestr='CH_sb_b{BETA}.h5'):
     T = []

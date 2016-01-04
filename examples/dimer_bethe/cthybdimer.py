@@ -169,7 +169,7 @@ def do_setup():
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
                                'measure_pert_order': False,
-                               'random_seed': struct.unpack("L", os.urandom(4))[0]}})
+                               'random_seed': struct.unpack("I", os.urandom(4))[0]}})
 
     return setup
 
