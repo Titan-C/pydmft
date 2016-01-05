@@ -42,6 +42,7 @@ def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0,
     graf += r'$(i\omega_n)$'
     label_convergence(beta, u_str,
                       axes, graf, n_freq, xlim)
+    return axes
 
 
 def list_show_conv(BETA, filestr='CH_sb_b{BETA}.h5', n_freq=5, xlim=2, skip=5, sig=False):
@@ -113,11 +114,13 @@ def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
             u_int = float(u_str[1:])
             gf_iw.data.real = 0.
             tail_clean(gf_iw, u_int)
-            sig_iw = iOmega_n - 0.25 * gf_iw - inverse(gf_iw)
+            #sig_iw = iOmega_n - 0.25 * gf_iw - inverse(gf_iw)
+            #gf_iw << iOmega_n*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
 
+            sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
             gf_iw << iOmega_n*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
             e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., 0., 0.5, BETA))[0]
-            T.append((gf_iw).total_density() + e_mean)
+            T.append((gf_iw).total_density() + e_mean + u_int/4)
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(T), ur
@@ -138,6 +141,24 @@ def ekin2(BETA, filestr='CH_sb_b{BETA}.h5'):
             gt = gt*gt
 
             T.append(simps(np.squeeze(gt.data)*.5, tau))
+
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.asarray(T), ur
+
+def ekin3(BETA, filestr='CH_sb_b{BETA}.h5'):
+    T = []
+    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-1]
+            gf_iw = results[u_str][lastit]['giw']
+            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
+            gf_iw.data.real = 0.
+            u_int = float(u_str[1:])
+            tail_clean(gf_iw, u_int)
+            gf_iw << .25*gf_iw*gf_iw
+
+            T.append(gf_iw.total_density())
 
         ur = np.array([float(u_str[1:]) for u_str in results])
 
