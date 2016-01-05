@@ -47,39 +47,35 @@ def energy(beta, u_range, g_s_results):
     e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., mu, 0.5, beta))[0]
     kin = np.asarray([ekin(g_iw, s_iw, beta, w_n, e_mean, g_iwfree)
                       for g_iw, s_iw in g_s_iw_log])
-    kin2 = np.asarray([ekin_tau(g_iw, tau, w_n, u)
-                       for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
     pot = np.asarray([epot(g_iw, s_iw, u, beta, w_n)
                       for (g_iw, s_iw), u in zip(g_s_iw_log, u_range)])
 
-    return kin, pot, kin2
+    return kin, pot
 
 
 U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.hstack(([1024., 512.], np.logspace(8, -4.5, 13, base=2)))
+BETARANGE = np.hstack(([1024., 512.], np.logspace(8, -4.5, 41, base=2)))
 
 for BETA in BETARANGE:
-    Ti, Vi, Ti2 = energy(BETA, rU, hysteresis(BETA, rU))
-    Tm, Vm, Tm2 = energy(BETA, U, hysteresis(BETA, U))
-    E_log.append((Tm, Vm, Ti[::-1], Vi[::-1], Tm2, Ti2[::-1]))
+    Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
+    Tm, Vm = energy(BETA, U, hysteresis(BETA, U))
+    E_log.append((Tm, Vm, Ti[::-1], Vi[::-1]))
 
 ###############################################################################
 
 fige, axe = plt.subplots(nrows=3, sharex=True)
 fige.subplots_adjust(hspace=0.)
-for i, j in zip([0, 1, 2], ['b', 'g', 'r']):
+for i, j in zip([0, 9, 12], ['b', 'g', 'r']):
     BETA = BETARANGE[i]
-    Tm, Vm, Ti, Vi, Tm2, Ti2 = E_log[i]
+    Tm, Vm, Ti, Vi = E_log[i]
     axe[0].plot(U, Tm, j, label=r'$\beta={:.0f}$'.format(BETA))
     axe[0].plot(U, Ti, j + '--')
-    axe[0].plot(U, Tm2, j+ ':', label=r'$\beta={:.0f}$'.format(BETA))
-    axe[0].plot(U, Ti2, j + '-')
     axe[1].plot(U, Vm, j)
     axe[1].plot(U, Vi, j + '--')
-    axe[2].plot(U, (Tm2+Vm)-(Ti2+Vi), j+'-')
+    axe[2].plot(U, (Tm+Vm)-(Ti+Vi), j+'-')
 
 axe[0].set_ylabel(r'$\langle T \rangle$')
 axe[1].set_ylabel(r'$\langle V \rangle$')
@@ -97,7 +93,7 @@ axe[2].set_xlabel('U/D')
 # case.
 
 E_log = np.rollaxis(np.rollaxis(np.asarray(E_log), 2), 2)
-Tm, Vm, Ti, Vi = E_log[4], E_log[1], E_log[5], E_log[3]
+Tm, Vm, Ti, Vi = E_log[0], E_log[1], E_log[2], E_log[3]
 Hm = Tm + Vm
 Hi = Ti + Vi
 fig, ax = plt.subplots()
