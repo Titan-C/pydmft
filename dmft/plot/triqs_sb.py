@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
-from dmft.plot.hf_single_site import label_convergence
+import matplotlib.pyplot as plt
+import numpy as np
 from pytriqs.archive import HDFArchive
 from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, GfReFreq, \
     TailGf, SemiCircular, GfImTime, InverseFourier
 from pytriqs.plot.mpl_interface import oplot
 import dmft.common as gf
-from dmft.ipt_imag import n_half
 import dmft.plot.cthyb_h_single_site as pss
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy.optimize import fsolve
-from scipy.integrate import quad, simps
-import slaveparticles.quantum.dos as dos
+from dmft.plot.hf_single_site import label_convergence
 
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
@@ -58,7 +54,7 @@ def list_show_conv(BETA, filestr='CH_sb_b{BETA}.h5', n_freq=5, xlim=2, skip=5, s
 def phase_diag(beta_array, filestr='CH_sb_b{BETA}.h5'):
 
     for BETA in beta_array:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+        w_n = gf.matsubara_freq(BETA, 3)
         with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
             fl_dos = []
             for u_str in results.keys():
@@ -66,7 +62,7 @@ def phase_diag(beta_array, filestr='CH_sb_b{BETA}.h5'):
                 gf_iw = results[u_str][lastit]['giw']
                 gf_iw = .5*(gf_iw['up']+gf_iw['down'])
                 gf_iw = np.squeeze([gf_iw(i) for i in range(3)])
-                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
+                fl_dos.append(gf.fit_gf(w_n, gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             temp = np.ones(len(u_range)) / BETA
@@ -83,8 +79,6 @@ def tail_clean(gf_iw, U):
     gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
 
 def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
-    wsqr_4 = 4*w_n*w_n
     V = []
     with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
         for u_str in results:
@@ -103,50 +97,8 @@ def epot(BETA, filestr='CH_sb_b{BETA}.h5'):
 
     return np.array(V), ur
 
+
 def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
-    T = []
-    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
-        for u_str in results:
-            lastit = results[u_str].keys()[-1]
-            gf_iw = results[u_str][lastit]['giw']
-            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
-            u_int = float(u_str[1:])
-            gf_iw.data.real = 0.
-            tail_clean(gf_iw, u_int)
-            #sig_iw = iOmega_n - 0.25 * gf_iw - inverse(gf_iw)
-            #gf_iw << iOmega_n*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
-
-            sig_iw = iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
-            gf_iw << iOmega_n*(gf_iw-SemiCircular(1.)) - gf_iw*sig_iw
-            e_mean = quad(dos.bethe_fermi_ene, -1., 1., args=(1., 0., 0.5, BETA))[0]
-            T.append((gf_iw).total_density() + e_mean + u_int/4)
-        ur = np.array([float(u_str[1:]) for u_str in results])
-
-    return np.array(T), ur
-
-def ekin2(BETA, filestr='CH_sb_b{BETA}.h5'):
-    T = []
-    gt = GfImTime(beta=BETA, indices=[0])
-    tau = np.linspace(0, BETA, len(gt.mesh))
-    with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
-        for u_str in results:
-            lastit = results[u_str].keys()[-1]
-            gf_iw = results[u_str][lastit]['giw']
-            gf_iw = .5*(gf_iw['up']+gf_iw['down'])
-            u_int = float(u_str[1:])
-            gf_iw.data.real = 0.
-            tail_clean(gf_iw, u_int)
-            gt << InverseFourier(gf_iw)
-            gt = gt*gt
-
-            T.append(simps(np.squeeze(gt.data)*.5, tau))
-
-        ur = np.array([float(u_str[1:]) for u_str in results])
-
-    return np.asarray(T), ur
-
-def ekin3(BETA, filestr='CH_sb_b{BETA}.h5'):
     T = []
     with HDFArchive(filestr.format(BETA=BETA), 'r') as results:
         for u_str in results:
@@ -156,7 +108,7 @@ def ekin3(BETA, filestr='CH_sb_b{BETA}.h5'):
             gf_iw.data.real = 0.
             u_int = float(u_str[1:])
             tail_clean(gf_iw, u_int)
-            gf_iw << .25*gf_iw*gf_iw
+            gf_iw << -.25*gf_iw*gf_iw
 
             T.append(gf_iw.total_density())
 
