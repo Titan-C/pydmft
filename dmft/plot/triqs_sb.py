@@ -108,7 +108,7 @@ def ekin(BETA, filestr='CH_sb_b{BETA}.h5'):
             gf_iw.data.real = 0.
             u_int = float(u_str[1:])
             tail_clean(gf_iw, u_int)
-            gf_iw << -.25*gf_iw*gf_iw
+            gf_iw << .25*gf_iw*gf_iw
 
             T.append(gf_iw.total_density())
 

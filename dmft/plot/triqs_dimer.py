@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
-from pytriqs.gf.local import GfImFreq, iOmega_n, inverse
+from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, TailGf
 from pytriqs.gf.local import GfReFreq
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.archive import HDFArchive
@@ -69,3 +69,73 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
     plt.xlabel(r'$t_\perp/D$')
     plt.ylabel('$U/D$')
+
+def averager(h5parent, h5child, last_iterations):
+    """Given an H5 file parent averages over the iterations with the child"""
+    sum_child = 0.
+    for step in last_iterations:
+        sum_child += h5parent[step][h5child]
+
+    return 1. / len(last_iterations) * sum_child
+
+
+def tail_clean(gf_iw, U, tp):
+    fixed = TailGf(1, 1, 3, 1)
+    fixed[1] = np.array([[1]])
+    fixed[2] = np.array([[-tp]])
+    fixed[3] = np.array([[U**2/4 + tp**2 + .25]])
+    gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
+
+
+def paramagnetic_hf_clean(G_iw, u_int, tp):
+    """Performs the average over up & dw of the green functions to
+    enforce paramagnetism"""
+
+    G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
+    tail_clean(G_iw['asym_up'], u_int, tp)
+
+    G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
+    tail_clean(G_iw['sym_up'], u_int, -tp)
+
+    G_iw['asym_dw'] << G_iw['asym_up']
+    G_iw['sym_dw'] << G_iw['sym_up']
+
+
+def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
+    """Kinetic Energy per molecule"""
+    T = []
+    with HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-3:]
+            gf_iw = averager(results[u_str], 'G_iw', lastit)
+            u_int = float(u_str[1:])
+            paramagnetic_hf_clean(gf_iw, u_int, tp)
+
+            gf_iw << 0.25*gf_iw*gf_iw
+            T.append(gf_iw.total_density())
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.array(T), ur
+
+
+def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
+    """Potential energy per molecule"""
+    V = []
+    with HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
+        for u_str in results:
+            lastit = results[u_str].keys()[-3:]
+            gf_iw = averager(results[u_str], 'G_iw', lastit)
+            sig_iw= gf_iw.copy()
+            u_int = float(u_str[1:])
+            paramagnetic_hf_clean(gf_iw, u_int, tp)
+
+            for name, g0block in gf_iw:
+                shift = 1. if 'asym' in name else -1
+                sig_iw[name] << iOmega_n + u_int/2. + shift * tp - 0.25*gf_iw[name]- inverse(gf_iw[name])
+
+
+            gf_iw << 0.5*sig_iw*gf_iw
+            V.append(gf_iw.total_density())
+        ur = np.array([float(u_str[1:]) for u_str in results])
+
+    return np.array(V), ur
