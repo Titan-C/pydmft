@@ -13,7 +13,7 @@ import argparse
 import numpy as np
 import os
 import struct
-from dmft.plot.triqs_dimer import tail_clean, paramagnetic_hf_clean
+from dmft.plot.triqs_dimer import tail_clean, paramagnetic_hf_clean, averager
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 from pytriqs.archive import HDFArchive
 from pytriqs.gf.local import inverse, iOmega_n, SemiCircular, TailGf
@@ -76,17 +76,19 @@ def dmft_loop(setup, u_int, G_iw):
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
-            last_loop = len(outp[src_U].keys())
+            iterations = list(outp[src_U].keys())
+            last_loop = len(iterations)
             last_it = 'it{:03}'.format(last_loop-1)
+            G_iw_seed = averager(outp[src_U], 'G_iw', iterations[-3:])
             try:
-                imp_sol.G_iw << outp[src_U][last_it]['G_iw']
+                imp_sol.G_iw << G_iw_seed
             except IndexError:
                 import itertools
                 spin = ['up', 'dw']
                 newn = (''.join(a) for a in itertools.product(['asym_', 'sym_'], spin))
                 oldn = (''.join(a) for a in itertools.product(['high_', 'low_'], spin))
                 for name_n, name_o in zip(newn, oldn):
-                    imp_sol.G_iw[name_n] << outp[src_U][last_it]['G_iw'][name_o]
+                    imp_sol.G_iw[name_n] << G_iw_seed[name_o]
     except (KeyError, IOError):
         last_loop = 0
         for name, gblock in imp_sol.G_iw:
