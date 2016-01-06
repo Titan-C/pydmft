@@ -101,7 +101,7 @@ def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         setup = h5.get_attributes(output_files[u_str]['it000'])
         tau, w_n = gf.tau_wn_setup(setup)
-        for step in output_files[u_str].keys()[skip:]:
+        for step in list(output_files[u_str].keys())[skip:]:
             giwd, giwo = get_giw(output_files[u_str], step, tau, w_n)
             axes[0].plot(w_n, giwd.imag, 'bo:')
             axes[0].plot(w_n, giwo.real, 'gs:')
@@ -305,7 +305,7 @@ def plot_acc(BETA, u_str, tp, filestr, skip=5):
     """Plot the evolution of the acceptance rate in each DMFT loop"""
     acceptance_log = []
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        for it_name in output_files[u_str].keys()[skip:]:
+        for it_name in list(output_files[u_str].keys())[skip:]:
             try:
                 acceptance_log.append(output_files[u_str][it_name]['acceptance'].value)
             except KeyError:
