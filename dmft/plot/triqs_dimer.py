@@ -91,14 +91,25 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     """Performs the average over up & dw of the green functions to
     enforce paramagnetism"""
 
-    G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
-    tail_clean(G_iw['asym_up'], u_int, tp)
+    try:
+        G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
+        tail_clean(G_iw['asym_up'], u_int, tp)
 
-    G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
-    tail_clean(G_iw['sym_up'], u_int, -tp)
+        G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
+        tail_clean(G_iw['sym_up'], u_int, -tp)
 
-    G_iw['asym_dw'] << G_iw['asym_up']
-    G_iw['sym_dw'] << G_iw['sym_up']
+        G_iw['asym_dw'] << G_iw['asym_up']
+        G_iw['sym_dw'] << G_iw['sym_up']
+
+    except:
+        G_iw['high_up'] << 0.5 * (G_iw['high_up'] + G_iw['high_dw'])
+        tail_clean(G_iw['high_up'], u_int, tp)
+
+        G_iw['low_up'] << 0.5 * (G_iw['low_up'] + G_iw['low_dw'])
+        tail_clean(G_iw['low_up'], u_int, -tp)
+
+        G_iw['high_dw'] << G_iw['high_up']
+        G_iw['low_dw'] << G_iw['low_up']
 
 
 def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
