@@ -182,7 +182,7 @@ def epot(filestr, beta):
                 siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
                 V.append((rgiw_o*siw_o.real - jgiw_d*siw_d.imag +
-                          u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32)
+                          u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32 + u_int/8)
         array_shape = (len(results.keys()), len(tprec.keys()))
 
     return np.asarray(V).reshape(array_shape)

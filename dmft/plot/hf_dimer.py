@@ -248,7 +248,7 @@ def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
             V.append((giwo*siwo + giwd*siwd + u_int**2/wsqr_4).real.sum()/BETA)
         ur = np.array([float(u_str[1:]) for u_str in results])
 
-    return np.array(V) - BETA*ur**2/32, ur
+    return np.array(V) - BETA*ur**2/32 + ur/8., ur
 
 
 def get_docc(BETA, tp, filestr):
