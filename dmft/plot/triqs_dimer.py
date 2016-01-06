@@ -141,7 +141,7 @@ def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             paramagnetic_hf_clean(gf_iw, u_int, tp)
 
             for name, g0block in gf_iw:
-                shift = 1. if 'asym' in name else -1
+                shift = 1. if 'asym' or 'high' in name else -1
                 sig_iw[name] << iOmega_n + u_int/2. + shift * tp - 0.25*gf_iw[name]- inverse(gf_iw[name])
 
 
