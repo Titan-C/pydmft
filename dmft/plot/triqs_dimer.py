@@ -78,6 +78,22 @@ def averager(h5parent, h5child, last_iterations):
 
     return 1. / len(last_iterations) * sum_child
 
+def get_giw(h5parent, iteration_slice):
+    """Recover G_iw from h5parent at iteration_slice
+
+    Parameters
+    ----------
+    h5parent : h5py parent object
+    iteration_slice : list or slice of iterations to average over
+
+    Returns
+    -------
+    G_iw object
+    """
+
+    iterations = list(h5parent.keys())
+    return averager(h5parent, 'G_iw', iterations[iteration_slice])
+
 
 def tail_clean(gf_iw, U, tp):
     fixed = TailGf(1, 1, 3, 1)

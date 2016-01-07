@@ -10,13 +10,12 @@ from __future__ import division, absolute_import, print_function
 from math import sqrt, modf
 from time import time
 import argparse
-import numpy as np
 import os
 import struct
-from dmft.plot.triqs_dimer import tail_clean, paramagnetic_hf_clean, averager
+import dmft.plot.triqs_dimer as tdimer
 from pytriqs.applications.impurity_solvers.cthyb import Solver
 from pytriqs.archive import HDFArchive
-from pytriqs.gf.local import inverse, iOmega_n, SemiCircular, TailGf
+from pytriqs.gf.local import inverse, iOmega_n, SemiCircular
 from pytriqs.operators import c, dagger
 import pytriqs.utility.mpi as mpi
 
@@ -46,16 +45,14 @@ def set_new_seed(setup):
     avg_over = int(setup['new_seed'][2])
 
     with HDFArchive(setup['ofile'].format(**SETUP), 'a') as outp:
-        last_iterations = outp[src_U].keys()[-avg_over:]
-        giw = averager(outp[src_U], 'G_iw', last_iterations)
+        giw = tdimer.get_giw(outp[src_U], slice(-avg_over, None))
         try:
-            dest_count = len(outp[dest_U].keys())
+            dest_count = len(outp[dest_U])
         except KeyError:
             dest_count = 0
         dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
 
         outp[dest_group + 'giw'] = giw
-        outp[dest_group + 'setup'] = outp[src_U][last_iterations[-1]]['setup']
 
     print(setup['new_seed'])
 
@@ -76,30 +73,29 @@ def dmft_loop(setup, u_int, G_iw):
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
-            iterations = list(outp[src_U].keys())
-            last_loop = len(iterations)
-            last_it = 'it{:03}'.format(last_loop-1)
-            G_iw_seed = averager(outp[src_U], 'G_iw', iterations[-3:])
+            g_iw_seed = tdimer.get_giw(outp[src_U], slice(-3, None))
+            last_loop = len(outp[src_U])
             try:
-                imp_sol.G_iw << G_iw_seed
+                imp_sol.G_iw << g_iw_seed
             except IndexError:
                 import itertools
                 spin = ['up', 'dw']
                 newn = (''.join(a) for a in itertools.product(['asym_', 'sym_'], spin))
                 oldn = (''.join(a) for a in itertools.product(['high_', 'low_'], spin))
                 for name_n, name_o in zip(newn, oldn):
-                    imp_sol.G_iw[name_n] << G_iw_seed[name_o]
+                    imp_sol.G_iw[name_n] << g_iw_seed[name_o]
     except (KeyError, IOError):
         last_loop = 0
         for name, gblock in imp_sol.G_iw:
             gblock << SemiCircular(1)
         if G_iw is not None:
-            imp_sol.G_iw = G_iw
+            imp_sol.G_iw << G_iw
 
     for loop in range(last_loop, last_loop + setup['Niter']):
-        if mpi.is_master_node(): print('\n\n in loop \n', '='*40, loop)
+        if mpi.is_master_node():
+            print('\n\n in loop \n', '='*40, loop)
 
-        paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
+        tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
 
         for name, g0block in imp_sol.G0_iw:
             shift = 1. if 'asym' in name else -1
@@ -143,7 +139,6 @@ def do_setup():
                         help='Resume DMFT loops from on disk data files')
     setup = vars(parser.parse_args())
 
-    fracp, intp = modf(time())
     setup.update({'s_params': {'move_double': False,
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
