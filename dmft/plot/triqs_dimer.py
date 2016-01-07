@@ -14,7 +14,7 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 
 def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
-              block=2, n_freq=2, xlim=2, skip=0):
+              block=2, n_freq=2, xlim=2, skip=0, sig=False):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
@@ -22,8 +22,14 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
         for step in datarecord[u_str].keys()[skip:]:
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw'][labels[block]]
+            if sig:
+                u_int = float(u_str[1:])
+                shift = 1. if 'asym' in labels[block] else -1
+                gf_iw << iOmega_n + u_int/2. + shift * tp - 0.25 * gf_iw - inverse(gf_iw)
+
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
+
             gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
             freq_arr.append([gf_iw.real, gf_iw.imag])
     freq_arr = np.asarray(freq_arr).T
@@ -31,19 +37,20 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
         axes[1].plot(rfreqs, 's-.', label=str(num))
         axes[1].plot(ifreqs, 'o-.', label=str(num))
 
-    graf = r'$G(i\omega_n)$'
+    graf = r'$G$' if not sig else r'$\Sigma$'
+    graf += r'$(i\omega_n)$'
     label_convergence(beta, u_str+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
 
 def list_show_conv(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
-                   block=2, n_freq=5, xlim=2, skip=5):
+                   block=2, n_freq=5, xlim=2, skip=5, sig=False):
     """Plots in individual figures for all interactions the DMFT loops"""
     with HDFArchive(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         urange = output_files.keys()
 
     for u_str in urange:
-        show_conv(BETA, u_str, tp, filestr, block, n_freq, xlim, skip)
+        show_conv(BETA, u_str, tp, filestr, block, n_freq, xlim, skip, sig)
 
         plt.show()
         plt.close()

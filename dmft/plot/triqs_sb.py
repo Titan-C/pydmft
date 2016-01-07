@@ -26,14 +26,18 @@ def show_conv(beta, u_str, filestr='CH_sb_b{BETA}.h5', n_freq=2, xlim=2, skip=0,
                 gf_iw.data.real = 0.
                 tail_clean(gf_iw, u_int)
                 gf_iw << iOmega_n + u_int/2. - 0.25 * gf_iw - inverse(gf_iw)
+
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
+
             gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
             freq_arr.append([gf_iw.real, gf_iw.imag])
+
     freq_arr = np.asarray(freq_arr).T
     for num, (rfreqs, ifreqs) in enumerate(freq_arr):
         axes[1].plot(rfreqs, 's-.', label=str(num))
         axes[1].plot(ifreqs, 'o-.', label=str(num))
+
     graf = r'$G$' if not sig else r'$\Sigma$'
     graf += r'$(i\omega_n)$'
     label_convergence(beta, u_str,
