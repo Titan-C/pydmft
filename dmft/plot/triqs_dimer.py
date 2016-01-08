@@ -21,9 +21,11 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
     with HDFArchive(filestr.format(tp=tp, BETA=beta), 'r') as datarecord:
         for step in datarecord[u_str].keys()[skip:]:
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
-            gf_iw = datarecord[u_str][step]['G_iw'][labels[block]]
+            gf_iw = datarecord[u_str][step]['G_iw']
+            u_int = float(u_str[1:])
+            paramagnetic_hf_clean(gf_iw, u_int, tp)
+            gf_iw = gf_iw[labels[block]]
             if sig:
-                u_int = float(u_str[1:])
                 shift = 1. if 'asym' in labels[block] else -1
                 gf_iw << iOmega_n + u_int/2. + shift * tp - 0.25 * gf_iw - inverse(gf_iw)
 

@@ -52,7 +52,7 @@ def set_new_seed(setup):
             dest_count = 0
         dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
 
-        outp[dest_group + 'giw'] = giw
+        outp[dest_group + 'G_iw'] = giw
 
     print(setup['new_seed'])
 
