@@ -57,7 +57,7 @@ U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.around(np.hstack(([1024., 512.], np.logspace(8, -4.5, 48, base=2))))
+BETARANGE = np.around(np.hstack(([1024., 512.], np.logspace(8, -4.5, 48, base=2))), decimals=2)
 
 for BETA in BETARANGE:
     Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))

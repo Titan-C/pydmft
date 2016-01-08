@@ -28,6 +28,22 @@ trivially solvable
 
 .. math::  \langle T \rangle = Tr \frac{1}{\beta} \sum_n \left( i\omega_n \left( G(i\omega_n)- G(i\omega_n)^{free} \right) - \Sigma(i\omega_n)G(i\omega_n) \right) + \int_{-\infty}^\infty \epsilon\rho(\epsilon)n_F(\epsilon-\mu) d\epsilon
 
+It is also possible to take a simpler approac by introducing a zero to
+the frequecy sum, with a constant factor. In this case one takes from
+
+.. math:: \langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + G(k, i\omega_n)^{-1}G(k, i\omega_n) \right)
+
+.. math::  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + (i\omega_n - \epsilon_k^0 - \Sigma(i\omega_n))G(k, i\omega_n) \right)
+
+But the local self-energy can be expresed by
+
+.. math:: \Sigma(i\omega_n) = \mathcal{G}^{0, -1} - G(i\omega_n)^{-1} =  i\omega_n + \Delta(i\omega_n) - G(i\omega_n)^{-1}
+
+This then becomes
+
+.. math::  = Tr \frac{1}{\beta} \sum_{k,n} \Delta(i\omega_n)G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \Delta(i\omega_n)G(i\omega_n)
+
+
 .. _potential_energy:
 
 Potential energy
