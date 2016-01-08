@@ -57,7 +57,7 @@ U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.hstack(([1024., 512.], np.logspace(8, -4.5, 41, base=2)))
+BETARANGE = np.around(np.hstack(([1024., 512.], np.logspace(8, -4.5, 48, base=2))))
 
 for BETA in BETARANGE:
     Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
@@ -87,35 +87,34 @@ axe[2].set_xlabel('U/D')
 # Change of the internal energy with temperature
 # ----------------------------------------------
 #
-# The next plots show the internal energy. The zoomed insets are also
-# rendered in logarithmic scale for the temperature axis. One can see
-# the existence of the 2 solutions for the metallic and insulating
-# case.
+# The next plots show the internal energy. The zoomed insets give
+# insight to the low temperature behavior where the existence of 2
+# solutions becomes evident too. The metallic solution has the
+# characteristic Fermi liquid behavior with the internal energy being
+# proportional to :math:`T^2`. Within the coexistence region, for the
+# particularly selected value of interaction one also sees how the
+# metallic solution at low temperatures has a lower energy than the
+# insulator. The final remark is that the insulating solution remains
+# flat in energy at low temperatures.
 
 E_log = np.rollaxis(np.rollaxis(np.asarray(E_log), 2), 2)
 Tm, Vm, Ti, Vi = E_log[0], E_log[1], E_log[2], E_log[3]
 Hm = Tm + Vm
 Hi = Ti + Vi
 fig, ax = plt.subplots()
-ax.plot(1/BETARANGE, Hm[0], label='U='+str(U[0]))
-ax.plot(1/BETARANGE, Hm[26], label='U='+str(U[26]))
-ax.plot(1/BETARANGE, Hm[40], label='U='+str(U[40]))
-ax.set_xlim([0, 8])
-axins = zoomed_inset_axes(ax, 12, loc=5)
-axins.semilogx(1/BETARANGE, Hm[0], 'b+-')
-axins.semilogx(1/BETARANGE, Hi[0], 'b+-')
-axins.set_xlim([1/1240, .4])
-axins.set_ylim([-.333, -0.32])
-mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
-plt.yticks(visible=False)
 axins = zoomed_inset_axes(ax, 12, loc=4)
-axins.semilogx(1/BETARANGE, Hm[26], 'g+-')
-axins.semilogx(1/BETARANGE, Hi[26], 'g+-')
-axins.set_xlim([1/1240, .4])
-axins.set_ylim([-.419, -0.412])
+def plot_zoom(ul, color):
+    ax.plot(1/BETARANGE, Hm[ul], label='U='+str(U[ul]))
+    axins.plot(1/BETARANGE, Hm[ul], color + '+-')
+    axins.plot(1/BETARANGE, Hi[ul], color + '+-')
+
+for u, c in zip([0, 8, 40], ['b', 'g', 'r']):
+    plot_zoom(u, c)
+
+ax.set_xlim([0, 8])
+axins.set_xlim([0, .2])
+axins.set_ylim([-.031, -0.005])
 mark_inset(ax, axins, loc1=2, loc2=3, fc="none", ec="0.5")
-plt.xticks(visible=False)
-plt.yticks(visible=False)
 
 ax.set_xlabel('T/D')
 ax.set_ylabel(r'$\langle  H \rangle$')
@@ -144,8 +143,8 @@ def heat_capacity(H, temp):
 
 T = 1/BETARANGE
 plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U='+str(U[0]))
-plt.semilogx(T[:-1], heat_capacity(Hm[26], T), label='met U='+str(U[26]))
-plt.semilogx(T[:-1], heat_capacity(Hi[26], T), '--', label='ins U='+str(U[26]))
+plt.semilogx(T[:-1], heat_capacity(Hm[8], T), label='met U='+str(U[8]))
+plt.semilogx(T[:-1], heat_capacity(Hi[8], T), '--', label='ins U='+str(U[8]))
 plt.xlim([1/1240, 10])
 plt.legend(loc=0)
 plt.xlabel('T/D')
@@ -168,8 +167,8 @@ def entropy(H, temp):
     return log(2.) - S
 
 plt.semilogx(T, entropy(Hm[0], T), label='U='+str(U[0]))
-plt.semilogx(T, entropy(Hm[26], T), label='U='+str(U[26]))
-plt.semilogx(T, entropy(Hi[26], T), '--', label='U='+str(U[26]))
+plt.semilogx(T, entropy(Hm[8], T), label='U='+str(U[8]))
+plt.semilogx(T, entropy(Hi[8], T), '--', label='U='+str(U[8]))
 plt.xlim([1/1240, 10])
 plt.legend(loc=0)
 plt.xlabel('T/D')
