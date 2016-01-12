@@ -10,7 +10,6 @@ import numpy as np
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 import dmft.h5archive as h5
-import dmft.hirschfye as hf
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
@@ -25,6 +24,15 @@ def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
     axes[1].set_title('Evolution of the first frequencies')
     axes[1].set_ylabel(graf+'$(l)$')
     axes[1].set_xlabel('iterations')
+
+
+def averager(h5parent, h5child, last_iterations):
+    """Given an H5 file parent averages over the iterations with the child"""
+    sum_child = 0.
+    for step in last_iterations:
+        sum_child += h5parent[step][h5child][:]
+
+    return sum_child / len(last_iterations)
 
 
 def get_giw(h5parent, iteration, tau, w_n):
@@ -106,7 +114,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
             u_range.append(U)
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
             tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
-            gtau = hf.averager(output_files[u_str], 'gtau', last_iterations)
+            gtau = averager(output_files[u_str], 'gtau', last_iterations)
             giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., 0.25 + U**2/4])
 
             gfit = gf.fit_gf(w_n[:3], giw.imag)

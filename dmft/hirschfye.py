@@ -15,6 +15,7 @@ from scipy.linalg.blas import dger
 import argparse
 import dmft.hffast as hffast
 import dmft.h5archive as h5
+import dmft.plot.hf_single_site as pss
 import math
 import numpy as np
 import scipy.linalg as la
@@ -447,15 +448,6 @@ def do_input(help_string):
     return parser
 
 
-def averager(h5parent, h5child, last_iterations):
-    """Given an H5 file parent averages over the iterations with the child"""
-    sum_child = 0.
-    for step in last_iterations:
-        sum_child += h5parent[step][h5child][:]
-
-    return sum_child / len(last_iterations)
-
-
 def set_new_seed(setup, targets):
     """Generates a new starting Green's function for the DMFT loop
     based on the finishing state of the system at a diffent parameter set"""
@@ -468,7 +460,7 @@ def set_new_seed(setup, targets):
     with h5.File(setup['ofile'].format(**setup), 'a') as outp:
         last_iterations = outp[src_U].keys()[-avg_over:]
         for target in targets:
-            averages.append(averager(outp[src_U], target, last_iterations))
+            averages.append(pss.averager(outp[src_U], target, last_iterations))
 
         try:
             dest_count = len(outp[dest_U].keys())
