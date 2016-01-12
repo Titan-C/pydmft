@@ -33,10 +33,12 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     current_u = 'U'+str(U)
     setup.update(simulation)
     setup['U'] = U
+    setup['simt'] = 'PM' # simulation type ParaMagnetic
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
     if setup['AFM']:
         giw = giw + np.array([[-1], [1]])*1e-2/w_n**2
+        setup['simt'] = 'AFM' # simulation type Anti-Ferro-Magnetic
 
     if g_iw_start is not None:
         giw = g_iw_start

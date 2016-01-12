@@ -427,7 +427,7 @@ def do_input(help_string):
                         help='Local interaction strength')
     parser.add_argument('-mu', '--MU', type=float, default=0.,
                         help='Chemical potential')
-    parser.add_argument('-ofile', default='SB_PM_B{BETA}.h5',
+    parser.add_argument('-ofile', default='SB_{simt}_B{BETA}.h5',
                         help='Output file shelve')
 
     parser.add_argument('-l', '--save_logs', action='store_true',
