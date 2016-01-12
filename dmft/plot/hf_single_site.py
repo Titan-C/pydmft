@@ -32,8 +32,10 @@ def get_giw(h5parent, iteration, tau, w_n):
     setup = h5.get_attributes(h5parent[iteration])
     mu, U = setup['MU'], setup['U']
     gtau = h5parent[iteration]['gtau'][:]
-    giw = gf.gt_fouriertrans(gtau, tau, w_n,
-                             [1., -mu, 0.25 + U**2/4])
+    tail = [1., -mu, 0.25 + U**2/4]
+    if len(gtau.shape) > 1:
+        tail[1] = -mu -U*(0.5+gtau[:, 0]).reshape(2, 1)
+    giw = gf.gt_fouriertrans(gtau, tau, w_n, tail)
 
     return gtau, giw
 
@@ -53,12 +55,16 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
         tau, w_n = gf.tau_wn_setup(setup)
         for step in keys:
             _, giw = get_giw(output_files[u_str], step, tau, w_n)
-            axes[0].plot(w_n, giw.imag)
-            freq_arr.append(giw.imag[:n_freq])
+            if len(giw.shape) > 1:
+                axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
+                freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
+            else:
+                axes[0].plot(w_n, giw.imag)
+                freq_arr.append(giw.imag[:n_freq])
 
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
-        axes[1].plot(freqs, 'o-.', label=str(num))
+        axes[1].plot(freqs.T, 'o-.', label=str(num))
     graf = r'$G(i\omega_n)$'
 
     label_convergence(beta, u_str, axes, graf, n_freq, xlim)
