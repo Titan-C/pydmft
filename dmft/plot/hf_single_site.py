@@ -53,12 +53,24 @@ def gf_tail(gtau, U, mu):
     return [1., -mu -U*(0.5+one_n), 0.25 * U**2/4]
 
 
-def get_giw(h5parent, iteration, tau, w_n):
-    """Recovers with Fourier Transform G_iw from H5 file"""
-    setup = h5.get_attributes(h5parent[iteration])
-    mu, U = setup['MU'], setup['U']
-    gtau = h5parent[iteration]['gtau'][:]
-    giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, U, mu))
+def get_giw(h5parent, iteration_slice, tau, w_n):
+    r"""Recovers with Fourier Transform G_iw from H5 file
+
+    Parameters
+    ----------
+    h5parent : hdf5 group to go
+    iteration_slice : list of iteration names to average over
+    tau : 1D real array time slices of HF data
+    w_n : 1D real array matsubara frequencies
+
+    Returns
+    -------
+    tuple : :math:`G(\tau)`, :math:`G(i\omega_n)`
+    """
+
+    setup = h5.get_attributes(h5parent[iteration_slice])
+    gtau = averager(h5parent, 'gtau', iteration_slice)
+    giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, setup['U'], setup['mu']))
 
     return gtau, giw
 
@@ -77,7 +89,7 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
         setup = h5.get_attributes(output_files[u_str][keys[-1]])
         tau, w_n = gf.tau_wn_setup(setup)
         for step in keys:
-            _, giw = get_giw(output_files[u_str], step, tau, w_n)
+            _, giw = get_giw(output_files[u_str], [step], tau, w_n)
             if len(giw.shape) > 1:
                 axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
                 freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
@@ -129,8 +141,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
             u_range.append(U)
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
             tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
-            gtau = averager(output_files[u_str], 'gtau', last_iterations)
-            giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, U, 0.))
+            _, giw = get_giw(output_files[u_str], last_iterations, tau, w_n)
 
             gfit = gf.fit_gf(w_n[:3], giw.imag)
             figiw.append(gfit)
