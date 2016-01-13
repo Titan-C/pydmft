@@ -32,8 +32,6 @@ def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', col=2, n_freq=5, xlim=2):
     graf = r'$G(i\omega_n)$' if 'Gf' in filestr else r'$\Sigma(i\omega_n)$'
     label_convergence(beta, 'U'+str(u_int), axes, graf, n_freq, xlim)
 
-    plt.show()
-    plt.close()
 
 
 def list_show_conv(beta, dirstr='B{}_U{}', col=2,
@@ -44,6 +42,8 @@ def list_show_conv(beta, dirstr='B{}_U{}', col=2,
     for ldir in list_dirs:
         u_int = float(re.findall(r"U([\d\.]+)", ldir)[0])
         show_conv(beta, u_int, dirstr+func, col, n_freq, xlim)
+        plt.show()
+        plt.close()
 
 
 def averager(vector):

@@ -33,9 +33,13 @@ parser.add_argument('-therm', type=int, default=int(5e4),
                     help='Monte Carlo sweeps of thermalization')
 parser.add_argument('-meas', type=int, default=30,
                     help='Number of Updates before measurements')
+parser.add_argument('-mu', '--MU', type=float, default=0.,
+                    help='Chemical potential')
+parser.add_argument('-afm', '--AFM', action='store_true',
+                    help='Use the self-consistency for Antiferromagnetism')
 
 args = parser.parse_args()
-half_bandwidth = 1.0
+t = 0.5
 beta = args.beta
 
 # Construct the CTQMC solver
@@ -50,7 +54,7 @@ params = {'n_cycles': args.mcs,
          }
 # Initalize the Green's function to a semi-circular density of states
 g_iw = S.G_iw['up'].copy()
-g_iw << SemiCircular(half_bandwidth)
+g_iw << SemiCircular(2*t)
 for _, g in S.G_iw:
     g << g_iw
 
@@ -59,7 +63,7 @@ for _, g in S.G_tau:
 
 
 def dmft_loop_pm(U):
-    chemical_potential = U/2.0
+    chemical_potential = U/2.0 + args.MU
 
     for _, g in S.G_tau:
         g.tail[3] = np.array([[U**2/4 + .25]])
@@ -77,15 +81,22 @@ def dmft_loop_pm(U):
     for i in range(last_loop, last_loop + args.Niter):
         if mpi.is_master_node():
             print('it', i)
+            print('On loop', i, 'beta', setup['beta'], 'U', U)
 
-        # Compute S.G0_iw with the self-consistency condition while
-        # imposing paramagnetism
-        g_iw << 0.5*(S.G_iw['up']+S.G_iw['down'])
-        g_iw.data[:].real = 0.
-        tsb.tail_clean(g_iw, U)
+        if args.AFM:
+            tsb.tail_clean(g_iw, U)
+            S.G0_iw['up'] << inverse(iOmega_n + chemical_potential - t**2 * S.G_iw['down'])
+            S.G0_iw['down'] << inverse(iOmega_n + chemical_potential - t**2 * S.G_iw['up'])
 
-        for _, g0 in S.G0_iw:
-            g0 << inverse(iOmega_n + chemical_potential - (half_bandwidth/2.0)**2 * g_iw)
+        else:
+            # Compute S.G0_iw with the self-consistency condition while
+            # imposing paramagnetism
+            g_iw << 0.5*(S.G_iw['up']+S.G_iw['down'])
+            g_iw.data[:].real = 0.
+            tsb.tail_clean(g_iw, U)
+
+            for _, g0 in S.G0_iw:
+                g0 << inverse(iOmega_n + chemical_potential - t**2 * g_iw)
         # Run the solver
         S.solve(h_int=U * n('up', 0) * n('down', 0), **params)
 

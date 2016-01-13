@@ -9,6 +9,7 @@ The executable shoule exist in directory params['exe']
 
 from glob import glob
 import argparse
+import multiprocessing
 import dmft.common as gf
 import numpy as np
 import os
@@ -22,7 +23,7 @@ parser = argparse.ArgumentParser(description='DMFT loop for CTHYB single band',
 parser.add_argument('-BETA', metavar='B', type=float,
                     default=64., help='The inverse temperature')
 parser.add_argument('-Niter', metavar='N', type=int,
-                    default=10, help='Number of iterations')
+                    default=3, help='Number of iterations')
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
 
@@ -31,7 +32,7 @@ parser.add_argument('-odir', default='coex/B{BETA}_U{U}',
 parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                     metavar=('U_src', 'U_target', 'avg_over'),
                     help='Resume DMFT loops from on disk data files')
-parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e7),
+parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e6),
                     help='Number Monte Carlo Measurement')
 
 args = parser.parse_args()
@@ -163,7 +164,7 @@ def dmft_loop_pm(Uc):
     params.update(uparams)
     CreateInputFile(params)
 
-    mpi_prefix = 'mpirun -np 12'
+    mpi_prefix = 'mpirun -np ' + str(multiprocessing.cpu_count())
 
     fh_info = open('info.dat', 'w')
 
