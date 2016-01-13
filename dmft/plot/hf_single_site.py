@@ -35,15 +35,30 @@ def averager(h5parent, h5child, last_iterations):
     return sum_child / len(last_iterations)
 
 
+def gf_tail(gtau, U, mu):
+    """Estimates the known first 3 moments of the tail
+
+    Parameters
+    ----------
+    gtau : Imaginary Time Green function array
+    U : float Local interaction
+    mu : float chemical potential
+
+    Returns
+    -------
+    list
+    """
+    one_n = gtau[0] if len(gtau.shape) > 1 else gtau[:, 0].reshape(2, 1)
+
+    return [1., -mu -U*(0.5+one_n), 0.25 * U**2/4]
+
+
 def get_giw(h5parent, iteration, tau, w_n):
     """Recovers with Fourier Transform G_iw from H5 file"""
     setup = h5.get_attributes(h5parent[iteration])
     mu, U = setup['MU'], setup['U']
     gtau = h5parent[iteration]['gtau'][:]
-    tail = [1., -mu, 0.25 + U**2/4]
-    if len(gtau.shape) > 1:
-        tail[1] = -mu -U*(0.5+gtau[:, 0]).reshape(2, 1)
-    giw = gf.gt_fouriertrans(gtau, tau, w_n, tail)
+    giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, U, mu))
 
     return gtau, giw
 
@@ -115,7 +130,7 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
             last_iterations = sorted(output_files[u_str].keys())[-avg:]
             tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
             gtau = averager(output_files[u_str], 'gtau', last_iterations)
-            giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., 0.25 + U**2/4])
+            giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, U, 0.))
 
             gfit = gf.fit_gf(w_n[:3], giw.imag)
             figiw.append(gfit)
