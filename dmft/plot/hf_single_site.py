@@ -36,7 +36,19 @@ def averager(h5parent, h5child, last_iterations):
 
 
 def gf_tail(gtau, U, mu):
-    """Estimates the known first 3 moments of the tail
+    r"""Estimates the known first 3 moments of the tail
+
+    Starting from the high energy expansion of [self-energy]_
+
+    .. math:: \Sigma(i\omega_n \rightarrow \infty) = U \left(n_{\bar{\sigma}} - \frac{1}{2}\right)
+        + \frac{U^2}{i\omega_n} n_{\bar{\sigma}} (1 - n_{\bar{\sigma}})
+
+    Then in the Bethe lattice where the self consistency is
+    :math:`-t^2G` the Green function decays as
+
+    .. math:: G(i\omega_n \rightarrow \infty) = \frac{1}{i\omega_n}
+        - \frac{\mu + U(\frac{1}{2} + G(\tau=0^+))}{(i\omega_n)^2}
+        + \frac{t^2 + U^2/4 + \mu^2 - U\mu + 2U\mu G(\tau=0^+)}{(i\omega_n)^3}
 
     Parameters
     ----------
@@ -47,10 +59,16 @@ def gf_tail(gtau, U, mu):
     Returns
     -------
     list
-    """
-    one_n = gtau[0] if len(gtau.shape) > 1 else gtau[:, 0].reshape(2, 1)
 
-    return [1., -mu -U*(0.5+one_n), 0.25 * U**2/4]
+    References
+    ----------
+
+    .. [self-energy] : Gull, E. et al. Reviews of Modern Physics, 83(2), 384 http://dx.doi.org/10.1103/RevModPhys.83.349
+
+    """
+    g_t0 = gtau[0] if len(gtau.shape) > 1 else gtau[:, 0].reshape(2, 1)
+
+    return [1., -mu -U*(0.5+g_t0), 0.25 + U**2/4 + mu**2 - U*mu + 2*U*mu*g_t0]
 
 
 def get_giw(h5parent, iteration_slice, tau, w_n):
