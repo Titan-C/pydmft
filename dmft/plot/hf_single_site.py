@@ -66,7 +66,7 @@ def gf_tail(gtau, U, mu):
     .. [self-energy] : Gull, E. et al. Reviews of Modern Physics, 83(2), 384 http://dx.doi.org/10.1103/RevModPhys.83.349
 
     """
-    g_t0 = gtau[0] if len(gtau.shape) > 1 else gtau[:, 0].reshape(2, 1)
+    g_t0 = gtau[0] if len(gtau.shape) == 1 else gtau[:, 0].reshape(2, 1)
 
     return [1., -mu -U*(0.5+g_t0), 0.25 + U**2/4 + mu**2 - U*mu + 2*U*mu*g_t0]
 
