@@ -10,7 +10,6 @@ Quantum Monte Carlo algorithm
 from __future__ import division, absolute_import, print_function
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 from mpi4py import MPI
-from scipy.interpolate import interp1d
 from scipy.linalg.blas import dger
 import argparse
 import dmft.hffast as hffast
@@ -335,34 +334,6 @@ def g2flip(g, dv, l, k):
     denom = la.solve(U[lk, :]-d2, V)
 
     g -= np.dot(U, denom)
-
-
-def interpol(gtau, Lrang, add_edge=False, same_particle=False):
-    """This function interpolates :math:`G(\\tau)` onto a different array
-
-    it keep track of the shape of the Greens functions in Beta^-.
-
-    Parameters
-    ----------
-    gtau : ndarray
-        Green function to interpolate
-    Lrang : int
-        number of points to describe
-    add_edge : bool
-        if the point Beta^- is missing add it
-    same_particle : bool
-        because fermion commutation relations if same fermion the
-        edge has an extra -1
-    """
-    t = np.linspace(0, 1, gtau.size)
-    if add_edge:
-        gtau = np.concatenate((gtau, [-gtau[0]]))
-        t = np.linspace(0, 1, gtau.size) # update size
-        if same_particle:
-            gtau[-1] -= 1.
-    f = interp1d(t, gtau)
-    tf = np.linspace(0, 1, Lrang)
-    return f(tf)
 
 
 def interaction_matrix(bands):

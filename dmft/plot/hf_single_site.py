@@ -7,6 +7,7 @@ Plotting utilities for the Single site DMFT phase diagram
 from __future__ import division, print_function, absolute_import
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.interpolate import interp1d
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 import dmft.h5archive as h5
@@ -68,7 +69,35 @@ def gf_tail(gtau, U, mu):
     """
     g_t0 = gtau[0] if len(gtau.shape) == 1 else gtau[:, 0].reshape(2, 1)
 
-    return [1., -mu -U*(0.5+g_t0), 0.25 + U**2/4 + mu**2 - U*mu + 2*U*mu*g_t0]
+    return [1., -mu - U*(0.5+g_t0), 0.25 + U**2/4 + mu**2 - U*mu + 2*U*mu*g_t0]
+
+
+def interpol(gtau, Lrang, add_edge=False, same_particle=False):
+    """This function interpolates :math:`G(\\tau)` onto a different array
+
+    it keep track of the shape of the Greens functions in Beta^-.
+
+    Parameters
+    ----------
+    gtau : ndarray
+        Green function to interpolate
+    Lrang : int
+        number of points to describe
+    add_edge : bool
+        if the point Beta^- is missing add it
+    same_particle : bool
+        because fermion commutation relations if same fermion the
+        edge has an extra -1
+    """
+    rtau = np.linspace(0, 1, gtau.size)
+    if add_edge:
+        gtau = np.concatenate((gtau, [-gtau[0]]))
+        rtau = np.linspace(0, 1, gtau.size)  # update size
+        if same_particle:
+            gtau[-1] -= 1.
+    interp = interp1d(rtau, gtau)
+    nrang = np.linspace(0, 1, Lrang)
+    return interp(nrang)
 
 
 def get_giw(h5parent, iteration_slice, tau, w_n):
@@ -88,9 +117,11 @@ def get_giw(h5parent, iteration_slice, tau, w_n):
 
     setup = h5.get_attributes(h5parent[iteration_slice[-1]])
     gtau = averager(h5parent, 'gtau', iteration_slice)
-    giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, setup['U'], setup['MU']))
+    giw = gf.gt_fouriertrans(gtau, tau, w_n,
+                             gf_tail(gtau, setup['U'], setup['MU']))
 
     return gtau, giw
+
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
     """Returns the self-energy with the Dyson equation"""
@@ -123,6 +154,7 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     label_convergence(beta, u_str, axes, graf, n_freq, xlim)
 
     return axes
+
 
 def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
