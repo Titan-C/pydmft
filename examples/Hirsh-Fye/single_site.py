@@ -12,10 +12,11 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 from __future__ import division, absolute_import, print_function
 import sys
 from mpi4py import MPI
+import numpy as np
 import dmft.common as gf
 import dmft.h5archive as h5
 import dmft.hirschfye as hf
-import numpy as np
+import dmft.plot.hf_single_site as pss
 COMM = MPI.COMM_WORLD
 
 
@@ -37,7 +38,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
     tau, w_n, _, giw, v_aux, intm = hf.setup_PM_sim(setup)
     if setup['AFM']:
-        giw = giw + np.array([[-1], [1]])*1e-2/w_n**2
+        giw = giw + np.array([[-1], [1]])*1e-3*giw.imag
         setup['simt'] = 'AFM' # simulation type Anti-Ferro-Magnetic
 
     if g_iw_start is not None:
@@ -47,7 +48,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         with h5.File(setup['ofile'].format(**setup), 'a') as store:
             last_loop = len(store[current_u].keys())
             gtau = store[current_u]['it{:03}'.format(last_loop-1)]['gtau'][:]
-            giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., setup['U']**2/4])
+            giw = gf.gt_fouriertrans(gtau, tau, w_n,
+                                     pss.gf_tail(gtau, U, setup['MU']))
     except (IOError, KeyError):
         last_loop = 0
 
@@ -66,9 +68,6 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             gtu, gtd = hf.imp_solver([g0tau[0], g0tau[1]], v_aux, intm, setup)
             gtau = -np.squeeze([gtu, gtd])
 
-            giw = gf.gt_fouriertrans(gtau, tau, w_n,
-                                     [1., -setup['U']*(0.5+gtau[:, 0]).reshape(2, 1),
-                                      (setup['U']/2)**2])
         else:
             # enforce Half-fill, particle-hole symmetry
             giw.real = 0.
@@ -78,7 +77,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             gtu, gtd = hf.imp_solver([g0tau]*2, v_aux, intm, setup)
             gtau = -np.squeeze(0.5 * (gtu+gtd))
 
-            giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., setup['U']**2/4])
+        giw = gf.gt_fouriertrans(gtau, tau, w_n,
+                                 pss.gf_tail(gtau, U, setup['MU']))
 
         if COMM.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
