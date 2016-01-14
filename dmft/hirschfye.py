@@ -63,7 +63,6 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
     comm = MPI.COMM_WORLD
     # Set up default values
-    fracp, intp = math.modf(time.time())
     parms = {'global_flip': False,
              'double_flip_prob': 0.,
              't':           0.5,

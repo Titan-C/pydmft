@@ -86,7 +86,7 @@ def get_giw(h5parent, iteration_slice, tau, w_n):
     tuple : :math:`G(\tau)`, :math:`G(i\omega_n)`
     """
 
-    setup = h5.get_attributes(h5parent[iteration_slice])
+    setup = h5.get_attributes(h5parent[iteration_slice[-1]])
     gtau = averager(h5parent, 'gtau', iteration_slice)
     giw = gf.gt_fouriertrans(gtau, tau, w_n, gf_tail(gtau, setup['U'], setup['mu']))
 
