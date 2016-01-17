@@ -7,7 +7,9 @@ H5PY interface
 # Author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
+import os
 from h5py import File
+import numpy as np
 
 
 def add_attributes(parent, attr):
@@ -30,3 +32,23 @@ def get_attributes(parent):
     :param obj parent: h5py parent object
     """
     return dict(parent.attrs.items())
+
+
+def _make_npy(name, obj):
+    try:
+        data = obj.value
+        np.save(name, data)
+    except AttributeError:
+        if not os.path.exists(name):
+            os.makedirs(name)
+
+def h5_2_npy(h5file):
+    """Converts a h5 data file into a folder tree with npy files"""
+    target_dir = os.path.splitext(h5file)[0]
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    cwd = os.getcwd()
+    with File(h5file, 'r') as source:
+        os.chdir(target_dir)
+        source.visititems(_make_npy)
+    os.chdir(cwd)
