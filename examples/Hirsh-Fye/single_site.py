@@ -45,20 +45,22 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     if g_iw_start is not None:
         giw = g_iw_start
 
-    out_put_dir = os.path.join(setup['ofile'].format(**setup), current_u)
+    save_dir = os.path.join(setup['ofile'].format(**setup), current_u)
     try:
-        last_loop = len(os.listdir(out_put_dir))
-        gtau = np.load(os.path.join(out_put_dir,
-                                    'it{:03}'.format(last_loop-1),
-                                    'gtau'))
+        with open(save_dir + '/setup', 'r') as conf:
+            last_loop = json.load(conf)['last_loop']
+        gtau = np.load(os.path.join(save_dir,
+                                    'it{:03}'.format(last_loop),
+                                    'gtau.npy'))
         giw = gf.gt_fouriertrans(gtau, tau, w_n,
                                  pss.gf_tail(gtau, U, setup['MU']))
+        last_loop += 1
     except (IOError, OSError):
         last_loop = 0
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
         # For saving in the h5 file
-        work_dir = os.path.join(out_put_dir, 'it{:03}'.format(iter_count))
+        work_dir = os.path.join(save_dir, 'it{:03}'.format(iter_count))
         setup['work_dir'] = work_dir
 
         if COMM.rank == 0:
@@ -87,7 +89,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
         if COMM.rank == 0:
             np.save(work_dir + '/gtau', gtau)
-            with open(work_dir + '/setup', 'w') as conf:
+            with open(save_dir + '/setup', 'w') as conf:
+                setup['last_loop'] = iter_count
                 json.dump(setup, conf, indent=2)
         sys.stdout.flush()
 
