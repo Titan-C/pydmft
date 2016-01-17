@@ -10,11 +10,12 @@ Quantum Monte Carlo algorithm for a paramagnetic impurity
 """
 
 from __future__ import division, absolute_import, print_function
+import json
 import sys
+import os
 from mpi4py import MPI
 import numpy as np
 import dmft.common as gf
-import dmft.h5archive as h5
 import dmft.hirschfye as hf
 import dmft.plot.hf_single_site as pss
 COMM = MPI.COMM_WORLD
@@ -44,26 +45,30 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     if g_iw_start is not None:
         giw = g_iw_start
 
+    out_put_dir = os.path.join(setup['ofile'].format(**setup), current_u)
     try:
-        with h5.File(setup['ofile'].format(**setup), 'a') as store:
-            last_loop = len(store[current_u].keys())
-            gtau = store[current_u]['it{:03}'.format(last_loop-1)]['gtau'][:]
-            giw = gf.gt_fouriertrans(gtau, tau, w_n,
-                                     pss.gf_tail(gtau, U, setup['MU']))
-    except (IOError, KeyError):
+        last_loop = len(os.listdir(out_put_dir))
+        gtau = np.load(os.path.join(out_put_dir,
+                                    'it{:03}'.format(last_loop-1),
+                                    'gtau'))
+        giw = gf.gt_fouriertrans(gtau, tau, w_n,
+                                 pss.gf_tail(gtau, U, setup['MU']))
+    except (IOError, OSError):
         last_loop = 0
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
         # For saving in the h5 file
-        dest_group = current_u+'/it{:03}/'.format(iter_count)
-        setup['group'] = dest_group
+        work_dir = os.path.join(out_put_dir, 'it{:03}'.format(iter_count))
+        setup['work_dir'] = work_dir
 
         if COMM.rank == 0:
             print('On loop', iter_count, 'beta', setup['BETA'], 'U', setup['U'])
+            if not os.path.exists(work_dir):
+                os.makedirs(work_dir)
 
 
         if setup['AFM']:
-            g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw[[1, 0]])
+            g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
             g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n, [1., 0., .25])
             gtu, gtd = hf.imp_solver([g0tau[0], g0tau[1]], v_aux, intm, setup)
             gtau = -np.squeeze([gtu, gtd])
@@ -81,9 +86,9 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
                                  pss.gf_tail(gtau, U, setup['MU']))
 
         if COMM.rank == 0:
-            with h5.File(setup['ofile'].format(**setup), 'a') as store:
-                store[dest_group + 'gtau'] = gtau
-                h5.add_attributes(store[dest_group], setup)
+            np.save(work_dir + '/gtau', gtau)
+            with open(work_dir + '/setup', 'w') as conf:
+                json.dump(setup, conf, indent=2)
         sys.stdout.flush()
 
     return giw

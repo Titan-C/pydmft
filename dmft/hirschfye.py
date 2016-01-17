@@ -167,15 +167,13 @@ def susceptibility(v):
 
 def save_output(params, double_occ, acceptance, chi, vlog, ar):
     """Saves the simulation status"""
+    np.save(params['work_dir'] + '/double_occ', double_occ)
+    np.save(params['work_dir'] + '/acceptance', acceptance)
+    np.save(params['work_dir'] + '/chi', chi)
 
-    with h5.File(params['ofile'].format(**params), 'a') as save_file:
-        save_file[params['group'] + 'double_occ'] = double_occ
-        save_file[params['group'] + 'acceptance'] = acceptance
-        save_file[params['group'] + 'chi'] = chi
-
-        if params['save_logs']:
-            save_file[params['group'] + 'v_ising'] = np.asarray(vlog)
-            save_file[params['group'] + 'acceptance_log'] = np.asarray(ar)
+    if params['save_logs']:
+        np.save(params['work_dir'] + '/v_ising', np.asarray(vlog))
+        np.save(params['work_dir'] + '/acceptance_log', np.asarray(ar))
 
 
 def retarded_weiss(g0tau):
@@ -398,7 +396,7 @@ def do_input(help_string):
                         help='Local interaction strength')
     parser.add_argument('-mu', '--MU', type=float, default=0.,
                         help='Chemical potential')
-    parser.add_argument('-ofile', default='SB_{simt}_B{BETA}.h5',
+    parser.add_argument('-ofile', default='SB_{simt}_B{BETA}',
                         help='Output file shelve')
 
     parser.add_argument('-l', '--save_logs', action='store_true',
