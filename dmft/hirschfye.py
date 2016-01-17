@@ -99,7 +99,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
             update = False
 
-        for _ in range(parms['N_meas']):
+        for _ in range(parms['meas']):
             for i, (up, dw) in enumerate(i_pairs):
                 acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
                                              2*parms['N_MATSUBARA'],
@@ -122,7 +122,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     comm.Allreduce(tGst, Gst)
     Gst /= parms['sweeps']*comm.Get_size()
 
-    acc /= v.size*parms['N_meas']*(parms['sweeps'] + parms['therm'])
+    acc /= v.size*parms['meas']*(parms['sweeps'] + parms['therm'])
     double_occ /= 2*parms['N_MATSUBARA']*parms['sweeps']
 
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
@@ -388,7 +388,7 @@ def do_input(help_string):
                         help='Number Monte Carlo Measurement')
     parser.add_argument('-therm', type=int, default=int(5e3),
                         help='Monte Carlo sweeps of thermalization')
-    parser.add_argument('-N_meas', type=int, default=3,
+    parser.add_argument('-meas', type=int, default=3,
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
