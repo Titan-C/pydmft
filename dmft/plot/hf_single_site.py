@@ -5,6 +5,8 @@ Plotting utilities for the Single site DMFT phase diagram
 """
 
 from __future__ import division, print_function, absolute_import
+import json
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
@@ -27,11 +29,11 @@ def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
     axes[1].set_xlabel('iterations')
 
 
-def averager(h5parent, h5child, last_iterations):
+def averager(sim_dir, observable, last_iterations):
     """Given an H5 file parent averages over the iterations with the child"""
     sum_child = 0.
     for step in last_iterations:
-        sum_child += h5parent[step][h5child][:]
+        sum_child += np.load(os.path.join(sim_dir, step, observable))
 
     return sum_child / len(last_iterations)
 
@@ -100,7 +102,7 @@ def interpol(gtau, Lrang, add_edge=False, same_particle=False):
     return interp(nrang)
 
 
-def get_giw(h5parent, iteration_slice, tau, w_n):
+def get_giw(sim_dir, iteration_slice, tau, w_n):
     r"""Recovers with Fourier Transform G_iw from H5 file
 
     Parameters
@@ -115,8 +117,9 @@ def get_giw(h5parent, iteration_slice, tau, w_n):
     tuple : :math:`G(\tau)`, :math:`G(i\omega_n)`
     """
 
-    setup = h5.get_attributes(h5parent[iteration_slice[-1]])
-    gtau = averager(h5parent, 'gtau', iteration_slice)
+    with open(sim_dir + '/setup', 'r') as read:
+        setup = json.load(read)
+    gtau = averager(sim_dir, 'gtau.npy', iteration_slice)
     giw = gf.gt_fouriertrans(gtau, tau, w_n,
                              gf_tail(gtau, setup['U'], setup['MU']))
 
@@ -129,22 +132,24 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     return 1j*w_n - .25*giw - 1/giw
 
 
-def show_conv(beta, u_str, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
+def show_conv(beta, u_str, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
-    with h5.File(filestr.format(beta), 'r') as output_files:
-        keys = output_files[u_str].keys()[skip:]
-        setup = h5.get_attributes(output_files[u_str][keys[-1]])
-        tau, w_n = gf.tau_wn_setup(setup)
-        for step in keys:
-            _, giw = get_giw(output_files[u_str], [step], tau, w_n)
-            if len(giw.shape) > 1:
-                axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
-                freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
-            else:
-                axes[0].plot(w_n, giw.imag)
-                freq_arr.append(giw.imag[:n_freq])
+    sim_dir = os.path.join(filestr.format(beta), u_str)
+    iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
+    with open(sim_dir + '/setup', 'r') as read:
+        setup = json.load(read)
+    tau, w_n = gf.tau_wn_setup(setup)
+
+    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
+    for step in iterations:
+        _, giw = get_giw(sim_dir, [step], tau, w_n)
+        if len(giw.shape) > 1:
+            axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
+            freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
+        else:
+            axes[0].plot(w_n, giw.imag)
+            freq_arr.append(giw.imag[:n_freq])
 
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
