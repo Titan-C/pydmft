@@ -275,3 +275,33 @@ def energies(beta, filestr='SB_PM_B{}.h5'):
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(epot), np.array(ekin), ur
+
+
+def autocorrelation_function(spins_log):
+    """Calculates the autocorrelation function of the auxiliary Ising fields
+
+    Parameters
+    ----------
+    spins_log : ndarray 1D or 2D
+        Monte Carlo time evolution of the auxiliary Ising field
+
+    Returns
+    -------
+    ndarray
+    """
+
+    if spins_log.dtype == np.dtype('bool'):
+        spins_log = 2.0*(spins_log-0.5)
+    meas = spins_log.shape[0]
+    avg = spins_log.mean()
+    std = spins_log.std()
+    if len(spins_log.shape) > 1:
+        cor_dt = np.dot(spins_log, spins_log.T)
+        cor_dt /= spins_log.shape[1]
+    else:
+        cor_dt = np.outer(spins_log, spins_log)
+
+    avs = np.array([np.trace(cor_dt, i) for i in range(meas)])
+    avs /= meas-np.arange(meas)
+
+    return (avs-avg**2)/std**2
