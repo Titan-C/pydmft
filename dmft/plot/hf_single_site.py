@@ -33,7 +33,9 @@ def averager(sim_dir, observable, last_iterations):
     """Given an H5 file parent averages over the iterations with the child"""
     sum_child = 0.
     for step in last_iterations:
-        sum_child += np.load(os.path.join(sim_dir, step, observable))
+        data_file = os.path.join(sim_dir, step, observable)
+        if os.path.exists(data_file):
+            sum_child += np.load(data_file)
 
     return sum_child / len(last_iterations)
 

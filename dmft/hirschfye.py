@@ -167,6 +167,8 @@ def susceptibility(v):
 
 def save_output(params, double_occ, acceptance, chi, vlog, ar):
     """Saves the simulation status"""
+    if not os.path.exists(params['work_dir']):
+        os.makedirs(params['work_dir'])
     np.save(params['work_dir'] + '/double_occ', double_occ)
     np.save(params['work_dir'] + '/acceptance', acceptance)
     np.save(params['work_dir'] + '/chi', chi)
