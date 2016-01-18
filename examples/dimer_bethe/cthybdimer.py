@@ -70,6 +70,7 @@ def dmft_loop(setup, u_int, G_iw):
     h_int = prepare_interaction(u_int)
 
     src_U = 'U'+str(u_int)
+    setup['simt'] = 'AFM' if setup['AFM'] else 'PM'
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
@@ -95,7 +96,10 @@ def dmft_loop(setup, u_int, G_iw):
         if mpi.is_master_node():
             print('\n\n in loop \n', '='*40, loop)
 
-        tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
+        if not setup['AFM']:
+            tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
+            print('paramag clean')
+
 
         for name, g0block in imp_sol.G0_iw:
             shift = 1. if 'asym' in name else -1
@@ -131,9 +135,11 @@ def do_setup():
                         default=[2.7], help='Local interaction strength')
     parser.add_argument('-tp', default=0.18, type=float,
                         help='The dimerization strength')
-    parser.add_argument('-ofile', default='DIMER_PM_B{BETA}_tp{tp}.h5',
+    parser.add_argument('-ofile', default='DIMER_{simt}_B{BETA}_tp{tp}.h5',
                         help='Output file shelve')
 
+    parser.add_argument('-afm', '--AFM', action='store_true',
+                        help='Use the self-consistency for Antiferromagnetism')
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                         metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
