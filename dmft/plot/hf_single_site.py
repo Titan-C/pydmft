@@ -161,10 +161,10 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
     return axes
 
 
-def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
+def list_show_conv(beta, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
-    with h5.File(filestr.format(beta), 'r') as output_files:
-        urange = output_files.keys()
+    urange = sorted([u_str for u_str in os.listdir(filestr.format(beta))
+                     if 'U' in u_str])
 
     for u_str in urange:
         show_conv(beta, u_str, filestr, n_freq, xlim, skip)
@@ -172,7 +172,7 @@ def list_show_conv(beta, filestr='SB_PM_B{}.h5', n_freq=5, xlim=2, skip=5):
         plt.close()
 
 
-def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
+def fit_dos(beta, avg, filestr='SB_PM_B{}'):
     """Fits for all Green's functions at a given beta their
     density of states at the Fermi energy
 
@@ -190,22 +190,26 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}.h5'):
     figiw = []
     lgiw = []
 
-    with h5.File(filestr.format(beta), 'r') as output_files:
-        for u_str in sorted(output_files.keys()):
-            U = float(u_str[1:])
-            u_range.append(U)
-            last_iterations = sorted(output_files[u_str].keys())[-avg:]
-            tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
-            _, giw = get_giw(output_files[u_str], last_iterations, tau, w_n)
+    ulist = sorted([u_str for u_str in os.listdir(filestr.format(beta))
+                     if 'U' in u_str])
+    for u_str in ulist:
+        sim_dir = os.path.join(filestr.format(beta), u_str)
+        last_iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[-avg:]
+        with open(sim_dir + '/setup', 'r') as read:
+            setup = json.load(read)
+            tau, w_n = gf.tau_wn_setup(setup)
 
-            gfit = gf.fit_gf(w_n[:3], giw.imag)
-            figiw.append(gfit)
-            lgiw.append(giw)
+        _, giw = get_giw(sim_dir, last_iterations, tau, w_n)
 
-    return np.asarray(u_range), figiw, lgiw
+        gfit = gf.fit_gf(w_n[:3], giw.imag)
+        figiw.append(gfit)
+        lgiw.append(giw)
+
+    u_range = np.asarray([float(u_str[1:]) for u_str in ulist])
+    return u_range, figiw, lgiw
 
 
-def plot_fit_dos(beta, avg, filestr='SB_PM_B{}.h5', xlim=2):
+def plot_fit_dos(beta, avg, filestr='SB_PM_B{}', xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
