@@ -28,13 +28,15 @@ parser.add_argument('-Niter', metavar='N', type=int,
 parser.add_argument('-U', metavar='U', nargs='+', type=float,
                     default=[2.7], help='Local interaction strenght')
 
-parser.add_argument('-odir', default='coex/B{BETA}_U{U}',
+parser.add_argument('-odir', default='{simt}/B{BETA}_U{U}',
                     help='Output directory')
 parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                     metavar=('U_src', 'U_target', 'avg_over'),
                     help='Resume DMFT loops from on disk data files')
 parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e6),
                     help='Number Monte Carlo Measurement')
+parser.add_argument('-afm', '--AFM', action='store_true',
+                    help='Use the self-consistency for Antiferromagnetism')
 
 args = parser.parse_args()
 Niter = args.Niter
@@ -65,19 +67,19 @@ icix = """# Cix file for cluster DMFT with CTQMC
 1 4 2 1
 # baths, dimension, symmetry, global flip
 0       1 0 0
-1       1 0 0
+1       1 {0} {0}
 # cluster energies for unique baths, eps[k]
 0 0
-#   N   K   Sz size F^{+,dn}, F^{+,up}, Ea  S
+#   N   K   Sz size F^{{+,dn}}, F^{{+,up}}, Ea  S
 1   0   0    0   1   2         3        0   0
 2   1   0 -0.5   1   0         4        0   0.5
 3   1   0  0.5   1   4         0        0   0.5
 4   2   0    0   1   0         0        0   0
 # matrix elements
-1  2  1  1    1    # start-state,end-state, dim1, dim2, <2|F^{+,dn}|1>
-1  3  1  1    1    # start-state,end-state, dim1, dim2, <3|F^{+,up}|1>
+1  2  1  1    1    # start-state,end-state, dim1, dim2, <2|F^{{+,dn}}|1>
+1  3  1  1    1    # start-state,end-state, dim1, dim2, <3|F^{{+,up}}|1>
 2  0  0  0
-2  4  1  1   -1    # start-state,end-state, dim1, dim2, <4|F^{+,up}|2>
+2  4  1  1   -1    # start-state,end-state, dim1, dim2, <4|F^{{+,up}}|2>
 3  4  1  1    1
 3  0  0  0
 4  0  0  0
@@ -106,7 +108,7 @@ HB2                # Hubbard-I is used to determine high-frequency
 3  0  0  0
 4  0  0  0
 4  0  0  0
-"""
+""".format(1 if args.AFM else 0)
 
 
 def CreateInputFile(params):
@@ -116,28 +118,35 @@ def CreateInputFile(params):
             parfile.write('{}\t{}\t{}\n'.format(key, vaule[0], vaule[1]))
 
 
-def DMFT_SCC(fDelta):
+def DMFT_SCC(fDelta, fileGf):
     """This subroutine creates Delta.inp from Gf.out for DMFT on bethe
     lattice: Delta=t^2*G If Gf.out does not exist, it creates Gf.out
     which corresponds to the non-interacting model In the latter case
     also creates the inpurity cix file, which contains information
     about the atomic states."""
-    fileGf = 'Gf.out.npy'
     try:
         w_n = gf.matsubara_freq(BETA)
-        Gf = np.squeeze(np.load(fileGf))
+        hyb = 0.25*np.squeeze(np.load(fileGf))
         # If output file exists, start from previous iteration
+        delta = np.array([w_n, hyb.real, hyb.imag])
+        if args.AFM:
+            delta = np.array([w_n,
+                              hyb[1].real, hyb[1].imag,
+                              hyb[0].real, hyb[0].imag])
     except Exception:  # otherwise start from non-interacting limit
         print('Starting from non-interacting model at beta'+str(BETA))
-        Gf = gf.greenF(w_n)
+        hyb = 0.25*gf.greenF(w_n)
 
         # creating impurity cix file
         with open(params['cix'][0], 'w') as f:
             f.write(icix)
 
-    # Preparing input file Delta.inp
-    delta = np.array([w_n, 0.25*Gf.real, 0.25*Gf.imag]).T
-    np.savetxt(fDelta, delta)
+        # Preparing input file Delta.inp
+        delta = np.array([w_n, hyb.real, hyb.imag])
+        if args.AFM:
+            delta = np.array([w_n, hyb.real, hyb.imag, hyb.real, hyb.imag])
+
+    np.savetxt(fDelta, delta.T)
 
 
 def set_new_seed(setup):
@@ -173,7 +182,7 @@ def dmft_loop_pm(Uc):
 
     for it in range(prev_iter, prev_iter + Niter):
         # Constructing bath Delta.inp from Green's function
-        DMFT_SCC(params['Delta'][0])
+        DMFT_SCC(params['Delta'][0], 'Gf.out.{:03}.npy'.format(it-1))
 
         # Running ctqmc
         print('Running ---- qmc it: ', it, '-----')
@@ -184,9 +193,8 @@ def dmft_loop_pm(Uc):
         fh_info.flush()
 
         # Some copying to store data obtained so far (at each iteration)
-        shutil.copy('Gf.out.npy', 'Gf.out.{:03}.npy'.format(it))
-        shutil.copy('Sig.out.npy', 'Sig.out.{:03}.npy'.format(it))
-
+        os.rename('Gf.out.npy', 'Gf.out.{:03}.npy'.format(it))
+        os.rename('Sig.out.npy', 'Sig.out.{:03}.npy'.format(it))
 
 CWD = os.getcwd()
 if args.new_seed:
@@ -195,7 +203,8 @@ if args.new_seed:
 
 for Uc in args.U:
 
-    udir = args.odir.format(BETA=BETA, U=Uc)
+    simt = 'afm' if args.AFM else 'coex'
+    udir = args.odir.format(simt=simt, BETA=BETA, U=Uc)
     if not os.path.exists(udir):
         os.makedirs(udir)
 
