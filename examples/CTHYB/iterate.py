@@ -6,6 +6,7 @@
 This module runs ctqmc impurity solver for one-band model.
 The executable shoule exist in directory params['exe']
 """
+from __future__ import division, absolute_import, print_function
 
 from glob import glob
 import argparse
@@ -41,7 +42,7 @@ BETA = args.BETA
 M = int(args.sweeps)
 
 
-params = {"exe":          ['ctqmc',        "# Path to executable"],
+params = {"exe":          ['cthyb_kh',        "# Path to executable"],
           "Delta":        ["Delta.inp",    "# Input bath function hybridization"],
           "cix":          ["one_band.imp", "# Input file with atomic state"],
           "beta":         [BETA,           "# Inverse temperature"],
@@ -111,7 +112,7 @@ HB2                # Hubbard-I is used to determine high-frequency
 def CreateInputFile(params):
     " Creates input file (PARAMS) for CT-QMC solver"
     with open('PARAMS', 'w') as parfile:
-        for key, vaule in params.iteritems():
+        for key, vaule in params.items():
             parfile.write('{}\t{}\t{}\n'.format(key, vaule[0], vaule[1]))
 
 
@@ -121,22 +122,21 @@ def DMFT_SCC(fDelta):
     which corresponds to the non-interacting model In the latter case
     also creates the inpurity cix file, which contains information
     about the atomic states."""
-    fileGf = 'Gf.out'
+    fileGf = 'Gf.out.npy'
     try:
-        Gf = np.loadtxt(fileGf).T
+        w_n = gf.matsubara_freq(BETA)
+        Gf = np.squeeze(np.load(fileGf))
         # If output file exists, start from previous iteration
     except Exception:  # otherwise start from non-interacting limit
         print('Starting from non-interacting model at beta'+str(BETA))
-        w_n = gf.matsubara_freq(BETA)
         Gf = gf.greenF(w_n)
-        Gf = np.array([w_n, Gf.real, Gf.imag])
 
         # creating impurity cix file
         with open(params['cix'][0], 'w') as f:
             f.write(icix)
 
     # Preparing input file Delta.inp
-    delta = np.array([Gf[0], 0.25*Gf[1], 0.25*Gf[2]]).T
+    delta = np.array([w_n, 0.25*Gf.real, 0.25*Gf.imag]).T
     np.savetxt(fDelta, delta)
 
 
@@ -151,7 +151,7 @@ def set_new_seed(setup):
     udir = setup.odir.format(BETA=setup.BETA, U=new_seed[1])
     if not os.path.exists(udir):
         os.makedirs(udir)
-    np.savetxt(udir + '/Gf.out', giw)
+    np.save(udir + '/Gf.out', giw)
     # creating impurity cix file
     with open(udir + '/' + params['cix'][0], 'w') as f:
         f.write(icix)
@@ -184,8 +184,8 @@ def dmft_loop_pm(Uc):
         fh_info.flush()
 
         # Some copying to store data obtained so far (at each iteration)
-        shutil.copy('Gf.out', 'Gf.out.{:02}'.format(it))
-        shutil.copy('Sig.out', 'Sig.out.{:02}'.format(it))
+        shutil.copy('Gf.out.npy', 'Gf.out.{:03}.npy'.format(it))
+        shutil.copy('Sig.out.npy', 'Sig.out.{:03}.npy'.format(it))
 
 
 CWD = os.getcwd()

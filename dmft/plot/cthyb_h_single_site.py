@@ -50,12 +50,11 @@ def averager(vector):
     """Averages over the files terminating with the numbers given in vector"""
     simgiw = 0
     for step in vector:
-        w_n, regiw, imgiw = np.loadtxt(step).T
-        simgiw += imgiw
+        simgiw += np.load(step)
 
-    regiw[:] = 0.
     simgiw /= len(vector)
-    return np.array([w_n, regiw, simgiw])
+
+    return simgiw
 
 
 def fit_dos(beta, avg, dirstr='coex/B{}_U{}'):
