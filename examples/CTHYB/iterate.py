@@ -125,7 +125,7 @@ def DMFT_SCC(fDelta, fileGf):
     also creates the inpurity cix file, which contains information
     about the atomic states."""
     try:
-        w_n = gf.matsubara_freq(BETA)
+        w_n = gf.matsubara_freq(BETA, 3*BETA)
         hyb = 0.25*np.squeeze(np.load(fileGf))
         # If output file exists, start from previous iteration
         delta = np.array([w_n, hyb.real, hyb.imag])

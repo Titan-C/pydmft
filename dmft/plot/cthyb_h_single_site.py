@@ -16,19 +16,23 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_int, filestr='coex/B{}_U{}/Gf.out.*.npy', col=2, n_freq=5, xlim=2):
+def show_conv(beta, u_int, filestr='coex/B{}_U{}/Gf.out.*.npy', skip=0, n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
-    w_n = gf.matsubara_freq(beta)
-    files = sorted(glob(filestr.format(beta, u_int)))
+    w_n = gf.matsubara_freq(beta, 3*beta)
+    files = sorted(glob(filestr.format(beta, u_int)))[skip:]
     for step in files:
         giw = np.squeeze(np.load(step))
-        axes[0].plot(w_n, giw.real, 'gs:', w_n, giw.imag, 'bo:')
-        freq_arr.append(giw.imag[:n_freq])
+        if len(giw.shape) > 1:
+            axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
+            freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
+        else:
+            axes[0].plot(w_n, giw.real, 'gs:', w_n, giw.imag, 'bo:')
+            freq_arr.append(giw.imag[:n_freq])
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
-        axes[1].plot(freqs, 'o-.', label=str(num))
+        axes[1].plot(freqs.T, 'o-.', label=str(num))
 
     graf = r'$G(i\omega_n)$' if 'Gf' in filestr else r'$\Sigma(i\omega_n)$'
     label_convergence(beta, 'U'+str(u_int), axes, graf, n_freq, xlim)
