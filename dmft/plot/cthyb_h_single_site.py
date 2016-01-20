@@ -16,15 +16,16 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 
-def show_conv(beta, u_int, filestr='B{}_U{}/Gf.out.*', col=2, n_freq=5, xlim=2):
+def show_conv(beta, u_int, filestr='coex/B{}_U{}/Gf.out.*.npy', col=2, n_freq=5, xlim=2):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8))
+    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arr = []
-    for step in sorted(glob(filestr.format(beta, u_int))):
-        gf_out = np.loadtxt(step).T
-        w_n, gf_iw = gf_out[0], gf_out[col]
-        axes[0].plot(w_n, gf_iw)
-        freq_arr.append(gf_iw[:n_freq])
+    w_n = gf.matsubara_freq(beta)
+    files = sorted(glob(filestr.format(beta, u_int)))
+    for step in files:
+        giw = np.squeeze(np.load(step))
+        axes[0].plot(w_n, giw.real, 'gs:', w_n, giw.imag, 'bo:')
+        freq_arr.append(giw.imag[:n_freq])
     freq_arr = np.asarray(freq_arr).T
     for num, freqs in enumerate(freq_arr):
         axes[1].plot(freqs, 'o-.', label=str(num))
