@@ -65,12 +65,10 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
         if COMM.rank == 0:
             print('On loop', iter_count, 'beta', setup['BETA'], 'U', setup['U'])
-            if not os.path.exists(work_dir):
-                os.makedirs(work_dir)
 
 
         if setup['AFM']:
-            g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
+            g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw[[1, 0]])
             g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n, [1., 0., .25])
             gtu, gtd = hf.imp_solver([g0tau[0], g0tau[1]], v_aux, intm, setup)
             gtau = -np.squeeze([gtu, gtd])
