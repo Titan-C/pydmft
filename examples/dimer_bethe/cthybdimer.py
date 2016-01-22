@@ -50,7 +50,7 @@ def set_new_seed(setup):
             dest_count = len(outp[dest_U])
         except KeyError:
             dest_count = 0
-        dest_group = '/{}/it{:0>2}/'.format(dest_U, dest_count)
+        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
 
         outp[dest_group + 'G_iw'] = giw
 
@@ -59,6 +59,7 @@ def set_new_seed(setup):
 
 def dmft_loop(setup, u_int, G_iw):
     """Starts impurity solver with DMFT paramagnetic self-consistency"""
+    setup['simt'] = 'AFM' if setup['AFM'] else 'PM'
 
     if setup['new_seed']:
         set_new_seed(setup)
@@ -70,7 +71,6 @@ def dmft_loop(setup, u_int, G_iw):
     h_int = prepare_interaction(u_int)
 
     src_U = 'U'+str(u_int)
-    setup['simt'] = 'AFM' if setup['AFM'] else 'PM'
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
@@ -98,7 +98,6 @@ def dmft_loop(setup, u_int, G_iw):
 
         if not setup['AFM']:
             tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
-            print('paramag clean')
 
 
         for name, g0block in imp_sol.G0_iw:
@@ -149,7 +148,7 @@ def do_setup():
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
-                               'measure_pert_order': False,
+                               'measure_pert_order': True,
                                'random_seed': struct.unpack("I", os.urandom(4))[0]}})
 
     return setup

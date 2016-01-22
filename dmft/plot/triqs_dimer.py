@@ -23,7 +23,6 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw']
             u_int = float(u_str[1:])
-            paramagnetic_hf_clean(gf_iw, u_int, tp)
             gf_iw = gf_iw[labels[block]]
             if sig:
                 shift = 1. if 'asym' in labels[block] else -1
@@ -40,7 +39,7 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
         axes[1].plot(ifreqs, 'o-.', label=str(num))
 
     graf = r'$G$' if not sig else r'$\Sigma$'
-    graf += r'$(i\omega_n)$'
+    graf += r'$(i\omega_n)$ '+labels[block]
     label_convergence(beta, u_str+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 

@@ -33,10 +33,12 @@ parser.add_argument('-odir', default='{simt}/B{BETA}_U{U}',
 parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                     metavar=('U_src', 'U_target', 'avg_over'),
                     help='Resume DMFT loops from on disk data files')
-parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(1e6),
+parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(2e7),
                     help='Number Monte Carlo Measurement')
 parser.add_argument('-afm', '--AFM', action='store_true',
                     help='Use the self-consistency for Antiferromagnetism')
+parser.add_argument('-i', '--insulator', action='store_true',
+                    help='Start with an insulator seed')
 
 args = parser.parse_args()
 Niter = args.Niter
@@ -53,12 +55,12 @@ params = {"exe":          ['cthyb_kh',        "# Path to executable"],
           "nomD":         [0,              "# number of Matsubara points using the Dyson Equation"],
           "Segment":      [0,              "# Whether to use segment type algorithm"],
           "aom":          [5,              "# number of frequency points to determin high frequency tail"],
-          "tsample":      [30,             "# how often to record the measurements" ],
+          "tsample":      [60,             "# how often to record the measurements" ],
           "PChangeOrder": [0.9,            "# Ratio between trial steps: add-remove-a-kink / move-a-kink"],
           "OCA_G":        [False,          "# No OCA diagrams being computed - for speed"],
           "minM":         [1e-10,          "# The smallest allowed value for the atomic trace"],
           "minD":         [1e-10,          "# The smallest allowed value for the determinant"],
-          "Nmax":         [BETA*2,         "# Maximum perturbation order allowed"],
+          "Nmax":         [40,         "# Maximum perturbation order allowed"],
           "GlobalFlip":   [100000,         "# Global flip shold be tried"],
           }
 
@@ -124,8 +126,8 @@ def DMFT_SCC(fDelta, fileGf):
     which corresponds to the non-interacting model In the latter case
     also creates the inpurity cix file, which contains information
     about the atomic states."""
+    w_n = gf.matsubara_freq(BETA, 3*BETA)
     try:
-        w_n = gf.matsubara_freq(BETA, 3*BETA)
         hyb = 0.25*np.squeeze(np.load(fileGf))
         # If output file exists, start from previous iteration
         delta = np.array([w_n, hyb.real, hyb.imag])
@@ -136,6 +138,8 @@ def DMFT_SCC(fDelta, fileGf):
     except Exception:  # otherwise start from non-interacting limit
         print('Starting from non-interacting model at beta'+str(BETA))
         hyb = 0.25*gf.greenF(w_n)
+        if args.insulator:
+            hyb = 0.25*gf.greenF(w_n, sigma=-1j*args.U[0]**2/4/w_n)
 
         # creating impurity cix file
         with open(params['cix'][0], 'w') as f:
