@@ -67,24 +67,29 @@ def dmft_loop(setup, u_int, G_iw):
 
     imp_sol = Solver(beta=setup['BETA'],
                      gf_struct={'asym_up': [0], 'sym_up': [0],
-                                'asym_dw': [0], 'sym_dw': [0]})
+                                'asym_dw': [0], 'sym_dw': [0]},
+                     n_iw=int(3*setup['BETA']), n_tau=int(100*setup['BETA']))
+    work_pt = len(imp_sol.G_iw.mesh)/2
     h_int = prepare_interaction(u_int)
 
     src_U = 'U'+str(u_int)
 
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
-            g_iw_seed = tdimer.get_giw(outp[src_U], slice(-3, None))
+            g_iw_seed = tdimer.get_giw(outp[src_U], slice(-1, None))
+            tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
             last_loop = len(outp[src_U])
+            src_pt = len(g_iw_seed.mesh)/2
             try:
-                imp_sol.G_iw << g_iw_seed
+                for name, gblock in imp_sol.G_iw:
+                    gblock.data[:] = g_iw_seed[name].data[src_pt-work_pt:src_pt+work_pt]
             except IndexError:
                 import itertools
                 spin = ['up', 'dw']
                 newn = (''.join(a) for a in itertools.product(['asym_', 'sym_'], spin))
                 oldn = (''.join(a) for a in itertools.product(['high_', 'low_'], spin))
                 for name_n, name_o in zip(newn, oldn):
-                    imp_sol.G_iw[name_n] << g_iw_seed[name_o]
+                    imp_sol.G_iw[name_n].data[:] = g_iw_seed[name_o].data[src_pt-work_pt:src_pt+work_pt]
     except (KeyError, IOError):
         last_loop = 0
         for name, gblock in imp_sol.G_iw:
@@ -102,14 +107,20 @@ def dmft_loop(setup, u_int, G_iw):
 
         for name, g0block in imp_sol.G0_iw:
             shift = 1. if 'asym' in name else -1
+            if setup['AFM']:
+                if 'up' in name:
+                    name_n = name.replace('up','dw')
+                else:
+                    name_n = name.replace('dw','up')
             g0block << inverse(iOmega_n + u_int/2. + shift * setup['tp'] -
-                               0.25*imp_sol.G_iw[name])
+                               0.25*imp_sol.G_iw[name_n])
 
         imp_sol.solve(h_int=h_int, **setup['s_params'])
 
         if mpi.is_master_node():
             with HDFArchive(setup['ofile'].format(**setup)) as last_run:
                 last_run['/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
+                last_run['/U{}/it{:03}/G_tau'.format(u_int, loop)] = imp_sol.G_tau
                 last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
 
     return imp_sol.G_iw

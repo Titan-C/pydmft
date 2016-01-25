@@ -63,16 +63,23 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
         tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
         with HDFArchive(filestr.format(tp=tp, BETA=BETA), 'r') as results:
             fl_dos = []
+            afm = []
             for u_str in results.keys():
                 lastit = results[u_str].keys()[-1]
                 labels = [name for name in results[u_str][lastit]['G_iw'].indices]
-                gf_iw = results[u_str][lastit]['G_iw'][labels[2]]
-                gf_iw = np.squeeze([gf_iw(i) for i in range(3)])
+                gfB_iw = results[u_str][lastit]['G_iw']
+                mesl= len(gfB_iw.mesh)
+
+                afmtest = np.allclose(gfB_iw['sym_up'].data[mesl:mesl+4].real,
+                                      -gfB_iw['sym_dw'].data[mesl:mesl+4].real, 3e-2)
+                afm.append(160 if afmtest else 80)
+
+                gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
-                        s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
+                        s=afm, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
     plt.xlim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
     plt.xlabel(r'$t_\perp/D$')
