@@ -10,15 +10,15 @@ Quantum Monte Carlo algorithm
 """
 
 from __future__ import division, absolute_import, print_function
+import numpy as np
+import sys
+import os
+import json
 from mpi4py import MPI
-import dmft.h5archive as h5
 import dmft.common as gf
 import dmft.hirschfye as hf
 import dmft.RKKY_dimer as dimer
 import dmft.plot.hf_dimer as pd
-import numpy as np
-import sys
-
 comm = MPI.COMM_WORLD
 
 
@@ -38,6 +38,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     setup.update(simulation)
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(U)
+    setup['simt'] = 'PM' # simulation type ParaMagnetic
 
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
@@ -48,12 +49,29 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     if g_iw_start is not None:
         giw_d, giw_o = g_iw_start
 
+    save_dir = os.path.join(setup['ofile'].format(**setup), current_u)
     try:  # try reloading data from disk
-        with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
-            last_loop = len(last_run[current_u].keys())
-            last_it = 'it{:03}'.format(last_loop-1)
-            giw_d, giw_o = pd.get_giw(last_run[current_u], last_it, tau, w_n)
-    except (IOError, KeyError):  # if no data clean start
+        with open(save_dir + '/setup', 'r') as conf:
+            last_loop = json.load(conf)['last_loop']
+        gtu = np.load(os.path.join(save_dir,
+                                    'it{:03}'.format(last_loop),
+                                    'gtau_up.npy')).reshape(2, 2, -1)
+        gtd = np.load(os.path.join(save_dir,
+                                    'it{:03}'.format(last_loop),
+                                    'gtau_dw.npy')).reshape(2, 2, -1)
+
+        gtau_d = -0.25 * (gtu[0, 0] + gtu[1, 1] + gtd[0, 0] + gtd[1, 1])
+        gtau_o = -0.25 * (gtu[1, 0] + gtu[0, 1] + gtd[1, 0] + gtd[0, 1])
+
+        giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n,
+                                   [1., -mu, U**2/4 +
+                                    tp**2+mu**2])
+
+        giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n,
+                                   [0., tp, -10.*mu*tp**2])
+
+        last_loop += 1
+    except (IOError, KeyError, ValueError):  # if no data clean start
         last_loop = 0
 
     V_field = hf.ising_v(setup['dtau_mc'], U,
@@ -61,13 +79,12 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
                          polar=setup['spin_polarization'])
 
 
-    for loop_count in range(last_loop, last_loop + setup['Niter']):
-        # For saving in the h5 file
-        dest_group = current_u+'/it{:03}/'.format(loop_count)
-        setup['group'] = dest_group
+    for iter_count in range(last_loop, last_loop + setup['Niter']):
+        work_dir = os.path.join(save_dir, 'it{:03}'.format(iter_count))
+        setup['work_dir'] = work_dir
 
         if comm.rank == 0:
-            print('On loop', loop_count, 'beta', setup['BETA'],
+            print('On loop', iter_count, 'beta', setup['BETA'],
                   'U', U, 'tp', tp)
 
         # Cleaning the input to half-filling
@@ -102,10 +119,11 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
         # Save output
         if comm.rank == 0:
-            with h5.File(setup['ofile'].format(**setup), 'a') as store:
-                store[dest_group + 'gtau_d'] = gtau_d
-                store[dest_group + 'gtau_o'] = gtau_o
-                h5.add_attributes(store[dest_group], setup)
+            np.save(work_dir+'/gtau_up', gtu.reshape(4, -1))
+            np.save(work_dir+'/gtau_dw', gtd.reshape(4, -1))
+            with open(save_dir + '/setup', 'w') as conf:
+                setup['last_loop'] = iter_count
+                json.dump(setup, conf, indent=2)
         sys.stdout.flush()
 
 
