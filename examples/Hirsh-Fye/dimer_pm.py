@@ -81,8 +81,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
                                     'it{:03}'.format(last_loop),
                                     'gtau_dw.npy')).reshape(2, 2, -1)
 
-        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(gtd, U, mu, tp))
+        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
+        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
 
         last_loop += 1
     except (IOError, KeyError, ValueError):  # if no data clean start
@@ -113,8 +113,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
         gtu, gtd = hf.imp_solver([g0tau_up, g0tau_dw], V_field, intm, setup)
 
-        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(gtd, U, mu, tp))
+        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
+        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
 
 
         # Save output
