@@ -10,6 +10,7 @@ from itertools import product
 import numpy as np
 import shutil
 import dmft.hirschfye as hf
+import dmft.plot.hf_single_site as phf
 import pytest
 import dmft.hffast as hffast
 
@@ -21,11 +22,11 @@ UPDATE_PARAMS = {'BETA': 16., 'N_MATSUBARA': 16, 't': 0.5, 'BANDS': 1,
 def test_autocorrelation_function():
     """Test the autocorrelation of an array of random numbers"""
     sample = np.random.rand(2000)
-    autocorrelation = hf.autocorrelation_function(sample)
+    autocorrelation = phf.autocorrelation_function(sample)
     assert abs(autocorrelation[0]-1.) < 1e-13
     assert (np.max(autocorrelation[1:500]) < 0.15).all()
 
-    autocorrelation = hf.autocorrelation_function(sample.reshape(-1, 4) > 0.5)
+    autocorrelation = phf.autocorrelation_function(sample.reshape(-1, 4) > 0.5)
     assert abs(autocorrelation[0]-1.) < 1e-13
     assert (np.max(autocorrelation[1:100]) < 0.15).all()
 
@@ -74,7 +75,7 @@ def test_hf_fast_2flip(chempot, u_int, updater):
 
 
 SOLVER_PARAMS = UPDATE_PARAMS
-SOLVER_PARAMS.update({'sweeps': 3000, 'therm': 1000, 'N_meas': 3, 'SEED': 4213,
+SOLVER_PARAMS.update({'sweeps': 3000, 'therm': 1000, 'meas': 3, 'SEED': 4213,
                       'save_logs': False, 'global_flip': True,
                       'SITES': 1, 'BANDS': 1,
                       'ofile': '/tmp/testdmft{}.h5'.format(np.random.rand()),
