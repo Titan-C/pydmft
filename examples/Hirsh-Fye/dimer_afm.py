@@ -46,6 +46,7 @@ def dmft_loop_pm(simulation):
     intm = hf.interaction_matrix(setup['BANDS'])
     setup['n_tau_mc'] = len(tau)
     mu, tp, U = setup['MU'], setup['tp'], setup['U']
+
     giw_d_up, giw_o_up = dimer.gf_met(w_n, 1e-3, tp, 0.5, 0.)
     giw_d_dw, giw_o_dw = dimer.gf_met(w_n, -1e-3, tp, 0.5, 0.)
     gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
@@ -100,8 +101,8 @@ def dmft_loop_pm(simulation):
         # Save output
         if comm.rank == 0:
             with h5.File(setup['ofile'].format(**setup), 'a') as store:
-                store[dest_group + 'gtau_u'] = -gtu
-                store[dest_group + 'gtau_d'] = -gtd
+                store[dest_group + 'gtau_u'] = gtu
+                store[dest_group + 'gtau_d'] = gtd
                 h5.add_attributes(store[dest_group], setup)
         sys.stdout.flush()
 
