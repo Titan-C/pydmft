@@ -53,6 +53,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(U)
     setup['simt'] = 'PM' # simulation type ParaMagnetic
+    if not setup['AFM']:
+        setup['simt'] = 'AFM' # simulation type AntiFerroMagnetic
 
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
@@ -75,22 +77,16 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         with open(save_dir + '/setup', 'r') as conf:
             last_loop = json.load(conf)['last_loop']
         gtu = np.load(os.path.join(save_dir,
-                                    'it{:03}'.format(last_loop),
-                                    'gtau_up.npy')).reshape(2, 2, -1)
+                                   'it{:03}'.format(last_loop),
+                                   'gtau_up.npy')).reshape(2, 2, -1)
         gtd = np.load(os.path.join(save_dir,
-                                    'it{:03}'.format(last_loop),
-                                    'gtau_dw.npy')).reshape(2, 2, -1)
-
-        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
+                                   'it{:03}'.format(last_loop),
+                                   'gtau_dw.npy')).reshape(2, 2, -1)
 
         last_loop += 1
     except (IOError, KeyError, ValueError):  # if no data clean start
         last_loop = 0
 
-    V_field = hf.ising_v(setup['dtau_mc'], U,
-                         L=setup['SITES']*setup['n_tau_mc'],
-                         polar=setup['spin_polarization'])
 
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
@@ -101,6 +97,13 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             print('On loop', iter_count, 'beta', setup['BETA'],
                   'U', U, 'tp', tp)
 
+        if not setup['AFM']:
+            gtu = .5*(gtu + gtd)
+            gtd = gtu
+
+        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
+        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
+
         # Bethe lattice bath
         g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
         g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
@@ -110,11 +113,12 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
 
         # Impurity solver
+        V_field = hf.ising_v(setup['dtau_mc'], U,
+                            L=setup['SITES']*setup['n_tau_mc'],
+                            polar=setup['spin_polarization'])
 
         gtu, gtd = hf.imp_solver([g0tau_up, g0tau_dw], V_field, intm, setup)
 
-        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
 
 
         # Save output
@@ -133,6 +137,8 @@ if __name__ == "__main__":
                         help='Dimerization strength')
     parser.add_argument('-df', '--double_flip_prob', type=float, default=0.,
                         help='Probability for double spin flip on equal sites')
+    parser.add_argument('-afm', '--AFM', action='store_true',
+                       help='Use the self-consistency for Antiferromagnetism')
 
     SETUP = vars(parser.parse_args())
     for U in SETUP['U']:
