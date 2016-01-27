@@ -26,13 +26,13 @@ def mat_2_inv(A):
     det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
     return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
 
-
 def gf_tail(gtau, U, mu, tp):
 
     g_t0 = gtau[:, :, 0]
 
     gtail = [np.eye(2).reshape(2, 2, 1),
-             (-mu  + tp*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
+             (-mu - ((U-.5*tp)*(0.5+g_t0))*np.eye(2)+
+              tp*(1-g_t0)*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
              (0.25 + U**2/4 + tp**2)*np.eye(2).reshape(2, 2, 1)]
     return gtail
 
