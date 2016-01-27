@@ -32,8 +32,8 @@ def gf_tail(gtau, U, mu, tp):
     g_t0 = gtau[:, :, 0]
 
     gtail = [np.eye(2).reshape(2, 2, 1),
-             ((-mu - U*(0.5+g_t0))*np.eye(2) + tp*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
-             (0.25 + U**2/4 + tp**2 + mu**2 - U*mu + 2*U*mu*g_t0 * np.eye(2)).reshape(2, 2, 1)]
+             (-mu  + tp*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
+             (0.25 + U**2/4 + tp**2)*np.eye(2).reshape(2, 2, 1)]
     return gtail
 
 def dmft_loop_pm(simulation, U, g_iw_start=None):
