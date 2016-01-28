@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import numpy as np
 import os
+import json
 from random import choice
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
@@ -146,14 +147,25 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
             pass
 
 
-def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=None):
+def gf_tail(gtau, U, mu, tp):
+
+    g_t0 = gtau[:, :, 0]
+
+    gtail = [np.eye(2).reshape(2, 2, 1),
+             (-mu - ((U-.5*tp)*(0.5+g_t0))*np.eye(2)+
+              tp*(1-g_t0)*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
+             (0.25 + U**2/4 + tp**2)*np.eye(2).reshape(2, 2, 1)]
+    return gtail
+
+
+def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{tp}', axes=None):
     """Plot the evolution of the Green's function in DMFT iterations
 
     Parameters
     ----------
     it: int, iteration to plot
     space: string, tau or iw
-    label: string to identify plot
+    block of the gf: string to identify plot
     axes: Matplotlib axes, use to superpose plots
 
     Returns
@@ -164,39 +176,32 @@ def plot_it(BETA, u_str, tp, it, space, label='', filestr='SB_PM_B{}.h5', axes=N
 
     colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
     if axes is None:
-        _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
-    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        step = 'it{:03}'.format(it)
-        setup = h5.get_attributes(output_files[u_str][step])
-        tau, w_n = gf.tau_wn_setup(setup)
+        _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
-        gtau_d = output_files[u_str][step]['gtau_d'][:]
-        gtau_o = output_files[u_str][step]['gtau_o'][:]
-        if label == '':
-            label = step
+    save_dir = os.path.join(filestr.format(simt=simt, BETA=BETA, tp=tp), "U"+str(u_int))
+    with open(save_dir + '/setup', 'r') as conf:
+        setup = json.load(conf)
 
-        if space == 'tau':
-            axes[0].plot(tau, gtau_d.T, '-', label=label)
-            axes[1].plot(tau, gtau_o.T, '-', label=label)
+    tau, w_n = gf.tau_wn_setup(setup)
+    names = ['AA', 'AB', 'BA', 'BB']
 
-            graf = r'$G(\tau)$'
-            axes[0].set_xlabel(r'$\tau$')
-            axes[0].set_xlim([0, BETA])
-        else:
-            giw_d, giw_o = get_giw(output_files[u_str], step, tau, w_n)
-            #c = choice(colors)
-            #axes[0].plot(w_n, giw_d.real.T, c + 'o-', label='R ' + label)
-            axes[0].plot(w_n, giw_d.imag.T, 's:', label='I ' + label)
-            axes[1].plot(w_n, giw_o.real.T, 'o-', label='R ' + label)
-            #axes[1].plot(w_n, giw_o.imag.T, c + 's:', label='I ' + label)
+    gtau = np.load(save_dir + '/it{:03}/gtau_{}.npy'.format(it, flavor))
 
-            graf = r'$G(i\omega_n)$'
-            axes[0].set_xlabel(r'$i\omega$')
+    for gt, name in zip(gtau, names):
+        axes[0].plot(tau, gt, label=name)
+        axes[0].set_ylabel(r'$G(\tau)$_'+flavor)
+        axes[0].set_xlabel(r'$\tau$')
 
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, BETA, u_str[1:]))
-    axes[0].set_ylabel(graf+'$_{AA}$')
+    giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
+                             gf_tail(gtau.reshape(2, 2, -1), u_int, 0., tp))
+
+    for gw, name in zip(giw.reshape(4, -1), names):
+        axes[1].plot(w_n, gw.real, 'o:', label="Re " +name)
+        axes[1].plot(w_n, gw.imag, 's:', label="Im " +name)
+        axes[1].set_xlabel(r'$i\omega_n$')
+
+    axes[0].set_title(r'Green Function in {} @ $\beta={}$, U={}, tp={}'.format(simt, BETA, u_int, tp))
     axes[0].legend(loc=0)
-    axes[1].set_ylabel(graf+'$_{AB}$')
     axes[1].legend(loc=0)
 
     return axes
