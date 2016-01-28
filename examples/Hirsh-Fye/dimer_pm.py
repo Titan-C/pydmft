@@ -53,7 +53,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(U)
     setup['simt'] = 'PM' # simulation type ParaMagnetic
-    if not setup['AFM']:
+    if setup['AFM']:
         setup['simt'] = 'AFM' # simulation type AntiFerroMagnetic
 
     tau, w_n = gf.tau_wn_setup(setup)
@@ -95,16 +95,17 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         work_dir = os.path.join(save_dir, 'it{:03}'.format(iter_count))
         setup['work_dir'] = work_dir
 
-        if comm.rank == 0:
-            print('On loop', iter_count, 'beta', setup['BETA'],
-                  'U', U, 'tp', tp)
-
         if not setup['AFM']:
             gtu = .5*(gtu + gtd)
             gtd = gtu
 
-        giw_up = gf.gt_fouriertrans(-gtu, tau, w_n, gf_tail(-gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(-gtd, tau, w_n, gf_tail(-gtd, U, mu, tp))
+        if comm.rank == 0:
+            print('On loop', iter_count, 'beta', setup['BETA'],
+                  'U', U, 'tp', tp)
+            print(gtu)
+
+        giw_up = gf.gt_fouriertrans(gtu, tau, w_n, gf_tail(gtu, U, mu, tp))
+        giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, gf_tail(gtd, U, mu, tp))
 
         # Bethe lattice bath
         g0iw_up = mat_2_inv(gmix - 0.25*giw_up)

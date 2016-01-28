@@ -74,6 +74,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              }
     parms.update(parms_user)
 
+    # Retarded field includes the Hirsh-Fye minus sign in GF
     GX = [retarded_weiss(gb) for gb in g0_blocks]
     kroneker = np.eye(GX[0].shape[0])  # assuming all blocks are of same shape
     Gst = [np.zeros_like(gx) for gx in GX]
@@ -134,7 +135,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
         save_output(parms, double_occ/comm.Get_size(),
                     acc, chi, vlog, ar)
 
-    return [avg_g(gst, parms) for gst in Gst]
+    # Recover Conventional GF sign in average
+    return [-1*avg_g(gst, parms) for gst in Gst]
 
 @numba.jit(nopython=True)
 def measure_chi(v, slices):
