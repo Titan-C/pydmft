@@ -93,22 +93,29 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     return sigmaiw_d, sigmaiw_o
 
 
-def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
+def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}', simt='PM',
               n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
-    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     freq_arrd = []
     freq_arro = []
-    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        setup = h5.get_attributes(output_files[u_str]['it000'])
-        tau, w_n = gf.tau_wn_setup(setup)
-        for step in list(output_files[u_str].keys())[skip:]:
-            giwd, giwo = get_giw(output_files[u_str], step, tau, w_n)
-            axes[0].plot(w_n, giwd.imag, 'bo:')
-            axes[0].plot(w_n, giwo.real, 'gs:')
+    sim_dir = os.path.join(filestr.format(BETA=BETA, tp=tp, simt=simt), 'U' + str(u_int))
+    iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
+    with open(sim_dir + '/setup', 'r') as read:
+        setup = json.load(read)
+    tau, w_n = gf.tau_wn_setup(setup)
 
-            freq_arrd.append(giwd.imag[:n_freq])
-            freq_arro.append(giwo.real[:n_freq])
+    _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
+
+    for step in iterations:
+        gtau = np.load(sim_dir + '/{}/gtau_{}.npy'.format(step, 'up'))
+        giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
+                                 gf_tail(gtau.reshape(2, 2, -1), u_int, 0., tp))
+
+        axes[0].plot(w_n, giw[0, 0].imag, 'bo:')
+        axes[0].plot(w_n, giw[0, 1].real, 'gs:')
+
+        freq_arrd.append(giw[0, 0].imag[:n_freq])
+        freq_arro.append(giw[0, 1].real[:n_freq])
 
     freq_arrd = np.asarray(freq_arrd).T
     freq_arro = np.asarray(freq_arro).T
@@ -124,7 +131,7 @@ def show_conv(BETA, u_str, tp=0.25, filestr='tp{tp}_B{BETA}.h5',
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
     graf = r'$G(i\omega_n)$'
-    label_convergence(BETA, u_str+'\n$t_\\perp={}$'.format(tp),
+    label_convergence(BETA, str(u_int)+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
     return axes
