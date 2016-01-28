@@ -385,36 +385,4 @@ def do_input(help_string):
                         'thermalization steps ')
     parser.add_argument('-M', '--Heat_bath', action='store_false',
                         help='Use Metropolis importance sampling')
-    parser.add_argument('-new_seed', type=float, nargs=3, default=False,
-                        metavar=('U_src', 'U_target', 'avg_over'),
-                        help='Resume DMFT loops from on disk data files')
     return parser
-
-
-def set_new_seed(setup, targets):
-    """Generates a new starting Green's function for the DMFT loop
-    based on the finishing state of the system at a diffent parameter set"""
-
-    src_U = 'U' + str(setup['new_seed'][0])
-    dest_U = 'U' + str(setup['new_seed'][1])
-    avg_over = int(setup['new_seed'][2])
-    averages = []
-
-    with h5.File(setup['ofile'].format(**setup), 'a') as outp:
-        last_iterations = outp[src_U].keys()[-avg_over:]
-        for target in targets:
-            averages.append(pss.averager(outp[src_U], target, last_iterations))
-
-        try:
-            dest_count = len(outp[dest_U].keys())
-        except KeyError:
-            dest_count = 0
-
-        dest_group = '/{}/it{:03}/'.format(dest_U, dest_count)
-        for target, avg in zip(targets, averages):
-            outp[dest_group + target + '/'] = avg
-        outp.flush()
-        h5.add_attributes(outp[dest_group],
-                          h5.get_attributes(outp[src_U][last_iterations[-1]]))
-
-    print(setup['new_seed'])

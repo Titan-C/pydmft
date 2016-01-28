@@ -27,11 +27,6 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
              'SITES':       1,
             }
 
-    if simulation['new_seed']:
-        if COMM.rank == 0:
-            hf.set_new_seed(simulation, ['gtau'])
-        return
-
     current_u = 'U'+str(U)
     setup.update(simulation)
     setup['U'] = U
@@ -45,6 +40,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     if g_iw_start is not None:
         giw = g_iw_start
 
+    gtau = gf.gw_invfouriertrans(giw, tau, w_n, [1., 0., .25])
     save_dir = os.path.join(setup['ofile'].format(**setup), current_u)
     try:
         with open(save_dir + '/setup', 'r') as conf:

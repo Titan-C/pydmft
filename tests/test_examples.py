@@ -28,7 +28,6 @@ def test_example(case, ofile, plot):
     assert not subprocess.call(command)
     plot.show_conv(4, 'U2.5', filestr='/tmp/'+ofile, xlim=8, skip=0)
 
-    command += '-new_seed 2.5 2.8 4'.split()
     print(command)
     assert not subprocess.call(command)
     plot.show_conv(4, 'U2.8', filestr='/tmp/'+ofile, xlim=8, skip=0)

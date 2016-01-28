@@ -43,12 +43,6 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
              'SITES':     2,
              }
 
-    if simulation['new_seed']:
-        if comm.rank == 0:
-            hf.set_new_seed(simulation, ['gtau_d', 'gtau_o'])
-        simulation['U'] = simulation['new_seed'][1]
-        return
-
     setup.update(simulation)
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(U)
@@ -102,7 +96,6 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         if comm.rank == 0:
             print('On loop', iter_count, 'beta', setup['BETA'],
                   'U', U, 'tp', tp)
-            print(gtu)
 
         giw_up = gf.gt_fouriertrans(gtu, tau, w_n, gf_tail(gtu, U, mu, tp))
         giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, gf_tail(gtd, U, mu, tp))
