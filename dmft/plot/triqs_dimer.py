@@ -68,11 +68,11 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
                 lastit = results[u_str].keys()[-1]
                 labels = [name for name in results[u_str][lastit]['G_iw'].indices]
                 gfB_iw = results[u_str][lastit]['G_iw']
-                mesl= len(gfB_iw.mesh)
+                mesl = len(gfB_iw.mesh)/2.
 
-                afmtest = np.allclose(gfB_iw['sym_up'].data[mesl:mesl+4].real,
-                                      -gfB_iw['sym_dw'].data[mesl:mesl+4].real, 3e-2)
-                afm.append(160 if afmtest else 80)
+                afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
+                                      gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
+                afm.append(60 if afmtest else 280)
 
                 gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
@@ -80,10 +80,12 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
                         s=afm, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
+
     plt.xlim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
     plt.xlabel(r'$t_\perp/D$')
     plt.ylabel('$U/D$')
+
 
 def averager(h5parent, h5child, last_iterations):
     """Given an H5 file parent averages over the iterations with the child"""
