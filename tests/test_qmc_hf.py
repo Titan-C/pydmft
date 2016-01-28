@@ -7,11 +7,11 @@ Created on Tue Nov 25 12:44:23 2014
 
 from __future__ import division, absolute_import, print_function
 from itertools import product
+import os
 import numpy as np
-import shutil
+import pytest
 import dmft.hirschfye as hf
 import dmft.plot.hf_single_site as phf
-import pytest
 import dmft.hffast as hffast
 
 
@@ -78,7 +78,7 @@ SOLVER_PARAMS = UPDATE_PARAMS
 SOLVER_PARAMS.update({'sweeps': 3000, 'therm': 1000, 'meas': 3, 'SEED': 4213,
                       'save_logs': False, 'global_flip': True,
                       'SITES': 1, 'BANDS': 1,
-                      'ofile': '/tmp/testdmft{}.h5'.format(np.random.rand()),
+                      'ofile': '/tmp/testdmft{}'.format(np.random.rand()),
                       'dtau_mc': 0.5})
 @pytest.mark.parametrize("u_int", [1, 2, 2.5])
 @pytest.mark.xfail(raises=AssertionError, reason='Atom is not well described')
@@ -89,8 +89,9 @@ def test_solver_atom(u_int):
     tau = np.linspace(0, parms['BETA'], 2*parms['N_MATSUBARA'])
     intm = hf.interaction_matrix(1)  # one orbital
     g0t = -.5 * np.ones(len(tau))
+    parms['work_dir'] = os.path.join(parms['ofile'], 'saves')
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
-    g = np.squeeze(0.5 * (gtu+gtd))
+    g = np.squeeze(-0.5 * (gtu+gtd)) # make positive for next log
     result = np.polyfit(tau[:10], np.log(g[:10]), 1)
     assert np.allclose(result, [-u_int/2., np.log(.5)], atol=0.02)
 
@@ -111,21 +112,21 @@ def test_solver(chempot, u_int, gend):
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
     g0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
     gtu, gtd = hf.imp_solver([g0t, g0t], v, intm, parms)
-    g = np.squeeze(-0.5 * (gtu+gtd))
+    g = np.squeeze(0.5 * (gtu+gtd))
     assert np.allclose(gend, g, atol=6e-3)
 
 
 @pytest.mark.parametrize("chempot, u_int, gend", SINGLE_BAND_GF_REF)
 def test_solver_dimer(chempot, u_int, gend):
     parms = SOLVER_PARAMS
-    parms.update(U=u_int, MU=chempot, group='dimer{}/'.format(u_int),
+    parms.update(U=u_int, MU=chempot, work_dir='dimer{}/'.format(u_int),
                  SITES=2)
     tau, w_n, g0t, Giw, v, intm = hf.setup_PM_sim(parms)
     G0iw = 1/(1j*w_n + parms['MU'] - .25*Giw)
     G0t = hf.gw_invfouriertrans(G0iw, tau, w_n, [1., -parms['MU'], 0.])
     gb0t = np.array([[G0t, np.zeros_like(G0t)], [np.zeros_like(G0t), G0t]])
     gtu, gtd = hf.imp_solver([gb0t]*2, v, intm, parms)
-    g = np.squeeze(-0.5 * (gtu+gtd))
+    g = np.squeeze(0.5 * (gtu+gtd))
     assert np.allclose(gend, g[0, 0], atol=6e-3)
     assert np.allclose(np.zeros_like(g0t), g[0, 1], atol=6e-3)
     assert np.allclose(np.zeros_like(g0t), g[1, 0], atol=6e-3)
