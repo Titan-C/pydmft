@@ -28,9 +28,6 @@ def test_example(case, ofile, plot):
     assert not subprocess.call(command)
     plot.show_conv(4, 'U2.5', filestr='/tmp/'+ofile, xlim=8, skip=0)
 
-    print(command)
-    assert not subprocess.call(command)
-    plot.show_conv(4, 'U2.8', filestr='/tmp/'+ofile, xlim=8, skip=0)
 
 plot_list = [pfl for pfl in os.listdir('examples') if pfl.startswith('plot')
                                                     and pfl.endswith('.py')]
