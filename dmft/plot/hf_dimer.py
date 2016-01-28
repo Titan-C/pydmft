@@ -6,7 +6,7 @@ Created on Thu Jul 23 14:08:23 2015
 """
 
 from __future__ import division, print_function, absolute_import
-from dmft.plot.hf_single_site import label_convergence
+from dmft.plot.hf_single_site import label_convergence, interpol
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.h5archive as h5
@@ -186,11 +186,16 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
     names = ['AA', 'AB', 'BA', 'BB']
 
     gtau = np.load(save_dir + '/it{:03}/gtau_{}.npy'.format(it, flavor))
+    edge_tau = np.concatenate((tau, [BETA]))
+
 
     for gt, name in zip(gtau, names):
-        axes[0].plot(tau, gt, label=name)
+        gt_edge = interpol(gt, len(edge_tau), True, True if name[0] == name[1] else False)
+
+        axes[0].plot(edge_tau, gt_edge, label=name)
         axes[0].set_ylabel(r'$G(\tau)$_'+flavor)
         axes[0].set_xlabel(r'$\tau$')
+    axes[0].set_xlim([0, BETA])
 
     giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
                              gf_tail(gtau.reshape(2, 2, -1), u_int, 0., tp))
@@ -198,7 +203,9 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
     for gw, name in zip(giw.reshape(4, -1), names):
         axes[1].plot(w_n, gw.real, 'o:', label="Re " +name)
         axes[1].plot(w_n, gw.imag, 's:', label="Im " +name)
+        axes[1].set_ylabel(r'$G(i\omega_n)$_'+flavor)
         axes[1].set_xlabel(r'$i\omega_n$')
+    axes[1].set_xlim([0, max(w_n)])
 
     axes[0].set_title(r'Green Function in {} @ $\beta={}$, U={}, tp={}'.format(simt, BETA, u_int, tp))
     axes[0].legend(loc=0)
