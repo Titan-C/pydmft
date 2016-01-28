@@ -65,8 +65,10 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
                        [-tp*np.ones_like(w_n), 1j*w_n]])
 
-    giw_up = np.array([[giw_d, giw_o], [giw_o, giw_d]])
-    giw_dw = np.array([[giw_d, giw_o], [giw_o, giw_d]])
+    giw = np.array([[giw_d, giw_o], [giw_o, giw_d]])
+    g0tau0 = -0.5*np.eye(2).reshape(2, 2, 1)
+    gtu = gf.gw_invfouriertrans(giw, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
+    gtd = np.copy(gtu)
 
     if g_iw_start is not None:
         giw_up = g_iw_start[0]
@@ -108,7 +110,6 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
         g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
 
-        g0tau0 = -0.5*np.eye(2).reshape(2, 2, 1)
         g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
         g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
 
@@ -139,6 +140,7 @@ if __name__ == "__main__":
                         help='Probability for double spin flip on equal sites')
     parser.add_argument('-afm', '--AFM', action='store_true',
                        help='Use the self-consistency for Antiferromagnetism')
+    parser.set_defaults(ofile='DIMER_{simt}_B{BETA}_tp{tp}')
 
     SETUP = vars(parser.parse_args())
     for U in SETUP['U']:
