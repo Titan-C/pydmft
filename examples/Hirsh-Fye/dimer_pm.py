@@ -26,15 +26,6 @@ def mat_2_inv(A):
     det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
     return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
 
-def gf_tail(gtau, U, mu, tp):
-
-    g_t0 = gtau[:, :, 0]
-
-    gtail = [np.eye(2).reshape(2, 2, 1),
-             (-mu - ((U-.5*tp)*(0.5+g_t0))*np.eye(2)+
-              tp*(1-g_t0)*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
-             (0.25 + U**2/4 + tp**2)*np.eye(2).reshape(2, 2, 1)]
-    return gtail
 
 def dmft_loop_pm(simulation, U, g_iw_start=None):
     """Implementation of the solver"""
@@ -61,7 +52,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
     giw = np.array([[giw_d, giw_o], [giw_o, giw_d]])
     g0tau0 = -0.5*np.eye(2).reshape(2, 2, 1)
-    gtu = gf.gw_invfouriertrans(giw, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
+    gtu = gf.gw_invfouriertrans(giw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
     gtd = np.copy(gtu)
 
     if g_iw_start is not None:
@@ -97,15 +88,15 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             print('On loop', iter_count, 'beta', setup['BETA'],
                   'U', U, 'tp', tp)
 
-        giw_up = gf.gt_fouriertrans(gtu, tau, w_n, gf_tail(gtu, U, mu, tp))
-        giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, gf_tail(gtd, U, mu, tp))
+        giw_up = gf.gt_fouriertrans(gtu, tau, w_n, pd.gf_tail(gtu, U, mu, tp))
+        giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, pd.gf_tail(gtd, U, mu, tp))
 
         # Bethe lattice bath
         g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
         g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
 
-        g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
-        g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, gf_tail(g0tau0, 0., mu, tp))
+        g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
+        g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
 
         # Impurity solver
         V_field = hf.ising_v(setup['dtau_mc'], U,
