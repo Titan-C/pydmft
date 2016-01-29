@@ -30,7 +30,7 @@ def label_convergence(beta, u_int, axes, graf, n_freq, xlim):
 
 
 def averager(sim_dir, observable, last_iterations):
-    """Given an H5 file parent averages over the iterations with the child"""
+    """Averages over the observable arrays in sim_dir for the last_iterations"""
     sum_child = 0.
     for step in last_iterations:
         data_file = os.path.join(sim_dir, step, observable)

@@ -67,7 +67,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw[[1, 0]])
             g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n, [1., 0., .25])
             gtu, gtd = hf.imp_solver([g0tau[0], g0tau[1]], v_aux, intm, setup)
-            gtau = -np.squeeze([gtu, gtd])
+            gtau = np.squeeze([gtu, gtd])
 
         else:
             # enforce Half-fill, particle-hole symmetry
@@ -76,7 +76,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             g0iw = 1/(1j*w_n + setup['MU'] - setup['t']**2 * giw)
             g0tau = gf.gw_invfouriertrans(g0iw, tau, w_n, [1., 0., .25])
             gtu, gtd = hf.imp_solver([g0tau]*2, v_aux, intm, setup)
-            gtau = -np.squeeze(0.5 * (gtu+gtd))
+            gtau = np.squeeze(0.5 * (gtu+gtd))
 
 
         if COMM.rank == 0:
