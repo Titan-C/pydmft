@@ -20,7 +20,7 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
 
-def get_giw(filestr, setup, tau, w_n):
+def get_giw(filestr, tau=None, w_n=None, setup=None):
     """Recovers with Fourier Transform G_iw from H5 file
 
     Parameters
@@ -45,11 +45,24 @@ def get_giw(filestr, setup, tau, w_n):
     get_sigmaiw
     """
 
+    recovered_sim_info = False
+    if None in (tau, w_n, setup):
+        sim_dir = os.path.dirname(os.path.dirname(os.path.abspath(filestr)))
+        with open(sim_dir + '/setup', 'r') as read:
+            setup = json.load(read)
+        tau, w_n = gf.tau_wn_setup(setup)
+        recovered_sim_info = True
+
     gtau = np.load(filestr)
     mu, tp, u_int = setup['MU'], setup['tp'], setup['U']
     giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
                              gf_tail(gtau.reshape(2, 2, -1), u_int, mu, tp))
-    return giw.reshape(4, -1), gtau
+
+    if recovered_sim_info:
+        return giw.reshape(4, -1), gtau, tau, w_n, setup
+    else:
+        return giw.reshape(4, -1), gtau
+
 
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
@@ -106,7 +119,7 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
 
     for it in iters:
         src = sim_dir + '/{}/gtau_{}.npy'.format(it, flavor)
-        giw, gg = get_giw(src, setup, tau, w_n)
+        giw, _ = get_giw(src, tau, w_n, setup)
 
         axes[0].plot(w_n, giw[names[entry]].imag, 'bo:')
         axes[0].plot(w_n, giw[names[entry]].real, 'gs:')
@@ -127,7 +140,7 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
                               label=r'$\Re e G$')
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
-    graf = r'$G(i\omega_n)_{{}}_{{}}$'.format(entry, flavor)
+    graf = r'$G(i\omega_n) {} {}$'.format(entry, flavor)
     label_convergence(BETA, str(u_int)+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
