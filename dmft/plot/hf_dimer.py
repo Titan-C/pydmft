@@ -112,6 +112,10 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
     iters = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
     with open(sim_dir + '/setup', 'r') as read:
         setup = json.load(read)
+    with open(sim_dir + '/setup', 'w') as conf:
+        setup['U'] = u_int
+        json.dump(setup, conf, indent=2)
+
     tau, w_n = gf.tau_wn_setup(setup)
     names = {'AA': 0, 'AB': 1, 'BA': 2, 'BB': 3}
 
@@ -199,6 +203,9 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
     save_dir = os.path.join(filestr.format(simt=simt, BETA=BETA, tp=tp), "U"+str(u_int))
     with open(save_dir + '/setup', 'r') as conf:
         setup = json.load(conf)
+    with open(save_dir + '/setup', 'w') as conf:
+        setup['U'] = u_int
+        json.dump(setup, conf, indent=2)
 
     tau, w_n = gf.tau_wn_setup(setup)
     edge_tau = np.concatenate((tau, [BETA]))
@@ -206,7 +213,7 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
     names = ['AA', 'AB', 'BA', 'BB']
 
     giw, gtau = get_giw(save_dir + '/it{:03}/gtau_{}.npy'.format(it, flavor),
-                        setup, tau, w_n)
+                        tau, w_n, setup)
 
     for gt, name in zip(gtau, names):
         gt_edge = interpol(gt, len(edge_tau), True,
