@@ -134,7 +134,7 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     return 1j*w_n - .25*giw - 1/giw
 
 
-def show_conv(beta, u_int, filestr='SB_PM_B{beta}', n_freq=5, xlim=2, skip=5, simt='PM'):
+def show_conv(beta, u_int, filestr='SB_{simt}_B{beta}', n_freq=5, xlim=2, skip=5, simt='PM'):
     """Plot the evolution of the Green's function in DMFT iterations"""
     freq_arr = []
     sim_dir = os.path.join(filestr.format(beta=beta, simt=simt), 'U' + str(u_int))

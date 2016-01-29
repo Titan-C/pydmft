@@ -81,8 +81,11 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         work_dir = os.path.join(save_dir, 'it{:03}'.format(iter_count))
         setup['work_dir'] = work_dir
 
-        if not setup['AFM']:
+        if not setup['AFM']: # Paramagnetic averaging
             gtu = .5*(gtu + gtd)
+            gt_diag = .5*(gtu[0,0] + gtu[1, 1])
+            gt_offd = .5*(gtu[0,1] + gtu[1, 0])
+            gtu = np.array([[gt_diag, gt_offd], [gt_offd, gt_diag]])
             gtd = gtu
 
         if comm.rank == 0:
@@ -91,6 +94,13 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
 
         giw_up = gf.gt_fouriertrans(gtu, tau, w_n, pd.gf_tail(gtu, U, mu, tp))
         giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, pd.gf_tail(gtd, U, mu, tp))
+
+        if not setup['AFM']: # Paramagnetic cleaning
+            giw_up[0, 0].real = 0
+            giw_up[1, 1].real = 0
+            giw_up[0, 1].imag = 0
+            giw_up[1, 0].imag = 0
+            giw_dw = giw_up
 
         # Bethe lattice bath
         g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
