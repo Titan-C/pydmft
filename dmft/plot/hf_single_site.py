@@ -17,11 +17,11 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
 
-def label_convergence(beta, u_str, axes, graf, n_freq, xlim):
+def label_convergence(beta, u_int, axes, graf, n_freq, xlim):
     """Label the axes of the common plot of the evolution of DMFT loops"""
     axes[0].set_xlim([0, xlim])
     axes[1].legend(loc=0, ncol=n_freq)
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_str[1:]))
+    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_int))
     axes[0].set_ylabel(graf)
     axes[0].set_xlabel(r'$i\omega_n$')
     axes[1].set_title('Evolution of the first frequencies')
@@ -134,10 +134,10 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     return 1j*w_n - .25*giw - 1/giw
 
 
-def show_conv(beta, u_str, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
+def show_conv(beta, u_int, filestr='SB_PM_B{beta}', n_freq=5, xlim=2, skip=5, simt='PM'):
     """Plot the evolution of the Green's function in DMFT iterations"""
     freq_arr = []
-    sim_dir = os.path.join(filestr.format(beta), u_str)
+    sim_dir = os.path.join(filestr.format(beta=beta, simt=simt), 'U' + str(u_int))
     iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
     with open(sim_dir + '/setup', 'r') as read:
         setup = json.load(read)
@@ -158,7 +158,7 @@ def show_conv(beta, u_str, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
         axes[1].plot(freqs.T, 'o-.', label=str(num))
     graf = r'$G(i\omega_n)$'
 
-    label_convergence(beta, u_str, axes, graf, n_freq, xlim)
+    label_convergence(beta, u_int, axes, graf, n_freq, xlim)
 
     return axes
 

@@ -37,6 +37,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     setup.update(simulation)
     setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
     current_u = 'U'+str(U)
+    setup['U'] = U
     setup['simt'] = 'PM' # simulation type ParaMagnetic
     if setup['AFM']:
         setup['simt'] = 'AFM' # simulation type AntiFerroMagnetic
@@ -128,5 +129,5 @@ if __name__ == "__main__":
     parser.set_defaults(ofile='DIMER_{simt}_B{BETA}_tp{tp}')
 
     SETUP = vars(parser.parse_args())
-    for U in SETUP['U']:
+    for U in SETUP['urange']:
         dmft_loop_pm(SETUP, U)

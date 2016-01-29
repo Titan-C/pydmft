@@ -6,28 +6,28 @@ Created on Thu Jul 23 14:08:23 2015
 """
 
 from __future__ import division, print_function, absolute_import
+import os
+import json
+from random import choice
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.lines as mlines
 from dmft.plot.hf_single_site import label_convergence, interpol
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.h5archive as h5
-import matplotlib.pyplot as plt
-import matplotlib.lines as mlines
-import numpy as np
-import os
-import json
-from random import choice
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
 
-def get_giw(h5parent, iteration, tau, w_n):
+def get_giw(filestr, setup, tau, w_n):
     """Recovers with Fourier Transform G_iw from H5 file
 
     Parameters
     ----------
-    h5parent : h5py parent object
-    iteration : string
-        group where the measurements are stored, name of iteration
+    filestr : string
+            file with array data G(tau)
+    setup : dictionary about simulation parameters
     tau : real float array
             Imaginary time points
     w_n : real float array
@@ -35,25 +35,21 @@ def get_giw(h5parent, iteration, tau, w_n):
 
     Returns
     -------
-    tuple complex ndarray
+    tuple complex ndarray (giw, gtau)
             Interacting Greens function in matsubara frequencies
-            diagonal and off diagonal
-
+            and original Imaginary time. Entries are list ordered and
+            not in matrix shape
 
     See also
     --------
     get_sigmaiw
     """
 
-    setup = h5.get_attributes(h5parent[iteration])
-    mu, tp, U = setup['MU'], setup['tp'], setup['U']
-    gtau_d = h5parent[iteration]['gtau_d'][:]
-    gtau_o = h5parent[iteration]['gtau_o'][:]
-    giw_d = gf.gt_fouriertrans(gtau_d, tau, w_n,
-                               [1., -mu, 0.25 + U**2/4 + tp**2 + mu**2])
-    giw_o = gf.gt_fouriertrans(gtau_o, tau, w_n, [0., tp, -10.*mu*tp**2])
-
-    return giw_d, giw_o
+    gtau = np.load(filestr)
+    mu, tp, u_int = setup['MU'], setup['tp'], setup['U']
+    giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
+                             gf_tail(gtau.reshape(2, 2, -1), u_int, mu, tp))
+    return giw.reshape(4, -1), gtau
 
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
@@ -93,29 +89,30 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     return sigmaiw_d, sigmaiw_o
 
 
-def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}', simt='PM',
-              n_freq=5, xlim=2, skip=5):
+def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
+              simt='PM', flavor='up', entry='AA', n_freq=5, xlim=2, skip=5):
     """Plot the evolution of the Green's function in DMFT iterations"""
     freq_arrd = []
     freq_arro = []
-    sim_dir = os.path.join(filestr.format(BETA=BETA, tp=tp, simt=simt), 'U' + str(u_int))
-    iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
+    sim_dir = os.path.join(filestr.format(BETA=BETA, tp=tp, simt=simt),
+                           'U' + str(u_int))
+    iters = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
     with open(sim_dir + '/setup', 'r') as read:
         setup = json.load(read)
     tau, w_n = gf.tau_wn_setup(setup)
+    names = {'AA': 0, 'AB': 1, 'BA': 2, 'BB': 3}
 
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
 
-    for step in iterations:
-        gtau = np.load(sim_dir + '/{}/gtau_{}.npy'.format(step, 'up'))
-        giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
-                                 gf_tail(gtau.reshape(2, 2, -1), u_int, 0., tp))
+    for it in iters:
+        src = sim_dir + '/{}/gtau_{}.npy'.format(it, flavor)
+        giw, gg = get_giw(src, setup, tau, w_n)
 
-        axes[0].plot(w_n, giw[0, 0].imag, 'bo:')
-        axes[0].plot(w_n, giw[0, 1].real, 'gs:')
+        axes[0].plot(w_n, giw[names[entry]].imag, 'bo:')
+        axes[0].plot(w_n, giw[names[entry]].real, 'gs:')
 
-        freq_arrd.append(giw[0, 0].imag[:n_freq])
-        freq_arro.append(giw[0, 1].real[:n_freq])
+        freq_arrd.append(giw[names[entry]].imag[:n_freq])
+        freq_arro.append(giw[names[entry]].real[:n_freq])
 
     freq_arrd = np.asarray(freq_arrd).T
     freq_arro = np.asarray(freq_arro).T
@@ -125,16 +122,17 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}', simt=
         axes[1].plot(freqso, 's-.', label=str(num))
 
     labimgiws = mlines.Line2D([], [], color='blue', marker='o',
-                              label=r'$\Im m G_{AA}$')
+                              label=r'$\Im m G$')
     labregiws = mlines.Line2D([], [], color='green', marker='s',
-                              label=r'$\Re e G_{AB}$')
+                              label=r'$\Re e G$')
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
-    graf = r'$G(i\omega_n)$'
+    graf = r'$G(i\omega_n)_{{}}_{{}}$'.format(entry, flavor)
     label_convergence(BETA, str(u_int)+'\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
     return axes
+
 
 def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
@@ -149,7 +147,7 @@ def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
         plt.close()
         try:
             print('Last step double occupation: {:.6}'.format(docc),
-              'The acceptance rate is:{:.1%}'.format(acc))
+                  'The acceptance rate is:{:.1%}'.format(acc))
         except ValueError:
             pass
 
@@ -190,24 +188,23 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
         setup = json.load(conf)
 
     tau, w_n = gf.tau_wn_setup(setup)
-    names = ['AA', 'AB', 'BA', 'BB']
-
-    gtau = np.load(save_dir + '/it{:03}/gtau_{}.npy'.format(it, flavor))
     edge_tau = np.concatenate((tau, [BETA]))
 
+    names = ['AA', 'AB', 'BA', 'BB']
+
+    giw, gtau = get_giw(save_dir + '/it{:03}/gtau_{}.npy'.format(it, flavor),
+                        setup, tau, w_n)
 
     for gt, name in zip(gtau, names):
-        gt_edge = interpol(gt, len(edge_tau), True, True if name[0] == name[1] else False)
+        gt_edge = interpol(gt, len(edge_tau), True,
+                           True if name[0] == name[1] else False)
 
         axes[0].plot(edge_tau, gt_edge, label=name)
         axes[0].set_ylabel(r'$G(\tau)$_'+flavor)
         axes[0].set_xlabel(r'$\tau$')
     axes[0].set_xlim([0, BETA])
 
-    giw = gf.gt_fouriertrans(gtau.reshape(2, 2, -1), tau, w_n,
-                             gf_tail(gtau.reshape(2, 2, -1), u_int, 0., tp))
-
-    for gw, name in zip(giw.reshape(4, -1), names):
+    for gw, name in zip(giw, names):
         axes[1].plot(w_n, gw.real, 'o:', label="Re " +name)
         axes[1].plot(w_n, gw.imag, 's:', label="Im " +name)
         axes[1].set_ylabel(r'$G(i\omega_n)$_'+flavor)

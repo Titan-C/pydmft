@@ -97,5 +97,5 @@ if __name__ == "__main__":
     SETUP = vars(SETUP.parse_args())
 
     G_iw = None
-    for u in SETUP['U']:
+    for u in SETUP['urange']:
         G_iw = dmft_loop_pm(SETUP, u, G_iw)

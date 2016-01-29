@@ -367,7 +367,7 @@ def do_input(help_string):
                         help='Number of Updates before measurements')
     parser.add_argument('-Niter', metavar='N', type=int,
                         default=20, help='Number of iterations')
-    parser.add_argument('-U', nargs='+', type=float, default=[2.5],
+    parser.add_argument('-U', '--urange', nargs='+', type=float, default=[2.5],
                         help='Local interaction strength')
     parser.add_argument('-mu', '--MU', type=float, default=0.,
                         help='Chemical potential')

@@ -26,7 +26,7 @@ def test_example(case, ofile, plot):
     command = "examples/Hirsh-Fye/{}.py -sweeps 100 -therm 400 -Niter 2 -ofile /tmp/{}".format(case, ofile)
     command = command.split()
     assert not subprocess.call(command)
-    plot.show_conv(4, 'U2.5', filestr='/tmp/'+ofile, xlim=8, skip=0)
+    plot.show_conv(4, 2.5, filestr='/tmp/'+ofile, xlim=8, skip=0)
 
 
 plot_list = [pfl for pfl in os.listdir('examples') if pfl.startswith('plot')
