@@ -112,6 +112,8 @@ def dmft_loop(setup, u_int, G_iw):
                     name_n = name.replace('up','dw')
                 else:
                     name_n = name.replace('dw','up')
+            else:
+                name_n = name
             g0block << inverse(iOmega_n + u_int/2. + shift * setup['tp'] -
                                0.25*imp_sol.G_iw[name_n])
 
@@ -155,7 +157,7 @@ def do_setup():
                         help='Resume DMFT loops from on disk data files')
     setup = vars(parser.parse_args())
 
-    setup.update({'s_params': {'move_double': False,
+    setup.update({'s_params': {'move_double': True,
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],

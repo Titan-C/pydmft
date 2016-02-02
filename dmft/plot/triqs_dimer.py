@@ -23,6 +23,7 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw']
             u_int = float(u_str[1:])
+            paramagnetic_hf_clean(gf_iw, float(u_str[1:]), tp)
             gf_iw = gf_iw[labels[block]]
             if sig:
                 shift = 1. if 'asym' in labels[block] else -1
@@ -68,23 +69,48 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
                 lastit = results[u_str].keys()[-1]
                 labels = [name for name in results[u_str][lastit]['G_iw'].indices]
                 gfB_iw = results[u_str][lastit]['G_iw']
-                mesl = len(gfB_iw.mesh)/2.
-
-                afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
-                                      gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
-                afm.append(60 if afmtest else 280)
+                #mesl = len(gfB_iw.mesh)/2.
+                paramagnetic_hf_clean(gfB_iw, float(u_str[1:]), tp)
+#
+                #afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
+                                      #gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
+                #afm.append(60 if afmtest else 280)
 
                 gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
             plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
-                        s=afm, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
+                        s=100, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
 
     plt.xlim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
     plt.xlabel(r'$t_\perp/D$')
     plt.ylabel('$U/D$')
+
+
+def phase_diag_b(BETA_range, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
+
+    for BETA in BETA_range:
+        tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
+        with HDFArchive(filestr.format(tp=tp, BETA=BETA), 'r') as results:
+            fl_dos = []
+            for u_str in results.keys():
+                lastit = results[u_str].keys()[-1]
+                labels = [name for name in results[u_str][lastit]['G_iw'].indices]
+                gfB_iw = results[u_str][lastit]['G_iw']
+                paramagnetic_hf_clean(gfB_iw, float(u_str[1:]), tp)
+
+                gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
+                fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
+
+            u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
+            plt.scatter(u_range, np.ones(len(fl_dos))/BETA, c=fl_dos,
+                        s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
+
+    plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
+    plt.xlabel(r'$t_\perp/D$')
+    plt.ylabel('$T/D$')
 
 
 def averager(h5parent, h5child, last_iterations):
