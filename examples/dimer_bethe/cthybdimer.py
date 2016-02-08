@@ -122,8 +122,9 @@ def dmft_loop(setup, u_int, G_iw):
         if mpi.is_master_node():
             with HDFArchive(setup['ofile'].format(**setup)) as last_run:
                 last_run['/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
-                last_run['/U{}/it{:03}/G_tau'.format(u_int, loop)] = imp_sol.G_tau
                 last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
+                if setup['save_gtau']:
+                    last_run['/U{}/it{:03}/G_tau'.format(u_int, loop)] = imp_sol.G_tau
 
     return imp_sol.G_iw
 
@@ -152,16 +153,22 @@ def do_setup():
 
     parser.add_argument('-afm', '--AFM', action='store_true',
                         help='Use the self-consistency for Antiferromagnetism')
+    parser.add_argument('-sg', '--save_gtau', action='store_true',
+                        help='Saves Gtau in file')
+    parser.add_argument('-dm', '--double_moves', action='store_true',
+                        help='Enables double moves during sampling')
+    parser.add_argument('-pert', action='store_true',
+                        help='Saves the perturbation order histogram')
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                         metavar=('U_src', 'U_target', 'avg_over'),
                         help='Resume DMFT loops from on disk data files')
     setup = vars(parser.parse_args())
 
-    setup.update({'s_params': {'move_double': True,
+    setup.update({'s_params': {'move_double': setup['double_moves'],
                                'n_cycles': int(setup['sweeps']),
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
-                               'measure_pert_order': True,
+                               'measure_pert_order': setup['pert'],
                                'random_seed': struct.unpack("I", os.urandom(4))[0]}})
 
     return setup
