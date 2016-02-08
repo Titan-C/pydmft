@@ -42,7 +42,7 @@ before_install:
     - export OPENBLAS_NUM_THREADS=1
 
 install:
-    - conda create --yes -n testenv python=$PYTHON_VERSION pip scipy numpy
+    - conda create --yes -n testenv python=$PYTHON_VERSION nomkl pip scipy numpy
       matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
       joblib pandas numba
     - source activate testenv
