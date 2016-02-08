@@ -288,3 +288,97 @@ def plot_giw(beta, tp, u_int, label, filestr, axes=None):
     axes[1].legend(loc=0)
 
     return axes
+
+
+def get_giw(beta, tp, u_int, filestr):
+    """Returns all Greens functions of a given cut at tp or U
+
+    either tp or u_int have to be defined and the other must be None"""
+
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    with h5.File(filestr.format(beta), 'r') as results:
+        if u_int:
+            u_str = 'U'+str(u_int)
+            gfs = [(1j*results[tpstr][u_str]['giw_d'][:],
+                    results[tpstr][u_str]['giw_o'][:])
+                               for tpstr in results]
+        elif tp:
+            tpstr = 'tp'+str(tp)
+            gfs = [(1j*results[tpstr][u_str]['giw_d'][:],
+                    results[tpstr][u_str]['giw_o'][:])
+                               for u_str in results[tpstr]]
+    return gfs
+
+
+def get_g0(beta, tp, u_int, filestr):
+    """Returns all the G0 functions of a given cut at tp or U
+
+    either tp or u_int have to be defined and the other must be None"""
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    g0 = []
+    with h5.File(filestr.format(beta), 'r') as results:
+        if u_int:
+            u_str = 'U'+str(u_int)
+            for tp in results.keys():
+                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][:],results[tp][u_str]['giw_o'][:]
+                g0.append((self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
+                                                    0., float(tp[2:]), 0.25)))
+        elif tp:
+            tpstr = 'tp'+str(tp)
+            for u_str in results[tpstr].keys():
+                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:]
+                g0.append((self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
+                                                    0., tp, 0.25)))
+    return g0
+
+
+def get_sigmaiw(beta, tp, u_int, filestr):
+    """Returns all the Sigma functions of a given cut at tp or U
+
+    either tp or u_int have to be defined and the other must be None"""
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    sigma = []
+    with h5.File(filestr.format(beta), 'r') as results:
+        if u_int:
+            u_str = 'U'+str(u_int)
+            for tp in results.keys():
+                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][:],results[tp][u_str]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
+                                                    0., float(tp[2:]), 0.25)
+                sigma.append(ipt.dimer_sigma(u_int, float(tp[2:]), g0iw_d, g0iw_o, tau, w_n))
+        elif tp:
+            tpstr = 'tp'+str(tp)
+            for u_str in results[tpstr].keys():
+                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
+                                                    0., tp, 0.25)
+                u_int = float(u_str[1:])
+                sigma.append(ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n))
+    return sigma
+
+def gf_ancon_gap(filestr, beta, u_int, tp, w, min_poles_fit=100):
+    """Plots the analytical continuation of the local Gf along a given U or tp line
+
+    For the insulator guess and metalic guess
+
+    either u_int or tp can have a single value the other must be none
+    """
+
+    w_n = gf.matsubara_freq(beta, int(beta))
+    regf = []
+
+    with h5.File(filestr.format(beta), 'r') as results:
+        if u_int:
+            u_str = 'U'+str(u_int)
+            gfs = [(results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:])
+                       for tpstr in results]
+        else:
+
+            tpstr = 'tp'+str(tp)
+            gfs = [(results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:])
+                               for u_str in results[tpstr]]
+
+        for giw in gfs:
+            pc = gf.pade_coefficients(1j*giw[0][:len(w_n)], w_n)
+            regf.append(gf.pade_rec(pc[:min(len(w_n), min_poles_fit)], w, w_n))
+    return np.array(gfs), np.array(regf)
