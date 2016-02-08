@@ -75,6 +75,9 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     except (IOError, KeyError, ValueError):  # if no data clean start
         last_loop = 0
 
+    V_field = hf.ising_v(setup['dtau_mc'], U,
+                            L=setup['SITES']*setup['n_tau_mc'],
+                            polar=setup['spin_polarization'])
 
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
@@ -110,11 +113,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
 
         # Impurity solver
-        V_field = hf.ising_v(setup['dtau_mc'], U,
-                            L=setup['SITES']*setup['n_tau_mc'],
-                            polar=setup['spin_polarization'])
 
-        gtu, gtd = hf.imp_solver([g0tau_up, g0tau_dw], V_field, intm, setup)
+        gtu, gtd = hf.imp_solver([g0tau_dw, g0tau_up], V_field, intm, setup)
 
 
 
