@@ -1,0 +1,28 @@
+
+#+BEGIN_SRC ipython :session dos :file file :exports results
+
+  import numpy as np
+  import matplotlib.pyplot as plt
+  import dmft.RKKY_dimer as rt
+  import dmft.common as gf
+  import dmft.ipt_imag as ipt
+
+  BETA = 64.
+  tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=max(5*BETA, 256)))
+  giw_d, giw_o = rt.gf_met(w_n, 0., 0.2, 0.5, 0.)
+  giw_d = 1/(1j*w_n - 4j/w_n)
+
+  giw_d, giw_o, loops = rt.ipt_dmft_loop(BETA, 3. , 0.2, giw_d, giw_o)
+
+  g0iw_d, g0iw_o = rt.self_consistency(1j*w_n, giw_d, giw_o, 0., 0.2, 0.25)
+  sig_d, sig_o = ipt.dimer_sigma(4., 0.2, g0iw_d, g0iw_o, tau, w_n)
+
+  w = np.linspace(-3, 3, 300)
+
+  plt.figure()
+  for e in np.linspace(-1, 1, 23):
+      giw_d_e, giw_o_e = rt.self_consistency(1j*w_n - np.arcsin(e)/np.pi, sig_d, sig_o, 0., 0.2, 1.)
+      pc = gf.pade_coefficients(giw_d_e, w_n)
+      gr=gf.pade_rec(pc[:60], w, w_n)
+      plt.plot(w, 2*e + gr.imag/np.min(gr.imag), 'k')
+#+END_SRC
