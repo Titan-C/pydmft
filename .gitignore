@@ -65,5 +65,6 @@ fort.*
 *.dat
 *.h5
 *.*o*
+!*org
 *.sum
 *.ipynb

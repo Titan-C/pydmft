@@ -1,0 +1,8 @@
+#+TITLE: Single Band Hubbard DMFT
+
+#+BEGIN_SRC ipython :session singleband :exports results
+  import dmft.plot.hf_single_site as ps
+
+  ps.show_conv(54., 3.)
+  giw, gtau, tau, w_n, setu = ps.get_giw('SB_PM_B54.0/U3.0', range(14, 20))
+#+END_SRC

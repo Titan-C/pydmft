@@ -1,0 +1,11 @@
+#+TITLE: Dimer Bethe Lattice
+aoei w
+eia
+
+#+BEGIN_SRC ipython :session dimer :file /tmp/cas.png :exports results
+  import dmft.plot.hf_dimer as pd
+  import os
+  print(os.getcwd())
+  #ax = pd.show_conv(32., 'U2.5', skip=20)
+
+#+END_SRC
