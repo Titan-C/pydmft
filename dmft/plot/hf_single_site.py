@@ -33,7 +33,7 @@ def averager(sim_dir, observable, last_iterations):
     """Averages over the observable arrays in sim_dir for the last_iterations"""
     sum_child = 0.
     for step in last_iterations:
-        data_file = os.path.join(sim_dir, step, observable)
+        data_file = os.path.join(sim_dir, 'it{:03}'.format(step), observable)
         if os.path.exists(data_file):
             sum_child += np.load(data_file)
 
@@ -104,7 +104,7 @@ def interpol(gtau, Lrang, add_edge=False, same_particle=False):
     return interp(nrang)
 
 
-def get_giw(sim_dir, iteration_slice, tau, w_n):
+def get_giw(sim_dir, iteration_slice, tau=None, w_n=None, setup=None):
     r"""Recovers with Fourier Transform G_iw from H5 file
 
     Parameters
@@ -119,13 +119,21 @@ def get_giw(sim_dir, iteration_slice, tau, w_n):
     tuple : :math:`G(\tau)`, :math:`G(i\omega_n)`
     """
 
-    with open(sim_dir + '/setup', 'r') as read:
-        setup = json.load(read)
+    recovered_sim_info = False
+    if None in (tau, w_n, setup):
+        with open(sim_dir + '/setup', 'r') as read:
+            setup = json.load(read)
+        tau, w_n = gf.tau_wn_setup(setup)
+        recovered_sim_info = True
+
     gtau = averager(sim_dir, 'gtau.npy', iteration_slice)
     giw = gf.gt_fouriertrans(gtau, tau, w_n,
                              gf_tail(gtau, setup['U'], setup['MU']))
 
-    return gtau, giw
+    if recovered_sim_info:
+        return giw, gtau, tau, w_n, setup
+    else:
+        return giw, gtau
 
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
