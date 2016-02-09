@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-===============================
-Isolated atom spectral function
-===============================
+===========================================================
+Non-interacting atom under external field spectral function
+===========================================================
 
-For the case of contact interaction in the single orbital case
-the atomic Green function as given by the Lehmann Representation.
+An Isolated atom with non-interacting electrons is set under the
+influence of an external magnetic field
 """
 # author: Óscar Nájera
 

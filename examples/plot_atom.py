@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-===============================
-Isolated atom spectral function
-===============================
+==================================
+Interacting atom spectral function
+==================================
 
 For the case of contact interaction in the single orbital case
 the atomic Green function as given by the Lehmann Representation.
