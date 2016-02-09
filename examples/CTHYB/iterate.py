@@ -33,7 +33,7 @@ parser.add_argument('-odir', default='{simt}/B{BETA}_U{U}',
 parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                     metavar=('U_src', 'U_target', 'avg_over'),
                     help='Resume DMFT loops from on disk data files')
-parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(2e7),
+parser.add_argument('-sweeps', metavar='MCS', type=float, default=int(4e5),
                     help='Number Monte Carlo Measurement')
 parser.add_argument('-afm', '--AFM', action='store_true',
                     help='Use the self-consistency for Antiferromagnetism')
@@ -60,7 +60,7 @@ params = {"exe":          ['cthyb_kh',        "# Path to executable"],
           "OCA_G":        [False,          "# No OCA diagrams being computed - for speed"],
           "minM":         [1e-10,          "# The smallest allowed value for the atomic trace"],
           "minD":         [1e-10,          "# The smallest allowed value for the determinant"],
-          "Nmax":         [40,         "# Maximum perturbation order allowed"],
+          "Nmax":         [28,         "# Maximum perturbation order allowed"],
           "GlobalFlip":   [100000,         "# Global flip shold be tried"],
           }
 
