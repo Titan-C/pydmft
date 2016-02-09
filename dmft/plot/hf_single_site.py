@@ -141,7 +141,7 @@ def get_giw(sim_dir, iteration_slice, tau=None, w_n=None, setup=None):
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
     """Returns the self-energy with the Dyson equation"""
-    _, giw = get_giw(h5parent, iteration, tau, w_n)
+    giw, _  = get_giw(h5parent, iteration, tau, w_n)
     return 1j*w_n - .25*giw - 1/giw
 
 
@@ -156,7 +156,7 @@ def show_conv(beta, u_int, filestr='SB_{simt}_B{beta}', n_freq=5, xlim=2, skip=5
 
     _, axes = plt.subplots(1, 2, figsize=(13, 8), sharey=True)
     for step in iterations:
-        _, giw = get_giw(sim_dir, [step], tau, w_n)
+        giw, caste = get_giw(sim_dir, [step], tau, w_n, setup)
         if len(giw.shape) > 1:
             axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
             freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
