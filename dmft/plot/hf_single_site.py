@@ -30,10 +30,13 @@ def label_convergence(beta, u_int, axes, graf, n_freq, xlim):
 
 
 def averager(sim_dir, observable, last_iterations):
-    """Averages over the observable arrays in sim_dir for the last_iterations"""
+    """Averages the observable arrays in sim_dir for the last_iterations
+
+    last_iteration is a list of folder names"""
+
     sum_child = 0.
     for step in last_iterations:
-        data_file = os.path.join(sim_dir, 'it{:03}'.format(step), observable)
+        data_file = os.path.join(sim_dir, step, observable)
         if os.path.exists(data_file):
             sum_child += np.load(data_file)
 
