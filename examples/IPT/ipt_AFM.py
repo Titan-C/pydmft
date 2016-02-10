@@ -89,23 +89,23 @@ def plot_GSG(S, loop, plt_env):
             grealdw = grealup.copy()
             grealup.set_from_pade(S.gup, 201, 0.0)
             grealdw.set_from_pade(S.gdw, 201, 0.0)
-            ax.oplot(grealup, RI='S', label="$\uparrow$"+nl)
+            ax.oplot(grealup, RI='S', label=r"$\uparrow$"+nl)
             ax.oplot(grealdw, '--', RI='S',
                      label="$\downarrow$"+nl)
             ax.set_ylabel('$A(\omega)$')
         if i == 1:
             ax.oplot(S.gup, '-o', RI='I', x_window=(0, 5),
-                     label="$\uparrow$"+nl)
+                     label=r"$\uparrow$"+nl)
             ax.oplot(S.gdw, '-+', RI='I', x_window=(0, 5),
                      label="$\downarrow$"+nl)
         if i == 2:
             ax.oplot(S.sigmaup, '-o', RI='I', x_window=(0, 5),
-                     label="$\uparrow$"+nl)
+                     label=r"$\uparrow$"+nl)
             ax.oplot(S.sigmadw, '-+', RI='I', x_window=(0, 5),
                      label="$\downarrow$"+nl)
             ax.set_ylabel('$\Sigma(i\omega_n)$')
         if i == 3:
-            ax.oplot(S.g0tup, '-', label="$\uparrow$"+nl)
+            ax.oplot(S.g0tup, '-', label=r"$\uparrow$"+nl)
             ax.oplot(S.g0tdw, '--', label="$\downarrow$"+nl)
 
     plt_env[1][0].set_title("Green's functions, IPT, Bethe lattice,"
