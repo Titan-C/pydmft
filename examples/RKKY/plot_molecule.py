@@ -13,6 +13,7 @@ from __future__ import division, absolute_import, print_function
 from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.linalg as LA
 from dmft.common import matsubara_freq, gw_invfouriertrans
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
@@ -34,6 +35,22 @@ def plot_real_gf(eig_e, eig_v, oper_pair, c_v, names, beta):
         axw[0].set_ylabel(r'$\Re e G(\omega)$')
         axw[1].set_ylabel(r'$-\Im m(\omega)/\pi$')
         axw[1].set_xlabel(r'$\omega$')
+
+def plot_eigen_spectra(U, mu, tp):
+    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
+    eig_e = []
+    eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
+    eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
+    eig_e.append(LA.eigvalsh(h_at[11:15,11:15].todense()))
+
+    plt.figure()
+    plt.title('Many particle Energy Spectra U={} $t_\perp={}$'.format(U, tp))
+    plt.plot(np.concatenate(eig_e), "o-")
+    plt.ylabel('Energy')
+    plt.xlabel('Eigenstate by N particle block')
+
+    plt.axvline(x=3.5)
+    plt.axvline(x=9.5)
 
 
 def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names, beta, U, mu, tp):
@@ -64,15 +81,15 @@ def plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names, beta, U, mu, tp):
         axt.set_ylabel(r'$G(\tau)$')
 
 def plot_eigen_spectra(U, mu, tp):
-    plt.figure()
-    plt.title('Many particle Energy Spectra U={} $t_\perp={}$'.format(U, tp))
     h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
     eig_e = []
     eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
     eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
     eig_e.append(LA.eigvalsh(h_at[11:15,11:15].todense()))
 
-    plt.plot(np.concatenate(eig_e), label=str(t))
+    plt.figure()
+    plt.title('Many particle Energy Spectra U={} $t_\perp={}$'.format(U, tp))
+    plt.plot(np.concatenate(eig_e), "o-", label=str(tp))
     plt.legend()
 
     plt.axvline(x=3.5)
@@ -86,6 +103,8 @@ def plot_greenfunctions(beta, U, mu, tp):
     h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
     oper_pair = list(product([oper[0], oper[2]], repeat=2))
     names = list(product('AB', repeat=2))
+
+    eig_e, eig_v = op.diagonalize(h_at.todense())
     plot_real_gf(eig_e, eig_v, oper_pair, c_v, names, beta)
     plot_matsubara_gf(eig_e, eig_v, oper_pair, c_v, names, beta, U, mu, tp)
 
@@ -94,28 +113,26 @@ def plot_greenfunctions(beta, U, mu, tp):
 # The non-interacting case $t_\perp=0.2$
 # --------------------------------------
 
-plot_greenfunctions(50, 0, 0, 0.2)
+plot_greenfunctions(64, 0, 0, 0.2)
 
 ###############################################################################
 # The non-interacting case $t_\perp=0.8$
 # --------------------------------------
 
-plot_greenfunctions(50, 0, 0, 0.8)
+plot_greenfunctions(64, 0, 0, 0.8)
 
 
 ###############################################################################
 # The interacting case $U=1$ $t_\perp=0.2$
 # --------------------------------------
 
-plot_greenfunctions(50, 1, 0, 0.2)
+plot_greenfunctions(64, 1, 0, 0.2)
 ###############################################################################
 # The interacting case $U=1$ $t_\perp=0.8$
 # --------------------------------------
 
-plot_greenfunctions(50, 1, 0, 0.5)
-eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
-eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
-eig_e.append(LA.eigvalsh(h_at[11:15,11:15].todense()))
+plot_greenfunctions(64, 1, 0, 0.5)
+
 ############################################################
 # The symmetric and anti-symmetric bands
 # ======================================
