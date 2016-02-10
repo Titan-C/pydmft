@@ -35,6 +35,7 @@ plot_list += [pfl for pfl in os.listdir('examples/IPT') if pfl.startswith('plot'
                                                     and pfl.endswith('.py')]
 sys.path.append('examples')
 sys.path.append('examples/IPT')
+sys.path.append('examples/RKKY')
 @pytest.mark.parametrize("plot", plot_list)
 def test_plots(plot):
     exec('import '+plot[:-3])
