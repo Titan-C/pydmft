@@ -101,13 +101,12 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             update = True
         if mcs % 500 == 0 or update:  # dirty update clean up
             int_v = np.dot(interaction, v)
-            g = np.array([gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)])
+            g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
             update = False
 
         for _ in range(parms['meas']):
             for i, (up, dw) in enumerate(i_pairs):
-                acr, nrat = hffast.updateDHS(g[up], g[dw], v[i],
-                                             2*parms['N_MATSUBARA'],
+                acr, nrat = hffast.updateDHS(g[up], g[dw], v[i], ntau,
                                              parms['double_flip_prob'],
                                              ['Heat_bath'])
                 acc += acr
