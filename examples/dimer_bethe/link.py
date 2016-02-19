@@ -55,7 +55,7 @@ def wdot0(sta,base,pairs,wsmall=1e-10):
     for candidate in candidates:
         w = wdot(sta,base[candidate])
         if abs(w)>wsmall:
-            if wprod.has_key(candidate): wprod[candidate] += w
+            if candidate in wprod: wprod[candidate] += w
             else: wprod[candidate] = w
 
     return wprod
@@ -65,24 +65,24 @@ def wdot0(sta,base,pairs,wsmall=1e-10):
 def ReadOneSiteCix(fcix):
     "Reading cix file for one site DMFT"
     f = open(fcix,'r')
-    s0 = f.next() # CIX file for ctqmc!
-    s1 = f.next() # cluster_size, number of states, number of baths, maximum_matrix_size
-    (Nc0,Ns0,Nb0,Nm0) = map(int,f.next().split())
+    s0 = next(f) # CIX file for ctqmc!
+    s1 = next(f) # cluster_size, number of states, number of baths, maximum_matrix_size
+    (Nc0,Ns0,Nb0,Nm0) = list(map(int,f.next().split()))
     if Nc0!= 1:
-        print 'Wrong cix file. Input cix should be for single site!'
-    s2 = f.next() # baths, dimension, symmetry
+        print('Wrong cix file. Input cix should be for single site!')
+    s2 = next(f) # baths, dimension, symmetry
     baths=zeros((Nb0,3),dtype=int)
     for ib in range(Nb0):
-        (iib,dim,ibs,ibg) = map(int,f.next().split())
+        (iib,dim,ibs,ibg) = list(map(int,f.next().split()))
         if iib!=ib:
-            print 'Something wrong reading cix file (1)!'
+            print('Something wrong reading cix file (1)!')
         baths[ib]=(dim,ibs,ibg)
     #print baths
-    s3 = f.next() # cluster energies for non-equivalent baths, eps[k]
+    s3 = next(f) # cluster energies for non-equivalent baths, eps[k]
     Nunique = max(baths[:,2])+1
-    eps = map(float,f.next().split())
+    eps = list(map(float,f.next().split()))
     #print eps
-    s4 = f.next() # N   K   Sz size
+    s4 = next(f) # N   K   Sz size
 
     mN = zeros(Ns0,dtype=int)
     mSz = zeros(Ns0,dtype=float)
@@ -94,7 +94,7 @@ def ReadOneSiteCix(fcix):
         data = f.next().split()
         ii = int(data[0])
         if ii!=i+1:
-            print 'Something wrong reading cix file (2)!'
+            print('Something wrong reading cix file (2)!')
         mN[i] = int(data[1])
         mSz[i] = float(data[3])
         msize[i] = int(data[4])
@@ -105,7 +105,7 @@ def ReadOneSiteCix(fcix):
         for j in range(msize[i]):
             mS2[i,j] = float(data[5+Nb0+msize[i]+j])
 
-    s5 = f.next() # matrix elements
+    s5 = next(f) # matrix elements
 
     Fm=[]
     for i in range(Ns0):
@@ -119,17 +119,17 @@ def ReadOneSiteCix(fcix):
             data = f.next().split()
             ii = int(data[0])
             if ii!=i+1:
-                print 'Something wrong reading cix file (3)!'
+                print('Something wrong reading cix file (3)!')
             ij = int(data[1])
             if ij!=Fi[i,ib]+1:
-                print 'Something wrong reading cix file (4)!'
+                print('Something wrong reading cix file (4)!')
             if ij>0:
                 sizei = int(data[2])
                 sizej = int(data[3])
                 if sizei!=msize[i]:
-                    print 'Something wrong reading cix file (5)!'
+                    print('Something wrong reading cix file (5)!')
                 if sizej!=msize[ij-1]:
-                    print 'Something wrong reading cix file (6)!'
+                    print('Something wrong reading cix file (6)!')
                 fm = zeros((sizei,sizej),dtype=float)
                 cii=0
                 for im1 in range(sizei):
@@ -150,7 +150,7 @@ def RemoveBaths(Nb0,Ns0,baths,eps,Ek,Fi,Fm, PRINT):
     bkeep=[]
     for ib,b in enumerate(baths):
         if abs(eps[b[1]])<1000.: bkeep.append(ib)
-        print 'baths= ', ib, b, eps[b[1]]
+        print('baths= ', ib, b, eps[b[1]])
 
     n_Nb0 = len(bkeep)
     n_baths = zeros((n_Nb0,3),dtype=int)
@@ -185,11 +185,11 @@ def RemoveBaths(Nb0,Ns0,baths,eps,Ek,Fi,Fm, PRINT):
     #Ek = n_Ek
 
     if PRINT:
-        print
-        print 'baths=', n_baths
-        print 'Nunique=', n_Nunique
-        print 'eps=', n_eps
-        print 'Ek=', n_Ek
+        print()
+        print('baths=', n_baths)
+        print('Nunique=', n_Nunique)
+        print('eps=', n_eps)
+        print('Ek=', n_Ek)
 
     return (n_Nb0,n_baths,n_eps,n_Ek,n_Fi,n_Fm)
 
@@ -259,7 +259,7 @@ def Create2SiteBasis(Ns0, mN, mSz, mEne, PRINT=False):
                 baseNKS.append( [mN[i1]*2,0,mSz[i1]*2,mEne[i1,:]*2] )
 
     # index for sorting the base
-    indbase = range(len(base))
+    indbase = list(range(len(base)))
     # creates cmp function by class compare
     comp = compare(baseNKS)
     # sorts base
@@ -283,9 +283,9 @@ def Create2SiteBasis(Ns0, mN, mSz, mEne, PRINT=False):
 
 
     if PRINT:
-        print 'base='
+        print('base=')
         for i in range(len(base)):
-            print i, baseNKS[i], base[i]
+            print(i, baseNKS[i], base[i])
 
     return (base, baseNKS, pairs)
 
@@ -336,21 +336,21 @@ def ComputeFdag(base,pairs,Nb0,mN,Fi,Fm,PRINT=False):
         for ib in range(Nb0):
             for ik in range(2):
                 fp = Fp_K[i][ib][ik]
-                for a in fp.keys():
+                for a in list(fp.keys()):
                     Fm_K[a][ib][ik][i]=fp[a]
 
 
     if PRINT:
-        print 'F^\dagger='
+        print('F^\dagger=')
         for i in range(len(base)):
             for ib in range(Nb0):
                 for ik in range(2):
-                    print i, ib, ik, '+', Fp_K[i][ib][ik]
-        print 'F = '
+                    print(i, ib, ik, '+', Fp_K[i][ib][ik])
+        print('F = ')
         for i in range(len(base)):
             for ib in range(Nb0):
                 for ik in range(2):
-                    print i, ib, ik, '-', Fm_K[i][ib][ik]
+                    print(i, ib, ik, '-', Fm_K[i][ib][ik])
 
     return (Fp_K,Fm_K)
 
@@ -367,32 +367,32 @@ def ComputeOccup(base,Nb0,Fp_K,Fm_K,TEST=False):
                 # Here we compute F^dagger * F
                 NN={}
                 fm=Fm_K[i][ib][ik]
-                for a in fm.keys():
+                for a in list(fm.keys()):
                     fpfm = Fp_K[a][ib][ik]
-                    for b in fpfm.keys():
-                        if NN.has_key(b):NN[b]+=fpfm[b]*fm[a]
+                    for b in list(fpfm.keys()):
+                        if b in NN:NN[b]+=fpfm[b]*fm[a]
                         else: NN[b] = fpfm[b]*fm[a]
                 NN1.append(NN)
                 # Here we compute F * F^dagger
                 MM={}
                 fp=Fp_K[i][ib][ik]
-                for a in fp.keys():
+                for a in list(fp.keys()):
                     fmfp = Fm_K[a][ib][ik]
-                    for b in fmfp.keys():
-                        if MM.has_key(b): MM[b]+=fmfp[b]*fp[a]
+                    for b in list(fmfp.keys()):
+                        if b in MM: MM[b]+=fmfp[b]*fp[a]
                         else: MM[b]=fmfp[b]*fp[a]
 
                 # Here we merge F^dagger * F + F * F^dagger and check identity
                 if (TEST):
-                    akeys = union(NN.keys(),MM.keys())
-                    print '##i=', i, 'akeys=', akeys #?????
+                    akeys = union(list(NN.keys()),list(MM.keys()))
+                    print('##i=', i, 'akeys=', akeys) #?????
                     canticom={}
                     for k in akeys:
                         cc = 0
-                        if NN.has_key(k): cc+=NN[k]
-                        if MM.has_key(k): cc+=MM[k]
+                        if k in NN: cc+=NN[k]
+                        if k in MM: cc+=MM[k]
                         if abs(cc)>1e-10: canticom[k]=cc
-                    print 'f^+f+ff^+', i, ib, ik, canticom
+                    print('f^+f+ff^+', i, ib, ik, canticom)
             NN2.append(NN1)
         all_NN.append(NN2)
     return all_NN
@@ -482,7 +482,7 @@ def CreateDiagPseudos(Nb0, Fp_K, all_NN, Ek, base, baseNKS, wsmall, PRINT=False)
                 for ik in range(2):
                     block=[]
                     for ii in pse:
-                        nblck = Fp_K[ii][ib][ik].keys()
+                        nblck = list(Fp_K[ii][ib][ik].keys())
                         # Instead of block += nblck
                         for k in nblck:
                             if k not in block: block.append(k)
@@ -520,7 +520,7 @@ def CreateDiagPseudos(Nb0, Fp_K, all_NN, Ek, base, baseNKS, wsmall, PRINT=False)
                 for ik in range(2):
                     for i,ip in enumerate(ps):
                         for j,jp in enumerate(ps):
-                            if all_NN[ip][ib][ik].has_key(jp):
+                            if jp in all_NN[ip][ib][ik]:
                                 hamilt[i,j] += all_NN[ip][ib][ik][jp]*Ek_hop[2*ib+ik]
             ### Potential part of the Hamiltonian
             for i,ip in enumerate(ps):
@@ -528,7 +528,7 @@ def CreateDiagPseudos(Nb0, Fp_K, all_NN, Ek, base, baseNKS, wsmall, PRINT=False)
 
             ee = linalg.eigh(hamilt)
 
-            if (PRINT): print 'Hamilt=', hamilt, 'diag=', ee
+            if (PRINT): print('Hamilt=', hamilt, 'diag=', ee)
 
             # Here we add a phase factor to eigenvectors, such that the largest component
             # of the eigenvector is positive.
@@ -583,16 +583,16 @@ def CreateDiagPseudos(Nb0, Fp_K, all_NN, Ek, base, baseNKS, wsmall, PRINT=False)
                     for ii in ps:
                         for ib in range(Nb0):
                             for ik in range(2):
-                                print 'd', ii, ib, ik, Fp_K[ii][ib][ik]
+                                print('d', ii, ib, ik, Fp_K[ii][ib][ik])
 
 
 
-    if PRINT: print 'blci1=', blci1
+    if PRINT: print('blci1=', blci1)
 
     # Finally, writing Energy in more convenient form for later printing
     Energy=zeros(len(base),dtype=float)
     EVector=[[] for i in range(len(base))]
-    for k in blci1.keys():
+    for k in list(blci1.keys()):
         for i1,j1 in enumerate(blci1[k]):
             Energy[j1] = Eham[k][i1]
             vec={}
@@ -601,7 +601,7 @@ def CreateDiagPseudos(Nb0, Fp_K, all_NN, Ek, base, baseNKS, wsmall, PRINT=False)
             EVector[j1] = vec
     if PRINT:
         for i in range(len(base)):
-            print 'Energy[',i,']=', Energy[i], 'EVector[',i,']=', EVector[i]
+            print('Energy[',i,']=', Energy[i], 'EVector[',i,']=', EVector[i])
 
 
     return (pseudo, blci, blci1, Tr, Eham, Energy)
@@ -619,25 +619,25 @@ def Transform_F_To_Eigensybase(Fp_K, Tr, Nb0, base, blci, blci1, wsmall, PRINT):
         for ik in range(2):
             fpKn1=[]
             for c in range(len(base)): fpKn1.append({})
-            for k in blci1.keys(): # over all current superstates
+            for k in list(blci1.keys()): # over all current superstates
                 # finds to which states are the states in blci1 connected through Fp_K.
                 blc_inds=[]
                 for i in blci1[k]: # over all components of the current superstate k
-                    blc_inds += [blci[ip] for ip in Fp_K[i][ib][ik].keys()]
+                    blc_inds += [blci[ip] for ip in list(Fp_K[i][ib][ik].keys())]
                 blc_inds = funique(blc_inds)
                 blc_inds.sort()
                 #print 'Superstate ', k, 'is connected to superstates', blc_inds, 'for ib=', ib, 'and ik=', ik
                 for j in blc_inds: # over all components of superstate in sector N+1
-                    if PRINT: print 'F^+[ib=',ib,'ik=',ik, '] connects superstates ', k, 'with superstate', j, 'which are composed of the following basis states', blci1[k],blci1[j], ', respectively'
+                    if PRINT: print('F^+[ib=',ib,'ik=',ik, '] connects superstates ', k, 'with superstate', j, 'which are composed of the following basis states', blci1[k],blci1[j], ', respectively')
                     Fpm=zeros((len(blci1[k]),len(blci1[j])),dtype=float)
                     for i1,j1 in enumerate(blci1[k]):
                         for i2,j2 in enumerate(blci1[j]):
-                            if Fp_K[j1][ib][ik].has_key(j2):
+                            if j2 in Fp_K[j1][ib][ik]:
                                 Fpm[i1,i2] = Fp_K[j1][ib][ik][j2]
                     Fpm_new = matrix(Tr[k]).T*matrix(Fpm)*matrix(Tr[j])
                     if PRINT:
-                        print 'Fpm_old=', Fpm
-                        print 'Fpm_new=', Fpm_new
+                        print('Fpm_old=', Fpm)
+                        print('Fpm_new=', Fpm_new)
                     for i1,j1 in enumerate(blci1[k]):
                         for i2,j2 in enumerate(blci1[j]):
                             if (abs(Fpm_new[i1,i2])>wsmall):
@@ -670,7 +670,7 @@ def CreateFinalSuperstatesAndIndeces(base, Nb0, Fp_Knew, wsmall, PRINT=False):
                 for ik in range(2):
                     block=[]
                     for ii in pse:
-                        nblck = Fp_Knew[ib][ik][ii].keys()
+                        nblck = list(Fp_Knew[ib][ik][ii].keys())
                         # Instead of block += nblck
                         for k in nblck:
                             if k not in block and abs(Fp_Knew[ib][ik][ii][k])>wsmall:
@@ -702,8 +702,8 @@ def CreateFinalSuperstatesAndIndeces(base, Nb0, Fp_Knew, wsmall, PRINT=False):
                 wblc_inside+=1
 
     if PRINT:
-        print 'wblci=', wblci
-        print 'wblci1=', wblci1
+        print('wblci=', wblci)
+        print('wblci1=', wblci1)
     return (all_pseudo, wblci, wblci1)
 
 
@@ -718,14 +718,14 @@ def CreateIndexFi2(all_pseudo, Nb0, Fp_Knew, wblci,wsmall):
             for ik in range(2):
                 ifin=[]
                 for ip in p:
-                    fis = Fp_Knew[ib][ik][ip].keys()
+                    fis = list(Fp_Knew[ib][ik][ip].keys())
                     ifin=[]
-                    for t in Fp_Knew[ib][ik][ip].keys():
+                    for t in list(Fp_Knew[ib][ik][ip].keys()):
                         if abs(Fp_Knew[ib][ik][ip][t])>wsmall:
                             ifin.append(wblci[t][0])
 
                 ifin = funique(ifin)
-                if len(ifin)>1: print 'ERROR: Not unique superstate F^+', ifin, 'ib,ik=', 2*ib+ik, 'p=', p
+                if len(ifin)>1: print('ERROR: Not unique superstate F^+', ifin, 'ib,ik=', 2*ib+ik, 'p=', p)
                 if ifin:
                     Fi2[i,ib,ik]=ifin[0]
                 else:
@@ -736,7 +736,7 @@ def FindMaxsize(all_pseudo, PRINT=False):
     maxsize=0
     for i,p in enumerate(all_pseudo):
         if len(p)>maxsize: maxsize=len(p)
-    if PRINT: print 'maxsize=', maxsize
+    if PRINT: print('maxsize=', maxsize)
     return maxsize
 
 def Print_Fp_old_Fp_New(Fp_K, Fp_Knew, Nb0, base):
@@ -744,12 +744,12 @@ def Print_Fp_old_Fp_New(Fp_K, Fp_Knew, Nb0, base):
     for ib in range(Nb0):
         for ik in range(2):
             for i in range(len(base)):
-                print 'old_f^+', ib, ik, i, Fp_K[i][ib][ik]
+                print('old_f^+', ib, ik, i, Fp_K[i][ib][ik])
 
     for ib in range(Nb0):
         for ik in range(2):
             for i in range(len(base)):
-                print 'f^+', ib, ik, i, Fp_Knew[ib][ik][i]
+                print('f^+', ib, ik, i, Fp_Knew[ib][ik][i])
 
 
 def CheckNKSconsistency(all_pseudo, baseNKS):
@@ -759,49 +759,49 @@ def CheckNKSconsistency(all_pseudo, baseNKS):
         NKS = baseNKS[pn.pop()][:3] # Since we always mixed states with the same N,K,Sz, we can just take this from superstate
         for j in pn:
             if baseNKS[j][:3] != NKS[:3]:
-                print 'ERROR: Combining states which do not have the same NKS!'
-                print 'ERROR:', [baseNKS[j] for j in p]
+                print('ERROR: Combining states which do not have the same NKS!')
+                print('ERROR:', [baseNKS[j] for j in p])
 
 def PrintHeader(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, baseNKS, Energy, SUPERC=False, WithIndex=False):
     "Prints header only"
     for i,p in enumerate(all_pseudo):
         NKS = baseNKS[p[0]][:3] # Since we always mixed states with the same N,K,Sz, we can just take this from superstate
         Energ = [ Energy[j] for j in p]
-        print >> lcix, "%3d " % (i+1),
-        if WithIndex: print >> lcix, "%3d " % (i+1),
-        print >> lcix, "%2d %2d %4.1f %2d " % (NKS[0], NKS[1], NKS[2], len(p)),
+        print("%3d " % (i+1), end=' ', file=lcix)
+        if WithIndex: print("%3d " % (i+1), end=' ', file=lcix)
+        print("%2d %2d %4.1f %2d " % (NKS[0], NKS[1], NKS[2], len(p)), end=' ', file=lcix)
 
         if (SUPERC):
             for (ib,ik) in bathk_ind:
                 if (ib<Nb0/2):
-                    print >> lcix, "%3d" % (Fi2[i,ib,ik]+1),
+                    print("%3d" % (Fi2[i,ib,ik]+1), end=' ', file=lcix)
                 else:
-                    print >> lcix, "%3d" % (Fj2[i,ib,ik]+1),
+                    print("%3d" % (Fj2[i,ib,ik]+1), end=' ', file=lcix)
         else:
             for (ib,ik) in bathk_ind:
-                print >> lcix, "%3d" % (Fi2[i,ib,ik]+1),
+                print("%3d" % (Fi2[i,ib,ik]+1), end=' ', file=lcix)
 
-        print >> lcix, "  ",
+        print("  ", end=' ', file=lcix)
         for ei in Energ:
-            print >> lcix, ei,
-        print >> lcix, "  ",
+            print(ei, end=' ', file=lcix)
+        print("  ", end=' ', file=lcix)
         for iq in range(len(p)):
-            print >> lcix, 0,
-        print >> lcix
+            print(0, end=' ', file=lcix)
+        print(file=lcix)
 
 
 def PrintOneMatrixElement(lcix, i, p, ib, ik, Fi2, Fp_Knew, all_pseudo, wblci):
     ifinal = Fi2[i,ib,ik]
-    print >> lcix, "%3d %3d " % (i+1, ifinal+1),
+    print("%3d %3d " % (i+1, ifinal+1), end=' ', file=lcix)
     Mw=zeros((len(p),len(p)),dtype=float)
     if ifinal>=0:
         q = all_pseudo[ifinal]
-        print >> lcix, "%2d %2d" % (len(p), len(q)),
+        print("%2d %2d" % (len(p), len(q)), end=' ', file=lcix)
 
         Fp = zeros((len(p),len(q)),dtype=float)
         for ii,ip in enumerate(p):
-            for iq in Fp_Knew[ib][ik][ip].keys():
-                if wblci[iq][0]!=ifinal: print 'ERROR in ifinal!'
+            for iq in list(Fp_Knew[ib][ik][ip].keys()):
+                if wblci[iq][0]!=ifinal: print('ERROR in ifinal!')
                 jj = wblci[iq][1]
                 Fp[ii,jj] = Fp_Knew[ib][ik][ip][iq]
 
@@ -809,10 +809,10 @@ def PrintOneMatrixElement(lcix, i, p, ib, ik, Fi2, Fp_Knew, all_pseudo, wblci):
 
         for ii,ip in enumerate(p):
             for jj,iq in enumerate(q):
-                print >> lcix, Fp[ii,jj],
+                print(Fp[ii,jj], end=' ', file=lcix)
     else:
-        print >> lcix, "%2d %2d" % (0, 0),
-    print >> lcix
+        print("%2d %2d" % (0, 0), end=' ', file=lcix)
+    print(file=lcix)
     return Mw
 
 def PrintMatrixElements(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, Fp_Knew, Fm_Knew, wblci, SUPERC):
@@ -844,7 +844,7 @@ def PrintOccupancy(lcix, bathk_ind, Nocc, all_pseudo,baths):
     for i,p in enumerate(all_pseudo):
 
         for ib,b in enumerate(bequal):
-            print >> lcix, "%2d %2d %2d" % (i+1, len(p), len(p)),
+            print("%2d %2d %2d" % (i+1, len(p), len(p)), end=' ', file=lcix)
 
             nocc = zeros((len(p),len(p)),dtype=float)
             for ibk in b: # sum over equivalent
@@ -852,18 +852,18 @@ def PrintOccupancy(lcix, bathk_ind, Nocc, all_pseudo,baths):
 
             for ii in range(len(p)):
                 for jj in range(len(p)):
-                    print >> lcix, "%10.6f " % nocc[ii,jj],
-            print >> lcix
+                    print("%10.6f " % nocc[ii,jj], end=' ', file=lcix)
+            print(file=lcix)
 
 def PrintCixFile(outfile, bathk_ind, Fi2, Fj2, Fp_Knew, Fm_Knew, all_pseudo, baths, epsk2q, baseNKS, Energy, wblci, Nb0, maxsize, SUPERC):
     "Printing Cix file"
     lcix = open(outfile, 'w')
-    print >> lcix, '# CIX file for ctqmc! '
-    print >> lcix, '# cluster_size, number of states, number of baths, maximum_matrix_size'
+    print('# CIX file for ctqmc! ', file=lcix)
+    print('# cluster_size, number of states, number of baths, maximum_matrix_size', file=lcix)
 
     if SUPERC:
-        print >> lcix, 2, len(all_pseudo), len(bathk_ind)/2, maxsize
-        print >> lcix, '# baths, dimension, symmetry'
+        print(2, len(all_pseudo), len(bathk_ind)/2, maxsize, file=lcix)
+        print('# baths, dimension, symmetry', file=lcix)
 
         sc_bath=[] # combine spin up and down into one entry
         for i in range(len(bathk_ind)/2):
@@ -878,51 +878,51 @@ def PrintCixFile(outfile, bathk_ind, Fi2, Fj2, Fp_Knew, Fm_Knew, all_pseudo, bat
             ib2 = sc_bath[i][1][0] # spin-dn
             ik = sc_bath[i][0][1]  # k is either 0 or pi
             #print 'ib=', ib1, 'ib2=', ib2, 'ik=', ik, 'cc=', baths[ib1][1]*2+ik, baths[ib2][1]*2+ik,
-            print >> lcix, ("%-2d" % i), '  ', baths[ib][0]*2, '  ', # index, dimension
+            print(("%-2d" % i), '  ', baths[ib][0]*2, '  ', end=' ', file=lcix) # index, dimension
             if ik==0:  # select symmetry for for s+-
                 off_index = lastb_ind
             else:
                 off_index = -lastb_ind
                 lastb_ind+=1
-            print >> lcix, baths[ib1][1]*2+ik, ("%2d "%off_index), ("%2d "%off_index), '-'+str((baths[ib2][1]*2+ik))+'*', '  ',
+            print(baths[ib1][1]*2+ik, ("%2d "%off_index), ("%2d "%off_index), '-'+str((baths[ib2][1]*2+ik))+'*', '  ', end=' ', file=lcix)
             #print >> lcix, baths[ib1][2]*2+ik, '  # ik=', ik  # symmetry
     else:
-        print >> lcix, 2, len(all_pseudo), len(bathk_ind), maxsize
-        print >> lcix, '# baths, dimension, symmetry'
+        print(2, len(all_pseudo), len(bathk_ind), maxsize, file=lcix)
+        print('# baths, dimension, symmetry', file=lcix)
 
         for i,(ib,ik) in enumerate(bathk_ind):
-            print >> lcix, ("%-2d" % i), '  ', baths[ib][0], baths[ib][1]*2+ik, '  ', baths[ib][2]*2+ik   #, '# ib=', ib, 'ik=', ik
+            print(("%-2d" % i), '  ', baths[ib][0], baths[ib][1]*2+ik, '  ', baths[ib][2]*2+ik, file=lcix)   #, '# ib=', ib, 'ik=', ik
 
-    print >> lcix, '# cluster energies for non-equivalent baths, eps[k]'
+    print('# cluster energies for non-equivalent baths, eps[k]', file=lcix)
     for ib in range(len(epsk2q)):
-        print >> lcix, epsk2q[ib],
+        print(epsk2q[ib], end=' ', file=lcix)
     if (SUPERC):
         for i in range(len(sc_bath)/2):
-            print >> lcix, 0,
-    print >> lcix
-    print >> lcix, '#     N  K  Sz size'
+            print(0, end=' ', file=lcix)
+    print(file=lcix)
+    print('#     N  K  Sz size', file=lcix)
 
     PrintHeader(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, baseNKS, Energy, SUPERC)
-    print >> lcix, '# matrix elements'
+    print('# matrix elements', file=lcix)
     Nocc = PrintMatrixElements(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, Fp_Knew, Fm_Knew, wblci, SUPERC)
 
-    print >> lcix, 'HB1'
-    print >> lcix, '# number of operators needed'
-    print >> lcix, '1'
-    print >> lcix, '# Occupancy '
+    print('HB1', file=lcix)
+    print('# number of operators needed', file=lcix)
+    print('1', file=lcix)
+    print('# Occupancy ', file=lcix)
     PrintOccupancy(lcix, bathk_ind, Nocc, all_pseudo,baths)
-    print >> lcix, '# Data for HB1'
+    print('# Data for HB1', file=lcix)
 
     if SUPERC:
-        print >> lcix, 2, len(all_pseudo), len(bathk_ind)/2, maxsize
+        print(2, len(all_pseudo), len(bathk_ind)/2, maxsize, file=lcix)
     else:
         #print >> lcix, 2, len(all_pseudo), Nb0*2, maxsize
-        print >> lcix, 2, len(all_pseudo), len(bathk_ind), maxsize
+        print(2, len(all_pseudo), len(bathk_ind), maxsize, file=lcix)
 
-    print >> lcix, '#      ind N  K  Sz  size'
+    print('#      ind N  K  Sz  size', file=lcix)
 
     PrintHeader(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, baseNKS, Energy, SUPERC, True)
-    print >> lcix, '# matrix elements'
+    print('# matrix elements', file=lcix)
     PrintMatrixElements(lcix, bathk_ind, all_pseudo, Nb0, Fi2, Fj2, Fp_Knew, Fm_Knew, wblci, SUPERC)
 
 
@@ -935,12 +935,12 @@ def Test_FpF_Expensive(Nb0, Fp_Knew, base):
             Fd = zeros((len(base),len(base)),dtype=float)
             for i in range(len(base)):
                 wp = Fpt[i]
-                for p in wp.keys():
+                for p in list(wp.keys()):
                     Fd[i,p]=wp[p]
 
             Fd = matrix(Fd)
             ID = Fd*Fd.T + Fd.T*Fd
-            print 'abs(1-F^+F+FF^+)', sum(abs(ID-identity(len(base))))
+            print('abs(1-F^+F+FF^+)', sum(abs(ID-identity(len(base)))))
 
 
 def CheckIndexFi(Fi2):
@@ -954,7 +954,7 @@ def CheckIndexFi(Fi2):
             if len(set(fi))!=len(fi):
                 for p in fi:
                     if fi.count(p)>1: break
-                print 'ERROR: Pseudo', p, 'appears multiple times for ib=', ib, 'and ik=', ik
+                print('ERROR: Pseudo', p, 'appears multiple times for ib=', ib, 'and ik=', ik)
 
 
 def Transpose_Fp(Fp_Knew, all_pseudo, Nb0, wblci, wsmall):
@@ -966,7 +966,7 @@ def Transpose_Fp(Fp_Knew, all_pseudo, Nb0, wblci, wsmall):
             fm=[{} for i in range(len(Fp_Knew[ib][ik]))]
             for i,p in enumerate(all_pseudo):
                 for ii,ip in enumerate(p):
-                    for iq in Fp_Knew[ib][ik][ip].keys():
+                    for iq in list(Fp_Knew[ib][ik][ip].keys()):
                         #print 'ip=', ip, 'iq=', iq, 'fp=', Fp_Knew[ib][ik][ip][iq]
                         #print 'len(fm)=', len(fm)
                         fm[iq][ip] = Fp_Knew[ib][ik][ip][iq]
@@ -980,14 +980,14 @@ def Transpose_Fp(Fp_Knew, all_pseudo, Nb0, wblci, wsmall):
             for ik in range(2):
                 ifin=[]
                 for ip in p:
-                    fis = Fm_Knew[ib][ik][ip].keys()
+                    fis = list(Fm_Knew[ib][ik][ip].keys())
                     ifin=[]
-                    for t in Fm_Knew[ib][ik][ip].keys():
+                    for t in list(Fm_Knew[ib][ik][ip].keys()):
                         if abs(Fm_Knew[ib][ik][ip][t])>wsmall:
                             ifin.append(wblci[t][0])
 
                 ifin = funique(ifin)
-                if len(ifin)>1: print 'ERROR: Not unique superstate F^+', ifin, 'ib,ik=', 2*ib+ik, 'p=', p
+                if len(ifin)>1: print('ERROR: Not unique superstate F^+', ifin, 'ib,ik=', 2*ib+ik, 'p=', p)
                 if ifin:
                     Fj2[i,ib,ik]=ifin[0]
                 else:
@@ -1001,41 +1001,41 @@ def PrintSingleSiteCixFile(outfile,Uc,Nb0,Nm0,baths,eps,mN,mSz,msize,mEne,mS2,Fi
     def PrintHeader(WithIndex=False):
         #print 'Fi=', Fi
         for i in range(Ns0):
-            print >> f, "%3d " % (i+1),
-            if WithIndex: print >> f, "%3d " % (i+1),
-            print >> f, "%2d %2d %4.1f %2d " % (mN[i], 0, mSz[i], msize[i]),
+            print("%3d " % (i+1), end=' ', file=f)
+            if WithIndex: print("%3d " % (i+1), end=' ', file=f)
+            print("%2d %2d %4.1f %2d " % (mN[i], 0, mSz[i], msize[i]), end=' ', file=f)
             for ib in range(Nb0):
-                print >> f, "%3d" % (Fi[i,ib]+1),
+                print("%3d" % (Fi[i,ib]+1), end=' ', file=f)
             for j in range(msize[i]):
-                print >> f, mEne[i][j],
+                print(mEne[i][j], end=' ', file=f)
             for j in range(msize[i]):
-                print >> f, mS2[i,j],
-            print >> f
+                print(mS2[i,j], end=' ', file=f)
+            print(file=f)
 
     def PrintMatrixElm():
         for i in range(Ns0):
             for ib in range(Nb0):
                 j = Fi[i,ib]
-                print >> f, "%3d %3d " % (i+1, j+1),
+                print("%3d %3d " % (i+1, j+1), end=' ', file=f)
                 if (j>=0):
-                    print >> f, "%2d %2d" % (msize[i], msize[j]),
+                    print("%2d %2d" % (msize[i], msize[j]), end=' ', file=f)
                     for im1 in range(msize[i]):
                         for im2 in range(msize[j]):
-                            print >> f, Fm[i][ib][im1,im2],
+                            print(Fm[i][ib][im1,im2], end=' ', file=f)
                 else:
-                    print >> f, "%2d %2d" % (0, 0),
-                print >> f
+                    print("%2d %2d" % (0, 0), end=' ', file=f)
+                print(file=f)
 
     Ns0 = len(mN)
     # Lets correct onsite energies with Ek
     Ek_local = [0.5*(Ek[2*i]+Ek[2*i+1]) for i in range(Nb0)]  # from input Ek
     ###Ek_local_orig = [eps[baths[i][1]] for i in range(Nb0)]  # from origonal SS-cix file
 
-    print '##Ek_local     =', Ek_local
+    print('##Ek_local     =', Ek_local)
     ###print '##Ek_local_orig=', Ek_local_orig
-    print '##eps=', eps
-    print '##baths=', baths
-    print '##degi=', baths
+    print('##eps=', eps)
+    print('##baths=', baths)
+    print('##degi=', baths)
 
 
     # correcting eps with Ek
@@ -1046,7 +1046,7 @@ def PrintSingleSiteCixFile(outfile,Uc,Nb0,Nm0,baths,eps,mN,mSz,msize,mEne,mS2,Fi
         degi[baths[i][1]]+=1
     eps_local = [eps_local[i]/degi[i] for i in range(len(eps))]
 
-    print '##eps_local=', eps_local
+    print('##eps_local=', eps_local)
 
     # Adding Coulomb term U to on-site energies
     ###mE = [mEne[i] + Uc*mN[i]*(mN[i]-1)/2. for i in range(len(mEne))]
@@ -1068,29 +1068,29 @@ def PrintSingleSiteCixFile(outfile,Uc,Nb0,Nm0,baths,eps,mN,mSz,msize,mEne,mS2,Fi
     ###        mE[i] += R[i]*(Ek_local[ib]-Ek_local_orig[ib])
 
     f = open(outfile,'w')
-    print >> f, '# CIX file for ctqmc!'
-    print >> f, '# cluster_size, number of states, number of baths, maximum_matrix_size'
-    print >> f, 1,Ns0,Nb0,Nm0
-    print >> f, '# baths, dimension, symmetry'
+    print('# CIX file for ctqmc!', file=f)
+    print('# cluster_size, number of states, number of baths, maximum_matrix_size', file=f)
+    print(1,Ns0,Nb0,Nm0, file=f)
+    print('# baths, dimension, symmetry', file=f)
     for ib in range(Nb0):
-        print >> f, ib, baths[ib][0], baths[ib][1], baths[ib][2]
-    print >> f, '# cluster energies for non-equivalent baths, eps[k]'
+        print(ib, baths[ib][0], baths[ib][1], baths[ib][2], file=f)
+    print('# cluster energies for non-equivalent baths, eps[k]', file=f)
     for i in range(len(eps)):
-        print >> f, Ek_local[i],
-    print >> f
-    print >> f, '# N   K   Sz size'
+        print(Ek_local[i], end=' ', file=f)
+    print(file=f)
+    print('# N   K   Sz size', file=f)
 
     PrintHeader()
-    print >> f, '# matrix elements'
+    print('# matrix elements', file=f)
     PrintMatrixElm()
-    print >> f, 'HB1'
-    print >> f, '# number of operators needed'
-    print >> f, 0
-    print >> f, '# Data for HB1'
-    print >> f, 1,Ns0,Nb0,Nm0
-    print >> f, '# ind   N   K   Jz size'
+    print('HB1', file=f)
+    print('# number of operators needed', file=f)
+    print(0, file=f)
+    print('# Data for HB1', file=f)
+    print(1,Ns0,Nb0,Nm0, file=f)
+    print('# ind   N   K   Jz size', file=f)
     PrintHeader(True)
-    print >> f, '# matrix elements'
+    print('# matrix elements', file=f)
     PrintMatrixElm()
 
 
@@ -1108,15 +1108,15 @@ def main(Uc, outfile, infile, Ek0, verbose, wsmall, ssc, SUPERC):
     for ib in range(Nb0):
         for ik in range(2):
             Ek[2*ib+ik] = Ek0[2*baths[ib][1]+ik]
-    print '##Ek0=', Ek0
-    print '##Ek=', Ek
+    print('##Ek0=', Ek0)
+    print('##Ek=', Ek)
 
     ###########################################
     # removing baths which have energy > 1000 #
     ###########################################
     (Nb0,baths,eps,Ek,Fi,Fm) = RemoveBaths(Nb0,Ns0,baths,eps,Ek,Fi,Fm, verbose>100)
 
-    print '##Ek=', Ek
+    print('##Ek=', Ek)
 
     mEne = CorrectSingleSiteEnergies(Ns0,Nb0,msize,mN,mEne,baths,Uc,eps,Ek,Fi,Fm,verbose>110)
 
@@ -1265,12 +1265,12 @@ if __name__ == '__main__':
     (options, args) = parser.parse_args()
 
     Ek0 = eval(options.Ek)
-    print 'Ek=', Ek0
-    print 'U=', options.Uc
-    print 'inp=', options.inp
-    print 'out=', options.out
-    print 'ssc=', options.ssc
-    print 'super=', options.SUPER
+    print('Ek=', Ek0)
+    print('U=', options.Uc)
+    print('inp=', options.inp)
+    print('out=', options.out)
+    print('ssc=', options.ssc)
+    print('super=', options.SUPER)
 
     wsmall = 1e-10
     verbose = 100       # debug information
