@@ -85,6 +85,9 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
+    flavor_pairs = list(combinations(product(range(2), range(parms['SITES'])), 2))
+    double_occ = np.zeros(len(flavor_pairs))
+
     flavors = 2*parms['BANDS']*parms['SITES']
     double_occ = np.zeros(flavors*(flavors-1)/2)
     ntau = 2*parms['N_MATSUBARA']
@@ -98,7 +101,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             update = True
         if mcs % 500 == 0 or update:  # dirty update clean up
             int_v = np.dot(interaction, v)
-            g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
+            g = np.array([gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)])
             update = False
 
         for _ in range(parms['meas']):
@@ -113,7 +116,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
         if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
-            double_occupation(g, double_occ, parms)
+            double_occupation(g, double_occ, ntau, flavor_pairs)
             if parms['save_logs']:
                 vlog.append(v > 0)
                 ar.append(acr)
@@ -154,10 +157,9 @@ def measure_chi(v, slices):
     return chi
 
 
-def double_occupation(g, double_occ, parms):
+def double_occupation(g, double_occ, slices, flavor_pairs):
     """Calculates the density-density correlator between spin flavors"""
-    slices = parms['N_MATSUBARA']*2
-    for k, (i, j) in enumerate(combinations(product(range(2), range(parms['SITES'])), 2)):
+    for k, (i, j) in enumerate(flavor_pairs):
         spin_i, site_i = i
         n_i = np.diag(g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices])
         spin_j, site_j = j
