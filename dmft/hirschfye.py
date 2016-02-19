@@ -85,7 +85,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
-    double_occ = np.zeros((len(i_pairs), parms['SITES']))
+    double_occ = np.zeros(2*parms['BANDS']*parms['SITES'])
     ntau = 2*parms['N_MATSUBARA']
     chi = np.zeros(ntau)
     hffast.set_seed(parms['SEED'])
@@ -153,13 +153,15 @@ def measure_chi(v, slices):
     return chi
 
 def double_occupation(g, i_pairs, double_occ, parms):
-    """Calculates the double occupation of the correlated orbital"""
+    """Calculates the density-density correlator between spin flavors"""
     slices = parms['N_MATSUBARA']*2
-    for i, (up, dw) in enumerate(i_pairs):
-        for j in range(parms['SITES']):
-            n_up = np.diag(g[up][j*slices:(j+1)*slices, j*slices:(j+1)*slices])
-            n_dw = np.diag(g[dw][j*slices:(j+1)*slices, j*slices:(j+1)*slices])
-            double_occ[i][j] += np.dot(n_up, n_dw)
+    for k, (i, j) in combinations(product(range(2), range(parms['SITES']), 2)):
+        spin_i, site_i = i
+        n_i = np.diag(g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices])
+        spin_j, site_j = j
+        n_j = np.diag(g[spin_i][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices])
+        double_occ[k] += np.dot(n_i, n_j)
+
 
 
 def susceptibility(v):
