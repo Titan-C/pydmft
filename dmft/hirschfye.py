@@ -161,7 +161,7 @@ def double_occupation(g, double_occ, parms):
         spin_i, site_i = i
         n_i = np.diag(g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices])
         spin_j, site_j = j
-        n_j = np.diag(g[spin_i][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices])
+        n_j = np.diag(g[spin_j][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices])
         double_occ[k] += np.dot(n_i, n_j)
 
 
