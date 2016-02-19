@@ -8,20 +8,20 @@ Quantum Monte Carlo algorithm
 """
 
 from __future__ import division, absolute_import, print_function
-from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
-from mpi4py import MPI
-from scipy.linalg.blas import dger
+from itertools import combinations, product
 import argparse
-import dmft.hffast as hffast
-import dmft.h5archive as h5
-import dmft.plot.hf_single_site as pss
-import math
-import numpy as np
-import scipy.linalg as la
-import time
-import numba
 import os
 import struct
+import time
+
+from mpi4py import MPI
+import numpy as np
+from scipy.linalg.blas import dger
+import scipy.linalg as la
+import numba
+
+from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
+import dmft.hffast as hffast
 
 
 def ising_v(dtau, U, L, fields=1, polar=0.5):
@@ -85,7 +85,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
-    double_occ = np.zeros(2*parms['BANDS']*parms['SITES'])
+    flavors = 2*parms['BANDS']*parms['SITES']
+    double_occ = np.zeros(flavors*(flavors-1)/2)
     ntau = 2*parms['N_MATSUBARA']
     chi = np.zeros(ntau)
     hffast.set_seed(parms['SEED'])
@@ -93,8 +94,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     update = False
     for mcs in range(parms['sweeps'] + parms['therm']):
         if mcs % parms['therm'] == 0 and parms['global_flip']:
-                v *= -1
-                update = True
+            v *= -1
+            update = True
         if mcs % 500 == 0 or update:  # dirty update clean up
             int_v = np.dot(interaction, v)
             g = [gnewclean(g_sp, lv, kroneker) for g_sp, lv in zip(GX, int_v)]
@@ -112,10 +113,9 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
         if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
                 Gst[i] += g[i]
-            double_occupation(g, i_pairs, double_occ, parms)
-            #chi += measure_chi(v, ntau)
+            double_occupation(g, double_occ, parms)
             if parms['save_logs']:
-                vlog.append(v>0)
+                vlog.append(v > 0)
                 ar.append(acr)
 
     tGst = np.asarray(Gst)
@@ -138,6 +138,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     # Recover Conventional GF sign in average
     return [-1*avg_g(gst, parms) for gst in Gst]
 
+
 @numba.jit(nopython=True)
 def measure_chi(v, slices):
     """Estimates the susceptibility from the Ising auxiliary fields"""
@@ -146,22 +147,22 @@ def measure_chi(v, slices):
     for i in range(slices):
         for j in range(slices):
             k = i + j
-            if k> slices:
-                k -= slices # Ising fields are bosonic and have PBC
+            if k > slices:
+                k -= slices  # Ising fields are bosonic and have PBC
             chi[i] += s[k]*s[j]
 
     return chi
 
-def double_occupation(g, i_pairs, double_occ, parms):
+
+def double_occupation(g, double_occ, parms):
     """Calculates the density-density correlator between spin flavors"""
     slices = parms['N_MATSUBARA']*2
-    for k, (i, j) in combinations(product(range(2), range(parms['SITES']), 2)):
+    for k, (i, j) in enumerate(combinations(product(range(2), range(parms['SITES'])), 2)):
         spin_i, site_i = i
         n_i = np.diag(g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices])
         spin_j, site_j = j
         n_j = np.diag(g[spin_i][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices])
         double_occ[k] += np.dot(n_i, n_j)
-
 
 
 def susceptibility(v):
