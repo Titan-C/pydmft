@@ -161,10 +161,10 @@ def double_occupation(g, double_occ, slices, flavor_pairs):
     """Calculates the density-density correlator between spin flavors"""
     for k, (i, j) in enumerate(flavor_pairs):
         spin_i, site_i = i
-        n_i = np.diag(g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices])
+        g_i = g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices]
         spin_j, site_j = j
-        n_j = np.diag(g[spin_j][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices])
-        double_occ[k] += np.dot(n_i, n_j)
+        g_j = g[spin_j][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices]
+        double_occ[k] += np.einsum('ii,ii', g_i, g_j)
 
 
 def susceptibility(v):
