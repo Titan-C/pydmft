@@ -46,7 +46,8 @@ def _make_npy(name, obj):
         setup = {str(a): v for a, v in setup.items() if not isinstance(v, np.bool_)}
         if setup:
             with open(os.path.dirname(name) + '/setup', 'w') as fname:
-                json.dump(setup, fname, indent=2)
+                json.dump(setup, fname, indent=2,
+                          default=lambda x: x.decode() if isinstance(x, bytes) else int(x))
 
 
 def h5_2_npy(h5file):
