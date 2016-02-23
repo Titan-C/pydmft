@@ -133,7 +133,7 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
     return mat_mul(dend, dendo, g0iw_d, g0iw_o)
 
 
-def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-3):
+def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-12):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=max(5*BETA, 256)))
 
     converged = False
