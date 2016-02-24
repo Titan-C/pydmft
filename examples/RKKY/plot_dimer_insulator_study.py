@@ -83,7 +83,7 @@ plt.plot(tprr, 2.65*np.ones_like(tprr), 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
-# -------------
+# ----------------
 #
 # There is not much out of the ordinary here. An always gaped function
 
@@ -244,7 +244,7 @@ plt.plot(tprr, 2.8-.65/.4*tprr, 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
-# -------------
+# ----------------
 #
 # There is not much out of the ordinary here. An always gaped function
 
@@ -403,7 +403,7 @@ plt.plot(tprr, 4.3*np.ones_like(tprr), 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
-# -------------
+# ----------------
 #
 # There is not much out of the ordinary here. An always gaped function
 
@@ -565,7 +565,7 @@ plt.plot(1.02*np.ones_like(urange), urange, 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
-# -------------
+# ----------------
 #
 # There is not much out of the ordinary here. An always gaped function
 
