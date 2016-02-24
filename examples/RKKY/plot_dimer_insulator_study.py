@@ -108,8 +108,8 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 250, 1)))
-w = np.linspace(0, 3.5, 500)
+w_set = np.concatenate((np.arange(8)*256, np.arange(1, 241, 1)))
+w = np.linspace(0, 3., 500)
 plt.figure()
 for i, tp in enumerate(tprr):
     pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
@@ -269,7 +269,7 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 265, 1)))
+w_set = np.concatenate((np.arange(7)*256, np.arange(1, 237, 1)))
 w = np.linspace(0, 2.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
@@ -428,7 +428,7 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 247, 1)))
+w_set = np.concatenate((np.arange(7)*256, np.arange(1, 237, 1)))
 w = np.linspace(0.5, 3.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
@@ -590,7 +590,7 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 247, 1)))
+w_set = np.concatenate((np.arange(7)*256, np.arange(1, 247, 1)))
 w = np.linspace(0, 3.5, 500)
 plt.figure()
 for i, u in enumerate(urange):
