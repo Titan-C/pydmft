@@ -108,14 +108,14 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 241, 1)))
+w_set = np.concatenate((np.arange(5)*512, np.arange(1, 250, 1)))
 w = np.linspace(0, 3.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
     pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
-plt.ylabel(r'$A(\omega) - t_\perp$')
+plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
 
 ###############################################################################
@@ -155,6 +155,13 @@ plt.legend(loc=0)
 plt.xlim([0, .5])
 plt.ylim([-8, 0])
 
+plt.figure()
+for i in range(6):
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
+plt.legend(loc=0)
+
 ###############################################################################
 
 slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
@@ -179,6 +186,13 @@ plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
 plt.ylim([-0.1, 2])
+plt.legend(loc=0)
+
+plt.figure()
+for i in [1, 4, 9, 16, 21, 25]:
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
@@ -206,7 +220,7 @@ plt.xlabel(r'$t_\perp/D$')
 # Double occupation
 # -----------------
 plt.plot(tprr, 2*epot/2.65)
-plt.title(r'Internal Energy per spin')
+plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
 
@@ -255,14 +269,14 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 241, 1)))
-w = np.linspace(0, 3.5, 500)
+w_set = np.concatenate((np.arange(5)*512, np.arange(1, 265, 1)))
+w = np.linspace(0, 2.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
     pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
-plt.ylabel(r'$A(\omega) - t_\perp$')
+plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
 
 ###############################################################################
@@ -302,6 +316,13 @@ plt.legend(loc=0)
 plt.xlim([0, 2.5])
 plt.ylim([-9, 0])
 
+plt.figure()
+for i in range(6):
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'-$\Im m \Sigma_{AA} (i\omega_n)$')
+plt.legend(loc=0)
+
 ###############################################################################
 
 slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
@@ -326,6 +347,13 @@ plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
 plt.ylim([-0.1, 2])
+plt.legend(loc=0)
+
+plt.figure()
+for i in [1, 4, 9, 16, 21, 25]:
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
@@ -353,7 +381,7 @@ plt.xlabel(r'$t_\perp/D$')
 # Double occupation
 # -----------------
 plt.plot(tprr, 2*epot/(2.8-.65/.4*tprr))
-plt.title(r'Internal Energy per spin')
+plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
 
@@ -400,14 +428,14 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 241, 1)))
-w = np.linspace(0, 3.5, 500)
+w_set = np.concatenate((np.arange(5)*512, np.arange(1, 247, 1)))
+w = np.linspace(0.5, 3.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
     pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
-plt.ylabel(r'$A(\omega) - t_\perp$')
+plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
 
 ###############################################################################
@@ -447,6 +475,13 @@ plt.legend(loc=0)
 plt.xlim([0, 2.5])
 plt.ylim([-25, 0])
 
+plt.figure()
+for i in range(6):
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
+plt.legend(loc=0)
+
 ###############################################################################
 
 slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
@@ -471,6 +506,14 @@ plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
 plt.ylim([-0.1, 6])
+plt.legend(loc=0)
+
+
+plt.figure()
+for i in [1, 4, 9, 16, 21, 25]:
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
@@ -498,7 +541,7 @@ plt.xlabel(r'$t_\perp/D$')
 # Double occupation
 # -----------------
 plt.plot(tprr, 2*epot/4.3)
-plt.title(r'Internal Energy per spin')
+plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
 
@@ -547,7 +590,7 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(5)*512, np.arange(1, 220, 1)))
+w_set = np.concatenate((np.arange(5)*512, np.arange(1, 247, 1)))
 w = np.linspace(0, 3.5, 500)
 plt.figure()
 for i, u in enumerate(urange):
@@ -593,6 +636,13 @@ plt.ylabel(r'$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
 plt.xlim([0, 3.2])
 
+plt.figure()
+for i in [3, 7, 11, 16, 23, 28]:
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$U={:.2}$'.format(urange[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
+plt.legend(loc=0)
+
 ###############################################################################
 
 slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(len(urange))])
@@ -617,6 +667,13 @@ plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
 plt.ylim([-0.1, 2])
+plt.legend(loc=0)
+
+plt.figure()
+for i in [3, 7, 11, 16, 23, 28]:
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$U={:.2}$'.format(urange[i]))
+plt.xlabel(r'$i\omega_n$')
+plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
@@ -644,6 +701,6 @@ plt.xlabel(r'$U/D$')
 # Double occupation
 # -----------------
 plt.plot(urange, 2*epot/urange)
-plt.title(r'Internal Energy per spin')
+plt.title(r'Double occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$U/D$')

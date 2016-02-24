@@ -190,7 +190,7 @@ def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
 
     st_d, st_o = _dimer_sigma(g0t_d, g0t_o, u_int)
 
-    sw_d = gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4])
-    sw_o = gt_fouriertrans(st_o, tau, w_n, [0., tp**2*u_int**2/4, 0.])
+    sw_d = gt_fouriertrans(st_d, tau, w_n, [u_int**2/4, 0., u_int**2/4+4*tp])
+    sw_o = gt_fouriertrans(st_o, tau, w_n, [0., -u_int**2/2*tp -3*tp**2, 0.])
 
     return sw_d, sw_o
