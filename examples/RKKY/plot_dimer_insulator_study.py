@@ -34,11 +34,9 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
 
-        ekin.append((-giw_d.imag**2 + giw_o.real**2 + 1/w_n**2).real.sum()/beta/2 - beta/16)
+        ekin.append(rt.ekin(giw_d, giw_o, w_n, beta))
 
-        epot.append((-siw_d.imag*giw_d.imag + siw_o.real*giw_o.real +
-                     u_int**2/4/w_n**2).real.sum()/beta - beta*u_int**2/32 + u_int/8)
-
+        epot.append(rt.epot(giw_d, giw_o, tau, w_n, tp, u_int, beta))
 
     print(np.array(iterations))
 
