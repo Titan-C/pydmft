@@ -21,7 +21,7 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 
 def get_giw(filestr, tau=None, w_n=None, setup=None):
-    """Recovers with Fourier Transform G_iw from H5 file
+    """Recovers with Fourier Transform G_iw and G_tau from npy file
 
     Parameters
     ----------
@@ -65,19 +65,19 @@ def get_giw(filestr, tau=None, w_n=None, setup=None):
 
 
 
-def get_sigmaiw(h5parent, iteration, tau, w_n):
+def get_sigmaiw(giw, tau, w_n, setup):
     """Calculates the Self-Energy in Matsubara Frequencies by the
-    Dyson equation from the Monte Carlo data
+    Dyson equation
 
     Parameters
     ----------
-    h5parent : h5py parent object
-    iteration : string
-        group where the measurements are stored, name of iteration
+    giw: complex ndarray
+            Matsubara Green Function
     tau : real float array
             Imaginary time points
     w_n : real float array
             fermionic matsubara frequencies. Only use the positive ones
+    setup : dictionary about simulation parameters
 
     Returns
     -------
@@ -90,16 +90,16 @@ def get_sigmaiw(h5parent, iteration, tau, w_n):
     get_giw
     """
 
-    giw_d, giw_o = get_giw(h5parent, iteration, tau, w_n)
-    giw_d_inv, giw_o_inv = rt.mat_inv(giw_d, giw_o)
+    if giw.shape[0] == 4:
+        giw = giw.reshape(2, 2, -1)
 
-    setup = h5.get_attributes(h5parent[iteration])
     tp, t = setup['tp'], setup['t']
 
-    sigmaiw_d = 1j*w_n - t**2 * giw_d - giw_d_inv
-    sigmaiw_o = -tp    - t**2 * giw_o - giw_o_inv
+    gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
+                     [-tp*np.ones_like(w_n), 1j*w_n]])
+    sigmaiw = gmix -t**2 * giw - rt.mat_2_inv(giw)
 
-    return sigmaiw_d, sigmaiw_o
+    return sigmaiw
 
 
 def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',

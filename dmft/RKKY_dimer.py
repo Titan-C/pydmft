@@ -107,6 +107,12 @@ def mat_inv(a, b):
     return a/det, -b/det
 
 
+def mat_2_inv(A):
+    """Inverts a 2x2 matrix"""
+    det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
+    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
+
+
 def mat_mul(a, b, c, d):
     """Multiplies two Matrices of the dimer Green's Functions"""
     return a*c + b*d, a*d + b*c

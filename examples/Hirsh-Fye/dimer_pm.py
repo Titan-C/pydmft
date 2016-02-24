@@ -22,11 +22,6 @@ import dmft.plot.hf_dimer as pd
 comm = MPI.COMM_WORLD
 
 
-def mat_2_inv(A):
-    det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
-    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
-
-
 def dmft_loop_pm(simulation, U, g_iw_start=None):
     """Implementation of the solver"""
     setup = {'t':         0.5,
@@ -106,8 +101,8 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             giw_dw = giw_up
 
         # Bethe lattice bath
-        g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
-        g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
+        g0iw_up = dimer.mat_2_inv(gmix - 0.25*giw_up)
+        g0iw_dw = dimer.mat_2_inv(gmix - 0.25*giw_dw)
 
         g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
         g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
