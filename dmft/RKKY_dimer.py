@@ -172,64 +172,17 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-12):
     return giw_d, giw_o, loops
 
 
-def epot(filestr, beta):
-    V = []
-    with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
-        wsqr_4 = 4*w_n*w_n
-        for tpstr in results:
-            tp = float(tpstr[2:])
-            tprec = results[tpstr]
-            for ustr in tprec:
-                jgiw_d, rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                  0., tp, 0.25)
-                u_int = float(ustr[1:])
-                siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
-
-                V.append((rgiw_o*siw_o.real - jgiw_d*siw_d.imag +
-                          u_int**2/wsqr_4).sum()/beta - beta*u_int**2/32 + u_int/8)
-        array_shape = (len(results.keys()), len(tprec.keys()))
-
-    return np.asarray(V).reshape(array_shape)
+def ekin(giw_d, giw_o, w_n, beta):
+    """Calculates the kinetic energy per spin from its Green Function"""
+    return (-giw_d.imag**2 + giw_o.real**2 + 1/w_n**2).real.sum()/beta/2 - beta/16
 
 
-def n_fill(mu, tp, beta):
-    return quad(dos.bethe_fermi, -1., 1., args=(1., mu + tp, 0.5, beta))[0] + \
-           quad(dos.bethe_fermi, -1., 1., args=(1., mu - tp, 0.5, beta))[0]-1.
-
-
-def free_ekin(tp, beta):
-    mu = fsolve(n_fill, 0., (tp, beta))[0]
-    e_mean = quad(dos.bethe_fermi_ene, -1., 1., (1., mu+tp, 0.5, beta))[0] + \
-             quad(dos.bethe_fermi_ene, -1., 1., (1., mu-tp, 0.5, beta))[0] - \
-             tp*(quad(dos.bethe_fermi, -1., 1., (1., mu+tp, 0.5, beta))[0] -
-                 quad(dos.bethe_fermi, -1., 1., (1., mu-tp, 0.5, beta))[0])
-    return e_mean * 0.5
-
-
-def ekin(filestr, beta):
-    r"""Calculates the internal energy of the system given by Fetter-Walecka"""
-    T = []
-    with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
-        for tpstr in results:
-            tp = float(tpstr[2:])
-            tprec = results[tpstr]
-            giw_free_d, _ = gf_met(w_n, 0., tp, 0.5, 0.)
-            e_mean = free_ekin(tp, beta)
-            for ustr in tprec:
-                jgiw_d, rgiw_o = tprec[ustr]['giw_d'][:], tprec[ustr]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                  0., tp, 0.25)
-                u_int = float(ustr[1:])
-                siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
-
-                T.append(2*(w_n*(giw_free_d.imag - jgiw_d) +
-                         jgiw_d*siw_d.imag - rgiw_o*siw_o.real).sum()/beta + e_mean)
-        array_shape = (len(results.keys()), len(tprec.keys()))
-
-    return np.asarray(T).reshape(array_shape)
+def epot(giw_d, giw_o, tau, w_n, tp, u_int, beta):
+    """Calculates the potential energy per spin from its Green Function"""
+    g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*giw_d.imag, giw_o.real, 0., tp, 0.25)
+    siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+    return (-siw_d.imag*giw_d.imag + siw_o.real*giw_o.real +
+            u_int**2/4/w_n**2).real.sum()/beta - beta*u_int**2/32 + u_int/8
 
 
 def complexity(filestr, beta):
