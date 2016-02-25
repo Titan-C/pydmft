@@ -217,6 +217,7 @@ plt.xlabel(r'$t_\perp/D$')
 ###############################################################################
 # Double occupation
 # -----------------
+
 plt.plot(tprr, 2*epot/2.65)
 plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')

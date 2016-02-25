@@ -80,8 +80,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
     return giw_s, sigma_iw, np.array(ekin), np.array(epot), w_n
 
-
-BETARANGE = np.round(np.hstack(([768, 512], np.logspace(8, -5, 50, base=2))), 2)
+BETARANGE = np.round(np.hstack(([768, 512], np.logspace(8, -4.5, 45, base=2), [.03, .02])), 2)
 temp = 1 / np.array(BETARANGE)
 
 metal2 = loop_beta(2., .20, BETARANGE, seed='metal')
@@ -120,6 +119,34 @@ ax[0].legend(loc=0)
 ax[1].set_xlabel('T/D')
 ax[1].set_ylabel(r'$\langle  H \rangle$')
 
+
+###############################################################################
+# Double occupation
+# -----------------
+
+fig, ax = plt.subplots(2)
+BETARANGE = np.round(np.hstack(([768, 512], np.logspace(8, -4.5, 45, base=2), [.03, .02])), 2)
+temp = 1 / np.array(BETARANGE)
+Harr = zip([metal2, metal2_75, insulator2_75, metal3_5, insulator3_5, insulator4_3],
+           [2., '2.75 M', '2.75 I', '3.5 M', '3.5 I', 4.3],
+           ['b', 'g', 'c', 'r', 'y', 'k'])
+for sol, u, c in Harr:
+    li = c + 'o--' if 'I' in str(u) else c + '+-'
+    u_int = u if isinstance(u, float) else float(u[:-1])
+    ax[0].plot(temp, 2*sol[3]/u_int, li, label='U={}'.format(u))
+    ax[1].plot(temp, 2*sol[3]/u_int, li)
+ax[0].set_xlim([0, 5])
+ax[0].set_ylim([0.0, .25])
+ax[1].set_xlim([0, .2])
+ax[1].set_ylim([0.0, .25])
+
+ax[0].set_title('Double Occupation')
+ax[0].set_xlabel('T/D')
+ax[0].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
+ax[0].legend(loc=0)
+ax[1].set_xlabel('T/D')
+ax[1].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
+
 ###############################################################################
 # Specific Heat and Entropy
 # -------------------------
@@ -145,9 +172,9 @@ for sol, u, c in Harr:
     ax_s[1].plot(temp, log(2.) -S, li)
 
 ax_cv[0].set_xlim([0, 3])
-ax_cv[0].set_ylim([-0.06, .6])
+ax_cv[0].set_ylim([-0.08, .83])
 ax_cv[1].set_xlim([0, .125])
-ax_cv[1].set_ylim([-0.06, 0.6])
+ax_cv[1].set_ylim([-0.08, 0.83])
 
 ax_cv[0].set_title('Heat Capacity')
 ax_cv[0].set_xlabel('T/D')
