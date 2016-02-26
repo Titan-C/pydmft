@@ -47,13 +47,13 @@ def dimer_hamiltonian(U, mu, tp):
         - \mu(n_{b\uparrow} + n_{b\downarrow})
 
     """
-    a_up, a_dw, b_up, b_dw = sorted_basis()
+    a_up, b_up, a_dw, b_dw = sorted_basis()
     sigma_za = a_up.T*a_up - a_dw.T*a_dw
     sigma_zb = b_up.T*b_up - b_dw.T*b_dw
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
     H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, [a_up, a_dw, b_up, b_dw]
+    return H, [a_up, b_up, a_dw,  b_dw]
 
 
 def dimer_hamiltonian_bond(U, mu, tp):
@@ -67,7 +67,7 @@ def dimer_hamiltonian_bond(U, mu, tp):
     dimer_hamiltonian
     """
     from math import sqrt
-    as_up, as_dw, s_up, s_dw = sorted_basis()
+    as_up, s_up, as_dw, s_dw = sorted_basis()
 
     a_up = (-as_up + s_up)/sqrt(2)
     b_up = ( as_up + s_up)/sqrt(2)
@@ -79,7 +79,7 @@ def dimer_hamiltonian_bond(U, mu, tp):
     H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
     H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
     H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
-    return H, [as_up, as_dw, s_up, s_dw]
+    return H, [as_up, s_up, as_dw, s_dw]
 
 
 ###############################################################################
