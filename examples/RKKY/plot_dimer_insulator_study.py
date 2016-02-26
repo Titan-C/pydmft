@@ -17,10 +17,10 @@ import dmft.ipt_imag as ipt
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
     giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'mott gap':
-        giw_d, giw_o = 1/(1j*w_n + 4j/w_n), np.zeros_like(w_n)+0j
+        giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
     giw_s = []
     sigma_iw = []
@@ -30,7 +30,8 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
         giw_d, giw_o, loops = rt.ipt_dmft_loop(beta, u_int, tp, giw_d, giw_o)
         giw_s.append((giw_d, giw_o))
         iterations.append(loops)
-        g0iw_d, g0iw_o = rt.self_consistency(1j*w_n, 1j*giw_d.imag, giw_o.real, 0., tp, 0.25)
+        g0iw_d, g0iw_o = rt.self_consistency(
+            1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
 
@@ -67,17 +68,20 @@ insulator_phases = np.clip(-rt.fermi_level_dos(filestr, BETA).T, 0, 2)
 # temperatures each time.
 
 tprr = np.arange(0, 1.2, 0.04)
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(2.65*np.ones_like(tprr), tprr, 512.)
+giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+    2.65 * np.ones_like(tprr), tprr, 512.)
 
 plt.pcolormesh(x, y, metal_phases, cmap=plt.get_cmap(r'viridis'))
 plt.axis([x.min(), x.max(), y.min(), y.max()])
 plt.colorbar()
-plt.pcolormesh(x, y, insulator_phases, alpha=0.2, cmap=plt.get_cmap(r'viridis'))
+plt.pcolormesh(x, y, insulator_phases, alpha=0.2,
+               cmap=plt.get_cmap(r'viridis'))
 
 plt.xlabel(r'$t_\perp$')
 plt.ylabel(r'U/D')
-plt.title('Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
-plt.plot(tprr, 2.65*np.ones_like(tprr), 'rx-', lw=2)
+plt.title(
+    'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
+plt.plot(tprr, 2.65 * np.ones_like(tprr), 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
@@ -95,23 +99,23 @@ ax.set_zlabel(r'$\Im m G_{AA} (i\omega_n)$')
 
 ###############################################################################
 
-slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0] for i in range(len(tprr))]
+slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0]
+          for i in range(len(tprr))]
 plt.plot(tprr, slopes, '+-', label='data')
 plt.title(r'Slope of $Im G_{AA}$')
 plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r"$\Im m G'_{AA}(0)$")
 
-
 ###############################################################################
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(8)*256, np.arange(1, 241, 1)))
+w_set = np.concatenate((np.arange(8) * 256, np.arange(1, 241, 1)))
 w = np.linspace(0, 3., 500)
 plt.figure()
 for i, tp in enumerate(tprr):
-    pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    pc = gf.pade_coefficients(1j * giw_s[i, 0, w_set].imag, w_n[w_set])
+    plt.plot(w, -2 * tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
@@ -121,7 +125,8 @@ plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 # ----------------
 
 for i in [1, 2, 4, 7, 11, 16]:
-    plt.plot(w_n, giw_s[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, giw_s[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e G_{AB} (i\omega_n)$')
 plt.legend(loc=0)
@@ -130,7 +135,8 @@ plt.xlim([0, 3])
 
 plt.figure()
 
-slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1) for i in range(len(tprr))])
+slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1)
+                   for i in range(len(tprr))])
 
 plt.plot(tprr, slopes.T[0], '+-', label='Slope')
 plt.plot(tprr, slopes.T[1], '+-', label='Cut')
@@ -146,7 +152,8 @@ plt.legend(loc=0)
 # --------
 
 for i in range(6):
-    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
@@ -155,14 +162,16 @@ plt.ylim([-8, 0])
 
 plt.figure()
 for i in range(6):
-    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -179,7 +188,8 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.plot(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
@@ -188,14 +198,16 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -209,7 +221,7 @@ plt.legend(loc=0)
 # The Energy
 # ----------
 
-plt.plot(tprr, ekin+epot)
+plt.plot(tprr, ekin + epot)
 plt.title(r'Internal Energy per spin')
 plt.ylabel(r'$\langle H \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -218,7 +230,7 @@ plt.xlabel(r'$t_\perp/D$')
 # Double occupation
 # -----------------
 
-plt.plot(tprr, 2*epot/2.65)
+plt.plot(tprr, 2 * epot / 2.65)
 plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -229,17 +241,19 @@ plt.xlabel(r'$t_\perp/D$')
 #
 # Here I simultaneously vary $U$ and $t_\perp$ just to stay above $U_{c1}$
 
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(2.8-.65/.4*tprr, tprr, 512.)
+giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(2.8 - .65 / .4 * tprr, tprr, 512.)
 
 plt.pcolormesh(x, y, metal_phases, cmap=plt.get_cmap(r'viridis'))
 plt.axis([x.min(), x.max(), y.min(), y.max()])
 plt.colorbar()
-plt.pcolormesh(x, y, insulator_phases, alpha=0.2, cmap=plt.get_cmap(r'viridis'))
+plt.pcolormesh(x, y, insulator_phases, alpha=0.2,
+               cmap=plt.get_cmap(r'viridis'))
 
 plt.xlabel(r'$t_\perp$')
 plt.ylabel(r'U/D')
-plt.title('Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
-plt.plot(tprr, 2.8-.65/.4*tprr, 'rx-', lw=2)
+plt.title(
+    'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
+plt.plot(tprr, 2.8 - .65 / .4 * tprr, 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
@@ -257,7 +271,8 @@ ax.set_zlabel(r'$\Im m G_{AA} (i\omega_n)$')
 
 ###############################################################################
 
-slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0] for i in range(len(tprr))]
+slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0]
+          for i in range(len(tprr))]
 plt.plot(tprr, slopes, '+-', label='data')
 plt.title(r'Slope of $Im G_{AA}$')
 plt.xlabel(r'$t_\perp/D$')
@@ -268,12 +283,12 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(7)*256, np.arange(1, 237, 1)))
+w_set = np.concatenate((np.arange(7) * 256, np.arange(1, 237, 1)))
 w = np.linspace(0, 2.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
-    pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    pc = gf.pade_coefficients(1j * giw_s[i, 0, w_set].imag, w_n[w_set])
+    plt.plot(w, -2 * tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
@@ -283,7 +298,8 @@ plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 # ----------------
 
 for i in [1, 2, 4, 7, 11, 16]:
-    plt.plot(w_n, giw_s[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, giw_s[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e G_{AB} (i\omega_n)$')
 plt.legend(loc=0)
@@ -292,7 +308,8 @@ plt.xlim([0, 3])
 
 plt.figure()
 
-slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1) for i in range(len(tprr))])
+slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1)
+                   for i in range(len(tprr))])
 
 plt.plot(tprr, slopes.T[0], '+-', label='Slope')
 plt.plot(tprr, slopes.T[1], '+-', label='Cut')
@@ -308,7 +325,8 @@ plt.legend(loc=0)
 # --------
 
 for i in range(6):
-    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
@@ -317,14 +335,16 @@ plt.ylim([-9, 0])
 
 plt.figure()
 for i in range(6):
-    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'-$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -341,7 +361,8 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.plot(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
@@ -350,14 +371,16 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -371,7 +394,7 @@ plt.legend(loc=0)
 # The Energy
 # ----------
 
-plt.plot(tprr, ekin+epot)
+plt.plot(tprr, ekin + epot)
 plt.title(r'Internal Energy per spin')
 plt.ylabel(r'$\langle H \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -379,7 +402,7 @@ plt.xlabel(r'$t_\perp/D$')
 ###############################################################################
 # Double occupation
 # -----------------
-plt.plot(tprr, 2*epot/(2.8-.65/.4*tprr))
+plt.plot(tprr, 2 * epot / (2.8 - .65 / .4 * tprr))
 plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -388,17 +411,20 @@ plt.xlabel(r'$t_\perp/D$')
 # High in the Mott insulator
 # ==========================
 
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(4.3*np.ones_like(tprr), tprr, 512.)
+giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+    4.3 * np.ones_like(tprr), tprr, 512.)
 
 plt.pcolormesh(x, y, metal_phases, cmap=plt.get_cmap(r'viridis'))
 plt.axis([x.min(), x.max(), y.min(), y.max()])
 plt.colorbar()
-plt.pcolormesh(x, y, insulator_phases, alpha=0.2, cmap=plt.get_cmap(r'viridis'))
+plt.pcolormesh(x, y, insulator_phases, alpha=0.2,
+               cmap=plt.get_cmap(r'viridis'))
 
 plt.xlabel(r'$t_\perp$')
 plt.ylabel(r'U/D')
-plt.title('Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
-plt.plot(tprr, 4.3*np.ones_like(tprr), 'rx-', lw=2)
+plt.title(
+    'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
+plt.plot(tprr, 4.3 * np.ones_like(tprr), 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
@@ -416,7 +442,8 @@ ax.set_zlabel(r'$\Im m G_{AA} (i\omega_n)$')
 
 ###############################################################################
 
-slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0] for i in range(len(tprr))]
+slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0]
+          for i in range(len(tprr))]
 plt.plot(tprr, slopes, '+-', label='data')
 plt.title(r'Slope of $Im G_{AA}$')
 plt.xlabel(r'$t_\perp/D$')
@@ -427,12 +454,12 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(7)*256, np.arange(1, 237, 1)))
+w_set = np.concatenate((np.arange(7) * 256, np.arange(1, 237, 1)))
 w = np.linspace(0.5, 3.5, 500)
 plt.figure()
 for i, tp in enumerate(tprr):
-    pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
-    plt.plot(w, -2*tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
+    pc = gf.pade_coefficients(1j * giw_s[i, 0, w_set].imag, w_n[w_set])
+    plt.plot(w, -2 * tp - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 
@@ -442,7 +469,8 @@ plt.ylabel(r'$A(\omega) - 2 t_\perp$')
 # ----------------
 
 for i in [1, 2, 4, 7, 11, 16]:
-    plt.plot(w_n, giw_s[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, giw_s[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e G_{AB} (i\omega_n)$')
 plt.legend(loc=0)
@@ -451,7 +479,8 @@ plt.xlim([0, 3])
 
 plt.figure()
 
-slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1) for i in range(len(tprr))])
+slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1)
+                   for i in range(len(tprr))])
 
 plt.plot(tprr, slopes.T[0], '+-', label='Slope')
 plt.plot(tprr, slopes.T[1], '+-', label='Cut')
@@ -467,7 +496,8 @@ plt.legend(loc=0)
 # --------
 
 for i in range(6):
-    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
@@ -476,14 +506,16 @@ plt.ylim([-25, 0])
 
 plt.figure()
 for i in range(6):
-    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -500,7 +532,8 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.plot(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.plot(w_n, sigma_iw[i, 1].real, 's-',
+             label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
@@ -510,14 +543,16 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [1, 4, 9, 16, 21, 25]:
-    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$t_\perp={}$'.format(tprr[i]))
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-',
+               label=r'$t_\perp={}$'.format(tprr[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1) for i in range(1, len(tprr))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1)
+                   for i in range(1, len(tprr))])
 
 plt.plot(tprr[1:], slopes.T[0], '+-', label='Slope')
 plt.plot(tprr[1:], slopes.T[1], '+-', label='Cut')
@@ -531,7 +566,7 @@ plt.legend(loc=0)
 # The Energy
 # ----------
 
-plt.plot(tprr, ekin+epot)
+plt.plot(tprr, ekin + epot)
 plt.title(r'Internal Energy per spin')
 plt.ylabel(r'$\langle H \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -539,7 +574,7 @@ plt.xlabel(r'$t_\perp/D$')
 ###############################################################################
 # Double occupation
 # -----------------
-plt.plot(tprr, 2*epot/4.3)
+plt.plot(tprr, 2 * epot / 4.3)
 plt.title(r'Double Occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$t_\perp/D$')
@@ -549,18 +584,21 @@ plt.xlabel(r'$t_\perp/D$')
 # ==========================
 
 urange = np.linspace(0.5, 4.5, len(tprr))
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(urange, 1.02*np.ones_like(urange), 512.)
+giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+    urange, 1.02 * np.ones_like(urange), 512.)
 
 plt.pcolormesh(x, y, metal_phases, cmap=plt.get_cmap(r'viridis'))
 plt.axis([x.min(), x.max(), y.min(), y.max()])
 plt.colorbar()
-plt.pcolormesh(x, y, insulator_phases, alpha=0.2, cmap=plt.get_cmap(r'viridis'))
+plt.pcolormesh(x, y, insulator_phases, alpha=0.2,
+               cmap=plt.get_cmap(r'viridis'))
 
 plt.xlabel(r'$t_\perp$')
 plt.ylabel(r'U/D')
-plt.title('Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
+plt.title(
+    'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
 
-plt.plot(1.02*np.ones_like(urange), urange, 'rx-', lw=2)
+plt.plot(1.02 * np.ones_like(urange), urange, 'rx-', lw=2)
 
 ###############################################################################
 # Change of G_{AA}
@@ -578,7 +616,8 @@ ax.set_zlabel(r'$\Im m G_{AA} (i\omega_n)$')
 
 ###############################################################################
 
-slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0] for i in range(len(urange))]
+slopes = [np.polyfit(w_n[:5], giw_s[i, 0, :5].imag, 1)[0]
+          for i in range(len(urange))]
 plt.plot(urange, slopes, '+-', label='data')
 plt.title(r'Slope of $Im G_{AA}$')
 plt.xlabel(r'$U/D$')
@@ -589,11 +628,11 @@ plt.ylabel(r"$\Im m G'_{AA}(0)$")
 # Analytical Continuation
 # -----------------------
 
-w_set = np.concatenate((np.arange(7)*256, np.arange(1, 247, 1)))
+w_set = np.concatenate((np.arange(7) * 256, np.arange(1, 247, 1)))
 w = np.linspace(0, 3.5, 500)
 plt.figure()
 for i, u in enumerate(urange):
-    pc = gf.pade_coefficients(1j*giw_s[i, 0, w_set].imag, w_n[w_set])
+    pc = gf.pade_coefficients(1j * giw_s[i, 0, w_set].imag, w_n[w_set])
     plt.plot(w, -u - gf.pade_rec(pc, w, w_n[w_set]).imag)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega) - U$')
@@ -613,7 +652,8 @@ plt.xlim([0, 3])
 
 plt.figure()
 
-slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1) for i in range(len(urange))])
+slopes = np.array([np.polyfit(w_n[:5], giw_s[i, 1, :5].real, 1)
+                   for i in range(len(urange))])
 
 plt.plot(urange, slopes.T[0], '+-', label='Slope')
 plt.plot(urange, slopes.T[1], '+-', label='Cut')
@@ -629,7 +669,8 @@ plt.legend(loc=0)
 # --------
 
 for i in [3, 7, 11, 16, 23, 28]:
-    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:', label=r'$U={:.2}$'.format(urange[i]))
+    plt.plot(w_n, sigma_iw[i, 0].imag, 'o:',
+             label=r'$U={:.2}$'.format(urange[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
@@ -637,14 +678,16 @@ plt.xlim([0, 3.2])
 
 plt.figure()
 for i in [3, 7, 11, 16, 23, 28]:
-    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:', label=r'$U={:.2}$'.format(urange[i]))
+    plt.loglog(w_n, -sigma_iw[i, 0].imag, 'o:',
+               label=r'$U={:.2}$'.format(urange[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$-\Im m \Sigma_{AA} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1) for i in range(len(urange))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 0, :3].imag, 1)
+                   for i in range(len(urange))])
 
 plt.plot(urange, slopes.T[0], '+-', label='Slope')
 plt.plot(urange, slopes.T[1], '+-', label='Cut')
@@ -661,7 +704,8 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [3, 7, 11, 16, 23, 28]:
-    plt.plot(w_n, sigma_iw[i, 1].real, 's-', label=r'$U={:.2}$'.format(urange[i]))
+    plt.plot(w_n, sigma_iw[i, 1].real, 's-',
+             label=r'$U={:.2}$'.format(urange[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.xlim([0, 3.2])
@@ -670,14 +714,16 @@ plt.legend(loc=0)
 
 plt.figure()
 for i in [3, 7, 11, 16, 23, 28]:
-    plt.loglog(w_n, sigma_iw[i, 1].real, 's-', label=r'$U={:.2}$'.format(urange[i]))
+    plt.loglog(w_n, sigma_iw[i, 1].real, 's-',
+               label=r'$U={:.2}$'.format(urange[i]))
 plt.xlabel(r'$i\omega_n$')
 plt.ylabel(r'$\Re e \Sigma_{AB} (i\omega_n)$')
 plt.legend(loc=0)
 
 ###############################################################################
 
-slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1) for i in range(len(urange))])
+slopes = np.array([np.polyfit(w_n[:3], sigma_iw[i, 1, :3].real, 1)
+                   for i in range(len(urange))])
 
 plt.plot(urange, slopes.T[0], '+-', label='Slope')
 plt.plot(urange, slopes.T[1], '+-', label='Cut')
@@ -691,7 +737,7 @@ plt.legend(loc=0)
 # The Energy
 # ----------
 
-plt.plot(urange, ekin+epot)
+plt.plot(urange, ekin + epot)
 plt.title(r'Internal Energy per spin')
 plt.ylabel(r'$\langle H \rangle$')
 plt.xlabel(r'$U/D$')
@@ -699,7 +745,7 @@ plt.xlabel(r'$U/D$')
 ###############################################################################
 # Double occupation
 # -----------------
-plt.plot(urange, 2*epot/urange)
+plt.plot(urange, 2 * epot / urange)
 plt.title(r'Double occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$U/D$')
