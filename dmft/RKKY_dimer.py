@@ -168,21 +168,24 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-12):
             print('B', BETA, 'tp', tp, 'U', u_int)
             print('Failed to converge in less than 3000 iterations')
 
-
     return giw_d, giw_o, loops
 
 
-def ekin(giw_d, giw_o, w_n, beta):
+def ekin(giw_d, giw_o, w_n, tp, beta):
     """Calculates the kinetic energy per spin from its Green Function"""
-    return (-giw_d.imag**2 + giw_o.real**2 + 1/w_n**2).real.sum()/beta/2 - beta/16
+    return (4 * tp * giw_o.real -
+            giw_d.imag**2 + giw_o.real**2 +
+            (1 - 4 * tp**2) / w_n**2).real.sum() / beta / 2 - \
+            beta / 16 * (1 - 4 * tp**2)
 
 
 def epot(giw_d, giw_o, tau, w_n, tp, u_int, beta):
     """Calculates the potential energy per spin from its Green Function"""
-    g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*giw_d.imag, giw_o.real, 0., tp, 0.25)
+    g0iw_d, g0iw_o = self_consistency(
+        1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
-    return (-siw_d.imag*giw_d.imag + siw_o.real*giw_o.real +
-            u_int**2/4/w_n**2).real.sum()/beta - beta*u_int**2/32 + u_int/8
+    return (-siw_d.imag * giw_d.imag + siw_o.real * giw_o.real +
+            u_int**2 / 4 / w_n**2).real.sum() / beta - beta * u_int**2 / 32 + u_int / 8
 
 
 def complexity(filestr, beta):
