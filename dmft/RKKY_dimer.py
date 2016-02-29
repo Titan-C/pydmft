@@ -48,11 +48,11 @@ def dimer_hamiltonian(U, mu, tp):
 
     """
     a_up, b_up, a_dw, b_dw = sorted_basis()
-    sigma_za = a_up.T*a_up - a_dw.T*a_dw
-    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
-    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
-    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    sigma_za = a_up.T * a_up - a_dw.T * a_dw
+    sigma_zb = b_up.T * b_up - b_dw.T * b_dw
+    H  = - U / 2 * sigma_za * sigma_za - mu * (a_up.T * a_up + a_dw.T * a_dw)
+    H += - U / 2 * sigma_zb * sigma_zb - mu * (b_up.T * b_up + b_dw.T * b_dw)
+    H += tp * (a_up.T * b_up + a_dw.T * b_dw + b_up.T * a_up + b_dw.T * a_dw)
     return H, [a_up, b_up, a_dw,  b_dw]
 
 
@@ -69,16 +69,16 @@ def dimer_hamiltonian_bond(U, mu, tp):
     from math import sqrt
     as_up, s_up, as_dw, s_dw = sorted_basis()
 
-    a_up = (-as_up + s_up)/sqrt(2)
-    b_up = ( as_up + s_up)/sqrt(2)
-    a_dw = (-as_dw + s_dw)/sqrt(2)
-    b_dw = ( as_dw + s_dw)/sqrt(2)
+    a_up = (-as_up + s_up) / sqrt(2)
+    b_up = ( as_up + s_up) / sqrt(2)
+    a_dw = (-as_dw + s_dw) / sqrt(2)
+    b_dw = ( as_dw + s_dw) / sqrt(2)
 
-    sigma_za = a_up.T*a_up - a_dw.T*a_dw
-    sigma_zb = b_up.T*b_up - b_dw.T*b_dw
-    H =  - U/2 * sigma_za * sigma_za - mu * (a_up.T*a_up + a_dw.T*a_dw)
-    H += - U/2 * sigma_zb * sigma_zb - mu * (b_up.T*b_up + b_dw.T*b_dw)
-    H += tp * (a_up.T*b_up + a_dw.T*b_dw + b_up.T*a_up + b_dw.T*a_dw)
+    sigma_za = a_up.T * a_up - a_dw.T * a_dw
+    sigma_zb = b_up.T * b_up - b_dw.T * b_dw
+    H  = - U / 2 * sigma_za * sigma_za - mu * (a_up.T * a_up + a_dw.T * a_dw)
+    H += - U / 2 * sigma_zb * sigma_zb - mu * (b_up.T * b_up + b_dw.T * b_dw)
+    H += tp * (a_up.T * b_up + a_dw.T * b_dw + b_up.T * a_up + b_dw.T * a_dw)
     return H, [as_up, s_up, as_dw, s_dw]
 
 
@@ -90,10 +90,10 @@ def gf_met(omega, mu, tp, t, tn):
     """Double semi-circular density of states to represent the
     non-interacting dimer """
 
-    g_1 = gf.greenF(omega, mu=mu-tp, D=2*(t+tn))
-    g_2 = gf.greenF(omega, mu=mu+tp, D=2*abs(t-tn))
-    g_d = .5*(g_1 + g_2)
-    g_o = .5*(g_1 - g_2)
+    g_1 = gf.greenF(omega, mu=mu - tp, D=2 * (t + tn))
+    g_2 = gf.greenF(omega, mu=mu + tp, D=2 * abs(t - tn))
+    g_d = .5 * (g_1 + g_2)
+    g_o = .5 * (g_1 - g_2)
 
     return g_d, g_o
 
@@ -103,19 +103,19 @@ def mat_inv(a, b):
 
     .. math:: [a, b]^-1 = [a, -b]/(a^2 - b^2)
     """
-    det = a*a - b*b
-    return a/det, -b/det
+    det = a * a - b * b
+    return a / det, -b / det
 
 
 def mat_2_inv(A):
     """Inverts a 2x2 matrix"""
-    det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
-    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
+    det = A[0, 0] * A[1, 1] - A[1, 0] * A[0, 1]
+    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]]) / det
 
 
 def mat_mul(a, b, c, d):
     """Multiplies two Matrices of the dimer Green's Functions"""
-    return a*c + b*d, a*d + b*c
+    return a * c + b * d, a * d + b * c
 
 
 def self_consistency(omega, Gd, Gc, mu, tp, t2):
@@ -139,12 +139,11 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
     return mat_mul(dend, dendo, g0iw_d, g0iw_o)
 
 
-def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, conv=1e-12):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=max(5*BETA, 256)))
+def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
 
     converged = False
     loops = 0
-    iw_n = 1j*w_n
+    iw_n = 1j * w_n
 
     while not converged:
         # Half-filling, particle-hole cleaning
@@ -201,13 +200,14 @@ def complexity(filestr, beta):
 def quasiparticle(filestr, beta):
     zet = []
     with h5.File(filestr.format(beta), 'r') as results:
-        tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+        tau, w_n = gf.tau_wn_setup(
+            dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
         for tpstr in results:
             tp = float(tpstr[2:])
             tprec = results[tpstr]
             for ustr in tprec:
-                g0iw_d, g0iw_o = self_consistency(1j*w_n,
-                                                  1j*tprec[ustr]['giw_d'][:],
+                g0iw_d, g0iw_o = self_consistency(1j * w_n,
+                                                  1j * tprec[ustr]['giw_d'][:],
                                                   tprec[ustr]['giw_o'][:],
                                                   0., tp, 0.25)
                 u_int = float(ustr[1:])
@@ -228,13 +228,16 @@ def fermi_level_dos(filestr, beta, n=3):
     return dos_fl
 
 # plots
+
+
 def plot_giw(beta, tp, u_int, label, filestr, axes=None):
     if axes is None:
         _, axes = plt.subplots(1, 2, figsize=(13, 8), sharex=True, sharey=True)
     u_group = '/tp{}/U{}/'.format(tp, u_int)
-    w_n = gf.matsubara_freq(beta, max(5*beta, 256))
+    w_n = gf.matsubara_freq(beta, max(5 * beta, 256))
     with h5.File(filestr.format(beta), 'r') as results:
-        jgiw_d, rgiw_o = results[u_group + 'giw_d'][:], results[u_group + 'giw_o'][:]
+        jgiw_d, rgiw_o = results[
+            u_group + 'giw_d'][:], results[u_group + 'giw_o'][:]
 
         axes[0].plot(w_n, jgiw_d, 's:', label=label)
         axes[1].plot(w_n, rgiw_o, 'o:', label=label)
@@ -243,10 +246,11 @@ def plot_giw(beta, tp, u_int, label, filestr, axes=None):
         axes[0].set_xlabel(r'$i\omega$')
         axes[0].set_xlim([0, 4])
 
-    axes[0].set_title(r'Solutions at $\beta={}$ and $t_\perp={}$'.format(beta, tp))
-    axes[0].set_ylabel(graf+'$_{AA}$')
+    axes[0].set_title(
+        r'Solutions at $\beta={}$ and $t_\perp={}$'.format(beta, tp))
+    axes[0].set_ylabel(graf + '$_{AA}$')
     axes[0].legend(loc=0)
-    axes[1].set_ylabel(graf+'$_{AB}$')
+    axes[1].set_ylabel(graf + '$_{AB}$')
     axes[1].legend(loc=0)
 
     return axes
@@ -257,18 +261,18 @@ def get_giw(beta, tp, u_int, filestr):
 
     either tp or u_int have to be defined and the other must be None"""
 
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
     with h5.File(filestr.format(beta), 'r') as results:
         if u_int:
-            u_str = 'U'+str(u_int)
-            gfs = [(1j*results[tpstr][u_str]['giw_d'][:],
+            u_str = 'U' + str(u_int)
+            gfs = [(1j * results[tpstr][u_str]['giw_d'][:],
                     results[tpstr][u_str]['giw_o'][:])
-                               for tpstr in results]
+                   for tpstr in results]
         elif tp:
-            tpstr = 'tp'+str(tp)
-            gfs = [(1j*results[tpstr][u_str]['giw_d'][:],
+            tpstr = 'tp' + str(tp)
+            gfs = [(1j * results[tpstr][u_str]['giw_d'][:],
                     results[tpstr][u_str]['giw_o'][:])
-                               for u_str in results[tpstr]]
+                   for u_str in results[tpstr]]
     return gfs
 
 
@@ -276,21 +280,23 @@ def get_g0(beta, tp, u_int, filestr):
     """Returns all the G0 functions of a given cut at tp or U
 
     either tp or u_int have to be defined and the other must be None"""
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
     g0 = []
     with h5.File(filestr.format(beta), 'r') as results:
         if u_int:
-            u_str = 'U'+str(u_int)
+            u_str = 'U' + str(u_int)
             for tp in results.keys():
-                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][:],results[tp][u_str]['giw_o'][:]
-                g0.append((self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                    0., float(tp[2:]), 0.25)))
+                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][
+                    :], results[tp][u_str]['giw_o'][:]
+                g0.append((self_consistency(1j * w_n, 1j * jgiw_d, rgiw_o,
+                                            0., float(tp[2:]), 0.25)))
         elif tp:
-            tpstr = 'tp'+str(tp)
+            tpstr = 'tp' + str(tp)
             for u_str in results[tpstr].keys():
-                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:]
-                g0.append((self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                    0., tp, 0.25)))
+                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][
+                    :], results[tpstr][u_str]['giw_o'][:]
+                g0.append((self_consistency(1j * w_n, 1j * jgiw_d, rgiw_o,
+                                            0., tp, 0.25)))
     return g0
 
 
@@ -298,25 +304,30 @@ def get_sigmaiw(beta, tp, u_int, filestr):
     """Returns all the Sigma functions of a given cut at tp or U
 
     either tp or u_int have to be defined and the other must be None"""
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5*beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
     sigma = []
     with h5.File(filestr.format(beta), 'r') as results:
         if u_int:
-            u_str = 'U'+str(u_int)
+            u_str = 'U' + str(u_int)
             for tp in results.keys():
-                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][:],results[tp][u_str]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                    0., float(tp[2:]), 0.25)
-                sigma.append(ipt.dimer_sigma(u_int, float(tp[2:]), g0iw_d, g0iw_o, tau, w_n))
+                jgiw_d, rgiw_o = results[tp][u_str]['giw_d'][
+                    :], results[tp][u_str]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j * w_n, 1j * jgiw_d, rgiw_o,
+                                                  0., float(tp[2:]), 0.25)
+                sigma.append(ipt.dimer_sigma(
+                    u_int, float(tp[2:]), g0iw_d, g0iw_o, tau, w_n))
         elif tp:
-            tpstr = 'tp'+str(tp)
+            tpstr = 'tp' + str(tp)
             for u_str in results[tpstr].keys():
-                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:]
-                g0iw_d, g0iw_o = self_consistency(1j*w_n, 1j*jgiw_d, rgiw_o,
-                                                    0., tp, 0.25)
+                jgiw_d, rgiw_o = results[tpstr][u_str]['giw_d'][
+                    :], results[tpstr][u_str]['giw_o'][:]
+                g0iw_d, g0iw_o = self_consistency(1j * w_n, 1j * jgiw_d, rgiw_o,
+                                                  0., tp, 0.25)
                 u_int = float(u_str[1:])
-                sigma.append(ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n))
+                sigma.append(ipt.dimer_sigma(
+                    u_int, tp, g0iw_d, g0iw_o, tau, w_n))
     return sigma
+
 
 def gf_ancon_gap(filestr, beta, u_int, tp, w, min_poles_fit=100):
     """Plots the analytical continuation of the local Gf along a given U or tp line
@@ -331,16 +342,16 @@ def gf_ancon_gap(filestr, beta, u_int, tp, w, min_poles_fit=100):
 
     with h5.File(filestr.format(beta), 'r') as results:
         if u_int:
-            u_str = 'U'+str(u_int)
-            gfs = [(results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:])
-                       for tpstr in results]
+            u_str = 'U' + str(u_int)
+            gfs = [(results[tpstr][u_str]['giw_d'][:], results[tpstr][u_str]['giw_o'][:])
+                   for tpstr in results]
         else:
 
-            tpstr = 'tp'+str(tp)
-            gfs = [(results[tpstr][u_str]['giw_d'][:],results[tpstr][u_str]['giw_o'][:])
-                               for u_str in results[tpstr]]
+            tpstr = 'tp' + str(tp)
+            gfs = [(results[tpstr][u_str]['giw_d'][:], results[tpstr][u_str]['giw_o'][:])
+                   for u_str in results[tpstr]]
 
         for giw in gfs:
-            pc = gf.pade_coefficients(1j*giw[0][:len(w_n)], w_n)
+            pc = gf.pade_coefficients(1j * giw[0][:len(w_n)], w_n)
             regf.append(gf.pade_rec(pc[:min(len(w_n), min_poles_fit)], w, w_n))
     return np.array(gfs), np.array(regf)

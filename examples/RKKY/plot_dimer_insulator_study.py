@@ -27,7 +27,8 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     ekin, epot = [], []
     iterations = []
     for u_int, tp in zip(u_range, tprange):
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(beta, u_int, tp, giw_d, giw_o)
+        giw_d, giw_o, loops = rt.ipt_dmft_loop(
+            beta, u_int, tp, giw_d, giw_o, tau, w_n)
         giw_s.append((giw_d, giw_o))
         iterations.append(loops)
         g0iw_d, g0iw_o = rt.self_consistency(
@@ -35,7 +36,7 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
 
-        ekin.append(rt.ekin(giw_d, giw_o, w_n, beta))
+        ekin.append(rt.ekin(giw_d, giw_o, w_n, tp, beta))
 
         epot.append(rt.epot(giw_d, giw_o, tau, w_n, tp, u_int, beta))
 
@@ -49,10 +50,10 @@ tpr = np.hstack((np.arange(0, 0.5, 0.02), np.arange(0.5, 1.1, 0.05)))
 ur = np.arange(0, 4.5, 0.1)
 x, y = np.meshgrid(tpr, ur)
 BETA = 512.
-filestr = 'disk/Dimer_ipt_B{}.h5'.format(BETA)
-metal_phases = np.clip(-rt.fermi_level_dos(filestr, BETA).T, 0, 2)
-filestr = 'disk/Dimer_ins_ipt_B{}.h5'.format(BETA)
-insulator_phases = np.clip(-rt.fermi_level_dos(filestr, BETA).T, 0, 2)
+metal_phases = np.load(
+    'disk/dimer_07_2015/Dimer_ipt_metal_seed_FL_DOS_BUt.npy')[1]
+insulator_phases = np.load(
+    'disk/dimer_07_2015/Dimer_ipt_insulator_seed_FL_DOS_BUt.npy')[1]
 
 
 ###############################################################################
@@ -68,8 +69,6 @@ insulator_phases = np.clip(-rt.fermi_level_dos(filestr, BETA).T, 0, 2)
 # temperatures each time.
 
 tprr = np.arange(0, 1.2, 0.04)
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
-    2.65 * np.ones_like(tprr), tprr, 512.)
 
 plt.pcolormesh(x, y, metal_phases, cmap=plt.get_cmap(r'viridis'))
 plt.axis([x.min(), x.max(), y.min(), y.max()])
@@ -82,6 +81,11 @@ plt.ylabel(r'U/D')
 plt.title(
     'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(BETA))
 plt.plot(tprr, 2.65 * np.ones_like(tprr), 'rx-', lw=2)
+
+###############################################################################
+
+giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+    2.65 * np.ones_like(tprr), tprr, 512.)
 
 ###############################################################################
 # Change of G_{AA}
