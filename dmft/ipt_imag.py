@@ -161,15 +161,21 @@ def _dimer_sigma(g0t_d, g0t_o, U):
     return g0t_d*g0t_d*g0t_d*U*U, -g0t_o*g0t_o*g0t_o*U*U
 
 def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
-    r"""Given a Green function it returns a dressed one and the self-energy
+    r"""Given a Green function it returns the self-energy
 
-    .. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3
+    .. math:: \Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)\mathcal{G}^0(-\tau)\mathcal{G}^0(\tau)
 
-    .. math:: G = \mathcal{G}^0(i\omega_n)/(1 - \Sigma(i\omega_n)\mathcal{G}^0(i\omega_n))
+    Which is done element wise given the form of the local interaction
+    in the dimer. For symmetry reasons only the 2 arrays are returned,
+    corresponding to the diagonal and off-diagonal terms of the matrix
+    self-energy
 
-    The Fourier transforms use as tail expansion of the atomic limit self-enegy
+    The Fourier transforms uses an empirically established tail expansion 
 
-    .. math:: \Sigma(i\omega_n\rightarrow \infty) = \frac{U^2}{4i\omega_n}
+    .. math:: \Sigma(i\omega_n\rightarrow \infty)_{AA} =
+        \frac{U^2}{4i\omega_n} + \frac{U^2/4 + 4*tp}{(i\omega_n)^3}
+    .. math:: \Sigma(i\omega_n\rightarrow \infty)_{AB} = \frac{-U^2
+        t_\perp}{2(i\omega_n)^2}
 
     Parameters
     ----------
