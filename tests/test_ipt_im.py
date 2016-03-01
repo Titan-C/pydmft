@@ -59,7 +59,7 @@ def test_selfconsistency(tp):
     """Check that the Bethe lattice self-consistency is working"""
     _, w_n = tau_wn_setup(dict(BETA=100., N_MATSUBARA=400))
     giwd, giwo = dimer.gf_met(w_n, 0., tp, 0.5, 0.)
-    g0iwd, g0iwo = dimer.self_consistency(1j*w_n, giwd, giwo, 0., tp, 0.25)
+    g0iwd, g0iwo = dimer.self_consistency(1j * w_n, giwd, giwo, 0., tp, 0.25)
     assert np.allclose(giwd, g0iwd)
     assert np.allclose(giwo, g0iwo)
 
@@ -71,7 +71,7 @@ def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
              't': 0.5, 'MU': 0, 'U': u_int,
              }
     tau, w_n = tau_wn_setup(parms)
-    g_iwn0 = greenF(w_n, D=2*parms['t'])
+    g_iwn0 = greenF(w_n, D=2 * parms['t'])
     g_iwn, _ = ipt_imag.dmft_loop(parms['U'], parms['t'], g_iwn0, w_n, tau)
 
     assert np.allclose(result, g_iwn, atol=3e-3)
@@ -81,7 +81,8 @@ def test_ipt_pm_g(u_int, result, beta=50., n_matsubara=64):
 def test_ipt_dimer_pm_g(u_int, result, beta=50.):
     tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=256))
     giw_d, giw_o = dimer.gf_met(w_n, 0., 0, 0.5, 0.)
-    giw_d = dimer.ipt_dmft_loop(beta, u_int, 0, giw_d, giw_o)[0][:64]
+    giw_d = dimer.ipt_dmft_loop(
+        beta, u_int, 0, giw_d, giw_o, tau, w_n, 1e-5)[0][:64]
 
     assert np.allclose(result, giw_d, atol=3e-3)
 
