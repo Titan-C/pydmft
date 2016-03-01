@@ -175,26 +175,28 @@ def ekin(giw_d, giw_o, w_n, tp, beta):
     return (4 * tp * giw_o.real -
             giw_d.imag**2 + giw_o.real**2 +
             (1 - 4 * tp**2) / w_n**2).real.sum() / beta / 2 - \
-            beta / 16 * (1 - 4 * tp**2)
+        beta / 16 * (1 - 4 * tp**2)
 
 
-def epot(giw_d, giw_o, tau, w_n, tp, u_int, beta):
-    """Calculates the potential energy per spin from its Green Function"""
-    g0iw_d, g0iw_o = self_consistency(
-        1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
-    siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+def epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta):
+    """Calculates the potential energy per spin
+
+    Using the Green Function and self-energy as in
+    :ref:`potential_energy`, which in this case have a matrix
+    structure in their product but one is only interested in the
+    diagonal terms of such product. Also for symmetry reason. A-B and
+    paramagnetism, only the first diagonal term is calculated, as one
+    is interested in the per spin energy. To get the per unit cell
+    multiply by 4. That is 2 sites times 2 spins, a total of 4
+    flavors.
+
+    Tail expansion is only taken relevant up to second order in the
+    product from the known moments of the Green function and
+    Self-Energy. In the case it ends up being the same as single band
+
+"""
     return (-siw_d.imag * giw_d.imag + siw_o.real * giw_o.real +
-            u_int**2 / 4 / w_n**2).real.sum() / beta - beta * u_int**2 / 32 + u_int / 8
-
-
-def complexity(filestr, beta):
-    """Extracts the loopcount for convergence"""
-    with h5.File(filestr.format(beta), 'r') as results:
-        comp = [results[tpstr][uint]['loops'].value
-                for tpstr in results
-                for uint in results[tpstr]]
-        array_column = len(results.keys())
-    return np.asarray(comp).reshape((array_column, -1))
+            u_int**2 / 4 / w_n**2).sum() / beta - beta * u_int**2 / 32 + u_int / 8
 
 
 def quasiparticle(filestr, beta):
