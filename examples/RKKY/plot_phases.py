@@ -53,7 +53,7 @@ TPR = np.arange(0, 1.1, 0.02)
 UR = np.arange(0, 4.5, 0.1)
 for beta in [100., 1000.]:
     plt.figure()
-    plot_phase_diagram_U_vs_tp(TPR, UR, 1000.)
+    plot_phase_diagram_U_vs_tp(TPR, UR, beta)
 
 ###############################################################################
 
