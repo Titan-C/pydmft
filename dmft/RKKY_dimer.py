@@ -170,12 +170,11 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
     return giw_d, giw_o, loops
 
 
-def ekin(giw_d, giw_o, w_n, tp, beta):
+def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
     """Calculates the kinetic energy per spin from its Green Function"""
-    return (4 * tp * giw_o.real -
-            giw_d.imag**2 + giw_o.real**2 +
-            (1 - 4 * tp**2) / w_n**2).real.sum() / beta / 2 - \
-        beta / 16 * (1 - 4 * tp**2)
+    return (tp * giw_o.real + t_sqr * (-giw_d.imag**2 + giw_o.real**2) +
+            (t_sqr + tp**2) / w_n**2).real.sum() / beta * 2 - \
+        beta / 4 * (t_sqr + tp**2)
 
 
 def epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta):

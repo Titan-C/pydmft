@@ -42,7 +42,7 @@ But the local self-energy can be expresed by
 Where :math:`h_{loc}` is the momentum independent part of the
 hamiltonian. Then the expression transforms into.
 
-.. math::  = Tr \frac{1}{\beta} \sum_{k,n} \left(h_{loc} + \Delta(i\omega_n)\right) G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \left(h_{loc} + \Delta(i\omega_n)\right) G(i\omega_n)
+.. math:: \langle T \rangle = Tr \frac{1}{\beta} \sum_{k,n} \left(h_{loc} - \Delta(i\omega_n)\right) G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \left(h_{loc} - \Delta(i\omega_n)\right) G(i\omega_n)
 
 
 .. _potential_energy:

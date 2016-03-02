@@ -38,7 +38,7 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
         ekin.append(rt.ekin(giw_d, giw_o, w_n, tp, beta))
 
-        epot.append(rt.epot(giw_d, giw_o, tau, w_n, tp, u_int, beta))
+        epot.append(rt.epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta))
 
     print(np.array(iterations))
 
