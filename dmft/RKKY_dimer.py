@@ -173,7 +173,7 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
 def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
     """Calculates the kinetic energy per spin from its Green Function"""
     return (tp * giw_o.real + t_sqr * (-giw_d.imag**2 + giw_o.real**2) +
-            (t_sqr + tp**2) / w_n**2).real.sum() / beta * 2 - \
+            (t_sqr + tp**2) / w_n**2).sum() / beta * 2 - \
         beta / 4 * (t_sqr + tp**2)
 
 
@@ -219,14 +219,6 @@ def quasiparticle(filestr, beta):
 
     return np.asarray(zet).reshape(array_shape)
 
-
-def fermi_level_dos(filestr, beta, n=3):
-    with h5.File(filestr.format(beta), 'r') as results:
-        w_n = gf.matsubara_freq(beta, n)
-        dos_fl = np.array([gf.fit_gf(w_n, results[tpstr][uint]['giw_d'][:n])(0.)
-                           for tpstr in results for uint in results[tpstr]])
-        dos_fl = dos_fl.reshape((len(results.keys()), -1))
-    return dos_fl
 
 # plots
 
