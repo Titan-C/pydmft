@@ -33,27 +33,27 @@ def estimate_dos_at_fermi_level_U_vs_tp(tpr, ulist, beta, phase):
     return -np.array(dos_fl).T
 
 
-def plot_phase_diagram_U_vs_tp(tpr, ur, beta):
+def plot_phase_diagram_U_vs_tp(tpr, ur, beta, ax):
 
     x, y = np.meshgrid(tpr, ur)
-    plt.pcolormesh(x, y, estimate_dos_at_fermi_level_U_vs_tp(
+    ax.pcolormesh(x, y, estimate_dos_at_fermi_level_U_vs_tp(
         tpr, range(len(ur)), beta, 'met'), cmap=plt.get_cmap(r'viridis'), vmin=0, vmax=2)
-    plt.axis([x.min(), x.max(), y.min(), y.max()])
-    plt.colorbar()
-    plt.pcolormesh(x, y, estimate_dos_at_fermi_level_U_vs_tp(
+    ax.axis([x.min(), x.max(), y.min(), y.max()])
+    ax.pcolormesh(x, y, estimate_dos_at_fermi_level_U_vs_tp(
         tpr, range(len(ur))[::-1], beta, 'ins'), alpha=0.2, cmap=plt.get_cmap(r'viridis'), vmin=0, vmax=2)
-
-    plt.xlabel(r'$t_\perp/D$')
-    plt.ylabel(r'$U/D$')
-    plt.title(
-        'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(beta))
 
 
 TPR = np.arange(0, 1.1, 0.02)
 UR = np.arange(0, 4.5, 0.1)
+urange = np.linspace(2.4, 3.6, 41)
+
 for beta in [100., 1000.]:
-    plt.figure()
-    plot_phase_diagram_U_vs_tp(TPR, UR, beta)
+    f, ax = plt.subplots()
+    plot_phase_diagram_U_vs_tp(TPR, UR, beta, ax)
+    ax.set_xlabel(r'$t_\perp/D$')
+    ax.set_ylabel(r'$U/D$')
+    ax.set_title(
+        'Phase diagram $\\beta={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(beta))
 
 ###############################################################################
 
@@ -77,23 +77,57 @@ def estimate_dos_at_fermi_level_T_vs_U(tp, ulist, temp, phase):
     return -np.array(dos_fl)
 
 
-def plot_phase_diagram_T_vs_U(tp, ur, temp):
+def plot_phase_diagram_T_vs_U(tp, ur, temp, ax):
 
     x, y = np.meshgrid(ur, temp)
-    plt.pcolormesh(x, y, estimate_dos_at_fermi_level_T_vs_U(
+    ax.pcolormesh(x, y, estimate_dos_at_fermi_level_T_vs_U(
         tp, range(len(ur)), temp, 'met'), cmap=plt.get_cmap(r'viridis'), vmin=0, vmax=2)
-    plt.axis([x.min(), x.max(), y.min(), y.max()])
-    plt.colorbar()
-    plt.pcolormesh(x, y, estimate_dos_at_fermi_level_T_vs_U(
+    ax.axis([x.min(), x.max(), y.min(), y.max()])
+    ax.pcolormesh(x, y, estimate_dos_at_fermi_level_T_vs_U(
         tp, range(len(ur))[::-1], temp, 'ins'), alpha=0.2, cmap=plt.get_cmap(r'viridis'), vmin=0, vmax=2)
-
-    plt.xlabel(r'$U/D$')
-    plt.ylabel(r'$T/D$')
-    plt.title(
-        'Phase diagram $t_\\perp={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(tp))
 
 TEMP = np.arange(1 / 500., .14, 1 / 400)
 for tp in [0., .15, .3, .5]:
-    plt.figure()
-    plot_phase_diagram_T_vs_U(tp, UR, TEMP)
+    f, ax = plt.subplots()
+    plot_phase_diagram_T_vs_U(tp, UR, TEMP, ax)
+    ax.set_ylabel(r'$T/D$')
+    ax.set_xlabel(r'$U/D$')
+    ax.set_title(
+        'Phase diagram $t_\\perp={}$,\n color represents $-\\Im G_{{AA}}(0)$'.format(tp))
+
 plt.show()
+
+###############################################################################
+
+
+ax_Bk = plt.subplot(231)
+ax_Bc = plt.subplot(232)
+ax_Br = plt.subplot(233)
+ax_t0 = plt.subplot(234)
+ax_t15 = plt.subplot(235)
+ax_t3 = plt.subplot(236)
+plot_phase_diagram_U_vs_tp(TPR, UR, 1000., ax_Bk)
+ax_Bk.set_ylabel(r'$U/D$')
+ax_Bk.set_xlabel(r'$t_\perp/D$')
+ax_Bk.plot(0.15 * np.ones_like(UR), UR, 'r-')
+ax_Bk.plot(0.3 * np.ones_like(UR), UR, 'r-')
+plot_phase_diagram_U_vs_tp(TPR, UR, 100., ax_Bc)
+ax_Bc.set_xlabel(r'$t_\perp/D$')
+ax_Bc.axes.get_yaxis().set_ticklabels([])
+plot_phase_diagram_U_vs_tp(TPR, UR, 30., ax_Br)
+ax_Br.set_xlabel(r'$t_\perp/D$')
+ax_Br.axes.get_yaxis().set_ticklabels([])
+
+plot_phase_diagram_T_vs_U(0.0, UR, TEMP, ax_t0)
+ax_t0.set_xlabel(r'$U/D$')
+ax_t0.set_ylabel(r'$T/D$')
+ax_t0.locator_params(axis='x', tight=True, nbins=6)
+plot_phase_diagram_T_vs_U(0.15, UR, TEMP, ax_t15)
+ax_t15.set_xlabel(r'$U/D$')
+ax_t15.locator_params(axis='x', tight=True, nbins=6)
+ax_t15.axes.get_yaxis().set_ticklabels([])
+plot_phase_diagram_T_vs_U(0.3, UR, TEMP, ax_t3)
+ax_t3.set_xlabel(r'$U/D$')
+ax_t3.locator_params(axis='x', tight=True, nbins=6)
+ax_t3.axes.get_yaxis().set_ticklabels([])
+plt.subplots_adjust(wspace=0.05, hspace=0.25)
