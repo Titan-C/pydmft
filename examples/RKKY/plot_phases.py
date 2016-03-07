@@ -68,7 +68,7 @@ def estimate_dos_at_fermi_level_T_vs_U(tp, ulist, temp, phase):
         return -np.load(save_file)
 
     for T in temp:
-        w_n = gf.matsubara_freq(100., 3)
+        w_n = gf.matsubara_freq(1 / T, 3)
         filestr = 'disk/phase_Dimer_ipt_{}_tp{}/B{:.5}/giw.npy'.format(
             phase, tp, 1 / T)
         gfs = np.load(filestr)
