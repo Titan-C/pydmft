@@ -180,8 +180,12 @@ def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             gf_iw = averager(results[u_str], 'G_iw', lastit)
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
+            hop_gf_iw = gf_iw.copy()
+            for name, g0block in hop_gf_iw:
+                shift = 1. if 'asym' or 'high' in name else -1
+                hop_gf_iw[name] << shift * tp * gf_iw[name]
 
-            gf_iw << 0.25*gf_iw*gf_iw
+            gf_iw << hop_gf_iw + 0.25 * gf_iw * gf_iw
             T.append(gf_iw.total_density())
         ur = np.array([float(u_str[1:]) for u_str in results])
 
