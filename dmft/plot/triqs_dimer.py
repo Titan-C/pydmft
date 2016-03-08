@@ -27,7 +27,8 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
             gf_iw = gf_iw[labels[block]]
             if sig:
                 shift = 1. if 'asym' in labels[block] else -1
-                gf_iw << iOmega_n + u_int/2. + shift * tp - 0.25 * gf_iw - inverse(gf_iw)
+                gf_iw << iOmega_n + u_int / 2. + shift * \
+                    tp - 0.25 * gf_iw - inverse(gf_iw)
 
             axes[0].oplot(gf_iw.imag, 'bo:', label=None)
             axes[0].oplot(gf_iw.real, 'gs:', label=None)
@@ -40,8 +41,8 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
         axes[1].plot(ifreqs, 'o-.', label=str(num))
 
     graf = r'$G$' if not sig else r'$\Sigma$'
-    graf += r'$(i\omega_n)$ '+labels[block]
-    label_convergence(beta, u_str+'\n$t_\\perp={}$'.format(tp),
+    graf += r'$(i\omega_n)$ ' + labels[block]
+    label_convergence(beta, u_str + '\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
 
@@ -67,20 +68,21 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             afm = []
             for u_str in results.keys():
                 lastit = results[u_str].keys()[-1]
-                labels = [name for name in results[u_str][lastit]['G_iw'].indices]
+                labels = [name for name in results[
+                    u_str][lastit]['G_iw'].indices]
                 gfB_iw = results[u_str][lastit]['G_iw']
                 #mesl = len(gfB_iw.mesh)/2.
                 paramagnetic_hf_clean(gfB_iw, float(u_str[1:]), tp)
 #
-                #afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
-                                      #gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
+                # afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
+                # gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
                 #afm.append(60 if afmtest else 280)
 
                 gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
-            plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
+            plt.scatter(np.ones(len(fl_dos)) * tp, u_range, c=fl_dos,
                         s=100, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
 
     plt.xlim([0, 1])
@@ -97,7 +99,8 @@ def phase_diag_b(BETA_range, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             fl_dos = []
             for u_str in results.keys():
                 lastit = results[u_str].keys()[-1]
-                labels = [name for name in results[u_str][lastit]['G_iw'].indices]
+                labels = [name for name in results[
+                    u_str][lastit]['G_iw'].indices]
                 gfB_iw = results[u_str][lastit]['G_iw']
                 paramagnetic_hf_clean(gfB_iw, float(u_str[1:]), tp)
 
@@ -105,7 +108,7 @@ def phase_diag_b(BETA_range, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
-            plt.scatter(u_range, np.ones(len(fl_dos))/BETA, c=fl_dos,
+            plt.scatter(u_range, np.ones(len(fl_dos)) / BETA, c=fl_dos,
                         s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
 
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
@@ -120,6 +123,7 @@ def averager(h5parent, h5child, last_iterations):
         sum_child += h5parent[step][h5child]
 
     return 1. / len(last_iterations) * sum_child
+
 
 def get_giw(h5parent, iteration_slice):
     """Recover G_iw from h5parent at iteration_slice
@@ -142,7 +146,7 @@ def tail_clean(gf_iw, U, tp):
     fixed = TailGf(1, 1, 3, 1)
     fixed[1] = np.array([[1]])
     fixed[2] = np.array([[-tp]])
-    fixed[3] = np.array([[U**2/4 + tp**2 + .25]])
+    fixed[3] = np.array([[U**2 / 4 + tp**2 + .25]])
     gf_iw.fit_tail(fixed, 5, int(gf_iw.beta), len(gf_iw.mesh))
 
 
@@ -199,16 +203,16 @@ def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
         for u_str in results:
             lastit = results[u_str].keys()[-3:]
             gf_iw = averager(results[u_str], 'G_iw', lastit)
-            sig_iw= gf_iw.copy()
+            sig_iw = gf_iw.copy()
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
 
             for name, g0block in gf_iw:
                 shift = 1. if 'asym' or 'high' in name else -1
-                sig_iw[name] << iOmega_n + u_int/2. + shift * tp - 0.25*gf_iw[name]- inverse(gf_iw[name])
+                sig_iw[name] << iOmega_n + u_int / 2. + shift * \
+                    tp - 0.25 * gf_iw[name] - inverse(gf_iw[name])
 
-
-            gf_iw << 0.5*sig_iw*gf_iw
+            gf_iw << 0.5 * sig_iw * gf_iw
             V.append(gf_iw.total_density())
         ur = np.array([float(u_str[1:]) for u_str in results])
 

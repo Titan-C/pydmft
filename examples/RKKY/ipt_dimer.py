@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     tpr = np.arange(0, 1.1, 0.02)
     ur = np.arange(0, 4.5, 0.1)
-    BETARANGE = [1000., 100.]
+    BETARANGE = [1000., 100., 30.]
     jobs = [(job.T[0], job.T[1], BETA, 'disk/phase_Dimer_ipt_met_B{:.5}', 'metal')
             for BETA in BETARANGE
             for job in np.array(list(itertools.product(tpr, ur))).reshape(len(tpr), len(ur), 2)]
