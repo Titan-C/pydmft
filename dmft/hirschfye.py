@@ -8,17 +8,17 @@ Quantum Monte Carlo algorithm
 """
 
 from __future__ import division, absolute_import, print_function
-from itertools import combinations, product
 import argparse
 import os
 import struct
 import time
+from itertools import combinations, product
 
 from mpi4py import MPI
-import numpy as np
 from scipy.linalg.blas import dger
 import scipy.linalg as la
 import numba
+import numpy as np
 
 from dmft.common import tau_wn_setup, gw_invfouriertrans, greenF
 import dmft.hffast as hffast
@@ -48,11 +48,11 @@ def ising_v(dtau, U, L, fields=1, polar=0.5):
     -------
     out : single dimension ndarray
     """
-    lam = np.arccosh(np.exp(dtau*U/2))
+    lam = np.arccosh(np.exp(dtau * U / 2))
     vis = np.ones((fields, L))
     rand = np.random.rand(fields, L)
     vis[rand > polar] = -1
-    return vis*lam
+    return vis * lam
 
 
 def imp_solver(g0_blocks, v, interaction, parms_user):
@@ -70,7 +70,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              'SEED':        struct.unpack("I", os.urandom(4))[0],
              'Heat_bath':   True,
              'ofile':       'hf_out.h5',
-             'group':       'temp/'+time.asctime(),
+             'group':       'temp/' + time.asctime(),
              }
     parms.update(parms_user)
 
@@ -85,12 +85,13 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     ar = []
 
     acc, anrat = 0, 0
-    flavor_pairs = list(combinations(product(range(2), range(parms['SITES'])), 2))
+    flavor_pairs = list(combinations(
+        product(range(2), range(parms['SITES'])), 2))
     double_occ = np.zeros(len(flavor_pairs))
 
-    flavors = 2*parms['BANDS']*parms['SITES']
-    double_occ = np.zeros(flavors*(flavors-1)/2)
-    ntau = 2*parms['N_MATSUBARA']
+    flavors = 2 * parms['BANDS'] * parms['SITES']
+    double_occ = np.zeros(flavors * (flavors - 1) / 2)
+    ntau = 2 * parms['N_MATSUBARA']
     chi = np.zeros(ntau)
     hffast.set_seed(parms['SEED'])
 
@@ -123,10 +124,10 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     tGst = np.asarray(Gst)
     Gst = np.zeros_like(tGst)
     comm.Allreduce(tGst, Gst)
-    Gst /= parms['sweeps']*comm.Get_size()
+    Gst /= parms['sweeps'] * comm.Get_size()
 
-    acc /= v.size*parms['meas']*(parms['sweeps'] + parms['therm'])
-    double_occ /= 2*parms['N_MATSUBARA']*parms['sweeps']
+    acc /= v.size * parms['meas'] * (parms['sweeps'] + parms['therm'])
+    double_occ /= 2 * parms['N_MATSUBARA'] * parms['sweeps']
 
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
@@ -134,11 +135,11 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     comm.Allreduce(chi.copy(), chi)
 
     if comm.rank == 0:
-        save_output(parms, double_occ/comm.Get_size(),
+        save_output(parms, double_occ / comm.Get_size(),
                     acc, chi, vlog, ar)
 
     # Recover Conventional GF sign in average
-    return [-1*avg_g(gst, parms) for gst in Gst]
+    return [-1 * avg_g(gst, parms) for gst in Gst]
 
 
 @numba.jit(nopython=True)
@@ -151,7 +152,7 @@ def measure_chi(v, slices):
             k = i + j
             if k > slices:
                 k -= slices  # Ising fields are bosonic and have PBC
-            chi[i] += s[k]*s[j]
+            chi[i] += s[k] * s[j]
 
     return chi
 
@@ -160,9 +161,11 @@ def double_occupation(g, double_occ, slices, flavor_pairs):
     """Calculates the density-density correlator between spin flavors"""
     for k, (i, j) in enumerate(flavor_pairs):
         spin_i, site_i = i
-        g_i = g[spin_i][site_i*slices:(site_i+1)*slices, site_i*slices:(site_i+1)*slices]
+        g_i = g[spin_i][
+            site_i * slices:(site_i + 1) * slices, site_i * slices:(site_i + 1) * slices]
         spin_j, site_j = j
-        g_j = g[spin_j][site_j*slices:(site_j+1)*slices, site_j*slices:(site_j+1)*slices]
+        g_j = g[spin_j][
+            site_j * slices:(site_j + 1) * slices, site_j * slices:(site_j + 1) * slices]
         double_occ[k] += np.einsum('ii,ii', g_i, g_j)
 
 
@@ -211,12 +214,12 @@ def retarded_weiss(g0tau):
     delta_tau = np.arange(slices)
 
     gind = slices + np.subtract.outer(delta_tau, delta_tau)
-    g0t_mat = np.empty((slices*n1, slices*n2))
+    g0t_mat = np.empty((slices * n1, slices * n2))
 
     for i in range(n1):
         for j in range(n2):
-            g0t_mat[i*slices:(i+1)*slices,
-                    j*slices:(j+1)*slices] = np.concatenate(
+            g0t_mat[i * slices:(i + 1) * slices,
+                    j * slices:(j + 1) * slices] = np.concatenate(
                         (g0tau[i, j], -g0tau[i, j]))[gind]
     return g0t_mat
 
@@ -226,23 +229,23 @@ def avg_gblock(gmat):
     the Greens Function"""
 
     slices = gmat.shape[0]
-    xga = np.zeros(2*slices)
-    for i in range(2*slices):
-        xga[i] = np.trace(gmat, offset=slices-i)
+    xga = np.zeros(2 * slices)
+    for i in range(2 * slices):
+        xga[i] = np.trace(gmat, offset=slices - i)
 
-    xg = (xga[slices:]-xga[:slices]) / slices
+    xg = (xga[slices:] - xga[:slices]) / slices
 
     return xg
 
 
 def avg_g(gst, parms):
-    n1, n2, slices = parms['SITES'], parms['SITES'], parms['N_MATSUBARA']*2
+    n1, n2, slices = parms['SITES'], parms['SITES'], parms['N_MATSUBARA'] * 2
 
     gst_m = np.empty((n1, n2, slices))
     for i in range(n1):
         for j in range(n2):
-            gst_m[i, j] = avg_gblock(gst[i*slices:(i+1)*slices,
-                                         j*slices:(j+1)*slices])
+            gst_m[i, j] = avg_gblock(gst[i * slices:(i + 1) * slices,
+                                         j * slices:(j + 1) * slices])
     return gst_m
 
 
@@ -263,7 +266,7 @@ def gnewclean(g0t, v, kroneker):
     multiorbital systems it asumes that it is already the fields addition
     """
     u_j = np.exp(v) - 1.
-    b = kroneker - u_j * (g0t-kroneker)
+    b = kroneker - u_j * (g0t - kroneker)
 
     return la.solve(b, g0t)
 
@@ -277,8 +280,8 @@ def gnew(g, dv, k):
     .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
 
     no sumation in the indexes"""
-    ee = np.exp(dv)-1.
-    a = ee/(1. + (1.-g[k, k])*ee)
+    ee = np.exp(dv) - 1.
+    a = ee / (1. + (1. - g[k, k]) * ee)
     x = g[:, k].copy()
     x[k] -= 1
     y = g[k, :].copy()
@@ -308,7 +311,7 @@ def g2flip(g, dv, l, k):
     U *= np.exp(dv) - 1.
 
     V = g[lk, :].copy()
-    denom = la.solve(U[lk, :]-d2, V)
+    denom = la.solve(U[lk, :] - d2, V)
 
     g -= np.dot(U, denom)
 
@@ -324,7 +327,7 @@ def interaction_matrix(bands):
     int_matrix = np.zeros((particles, fields))
     L = 0
     for i in range(particles):
-        for j in range(i+1, particles):
+        for j in range(i + 1, particles):
             int_matrix[i, L] = 1
             int_matrix[j, L] = -1
             L += 1
@@ -334,11 +337,11 @@ def interaction_matrix(bands):
 def setup_PM_sim(parms):
     """Setup the default state for a Paramagnetic simulation"""
     tau, w_n = tau_wn_setup(parms)
-    giw = greenF(w_n, mu=parms['MU'], D=2*parms['t'])
+    giw = greenF(w_n, mu=parms['MU'], D=2 * parms['t'])
     gtau = gw_invfouriertrans(giw, tau, w_n)
     parms['dtau_mc'] = tau[1]
     intm = interaction_matrix(parms.get('BANDS', 1))
-    v = ising_v(parms['dtau_mc'], parms['U'], len(tau)*parms['SITES'],
+    v = ising_v(parms['dtau_mc'], parms['U'], len(tau) * parms['SITES'],
                 intm.shape[1], parms['spin_polarization'])
 
     return tau, w_n, gtau, giw, v, intm
