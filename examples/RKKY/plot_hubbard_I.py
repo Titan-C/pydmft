@@ -23,7 +23,7 @@ import slaveparticles.quantum.operators as op
 def molecule_sigma(omega, U, mu, tp, beta):
     """Return molecule self-energy in the given frequency axis"""
 
-    h_at, oper = rt.dimer_hamiltonian(U, mu, -tp)
+    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
     oper_pair = [[oper[0], oper[0]], [oper[0], oper[1]]]
 
     eig_e, eig_v = op.diagonalize(h_at.todense())
@@ -110,7 +110,6 @@ ax[0].set_title(
     r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 plt.show()
 
-
 ###############################################################################
 # Hubbard I Band dispersion
 # -------------------------
@@ -136,3 +135,19 @@ plt.pcolormesh(
 plt.title(r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 plt.xlabel(r'$\epsilon$')
 plt.ylabel(r'$\omega$')
+
+import dmft.common as gf
+
+U, mu, tp, beta = 2.15, 0., 0.3, 5.
+sd_w, so_w = molecule_sigma(w + 1e-2j, U, mu, tp, beta)
+g = gf.greenF(-1j * (w + 1e-2j), sd_w)
+#g = gf.greenF(-1j *( w+1e-2j), U**2/4/w)
+plt.plot(w, g.real)
+plt.plot(w, -20 * g.imag)
+
+
+def g0s(U, w):
+
+    b = w + U**2 / 4 / w
+    s = np.sign(w)
+    return ((w + U**2 / 4 / w) + s * np.sqrt((w + 1e-5j + U**2 / 4 / w)**2 - 4 * (.25 + U**2 / 4 / w))) / 2
