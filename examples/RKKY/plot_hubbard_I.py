@@ -65,6 +65,7 @@ plt.show()
 
 ###############################################################################
 # Hubbard I Band dispersion
+# -------------------------
 
 eps_k = np.linspace(-1, 1, 61)
 lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
@@ -78,12 +79,60 @@ for i, e in enumerate(eps_k):
 
 plt.ylabel(r'$\epsilon + A(\epsilon, \omega)$')
 plt.xlabel(r'$\omega$')
-plt.title(r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+plt.title(r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 
 plt.figure()
 x, y = np.meshgrid(eps_k, w)
 plt.pcolormesh(
     x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-plt.title(r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+plt.title(r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+plt.xlabel(r'$\epsilon$')
+plt.ylabel(r'$\omega$')
+
+###############################################################################
+# The Real axis Self-energy
+# -------------------------
+
+w = np.linspace(-2, 2, 800)
+U, mu, tp, beta = 2.15, 0., 0.3, 5.
+sd_w, so_w = molecule_sigma(w + 5e-2j, U, mu, tp, beta)
+
+f, ax = plt.subplots(2, sharex=True)
+ax[0].plot(w, sd_w.real, label='Real')
+ax[0].plot(w, sd_w.imag, label='Imag')
+ax[1].plot(w, so_w.real, label='Real')
+ax[1].plot(w, so_w.imag, label='Imag')
+ax[0].legend(loc=0)
+ax[1].set_xlabel(r'$\omega$')
+ax[0].set_ylabel(r'$\Sigma_{AA}(\omega)$')
+ax[1].set_ylabel(r'$\Sigma_{AB}(\omega)$')
+ax[0].set_title(
+    r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+plt.show()
+
+
+###############################################################################
+# Hubbard I Band dispersion
+# -------------------------
+
+eps_k = np.linspace(-1, 1, 61)
+lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+Aw = -lat_gf[0].imag / np.pi
+
+plt.figure()
+for i, e in enumerate(eps_k):
+    plt.plot(w, e + Aw[i], 'k')
+    if e == 0:
+        plt.plot(w, e + Aw[i], 'g', lw=3)
+
+plt.ylabel(r'$\epsilon + A(\epsilon, \omega)$')
+plt.xlabel(r'$\omega$')
+plt.title(r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+
+plt.figure()
+x, y = np.meshgrid(eps_k, w)
+plt.pcolormesh(
+    x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
+plt.title(r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 plt.xlabel(r'$\epsilon$')
 plt.ylabel(r'$\omega$')
