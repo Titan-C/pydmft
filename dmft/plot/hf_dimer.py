@@ -64,7 +64,6 @@ def get_giw(filestr, tau=None, w_n=None, setup=None):
         return giw.reshape(4, -1), gtau
 
 
-
 def get_sigmaiw(giw, tau, w_n, setup):
     """Calculates the Self-Energy in Matsubara Frequencies by the
     Dyson equation
@@ -95,9 +94,9 @@ def get_sigmaiw(giw, tau, w_n, setup):
 
     tp, t = setup['tp'], setup['t']
 
-    gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
-                     [-tp*np.ones_like(w_n), 1j*w_n]])
-    sigmaiw = gmix -t**2 * giw - rt.mat_2_inv(giw)
+    gmix = np.array([[1j * w_n, -tp * np.ones_like(w_n)],
+                     [-tp * np.ones_like(w_n), 1j * w_n]])
+    sigmaiw = gmix - t**2 * giw - rt.mat_2_inv(giw)
 
     return sigmaiw
 
@@ -145,28 +144,26 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
     axes[0].legend(handles=[labimgiws, labregiws], loc=0)
 
     graf = r'$G(i\omega_n) {} {}$'.format(entry, flavor)
-    label_convergence(BETA, str(u_int)+'\n$t_\\perp={}$'.format(tp),
+    label_convergence(BETA, str(u_int) + '\n$t_\\perp={}$'.format(tp),
                       axes, graf, n_freq, xlim)
 
     return axes
 
 
-def list_show_conv(BETA, tp, filestr='tp{}_B{}.h5', n_freq=5, xlim=2, skip=5):
+def list_show_conv(BETA, tp, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
+                   simt='PM', flavor='up', entry='AA', n_freq=5, xlim=2, skip=5):
     """Plots in individual figures for all interactions the DMFT loops"""
-    with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
-        urange = output_files.keys()
 
-    for u_str in urange:
-        show_conv(BETA, u_str, tp, filestr, n_freq, xlim, skip)
-        docc, acc = report_docc_acc(BETA, u_str, tp, filestr)
+    sim_dir = filestr.format(BETA=BETA, tp=tp, simt=simt)
+    u_dirs = [u_dir for u_dir in os.listdir(sim_dir) if 'U' in u_dir]
+    urange = sorted([float(u[1:]) for u in u_dirs])
+
+    for u_int in urange:
+        show_conv(BETA, u_int, tp, filestr, simt,
+                  flavor, entry, n_freq, xlim, skip)
 
         plt.show()
         plt.close()
-        try:
-            print('Last step double occupation: {:.6}'.format(docc),
-                  'The acceptance rate is:{:.1%}'.format(acc))
-        except ValueError:
-            pass
 
 
 def gf_tail(gtau, U, mu, tp):
@@ -174,9 +171,9 @@ def gf_tail(gtau, U, mu, tp):
     g_t0 = gtau[:, :, 0]
 
     gtail = [np.eye(2).reshape(2, 2, 1),
-             (-mu - ((U-.5*tp)*(0.5+g_t0))*np.eye(2)+
-              tp*(1-g_t0)*np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
-             (0.25 + U**2/4 + tp**2)*np.eye(2).reshape(2, 2, 1)]
+             (-mu - ((U - .5 * tp) * (0.5 + g_t0)) * np.eye(2) +
+              tp * (1 - g_t0) * np.array([[0, 1], [1, 0]])).reshape(2, 2, 1),
+             (0.25 + U**2 / 4 + tp**2) * np.eye(2).reshape(2, 2, 1)]
     return gtail
 
 
@@ -195,12 +192,12 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
     Matplotlig axes
     """
 
-
     colors = ('b', 'g', 'r', 'c', 'm', 'y', 'k')
     if axes is None:
         _, axes = plt.subplots(1, 2, figsize=(13, 8))
 
-    save_dir = os.path.join(filestr.format(simt=simt, BETA=BETA, tp=tp), "U"+str(u_int))
+    save_dir = os.path.join(filestr.format(
+        simt=simt, BETA=BETA, tp=tp), "U" + str(u_int))
     with open(save_dir + '/setup', 'r') as conf:
         setup = json.load(conf)
     with open(save_dir + '/setup', 'w') as conf:
@@ -220,18 +217,19 @@ def plot_it(BETA, u_int, tp, it, flavor, simt, filestr='DIMER_{simt}_B{BETA}_tp{
                            True if name[0] == name[1] else False)
 
         axes[0].plot(edge_tau, gt_edge, label=name)
-        axes[0].set_ylabel(r'$G(\tau)$_'+flavor)
+        axes[0].set_ylabel(r'$G(\tau)$_' + flavor)
         axes[0].set_xlabel(r'$\tau$')
     axes[0].set_xlim([0, BETA])
 
     for gw, name in zip(giw, names):
-        axes[1].plot(w_n, gw.real, 'o:', label="Re " +name)
-        axes[1].plot(w_n, gw.imag, 's:', label="Im " +name)
-        axes[1].set_ylabel(r'$G(i\omega_n)$_'+flavor)
+        axes[1].plot(w_n, gw.real, 'o:', label="Re " + name)
+        axes[1].plot(w_n, gw.imag, 's:', label="Im " + name)
+        axes[1].set_ylabel(r'$G(i\omega_n)$_' + flavor)
         axes[1].set_xlabel(r'$i\omega_n$')
     axes[1].set_xlim([0, max(w_n)])
 
-    axes[0].set_title(r'Green Function in {} @ $\beta={}$, U={}, tp={}'.format(simt, BETA, u_int, tp))
+    axes[0].set_title(r'Green Function in {} @ $\beta={}$, U={}, tp={}'.format(
+        simt, BETA, u_int, tp))
     axes[0].legend(loc=0)
     axes[1].legend(loc=0)
 
@@ -251,6 +249,7 @@ def report_docc_acc(BETA, u_str, tp, filestr):
 
     return docc, acc
 
+
 def ekin(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
     e_mean = rt.free_ekin(tp, BETA)
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
@@ -263,15 +262,15 @@ def ekin(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
             giwd, giwo = get_giw(results[u_str], last_iter, tau, w_n)
             siwd, siwo = get_sigmaiw(results[u_str], last_iter, tau, w_n)
 
-            T.append(2*(w_n*(giw_free_d - giwd).imag +
-                     giwd.imag*siwd.imag - giwo.real*siwo.real).sum()/BETA + e_mean)
+            T.append(2 * (w_n * (giw_free_d - giwd).imag +
+                          giwd.imag * siwd.imag - giwo.real * siwo.real).sum() / BETA + e_mean)
         ur = np.array([float(u_str[1:]) for u_str in results])
     return np.array(T), ur
 
 
 def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
-    wsqr_4 = 4*w_n*w_n
+    wsqr_4 = 4 * w_n * w_n
     V = []
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:
         for u_str in results:
@@ -281,10 +280,11 @@ def epot(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
 
             u_int = float(u_str[1:])
 
-            V.append((giwo*siwo + giwd*siwd + u_int**2/wsqr_4).real.sum()/BETA)
+            V.append((giwo * siwo + giwd * siwd + u_int **
+                      2 / wsqr_4).real.sum() / BETA)
         ur = np.array([float(u_str[1:]) for u_str in results])
 
-    return np.array(V) - BETA*ur**2/32 + ur/8., ur
+    return np.array(V) - BETA * ur**2 / 32 + ur / 8., ur
 
 
 def get_docc(BETA, tp, filestr):
@@ -299,7 +299,7 @@ def get_docc(BETA, tp, filestr):
             except KeyError:
                 pass
 
-        docc=np.array(docc).T
+        docc = np.array(docc).T
         return docc[0], docc[1]
 
 
@@ -327,11 +327,11 @@ def dos_plot(BETA, tp, filestr, ax=None):
         for u_str in results:
             lastit = results[u_str].keys()[-1]
             giwd, _ = get_giw(results[u_str], lastit, tau, w_n)
-            fl_dos.append(-1./np.pi*gf.fit_gf(w_n[:3], giwd.imag)(0.))
+            fl_dos.append(-1. / np.pi * gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
         u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
         ax.scatter(u_range, fl_dos,
-                    s=120, marker='>', vmin=0, vmax=2./np.pi)
+                   s=120, marker='>', vmin=0, vmax=2. / np.pi)
     ax.set_title('Hysteresis loop of the \n density of states')
     ax.set_ylabel(r'$A(\omega=0)$')
     ax.set_xlabel('U/D')
@@ -343,23 +343,25 @@ def plot_acc(BETA, u_str, tp, filestr, skip=5):
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as output_files:
         for it_name in list(output_files[u_str].keys())[skip:]:
             try:
-                acceptance_log.append(output_files[u_str][it_name]['acceptance'].value)
+                acceptance_log.append(output_files[u_str][
+                                      it_name]['acceptance'].value)
             except KeyError:
                 acceptance_log.append(0.)
 
     plt.plot(acceptance_log, 'o-')
-    plt.title(r'Change of acceptance @ $\beta={}$, U={}'.format(BETA, u_str[1:]))
+    plt.title(r'Change of acceptance @ $\beta={}$, U={}'.format(
+        BETA, u_str[1:]))
     plt.ylabel('Acceptance rate')
     plt.xlabel('iterations')
 
 
 def plot_tails(BETA, U, tp, ax=None):
-    w_n = gf.matsubara_freq(BETA, BETA, BETA/2.)
+    w_n = gf.matsubara_freq(BETA, BETA, BETA / 2.)
     if ax is None:
         ax = plt
-    ax.plot(w_n, -1/w_n, '--')
-    ax.plot(w_n, -tp/w_n**2, '--')
-    ax.plot(w_n, -1/w_n + (U**2/4+0.25)/w_n**3, '--')
+    ax.plot(w_n, -1 / w_n, '--')
+    ax.plot(w_n, -tp / w_n**2, '--')
+    ax.plot(w_n, -1 / w_n + (U**2 / 4 + 0.25) / w_n**3, '--')
 
 
 def phase_diag_b(BETA_range, tp, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
@@ -374,7 +376,7 @@ def phase_diag_b(BETA_range, tp, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
                 fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
-            plt.scatter(u_range, np.ones(len(fl_dos))/BETA, c=fl_dos,
+            plt.scatter(u_range, np.ones(len(fl_dos)) / BETA, c=fl_dos,
                         s=150, vmin=-2, vmax=0)
     plt.ylim([0, 0.04])
     plt.title(r'Phase diagram at $t_\perp={}$'.format(tp))
@@ -394,7 +396,7 @@ def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
                 fl_dos.append(gf.fit_gf(w_n[:3], giwd.imag)(0.))
 
             u_range = np.array([float(u_str[1:]) for u_str in results.keys()])
-            plt.scatter(np.ones(len(fl_dos))*tp, u_range, c=fl_dos,
+            plt.scatter(np.ones(len(fl_dos)) * tp, u_range, c=fl_dos,
                         s=150, vmin=-2, vmax=0, cmap=plt.get_cmap('inferno'))
     plt.xlim([0, 1])
     plt.title(r'Phase diagram at $\beta={}$'.format(BETA))
@@ -403,26 +405,27 @@ def phase_diag(BETA, tp_range, filestr='HF_DIM_tp{tp}_B{BETA}.h5'):
 
 
 def spectral(tp, U, BETA, pade_fit_pts):
-    rot = np.matrix([[-1, 1], [1, 1]])/np.sqrt(2)
+    rot = np.matrix([[-1, 1], [1, 1]]) / np.sqrt(2)
     filestr = 'disk/metf_HF_Ul_tp{}_B{}.h5'.format(tp, BETA)
     f, (gl, gd) = plt.subplots(1, 2, figsize=(18, 8))
     with h5.File(filestr, 'r') as results:
-        u = 'U'+str(U)
+        u = 'U' + str(U)
         lastit = results[u].keys()[-1]
         g_iw = getGiw(results[u][lastit])
         greal = GfReFreq(indices=[0, 1], window=(-3.5, 3.5), n_points=500)
         greal.set_from_pade(g_iw, pade_fit_pts, 0.)
         gl.oplot(greal[0, 0], RI='S', label='out')
-        gl.set_title('On site GF, fit pts'+str(pade_fit_pts))
+        gl.set_title('On site GF, fit pts' + str(pade_fit_pts))
         gl.set_ylim([0, 0.6])
 
-        rgiw = rot*g_iw*rot
+        rgiw = rot * g_iw * rot
         greal.set_from_pade(rgiw, pade_fit_pts, 0.)
         gd.oplot(greal[0, 0], RI='S', label='bond')
         gd.oplot(greal[1, 1], RI='S', label='anti-bond')
         gd.set_title('Diagonal GF')
 
-        gl.oplot(0.5*(greal[0, 0] + greal[1, 1]), '--', RI='S', label='d avg')
+        gl.oplot(0.5 * (greal[0, 0] + greal[1, 1]),
+                 '--', RI='S', label='d avg')
 
     plt.show()
     plt.close()
