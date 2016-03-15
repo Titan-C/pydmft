@@ -152,14 +152,14 @@ ax[2][0].set_ylabel(r'$U/D$')
 sdm_zew, som_zew = estimate_zero_w_sigma_U_vs_tp(TPR, UR, 100., 'met')
 sdi_zew, soi_zew = estimate_zero_w_sigma_U_vs_tp(TPR, UR, 100., 'ins')
 
-for i, tp in list(enumerate(TPR))[::10]:
+for i, tp in list(enumerate(TPR))[:20:2]:
     # \Alpha
     plt.figure()
     plt.plot(UR, sdm_zew[i, :, 0], label='metal')
     plt.plot(UR, sdi_zew[i, ::-1, 0], label='insulator')
 
     min_y = np.min(np.concatenate((sdm_zew[i, :, 0], sdi_zew[i, ::-1, 0])))
-    plt.ylim([min_y, 0])
+    #plt.ylim([min_y, 0])
     plt.legend()
     plt.ylabel(r'$\alpha$')
     plt.xlabel(r'U/D')
@@ -227,15 +227,15 @@ for i, tp in list(enumerate(TPR))[::10]:
     # plt.close()
 # Z \Sigma AB
     plt.figure()
-    plt.plot(UR, som_zew[i, :, 1] * np.clip(1 /
-                                            (1 - sdm_zew[i, :, 0]), 0, 1), label='metal')
-    plt.plot(UR, soi_zew[i, ::-1, 1] * np.clip(1 /
-                                               (1 - sdi_zew[i, ::-1, 0]), 0, 1), label='insulator')
+    plt.plot(UR, (tp + som_zew[i, :, 1]) * np.clip(1 /
+                                                   (1 - sdm_zew[i, :, 0]), 0, 1), label='metal')
+    plt.plot(UR, (tp + soi_zew[i, ::-1, 1]) * np.clip(1 /
+                                                      (1 - sdi_zew[i, ::-1, 0]), 0, 1), label='insulator')
 
     plt.legend()
-    plt.ylabel(r'$Z\Sigma_{{AB}}(w=0)$')
+    plt.ylabel(r'$Z(t_\perp + \Sigma_{{AB}}(w=0))$')
     plt.xlabel(r'U/D')
-    plt.title(r'$Z\Sigma_{{AB}}(w=0)$ tp{} $\beta$=100'.format(tp))
+    plt.title(r'$Z(t_\perp + \Sigma_{{AB}}(w=0))$ tp{} $\beta$=100'.format(tp))
     plt.savefig('ZSIGMA_AB_cut_tp{}_B100.png'.format(tp))
     # plt.close()
 
@@ -257,10 +257,10 @@ for i, u_int in list(enumerate(UR))[20::3]:
     # plt.close()
 # Z \Sigma AB
     plt.figure()
-    plt.plot(TPR, som_zew[:, i, 1] * np.clip(1 /
-                                             (1 - sdm_zew[:, i, 0]), 0, 1), label='metal')
-    plt.plot(TPR, soi_zew[:, -1 - i, 1] * np.clip(1 /
-                                                  (1 - sdi_zew[:, -1 - i, 0]), 0, 1), label='insulator')
+    plt.plot(TPR, (tp + som_zew[:, i, 1]) * np.clip(1 /
+                                                    (1 - sdm_zew[:, i, 0]), 0, 1), label='metal')
+    plt.plot(TPR, (tp + soi_zew[:, -1 - i, 1]) * np.clip(1 /
+                                                         (1 - sdi_zew[:, -1 - i, 0]), 0, 1), label='insulator')
 
     plt.legend()
     plt.ylabel(r'$Z\Sigma_{{AB}}(w=0)$')

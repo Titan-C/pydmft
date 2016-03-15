@@ -95,7 +95,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
     # print(np.array(iterations))
 
-    return giw_s, sigma_iw, np.array(ekin), np.array(epot), w_n
+    return giw_s, np.array(ekin), np.array(epot)  # , w_n, sigma_iw
 
 BETARANGE = np.hstack((1 / np.arange(1.4e-3, 5, 1e-3),
                        1 / np.arange(5, 32, .1), [.03, .02]))
@@ -142,9 +142,9 @@ fig, ax = plt.subplots(2)
 for i, sol in enumerate(solutions):
     u, c = U_int[i], colors[i]
     li = c + '--' if 'I' == start[i] else c + '-'
-    ax[0].plot(temp, 2 * sol[3] / u_int, li,
+    ax[0].plot(temp, 2 * sol[3] / u, li,
                label='U={} {}'.format(u, start[i]))
-    ax[1].plot(temp, 2 * sol[3] / u_int, li)
+    ax[1].plot(temp, 2 * sol[3] / u, li)
 ax[0].set_xlim([0, 5])
 ax[0].set_ylim([0.0, .25])
 ax[1].set_xlim([0, .2])
@@ -165,21 +165,20 @@ ax[1].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 fig_cv, ax_cv = plt.subplots(2)
 fig_s, ax_s = plt.subplots(2)
 
-Harr = zip([metal2, metal2_75, insulator2_75, metal3_5, insulator3_5, insulator4_3],
-           [2, '2.75 M', '2.75 I', '3.5 M', '3.5 I', 4.3],
-           ['b', 'g', 'c', 'r', 'y', 'k'])
-for sol, u, c in Harr:
+for i, sol in enumerate(solutions):
+    u, c = U_int[i], colors[i]
+    li = c + '--' if 'I' == start[i] else c + '-'
+
     H = sol[2] + sol[3]
     CV = (H[1:] - H[:-1]) / (temp[1:] - temp[:-1])
 
-    li = c + '--' if 'I' in str(u) else c + '-'
-    ax_cv[0].plot(temp[:-1], CV, li, label='U={}'.format(u))
+    ax_cv[0].plot(temp[:-1], CV, li, label='U={} {}'.format(u, start[i]))
     ax_cv[1].plot(temp[:-1], CV, li)
 
     cv_temp = np.hstack((np.clip(CV, 0, 1) / temp[:-1], 0))
     S = np.array([simps(cv_temp[i:], temp[i:], even='last')
                   for i in range(len(temp))])
-    ax_s[0].plot(temp, log(2.) - S, li, label='U={}'.format(u))
+    ax_s[0].plot(temp, log(2.) - S, li, label='U={} {}'.format(u, start[i]))
     ax_s[1].plot(temp, log(2.) - S, li)
 
 ax_cv[0].set_xlim([0, 3])
