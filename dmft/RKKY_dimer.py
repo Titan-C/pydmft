@@ -139,6 +139,18 @@ def dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o):
     return mat_mul(dend, dendo, g0iw_d, g0iw_o)
 
 
+def get_sigmaiw(giw_d, giw_o, w_n, tp):
+    """Return Sigma by dyson in paramagnetic case only 2 entries"""
+
+    g0iw_d = 1j * w_n - .25 * giw_d
+    g0iw_o = -tp - 0.25 * giw_o
+
+    g_1_iw_d, g_1_iw_o = mat_inv(giw_d, giw_o)
+    siw_d = g0iw_d - g_1_iw_d
+    siw_o = g0iw_o - g_1_iw_o
+    return siw_d, siw_o
+
+
 def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
 
     converged = False
