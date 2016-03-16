@@ -6,18 +6,22 @@ Dimer in Bethe lattice
 
 """
 
-from __future__ import division, absolute_import, print_function
-from math import sqrt, modf
-from time import time
+from __future__ import absolute_import, division, print_function
+
 import argparse
 import os
 import struct
-import dmft.plot.triqs_dimer as tdimer
-from pytriqs.applications.impurity_solvers.cthyb import Solver
-from pytriqs.archive import HDFArchive
-from pytriqs.gf.local import inverse, iOmega_n, SemiCircular
-from pytriqs.operators import c, dagger
+from itertools import combinations
+from math import sqrt
+
 import pytriqs.utility.mpi as mpi
+import numpy as np
+from pytriqs.applications.impurity_solvers.cthyb import Solver, trace_rho_op
+from pytriqs.archive import HDFArchive
+from pytriqs.gf.local import SemiCircular, iOmega_n, inverse
+from pytriqs.operators import c, dagger
+
+import dmft.plot.triqs_dimer as tdimer
 
 
 def prepare_interaction(u_int):
@@ -33,7 +37,30 @@ def prepare_interaction(u_int):
 
     h_int = u_int * (dagger(aup) * aup * dagger(adw) * adw +
                      dagger(bup) * bup * dagger(bdw) * bdw)
-    return h_int
+    return h_int, [aup, bup, adw, bdw]
+
+
+def density_occup(solver_core, operators):
+
+    nn_avg = []
+    for cop in operators:
+        nn_avg.append(trace_rho_op(solver_core.density_matrix,
+                                   dagger(cop) * cop,
+                                   solver_core.h_loc_diagonalization))
+    return np.array(nn_avg)
+
+
+def density_correlators(solver_core, operators):
+    flavor_pairs = list(combinations(range(4), 2))
+
+    nn_avg = []
+    for i, j in flavor_pairs:
+        n_i_x_n_j = dagger(operators[i]) * operators[i] * \
+            dagger(operators[j]) * operators[j]
+        nn_avg.append(trace_rho_op(solver_core.density_matrix,
+                                   n_i_x_n_j,
+                                   solver_core.h_loc_diagonalization))
+    return np.array(nn_avg)
 
 
 def set_new_seed(setup):
@@ -70,7 +97,7 @@ def dmft_loop(setup, u_int, G_iw):
                                 'asym_dw': [0], 'sym_dw': [0]},
                      n_iw=int(3 * setup['BETA']), n_tau=int(100 * setup['BETA']))
     work_pt = len(imp_sol.G_iw.mesh) / 2
-    h_int = prepare_interaction(u_int)
+    h_int, operators = prepare_interaction(u_int)
 
     src_U = 'U' + str(u_int)
 
@@ -127,6 +154,11 @@ def dmft_loop(setup, u_int, G_iw):
                 last_run[
                     '/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
                 last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
+                last_run[
+                    '/U{}/it{:03}/density'.format(u_int, loop)] = density_correlators(imp_sol, operators)
+                last_run[
+                    '/U{}/it{:03}/occup'.format(u_int, loop)] = density_occup(imp_sol, operators)
+
                 if setup['save_gtau']:
                     last_run[
                         '/U{}/it{:03}/G_tau'.format(u_int, loop)] = imp_sol.G_tau
@@ -174,6 +206,8 @@ def do_setup():
                                'n_warmup_cycles': setup['therm'],
                                'length_cycle': setup['meas'],
                                'measure_pert_order': setup['pert'],
+                               'use_norm_as_weight': True,
+                               'measure_density_matrix': True,
                                'random_seed': struct.unpack("I", os.urandom(4))[0]}})
 
     return setup
