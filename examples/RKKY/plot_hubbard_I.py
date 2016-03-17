@@ -183,9 +183,9 @@ def molecule_sigma_bath(omega, U, mu, tp, beta):
 # The Real axis Self-energy
 # -------------------------
 
-w = np.linspace(-2, 2, 1800)
+w = np.linspace(-3, 3, 1800)
 plt.figure()
-U, mu, tp, beta = 2.15, 0., 0., 5.
+U, mu, tp, beta = 2.15, 0., 0., 100.
 sd_w, so_w = molecule_sigma_bath(w + 1e-13j, U, mu, tp, beta)
 #sd_w.imag, so_w.imag = -np.abs(sd_w), np.zeros_like(so_w.imag)
 g0_1s = w + 1e-3j - tp
@@ -222,12 +222,13 @@ plt.show()
 # Hubbard I Band dispersion
 # -------------------------
 
-eps_k = np.linspace(-1, 1, 61)
-lat_gf = rt.mat_inv(np.add.outer(-eps_k, g0_1s - sd_w), g0_1a - so_w)
+eps_k = np.linspace(-1.5, 1.5, 61)
+#lat_gf = rt.mat_inv(np.add.outer(-eps_k, g0_1s - sd_w), g0_1a - so_w)
 
-lat_gfs = 1 / np.add.outer(-eps_k, g0_1s + 5e-2j - sd_w)
-lat_gfa = 1 / np.add.outer(-eps_k, g0_1a + 5e-2j - so_w)
-Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, -.5, 10)
+lat_gfs = 1 / np.add.outer(-eps_k, g0_1s + 5e-5j - sd_w)
+lat_gfa = 1 / np.add.outer(-eps_k, g0_1a + 5e-5j - so_w)
+Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, -.5, 3) * \
+    dos.bethe_lattice(eps_k, .5).reshape(-1, 1)
 
 plt.figure()
 for i, e in enumerate(eps_k):
