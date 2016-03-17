@@ -217,3 +217,33 @@ def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V), ur
+
+
+def extract_local_sigma(BETA, tp, skip_list, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
+    """Extracts the local and intersite self-energy, averaged"""
+    sd_zew, so_zew = [], []
+    ur = []
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=2))
+    with tdp.HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
+        for u_str in results:
+            if u_str in skip_list:
+                continue
+            gf_iw = tdp.get_giw(results[u_str], slice(-1, -3, -1))
+
+            giw_d = .25 * (gf_iw['asym_up'] + gf_iw['sym_up'] +
+                           gf_iw['asym_dw'] + gf_iw['sym_dw'])
+            giw_o = .25 * \
+                (-1 * gf_iw['asym_up'] + gf_iw['sym_up'] -
+                 gf_iw['asym_dw'] + gf_iw['sym_dw'])
+            ngiw_d = np.squeeze(giw_d.data)
+            ngiw_o = np.squeeze(giw_o.data)
+            ngiw_d = ngiw_d[len(ngiw_d) / 2:len(ngiw_d) / 2 + 2]
+            ngiw_o = ngiw_o[len(ngiw_o) / 2:len(ngiw_o) / 2 + 2]
+
+            siw_d, siw_o = rt.get_sigmaiw(
+                1j * ngiw_d.imag, ngiw_o.real, w_n, tp)
+            sd_zew.append(np.polyfit(w_n, siw_d.imag, 1))
+            so_zew.append(np.polyfit(w_n, siw_o.real, 1))
+            ur.append(float(u_str[1:]))
+
+    return np.array(sd_zew), np.array(so_zew), np.array(ur)
