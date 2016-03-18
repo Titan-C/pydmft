@@ -48,10 +48,10 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
     gf_s = 1j * gf_d.imag + gf_o
     gf_a = 1j * gf_d.imag - gf_o
     pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w + 5e-5j, w_n[w_set])
+    gr_s = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
 
     pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
-    gr_a = gf.pade_rec(pc, w + 5e-5j, w_n[w_set])
+    gr_a = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
 
     return gr_s, gr_a
 
@@ -85,10 +85,26 @@ w = np.linspace(-4, 4, 800)
 eps_k = np.linspace(-1., 1., 61)
 
 
+def plot_self_energy(w, sd_w, so_w, U, mu, tp, beta):
+    f, ax = plt.subplots(2, sharex=True)
+    ax[0].plot(w, sd_w.real, label='Real')
+    ax[0].plot(w, sd_w.imag, label='Imag')
+    ax[1].plot(w, so_w.real, label='Real')
+    ax[1].plot(w, so_w.imag, label='Imag')
+    ax[0].legend(loc=0)
+    ax[1].set_xlabel(r'$\omega$')
+    ax[0].set_ylabel(r'$\Sigma_{AA}(\omega)$')
+    ax[1].set_ylabel(r'$\Sigma_{AB}(\omega)$')
+    ax[0].set_title(
+        r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+    plt.show()
+
+
 def plot_dispersions(sigma_iw, ur, tp, w_n, w):
 
     for U, (sig_d, sig_o) in zip(ur, sigma_iw):
         sd, so = pade_diag(sig_d, sig_o, w_n, np.arange(120), w)
+        plot_self_energy(w, sd, so, U, 0, tp, 100.)
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - sd)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - so)

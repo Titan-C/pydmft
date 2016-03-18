@@ -185,7 +185,7 @@ def list_show_conv(beta, filestr='SB_PM_B{}', n_freq=5, xlim=2, skip=5):
         plt.close()
 
 
-def fit_dos(beta, avg, filestr='SB_PM_B{}'):
+def fit_dos(beta, avg, filestr='disk/SB_PM_B{}'):
     """Fits for all Green's functions at a given beta their
     density of states at the Fermi energy
 
@@ -210,9 +210,10 @@ def fit_dos(beta, avg, filestr='SB_PM_B{}'):
         last_iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[-avg:]
         with open(sim_dir + '/setup', 'r') as read:
             setup = json.load(read)
+            setup['U'] = float(u_str[1:])
             tau, w_n = gf.tau_wn_setup(setup)
 
-        _, giw = get_giw(sim_dir, last_iterations, tau, w_n)
+        giw, _ = get_giw(sim_dir, last_iterations, tau, w_n, setup)
 
         gfit = gf.fit_gf(w_n[:3], giw.imag)
         figiw.append(gfit)
