@@ -56,7 +56,7 @@ U, mu, tp, beta = 2.15, 0., 0.3, 100.
 sd_w, so_w = molecule_sigma(w + 5e-2j, U, mu, tp, beta)
 
 
-def plot_self_energy(w, sd_w, sd_o, U, mu, tp, beta):
+def plot_self_energy(w, sd_w, so_w, U, mu, tp, beta):
     f, ax = plt.subplots(2, sharex=True)
     ax[0].plot(w, sd_w.real, label='Real')
     ax[0].plot(w, sd_w.imag, label='Imag')
