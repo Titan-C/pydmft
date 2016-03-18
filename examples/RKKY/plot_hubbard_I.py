@@ -51,11 +51,6 @@ def molecule_sigma(omega, U, mu, tp, beta):
 # The Real axis Self-energy
 # -------------------------
 
-w = np.linspace(-3, 3, 800)
-U, mu, tp, beta = 2.15, 0., 0.3, 100.
-sd_w, so_w = molecule_sigma(w + 5e-2j, U, mu, tp, beta)
-
-
 def plot_self_energy(w, sd_w, so_w, U, mu, tp, beta):
     f, ax = plt.subplots(2, sharex=True)
     ax[0].plot(w, sd_w.real, label='Real')
@@ -70,15 +65,14 @@ def plot_self_energy(w, sd_w, so_w, U, mu, tp, beta):
         r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
     plt.show()
 
+w = np.linspace(-3, 3, 800)
+U, mu, tp, beta = 2.15, 0., 0.3, 100.
+sd_w, so_w = molecule_sigma(w + 5e-5j, U, mu, tp, beta)
 plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
 
 ###############################################################################
 # Hubbard I Band dispersion
 # -------------------------
-
-eps_k = np.linspace(-1, 1, 61)
-lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
-Aw = -lat_gf[0].imag / np.pi
 
 
 def plot_band_dispersion(w, Aw, title):
@@ -100,6 +94,10 @@ def plot_band_dispersion(w, Aw, title):
     plt.xlabel(r'$\epsilon$')
     plt.ylabel(r'$\omega$')
 
+eps_k = np.linspace(-1, 1, 61)
+lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+Aw = -lat_gf[0].imag / np.pi
+
 plot_band_dispersion(
     w, Aw, r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 
@@ -109,7 +107,7 @@ plot_band_dispersion(
 
 w = np.linspace(-3, 3, 800)
 U, mu, tp, beta = 2.15, 0., 0.3, 5.
-sd_w, so_w = molecule_sigma(w + 5e-2j, U, mu, tp, beta)
+sd_w, so_w = molecule_sigma(w + 5e-5j, U, mu, tp, beta)
 plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
 
 ###############################################################################
@@ -163,10 +161,10 @@ def molecule_sigma_diag(omega, U, mu, tp, beta):
 # function that is equivalente to the hilbert transform of the molecule
 # green function
 
-w = np.linspace(-3, 3, 600)
+w = np.linspace(-3, 3, 800)
 plt.figure()
 U, mu, tp, beta = 2.15, 0., 0.3, 100.
-ss_w, sa_w = molecule_sigma_diag(w + 1e-15j, U, mu, tp, beta)
+ss_w, sa_w = molecule_sigma_diag(w + 1e-8j, U, mu, tp, beta)
 
 
 def approximate_free_propagator(ss_w, sa_w, title):
@@ -208,7 +206,7 @@ plot_band_dispersion(
 # -------------------------
 
 U, mu, tp, beta = 2.15, 0., 0.3, 5.
-ss_w, sa_w = molecule_sigma_diag(w + 1e-15j, U, mu, tp, beta)
+ss_w, sa_w = molecule_sigma_diag(w + 1e-8j, U, mu, tp, beta)
 g0_1s, g0_1a = approximate_free_propagator(
     ss_w, sa_w, r'Bath self-consistent dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
 
