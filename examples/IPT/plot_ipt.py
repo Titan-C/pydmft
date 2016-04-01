@@ -15,7 +15,7 @@ the contribution of the Hartree-term is not included here as it is cancelled
 from __future__ import division, absolute_import, print_function
 
 from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec
+from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec, plot_band_dispersion
 
 
 import numpy as np
@@ -41,6 +41,13 @@ pade_coefs = pade_coefficients(s_iwn, w_n)
 sigma_w = pade_rec(pade_coefs, omega, w_n)
 sw_ax[0].plot(omega, sigma_w.real, label='Insulator Solution')
 sw_ax[1].plot(omega, sigma_w.imag, label='Insulator Solution')
+
+eps_k = np.linspace(-1, 1, 61)
+lat_gf = 1 / (np.add.outer(-eps_k, omega + 8e-2j) - sigma_w)
+Aw = -lat_gf.imag / np.pi
+
+plot_band_dispersion(
+    omega, Aw, r'Insulator Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)
 
 g_iwn, s_iwn = dmft_loop(U, 0.5, g_iwn0, w_n, tau, conv=1e-8)
 giw_ax.plot(w_n, g_iwn.imag, 's-', label='Metal Solution')
@@ -71,9 +78,17 @@ gw_ax.set_title(r'Spectral function at $\beta= {}$, $U= {}$'.format(beta, U))
 gw_ax.legend(loc=0)
 
 sw_ax[0].set_ylabel(r'$\Re e \Sigma(\omega)$')
+sw_ax[0].set_ylim([-25, 25])
 sw_ax[1].set_ylabel(r'$\Im m \Sigma(\omega)$')
 sw_ax[0].set_xlabel(r'$\omega$')
 sw_ax[1].set_xlabel(r'$\omega$')
 sw_ax[0].set_title(r'Self-Energy at $\beta= {}$, $U= {}$'.format(beta, U))
 sw_ax[0].legend(loc=0)
 sw_ax[1].legend(loc=0)
+
+
+lat_gf = 1 / (np.add.outer(-eps_k, omega + 8e-2j) - sigma_w)
+Aw = -lat_gf.imag / np.pi
+
+plot_band_dispersion(
+    omega, Aw, r'Metal Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)

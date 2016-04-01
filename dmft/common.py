@@ -7,9 +7,11 @@ Interface to treat arrays as the Green functions. Deals with their
 Fourier Transforms from Matsubara frequencies to Imaginary time.
 """
 
-from __future__ import division, absolute_import, print_function
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
 from numpy.fft import fft, ifft
+import matplotlib.pyplot as plt
 
 
 def matsubara_freq(beta=16., size=256, fer=1):
@@ -34,7 +36,7 @@ def matsubara_freq(beta=16., size=256, fer=1):
     real ndarray
     """
 
-    return np.pi*(fer+2*np.arange(size)) / beta
+    return np.pi * (fer + 2 * np.arange(size)) / beta
 
 
 def tau_wn_setup(parms):
@@ -53,7 +55,7 @@ def tau_wn_setup(parms):
     """
 
     w_n = matsubara_freq(parms['BETA'], parms['N_MATSUBARA'])
-    tau = np.arange(0, parms['BETA'], parms['BETA']/2/len(w_n))
+    tau = np.arange(0, parms['BETA'], parms['BETA'] / 2 / len(w_n))
 
     return tau, w_n
 
@@ -82,10 +84,10 @@ def greenF(w_n, sigma=0, mu=0, D=1):
             Interacting Greens function in matsubara frequencies, all odd
             entries are zeros
     """
-    zeta = 1.j*w_n + mu - sigma
+    zeta = 1.j * w_n + mu - sigma
     sq = np.sqrt((zeta)**2 - D**2)
-    sig = np.sign(sq.imag*w_n)
-    return 2./(zeta + sig*sq)
+    sig = np.sign(sq.imag * w_n)
+    return 2. / (zeta + sig * sq)
 
 
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
@@ -122,7 +124,7 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
     gtau = g_tau - time_tail
-    return beta*ifft(gtau*np.exp(1j*np.pi*tau/beta))[..., :len(w_n)]+freq_tail
+    return beta * ifft(gtau * np.exp(1j * np.pi * tau / beta))[..., :len(w_n)] + freq_tail
 
 
 def freq_tail_fourier(tail_coef, beta, tau, w_n):
@@ -150,13 +152,13 @@ def freq_tail_fourier(tail_coef, beta, tau, w_n):
 
     """
 
-    freq_tail =   tail_coef[0]/(1.j*w_n)\
-                + tail_coef[1]/(1.j*w_n)**2\
-                + tail_coef[2]/(1.j*w_n)**3
+    freq_tail =   tail_coef[0] / (1.j * w_n)\
+        + tail_coef[1] / (1.j * w_n)**2\
+        + tail_coef[2] / (1.j * w_n)**3
 
-    time_tail = - tail_coef[0]/2 \
-                + tail_coef[1]/2*(tau-beta/2) \
-                - tail_coef[2]/4*(tau**2 - beta*tau)
+    time_tail = - tail_coef[0] / 2 \
+        + tail_coef[1] / 2 * (tau - beta / 2) \
+                - tail_coef[2] / 4 * (tau**2 - beta * tau)
 
     return freq_tail, time_tail
 
@@ -208,9 +210,9 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
 
     giwn = g_iwn - freq_tail
 
-    g_tau = fft(giwn, len(tau)) * np.exp(-1j*np.pi*tau/beta)
+    g_tau = fft(giwn, len(tau)) * np.exp(-1j * np.pi * tau / beta)
 
-    return (g_tau*2/beta).real + time_tail
+    return (g_tau * 2 / beta).real + time_tail
 
 
 def fit_gf(w_n, giw, p=2):
@@ -248,7 +250,8 @@ def pade_coefficients(g_iw, w_n):
     G = np.zeros((len(g_iw), len(g_iw)), dtype=np.complex)
     G[0] = g_iw
     for i in range(1, len(g_iw)):
-        G[i, i:] = 1j*(G[i-1, i-1]/G[i-1, i:]-1.)/(w_n[i-1]-w_n[i:])
+        G[i, i:] = 1j * (G[i - 1, i - 1] / G[i - 1, i:] -
+                         1.) / (w_n[i - 1] - w_n[i:])
 
     return np.diag(G)
 
@@ -269,10 +272,40 @@ def pade_rec(pc, w, w_n):
     an = pc[0]
     bn = 1.
     bn_1 = 1.
-    iw_n = 1j*w_n
-    for i in range(len(pc)-2):
-        anp = an+(w-iw_n[i])*pc[i+1]*an_1
-        bnp = bn+(w-iw_n[i])*pc[i+1]*bn_1
+    iw_n = 1j * w_n
+    for i in range(len(pc) - 2):
+        anp = an + (w - iw_n[i]) * pc[i + 1] * an_1
+        bnp = bn + (w - iw_n[i]) * pc[i + 1] * bn_1
         an_1, an = an, anp
         bn_1, bn = bn, bnp
-    return an/bn
+    return an / bn
+
+
+def plot_band_dispersion(w, Aw, title, eps_k):
+    """Plot the band dispersion of Aw in 2 graphics styles
+
+    Parameters
+    ----------
+    w : real ndarray, real frequencies
+    Aw : real 2D ndarray, Dispesion of spectral function
+    title : string with figure title
+    eps_k : real ndarray, spacing of spectral function lines
+    """
+
+    plt.figure()
+    for i, e in enumerate(eps_k):
+        plt.plot(w, e + Aw[i], 'k')
+        if e == 0:
+            plt.plot(w, e + Aw[i], 'g', lw=3)
+
+    plt.ylabel(r'$\epsilon + A(\epsilon, \omega)$')
+    plt.xlabel(r'$\omega$')
+    plt.title(title)
+
+    plt.figure()
+    x, y = np.meshgrid(eps_k, w)
+    plt.pcolormesh(
+        x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
+    plt.title(title)
+    plt.xlabel(r'$\epsilon$')
+    plt.ylabel(r'$\omega$')

@@ -69,27 +69,8 @@ plt.legend(loc=0)
 # The Band Dispersion
 # -------------------
 
-def plot_band_dispersion(w, Aw, title):
-    plt.figure()
-    for i, e in enumerate(eps_k):
-        plt.plot(w, e + Aw[i], 'k')
-        if e == 0:
-            plt.plot(w, e + Aw[i], 'g', lw=3)
-
-    plt.ylabel(r'$\epsilon + A(\epsilon, \omega)$')
-    plt.xlabel(r'$\omega$')
-    plt.title(title)
-
-    plt.figure()
-    x, y = np.meshgrid(eps_k, w)
-    plt.pcolormesh(
-        x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    plt.title(title)
-    plt.xlabel(r'$\epsilon$')
-    plt.ylabel(r'$\omega$')
-
 eps_k = np.linspace(-1, 1, 61)
 lat_gf = 1 / (np.add.outer(-eps_k, w + 8e-2j) - U**2 / 4 / g0_1)
 Aw = -lat_gf.imag / np.pi
 
-plot_band_dispersion(w, Aw, 'Hubbard III band dispersion')
+gf.plot_band_dispersion(w, Aw, 'Hubbard III band dispersion', eps_k)
