@@ -45,7 +45,7 @@ def molecule_sigma_d(omega, U, mu, tp, beta):
     return [omega + tp - 1 / gfsU[0], omega - tp - 1 / gfsU[1]]
 
 
-w = np.linspace(-3, 3, 1800)
+w = np.linspace(-3, 3, 800)
 U = 2.5
 tp = 0.3
 
@@ -73,27 +73,34 @@ g0_1_a = w - tp + 5e-2j + 2 * tp  # The excitation out of the singlet has
 g0_1_b = w + tp + 5e-2j - 2 * tp  # this extra contribution of 2tp
 
 plt.figure()
-plt.plot(w, -(1 / (g0_1_a - sp_2 / g0_1_a)).imag, label='Anti-bond')
-plt.plot(w, -(1 / (g0_1_b - sp_2 / g0_1_b)).imag, label='Bond')
+x = .60
+plt.plot(w, -((1 - (1 - 2 * x) * sp_2 / g0_1_a) /
+              (g0_1_a - sp_2 / g0_1_a)).imag, label='Anti-bond')
+plt.plot(w, -((1 + (1 - 2 * x) * sp_2 / g0_1_b) /
+              (g0_1_b - sp_2 / g0_1_b)).imag, label='Bond')
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega)$')
 plt.title(r'Isolated dimer approximation $U={}$, $t_\perp={}$'.format(U, tp))
 plt.legend(loc=0)
 
 for i in range(2000):
-    g0_1_b = w + tp - .25 / (g0_1_b - sp_2 / g0_1_b)
-    g0_1_a = w - tp - .25 / (g0_1_a - sp_2 / g0_1_a)
+    g0_1_a = w - tp - .25 * (1 - (1 - 2 * x) * sp_2 /
+                             g0_1_a) / (g0_1_a - sp_2 / g0_1_a)
+    g0_1_b = w + tp - .25 * (1 + (1 - 2 * x) * sp_2 /
+                             g0_1_b) / (g0_1_b - sp_2 / g0_1_b)
 
 ###############################################################################
 # The Self-Energy
 # ---------------
 
 plt.figure()
-plt.plot(w, (sp_2 / g0_1_b).real, label=r"Re Bond")
-plt.plot(w, (sp_2 / g0_1_b).imag, label=r"Im Bond")
+sb = sp_2 * ((1 - 2 * x) + 1 / g0_1_b) / (1 + (1 - 2 * x) * sp_2 / g0_1_b)
+plt.plot(w, sb.real, label=r"Re Bond")
+plt.plot(w, sb.imag, label=r"Im Bond")
 
-plt.plot(w, (sp_2 / g0_1_a).real, label=r"Re Anti-Bond")
-plt.plot(w, (sp_2 / g0_1_a).imag, label=r"Im Anti-Bond")
+sa = sp_2 * (-(1 - 2 * x) + 1 / g0_1_a) / (1 - (1 - 2 * x) * sp_2 / g0_1_a)
+plt.plot(w, sa.real, label=r"Re Anti-Bond")
+plt.plot(w, sa.imag, label=r"Im Anti-Bond")
 
 plt.ylabel(r'$\Sigma(\omega)$')
 plt.xlabel(r'$\omega$')
@@ -106,11 +113,10 @@ plt.ylim([-3.5, 2])
 # ------------------
 
 plt.figure()
-plt.plot(w, (1 / (w + tp - sp_2 / g0_1_b)).real, label=r"Re Bond")
-plt.plot(w, (1 / (w + tp - sp_2 / g0_1_b)).imag, label=r"Im Bond")
-plt.plot(w, (sp_2 / g0_1_b).real - w - tp, label=r'$\Sigma_{S} - w + t_\perp$')
-#plt.plot(w, (1 / (w - tp - sp_2 / g0_1_a)).real, label=r"Re Anti-Bond")
-#plt.plot(w, (1 / (w - tp - sp_2 / g0_1_a)).imag, label=r"Im Anti-Bond")
+g_b = 1 / (w + tp - sb)
+plt.plot(w, g_b.real, label=r"Re Bond")
+plt.plot(w, g_b.imag, label=r"Im Bond")
+plt.plot(w, sb.real - w - tp, label=r'$\Sigma_{S} - w + t_\perp$')
 
 plt.ylabel(r'$G(\omega)$')
 plt.xlabel(r'$\omega$')
