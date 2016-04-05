@@ -56,33 +56,13 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
     return gr_s, gr_a
 
 
-def plot_band_dispersion(w, Aw, title):
-    plt.figure()
-    for i, e in enumerate(eps_k):
-        plt.plot(w, e + Aw[i], 'k')
-        if e == 0:
-            plt.plot(w, e + Aw[i], 'g', lw=3)
-
-    plt.ylabel(r'$\epsilon + A(\epsilon, \omega)$')
-    plt.xlabel(r'$\omega$')
-    plt.title(title)
-
-    plt.figure()
-    x, y = np.meshgrid(eps_k, w)
-    plt.pcolormesh(
-        x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    plt.title(title)
-    plt.xlabel(r'$\epsilon$')
-    plt.ylabel(r'$\omega$')
-
-
 def plot_spectral(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
     f, ax = plt.subplots(1, sharex=True)
     ax.plot(w, ss_w.real, ":", label='Re G sum')
     ax.plot(w, -ss_w.imag, label='-Im G sum')
     if plot_second:
-        ax[1].plot(w, sa_w.real, ":", label='Re G dif')
-        ax[1].plot(w, -sa_w.imag, label='Im G dif')
+        ax.plot(w, sa_w.real, ":", label='Re G dif')
+        ax.plot(w, -sa_w.imag, label='Im G dif')
     ax.legend(loc=0)
     ax.set_xlabel(r'$\omega$')
     ax.set_ylabel(r'$A_{Bond}(\omega)$')
@@ -97,8 +77,8 @@ def plot_self_energy(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
     ax.plot(w, ss_w.real, label='Re sum')
     ax.plot(w, ss_w.imag, label='Im sum')
     if plot_second:
-        ax[1].plot(w, sa_w.real, label='Re dif')
-        ax[1].plot(w, sa_w.imag, label='Im dif')
+        ax.plot(w, sa_w.real, label='Re dif')
+        ax.plot(w, sa_w.imag, label='Im dif')
     ax.legend(loc=0)
     ax.set_xlabel(r'$\omega$')
     ax.set_ylabel(r'$\Sigma_{Bond}(\omega)$')
@@ -108,27 +88,30 @@ def plot_self_energy(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
     plt.show()
 
 
-def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w):
+def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 
     for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
-        gs, ga = pade_diag(giw_d, giw_o, w_n, np.arange(150), w)
+        gs, ga = pade_diag(giw_d, giw_o, w_n, w_set, w)
         plot_spectral(w, gs, ga,
-                      U, 0, tp, 100., True)
-        ss, sa = pade_diag(sig_d, sig_o, w_n, np.arange(150), w)
-        plot_self_energy(w, ss, sa, U, 0, tp, 100., True)
+                      U, 0, tp, 100., False)
+        ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
+        plot_self_energy(w, ss, sa, U, 0, tp, 100., False)
+        gs, ga = gf.greenF(-1j * w, + tp + ss), gf.greenF(-1j * w, - tp + sa)
+        plot_spectral(w, gs, ga,
+                      U, 0, tp, 100., False)
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
         Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 2)
 
-        plot_band_dispersion(
-            w, Aw, r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+        gf.plot_band_dispersion(
+            w, Aw, r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta), eps_k)
 
 ###############################################################################
 # Metals
 # ------
 
-urange = [1.5, 2., 2.175, 2.5, 3., 3.5]
+urange = [1.5, 2., 2.175, 2.5, 3.]
 beta = 100.
 tp = 0.3
 giw_s, sigma_iw, w_n = loop_u_tp(
@@ -136,7 +119,8 @@ giw_s, sigma_iw, w_n = loop_u_tp(
 
 w = np.linspace(-4, 4, 800)
 eps_k = np.linspace(-1., 1., 61)
-plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w)
+w_set = np.concatenate((np.arange(80), np.arange(80, 200, 2)))
+plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 
 ###############################################################################
 # Insulators
@@ -150,4 +134,4 @@ giw_s, sigma_iw, w_n = loop_u_tp(
 
 w = np.linspace(-4, 4, 800)
 eps_k = np.linspace(-1., 1., 61)
-plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w)
+plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
