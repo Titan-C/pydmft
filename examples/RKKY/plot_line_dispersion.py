@@ -86,6 +86,15 @@ def plot_self_energy(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
     plt.show()
 
 
+def plot_pole_eq(gf, sig, tp, w):
+    plt.plot(w, .25 * gf.real, label='D re')
+    plt.plot(w, .25 * gf.imag, label='D im')
+    plt.plot(w, sig.real, label='sig re')
+    plt.plot(w, sig.imag, label='sig im')
+    plt.plot(w, w + tp - .25 * gf.real - sig.real)
+    plt.title('Pole_equation')
+
+
 def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 
     for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
@@ -97,6 +106,7 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
         gs, ga = gf.greenF(-1j * w, + tp + ss), gf.greenF(-1j * w, - tp + sa)
         plot_spectral(w, gs, ga,
                       U, 0, tp, 100., False)
+        plot_pole_eq(gs, ss, -tp, w)
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
@@ -109,27 +119,28 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 # Metals
 # ------
 
-urange = [1.5, 2., 2.175, 2.5, 3.]
-beta = 100.
-tp = 0.3
-giw_s, sigma_iw, w_n = loop_u_tp(
-    urange, tp * np.ones_like(urange), beta, "M")
-
-w = np.linspace(-4, 4, 800)
-eps_k = np.linspace(-1., 1., 61)
-w_set = np.concatenate((np.arange(80), np.arange(80, 200, 2)))
-plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
-
+# urange = [1.5, 2., 2.175, 2.5, 3.]
+# beta = 100.
+# tp = 0.3
+# giw_s, sigma_iw, w_n = loop_u_tp(
+    # urange, tp * np.ones_like(urange), beta, "M")
+#
+# w = np.linspace(-4, 4, 800)
+# eps_k = np.linspace(-1., 1., 61)
+# w_set = np.concatenate((np.arange(80), np.arange(80, 200, 2)))
+# plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+#
 ###############################################################################
 # Insulators
 # ----------
 
-urange = [2.175, 2.5, 3., 3.5, 4., 5.]
+urange = [2.5]  # [2.175, 2.5, 3., 3.5, 4., 5.]
 beta = 100.
 tp = 0.3
 giw_s, sigma_iw, w_n = loop_u_tp(
     urange, tp * np.ones_like(urange), beta)
 
 w = np.linspace(-4, 4, 800)
+w_set = np.arange(80)
 eps_k = np.linspace(-1., 1., 61)
 plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
