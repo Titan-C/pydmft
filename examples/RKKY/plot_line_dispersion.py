@@ -10,8 +10,6 @@ Dispersion of the spectral function
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-from math import ceil, log
-
 import matplotlib.pyplot as plt
 import numpy as np
 

@@ -247,3 +247,95 @@ def extract_local_sigma(BETA, tp, skip_list, filestr='DIMER_PM_B{BETA}_tp{tp}.h5
             ur.append(float(u_str[1:]))
 
     return np.array(sd_zew), np.array(so_zew), np.array(ur)
+
+
+def avg_last(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5', over=5):
+    """Averages the over the last iterations and writes inplace"""
+    with tdp.HDFArchive(filestr.format(tp=tp, BETA=BETA), 'a') as output_files:
+        u_range = list(output_files.keys())
+        print(u_range)
+        for u_str in u_range:
+            giw = tdp.get_giw(output_files[u_str], slice(-over, None))
+            try:
+                dest_count = len(output_files[u_str])
+            except KeyError:
+                dest_count = 0
+            dest_group = '/{}/it{:03}/'.format(u_str, dest_count)
+
+            output_files[dest_group + 'G_iw'] = giw
+
+
+def sigma_zero_freq(BETA, tp, skip_list, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
+    """Extracts the local and intersite self-energy"""
+    sd_zew, so_zew = [], []
+    ur = []
+    tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=2))
+    try:
+        with tdp.HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
+            for u_str in results:
+                if u_str in skip_list:
+                    continue
+                gf_iw = tdp.get_giw(results[u_str], slice(-1, -3, -1))
+
+                giw_d = .25 * (gf_iw['asym_up'] + gf_iw['sym_up'] +
+                               gf_iw['asym_dw'] + gf_iw['sym_dw'])
+                giw_o = .25 * \
+                    (-1 * gf_iw['asym_up'] + gf_iw['sym_up'] -
+                     gf_iw['asym_dw'] + gf_iw['sym_dw'])
+                ngiw_d = np.squeeze(giw_d.data)
+                ngiw_o = np.squeeze(giw_o.data)
+                ngiw_d = ngiw_d[len(ngiw_d) / 2:len(ngiw_d) / 2 + 2]
+                ngiw_o = ngiw_o[len(ngiw_o) / 2:len(ngiw_o) / 2 + 2]
+
+                siw_d, siw_o = rt.get_sigmaiw(
+                    1j * ngiw_d.imag, ngiw_o.real, w_n, tp)
+                sd_zew.append(np.polyfit(w_n, siw_d.imag, 1))
+                so_zew.append(np.polyfit(w_n, siw_o.real, 1))
+                ur.append(float(u_str[1:]))
+        return np.array(sd_zew), np.array(so_zew), np.array(ur)
+
+    except (IndexError, RuntimeError):
+        return None, None, None
+
+
+def plot_zero_w_sigma(beta, tp, skip_list=[]):
+    sd_zew, so_zew, ur = sigma_zero_freq(beta, tp, skip_list)
+    if sd_zew is None:
+        return None
+    plt.figure()
+    try:
+        plt.plot(ur, sd_zew[:, 0], 'o', label=r'slope, $\alpha$')
+        plt.plot(ur, sd_zew[:, 1], 'o', label='cut AA')
+    except IndexError:
+        import pdb
+        pdb.set_trace()
+    plt.legend(loc=0)
+    plt.ylabel(r'$\alpha$')
+    plt.xlabel(r'U/D')
+    plt.title(r'$\alpha$ tp{} $\beta$=100'.format(tp))
+    plt.savefig('SIGMA_AA_alpha_tp{}_B100.png'.format(tp))
+
+    plt.figure()
+    plt.plot(ur, so_zew[:, 1], 's', label='cut AB')
+    plt.legend(loc=0)
+    plt.ylabel(r'$\Sigma_{{AB}}(w=0)$')
+    plt.xlabel(r'U/D')
+    plt.title(r'$\Sigma_{{AB}}(w=0)$ tp{} $\beta$=100'.format(tp))
+    plt.savefig('SIGMA_AB_cut_tp{}_B100.png'.format(tp))
+
+    plt.figure()
+    plt.plot(ur, 1 / (1 - sd_zew[:, 0]), 'o', label=r'$Z$')
+    plt.legend(loc=0)
+    plt.ylim([0, 1])
+    plt.ylabel(r'Z')
+    plt.xlabel(r'U/D')
+    plt.title(r'$Z$ tp{} $\beta$=100'.format(tp))
+    plt.savefig('Z_tp{}_B100.png'.format(tp))
+
+    plt.figure()
+    plt.plot(ur, (tp + so_zew[:, 1]) / (1 - sd_zew[:, 0]), 's', label='cut AB')
+    plt.legend(loc=0)
+    plt.ylabel(r'$Z(t_\perp + \Sigma_{{AB}}(w=0))$')
+    plt.xlabel(r'U/D')
+    plt.title(r'$Z(t_\perp + \Sigma_{{AB}}(w=0))$ tp{} $\beta$=100'.format(tp))
+    plt.savefig('ZSIGMA_AB_cut_tp{}_B100.png'.format(tp))
