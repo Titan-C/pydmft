@@ -11,6 +11,8 @@ Study of self energy
 from __future__ import division, absolute_import, print_function
 
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import dmft.plot.triqs_dimer as tdp
 import dmft.RKKY_dimer as rt
@@ -19,82 +21,67 @@ import dmft.plot.hf_single_site
 import dmft.ipt_imag as ipt
 
 
-def pade_diag(gf_s, gf_a, w_n, w_set, w):
-    pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
-
-    pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
-    gr_a = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
-
-    return gr_s, gr_a
-
-
-def plot_functions(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
-    f, ax = plt.subplots(1, sharex=True)
-    ax.plot(w, ss_w.real, label='Re sum')
-    ax.plot(w, -ss_w.imag, label='-Im sum')
-    if plot_second:
-        ax.plot(w, sa_w.real, label='Re dif')
-        ax.plot(w, -sa_w.imag, label='-Im dif')
+def plot_greenfunct(w, gfunc, title, ylabel, ax=None):
+    if ax is None:
+        f, ax = plt.subplots(1)
+    ax.plot(w, gfunc.real, label=r'$\Re e$' + ylabel)
+    ax.plot(w, -gfunc.imag, label=r'$-\Im m$' + ylabel)
     ax.legend(loc=0)
     ax.set_xlabel(r'$\omega$')
-    ax.set_title(
-        r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+    ax.set_ylabel(ylabel + r'$(\omega)$')
+    ax.set_title(title)
+    ax.set_ylim([-3, 3])
+    return ax
 
+
+def plot_pole_eq(w, gf, sig, title):
+    plt.figure()
+    plt.plot(w, sig.imag, label=r'$\Im m \Sigma$')
+    plt.plot(w, (1 / gf).real, label=r'$\Re e G^{-1}$')
+    plt.plot(w, -gf.imag, label='DOS')
+    plt.legend(loc=0)
+    plt.title(title)
+    plt.ylim([-3, 3])
+
+
+def hiltrans(zeta):
+    sqr = np.sqrt(zeta**2 - 1)
+    sqr = np.sign(sqr.imag) * sqr
+    return 2 * (zeta - sqr)
+
+BETA = 100.
 tp = 0.3
-U = 3.5
-with tdp.HDFArchive('tp03f/DIMER_PM_B100.0_tp0.3.h5') as data:
-    giw = tdp.get_giw(data['U' + str(U)], slice(-1, -4, -1))
-
-giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
-giw_s = np.squeeze(giw['sym_up'].data)[len(giw_s) / 2:len(giw_s) / 2 + 300]
-
-giw_as = np.squeeze(.5 * (giw['asym_up'].data + giw['asym_dw'].data))
-giw_as = np.squeeze(giw['asym_up'].data)[
-    len(giw_as) / 2:len(giw_as) / 2 + 300]
-
-
 w_n = gf.matsubara_freq(100., 300)
 w = np.linspace(-5, 20, 1000)
 w_set = np.arange(100)
-gs, ga = pade_diag(giw_s, giw_as, w_n, w_set, w)
-plot_functions(w, gs, ga, U, 0, tp, 100., False)
-plt.ylabel(r'$G(\omega)$')
-plt.ylim([-.5, 2])
-siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
-siw_as = 1j * w_n + tp - .25 * giw_as - 1 / giw_as
-
-ss, sa = pade_diag(siw_s, siw_as, w_n, w_set, w)
-plot_functions(w, ss, sa, U, 0, tp, 100., False)
-plt.ylabel(r'$\Sigma(\omega)$')
-plt.ylim([-5, 5])
-
-gs, ga = gf.greenF(-1j * w, + tp + ss), gf.greenF(-1j * w, - tp + sa)
-plot_functions(w, gs, ga, U, 0, tp, 100., False)
-plt.ylabel(r'$G(\omega)$')
-plt.ylim([-.5, 2])
-
-tp = 0.3
-U = 2.1499
+eps_k = np.linspace(-1., 1., 61)
 with tdp.HDFArchive('tp03f/DIMER_PM_B100.0_tp0.3.h5') as data:
-    giw = tdp.get_giw(data['U' + str(U)], slice(-1, -3, -1))
+    for u_str in data:
+        giw = tdp.get_giw(data[u_str], slice(-1, -5, -1))
 
-giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
-#giw_s = np.squeeze(giw['sym_up'].data)
-giw_s = np.squeeze(giw['sym_up'].data)[len(giw_s) / 2:len(giw_s) / 2 + 300]
+        giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
+        giw_s = np.squeeze(giw['sym_up'].data)[
+            len(giw_s) / 2:len(giw_s) / 2 + 300]
 
+        gs = gf.pade_contination(giw_s, w_n, w, w_set)
+        siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
+        ss = gf.pade_contination(siw_s, w_n, w, w_set)
+        gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+        lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
+        Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
 
-giw_as = np.squeeze(.5 * (giw['asym_up'].data + giw['asym_dw'].data))
-#giw_as = np.squeeze(giw['asym_up'].data)
-giw_as = np.squeeze(giw['asym_up'].data)[
-    len(giw_as) / 2:len(giw_as) / 2 + 300]
+        U = float(u_str[1:])
+        title = r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
+            U, tp, BETA)
+        ax = plot_greenfunct(w, gs, title, r'$G$')
+        plot_greenfunct(w, gst, title, r'$G$', ax)
+        plt.savefig('DOS_B100_tp{}_U{}.png'.format(tp, U))
 
-w_n = gf.matsubara_freq(100., 300)
-w = np.linspace(-5, 5, 1000)
-w_set = np.arange(80)
-gs, ga = pade_diag(giw_s, 0.5 * (giw_s - giw_as.real +
-                                 1j * giw_as.imag), w_n, w_set, w)
-plot_functions(w, gs, ga, U, 0, tp, 100., False)
-plt.ylabel(r'$G(\omega)$')
-plot_functions(w, ga, gs, U, 0, tp, 100., False)
-plt.ylabel(r'$G(\omega)$')
+        ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
+        plt.savefig('Sigma_B100_tp{}_U{}.png'.format(tp, U))
+
+        plot_pole_eq(w, gst, ss, title)
+        plt.savefig('Pole_eq_B100_tp{}_U{}.png'.format(tp, U))
+        gf.plot_band_dispersion(w, Aw, title, eps_k)
+        plt.savefig('Arpes_eq_B100_tp{}_U{}.png'.format(tp, U))
+        plt.savefig('Arpes_den_eq_B100_tp{}_U{}.png'.format(tp, U))

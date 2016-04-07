@@ -281,6 +281,38 @@ def pade_rec(pc, w, w_n):
     return an / bn
 
 
+def pade_contination(gfunc, w_n, w, w_set=None):
+    """Continate the green Function by Padé
+
+    Parameters
+    ----------
+    gfunc: complex 1D ndarray
+        Green function to be continued
+    w_n: real 1D ndarray
+        Matsubara frequencies
+    w: real 1D ndarray
+        real frequency array
+    w_set: int or int 1D ndarray
+        Amount of frequency point to sample
+        index of points to sample for continuation
+
+    See also
+    --------
+    pade_coefficients
+    pade_rec
+    """
+
+    if w_set is None:
+        w_set = np.arange(len(w_n))
+    elif isinstance(w_set, int):
+        w_set = np.arange(w_set)
+
+    pc = pade_coefficients(gfunc[w_set], w_n[w_set])
+    g_real = pade_rec(pc, w + 5e-8j, w_n[w_set])
+
+    return g_real
+
+
 def plot_band_dispersion(w, Aw, title, eps_k):
     """Plot the band dispersion of Aw in 2 graphics styles
 
