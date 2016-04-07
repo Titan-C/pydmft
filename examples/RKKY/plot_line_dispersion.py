@@ -54,46 +54,26 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
     return gr_s, gr_a
 
 
-def plot_spectral(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
-    f, ax = plt.subplots(1, sharex=True)
-    ax.plot(w, ss_w.real, label='Re G sum')
-    ax.plot(w, -ss_w.imag, label='-Im G sum')
-    if plot_second:
-        ax.plot(w, sa_w.real, ":", label='Re G, SP+H')
-        ax.plot(w, -sa_w.imag, ":", label='Im G SP+H')
+def plot_greenfunct(w, gfunc, title, ylabel, ax=None):
+    if ax is None:
+        f, ax = plt.subplots(1)
+    ax.plot(w, gfunc.real, label=r'$\Re e$' + ylabel)
+    ax.plot(w, -gfunc.imag, label=r'$-\Im m$' + ylabel)
     ax.legend(loc=0)
     ax.set_xlabel(r'$\omega$')
-    ax.set_ylabel(r'$A_{Bond}(\omega)$')
-    ax.set_title(
-        r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
-    ax.set_ylim([-.5, 2])
-    plt.show()
+    ax.set_ylabel(ylabel + r'$(\omega)$')
+    ax.set_title(title)
+    ax.set_ylim([-3, 3])
+    return ax
 
 
-def plot_self_energy(w, ss_w, sa_w, U, mu, tp, beta, plot_second):
-    f, ax = plt.subplots(1, sharex=True)
-    ax.plot(w, ss_w.real, label='Re sum')
-    ax.plot(w, -ss_w.imag, label='-Im sum')
-    if plot_second:
-        ax.plot(w, sa_w.real, label='Re dif')
-        ax.plot(w, sa_w.imag, label='Im dif')
-    ax.legend(loc=0)
-    ax.set_xlabel(r'$\omega$')
-    ax.set_ylabel(r'$\Sigma_{Bond}(\omega)$')
-    ax.set_title(
-        r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
-    ax.set_ylim([-5, 2])
-    plt.show()
-
-
-def plot_pole_eq(gf, sig, U, tp, w):
+def plot_pole_eq(w, gf, sig, title):
     plt.figure()
-    plt.plot(w, sig.imag, label='Im Sigma')
-    plt.plot(w, (1 / gf).real, label='Re G^-1')
+    plt.plot(w, sig.imag, label=r'$\Im m \Sigma$')
+    plt.plot(w, (1 / gf).real, label=r'$\Re e G^{-1}$')
     plt.plot(w, -gf.imag, label='DOS')
     plt.legend(loc=0)
-    plt.title(r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
-        U, tp, beta))
+    plt.title(title)
     plt.ylim([-3, 3])
 
 
@@ -109,9 +89,6 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
         gs, ga = pade_diag(giw_d, giw_o, w_n, w_set, w)
         ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
         gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
-        plot_spectral(w, gs, gst, U, 0, tp, 100., True)
-        plot_self_energy(w, ss, sa, U, 0, tp, 100., False)
-        plot_pole_eq(gst, ss, U, tp, w)
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
@@ -120,7 +97,12 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
         Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
 
         title = r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
-            U, tp, beta)
+            U, tp, BETA)
+        ax = plot_greenfunct(w, gs, title, r'$G$')
+        plot_greenfunct(w, gst, title, r'$G$', ax)
+        ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
+
+        plot_pole_eq(w, gst, ss, title)
         gf.plot_band_dispersion(w, Aw, title, eps_k)
 
 ###############################################################################
@@ -128,13 +110,12 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 # ------
 #
 urange = [1.5, 2., 2.175, 2.5, 3.]
-beta = 100.
+BETA = 100.
 tp = 0.3
-giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), beta, "M")
-
+giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
 w = np.linspace(-4, 4, 800)
 eps_k = np.linspace(-1., 1., 61)
-w_set = np.concatenate((np.arange(90), np.arange(90, 200, 2)))
+w_set = np.concatenate((np.arange(100), np.arange(100, 200, 2)))
 plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 
 ###############################################################################
@@ -142,13 +123,9 @@ plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 # ----------
 
 urange = [2.175, 2.5, 3., 3.5, 4., 5.]
-beta = 100.
-tp = 0.3
 giw_s, sigma_iw, w_n = loop_u_tp(
-    urange, tp * np.ones_like(urange), beta)
+    urange, tp * np.ones_like(urange), BETA)
 
-w = np.linspace(-4, 4, 800)
-w_set = np.concatenate((np.arange(90), np.arange(90, 200, 20)))
 eps_k = np.linspace(-1., 1., 61)
 plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 
