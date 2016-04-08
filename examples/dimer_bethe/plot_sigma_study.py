@@ -10,6 +10,7 @@ Study of self energy
 
 from __future__ import division, absolute_import, print_function
 
+import argparse
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -49,39 +50,51 @@ def hiltrans(zeta):
     sqr = np.sign(sqr.imag) * sqr
     return 2 * (zeta - sqr)
 
-BETA = 100.
-tp = 0.3
-w_n = gf.matsubara_freq(100., 300)
-w = np.linspace(-5, 20, 1000)
-w_set = np.arange(100)
-eps_k = np.linspace(-1., 1., 61)
-with tdp.HDFArchive('tp03f/DIMER_PM_B100.0_tp0.3.h5') as data:
-    for u_str in data:
-        giw = tdp.get_giw(data[u_str], slice(-1, -5, -1))
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Make plots out of CTQMC results',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-BETA', metavar='B', type=float,
+                        default=200., help='The inverse temperature')
+    parser.add_argument('-tp', default=0.18, type=float,
+                        help='The dimerization strength')
+    parser.add_argument('-file', default='DIMER_{simt}_B{BETA}_tp{tp}.h5',
+                        help='File to process')
+    args = parser.parse_args()
 
-        giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
-        giw_s = np.squeeze(giw['sym_up'].data)[
-            len(giw_s) / 2:len(giw_s) / 2 + 300]
+    BETA = args.BETA
+    tp = args.tp
+    w_n = gf.matsubara_freq(100., 300)
+    w = np.linspace(-4, 4, 1000)
+    w_set = np.arange(100)
+    eps_k = np.linspace(-1., 1., 61)
+    with tdp.HDFArchive(args.file) as data:
+        for u_str in data:
+            giw = tdp.get_giw(data[u_str], slice(-1, -5, -1))
 
-        gs = gf.pade_contination(giw_s, w_n, w, w_set)
-        siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
-        ss = gf.pade_contination(siw_s, w_n, w, w_set)
-        gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
-        lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
-        Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
+            giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
+            giw_s = np.squeeze(giw['sym_up'].data)[
+                len(giw_s) / 2:len(giw_s) / 2 + 300]
 
-        U = float(u_str[1:])
-        title = r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
-            U, tp, BETA)
-        ax = plot_greenfunct(w, gs, title, r'$G$')
-        plot_greenfunct(w, gst, title, r'$G$', ax)
-        plt.savefig('DOS_B100_tp{}_U{}.png'.format(tp, U))
+            gs = gf.pade_contination(giw_s, w_n, w, w_set)
+            siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
+            ss = gf.pade_contination(siw_s, w_n, w, w_set)
+            gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+            lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
+            Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
 
-        ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
-        plt.savefig('Sigma_B100_tp{}_U{}.png'.format(tp, U))
+            U = float(u_str[1:])
+            title = r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
+                U, tp, BETA)
+            ax = plot_greenfunct(w, gs, title, r'$G$')
+            plot_greenfunct(w, gst, title, r'$G$', ax)
+            plot_greenfunct(w, 1 / (w - tp - .25 * gst), title, r'$G0$', ax)
+            plt.savefig('DOS_B100_tp{}_U{}.png'.format(tp, U))
 
-        plot_pole_eq(w, gst, ss, title)
-        plt.savefig('Pole_eq_B100_tp{}_U{}.png'.format(tp, U))
-        gf.plot_band_dispersion(w, Aw, title, eps_k)
-        plt.savefig('Arpes_eq_B100_tp{}_U{}.png'.format(tp, U))
-        plt.savefig('Arpes_den_eq_B100_tp{}_U{}.png'.format(tp, U))
+            ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
+            plt.savefig('Sigma_B100_tp{}_U{}.png'.format(tp, U))
+
+            plot_pole_eq(w, gst, ss, title)
+            plt.savefig('Pole_eq_B100_tp{}_U{}.png'.format(tp, U))
+            gf.plot_band_dispersion(w, Aw, title, eps_k)
+            plt.savefig('Arpes_eq_B100_tp{}_U{}.png'.format(tp, U))
+            plt.savefig('Arpes_den_eq_B100_tp{}_U{}.png'.format(tp, U))

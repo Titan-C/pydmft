@@ -100,6 +100,7 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
             U, tp, BETA)
         ax = plot_greenfunct(w, gs, title, r'$G$')
         plot_greenfunct(w, gst, title, r'$G$', ax)
+        plot_greenfunct(w, 1 / (w - tp - .25 * gst), title, r'$G0$', ax)
         ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
 
         plot_pole_eq(w, gst, ss, title)
@@ -121,7 +122,7 @@ plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 ###############################################################################
 # Insulators
 # ----------
-
+tp = 0.
 urange = [2.175, 2.5, 3., 3.5, 4., 5.]
 giw_s, sigma_iw, w_n = loop_u_tp(
     urange, tp * np.ones_like(urange), BETA)
@@ -129,3 +130,27 @@ giw_s, sigma_iw, w_n = loop_u_tp(
 eps_k = np.linspace(-1., 1., 61)
 plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 
+#urange = [3.2]
+#beta = 100.
+#tp = 0.2
+# giw_s, sigma_iw, w_n = loop_u_tp(
+# urange, tp * np.ones_like(urange), beta)
+#
+#w = np.linspace(-8, 8, 1600)
+#w_set = np.concatenate((np.arange(80), np.arange(90, 140, 25)))
+#eps_k = np.linspace(-2., 1., 61)
+#ss, gs = plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+#
+#
+#tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
+#tp = 0.2
+# g0iw_d, g0iw_o = rt.self_consistency(
+# 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)
+#siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)
+#giw_d, giw_o = rt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
+# g0iw_d, g0iw_o = rt.self_consistency(
+# 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)
+#siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)
+# ss, gs = plot_dispersions(
+# np.array([giw_d, giw_o]), np.array([siw_d, siw_o]), urange, tp, w_n, w,
+# w_set)
