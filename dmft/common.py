@@ -308,7 +308,7 @@ def pade_contination(gfunc, w_n, w, w_set=None):
         w_set = np.arange(w_set)
 
     pc = pade_coefficients(gfunc[w_set], w_n[w_set])
-    g_real = pade_rec(pc, w + 5e-8j, w_n[w_set])
+    g_real = pade_rec(pc, w, w_n[w_set])
 
     return g_real
 

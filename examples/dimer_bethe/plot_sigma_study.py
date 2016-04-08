@@ -72,8 +72,7 @@ if __name__ == '__main__':
             giw = tdp.get_giw(data[u_str], slice(-1, -5, -1))
 
             giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
-            giw_s = np.squeeze(giw['sym_up'].data)[
-                len(giw_s) / 2:len(giw_s) / 2 + 300]
+            giw_s = giw_s[len(giw_s) / 2:len(giw_s) / 2 + 300]
 
             gs = gf.pade_contination(giw_s, w_n, w, w_set)
             siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
