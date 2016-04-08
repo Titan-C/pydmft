@@ -142,6 +142,16 @@ def get_giw(h5parent, iteration_slice):
     return averager(h5parent, 'G_iw', iterations[iteration_slice])
 
 
+def get_last_table(filename, u_str, islice, name):
+    g_out = []
+    with tdp.HDFArchive(filename, 'r') as data:
+        iterations = list(data[u_str].keys())[islice]
+        for step in iterations:
+            g_out.append(np.squeeze(data[u_str][step]['G_iw'][name].data))
+
+    return np.array(g_out)
+
+
 def tail_clean(gf_iw, U, tp):
     fixed = TailGf(1, 1, 3, 1)
     fixed[1] = np.array([[1]])
