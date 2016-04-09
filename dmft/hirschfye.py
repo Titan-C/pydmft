@@ -73,11 +73,15 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              'group':       'temp/' + time.asctime(),
              }
     parms.update(parms_user)
+    if not os.path.exists(parms_user['work_dir']):
+        os.makedirs(parms_user['work_dir'])
 
     # Retarded field includes the Hirsh-Fye minus sign in GF
     GX = [retarded_weiss(gb) for gb in g0_blocks]
     kroneker = np.eye(GX[0].shape[0])  # assuming all blocks are of same shape
     Gst = [np.zeros_like(gx) for gx in GX]
+    Gbin = [np.zeros_like(gx) for gx in GX]
+    bin_size = 30 * len(v[0])
 
     i_pairs = np.array([c.nonzero() for c in interaction.T]).reshape(-1, 2)
 
@@ -115,7 +119,15 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
 
         if mcs > parms['therm']:
             for i in range(interaction.shape[0]):
+                Gbin[i] += g[i]
                 Gst[i] += g[i]
+            if mcs % bin_size == 0:
+                Gbin = np.array(Gbin) / bin_size
+                np.save(parms_user['work_dir'] + '/gtau_bin_mcs{}_r{}'.format(mcs,
+                                                                              comm.rank),
+                        np.squeeze([-1 * avg_g(gst, parms) for gst in Gbin]))
+                Gbin = [np.zeros_like(gx) for gx in GX]
+
             double_occupation(g, double_occ, ntau, flavor_pairs)
             if parms['save_logs']:
                 vlog.append(v > 0)
