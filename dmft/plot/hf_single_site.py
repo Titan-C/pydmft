@@ -7,6 +7,7 @@ Plotting utilities for the Single site DMFT phase diagram
 from __future__ import division, print_function, absolute_import
 import json
 import os
+from glob import glob
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import interp1d
@@ -21,11 +22,12 @@ def label_convergence(beta, u_int, axes, graf, n_freq, xlim):
     """Label the axes of the common plot of the evolution of DMFT loops"""
     axes[0].set_xlim([0, xlim])
     axes[1].legend(loc=0, ncol=n_freq)
-    axes[0].set_title(r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_int))
+    axes[0].set_title(
+        r'Change of {} @ $\beta={}$, U={}'.format(graf, beta, u_int))
     axes[0].set_ylabel(graf)
     axes[0].set_xlabel(r'$i\omega_n$')
     axes[1].set_title('Evolution of the first frequencies')
-    axes[1].set_ylabel(graf+'$(l)$')
+    axes[1].set_ylabel(graf + '$(l)$')
     axes[1].set_xlabel('iterations')
 
 
@@ -76,7 +78,7 @@ def gf_tail(gtau, U, mu):
     """
     g_t0 = gtau[0] if len(gtau.shape) == 1 else gtau[:, 0].reshape(2, 1)
 
-    return [1., -mu - U*(0.5+g_t0), 0.25 + U**2/4 + mu**2 - U*mu + 2*U*mu*g_t0]
+    return [1., -mu - U * (0.5 + g_t0), 0.25 + U**2 / 4 + mu**2 - U * mu + 2 * U * mu * g_t0]
 
 
 def interpol(gtau, Lrang, add_edge=False, same_particle=False):
@@ -141,15 +143,17 @@ def get_giw(sim_dir, iteration_slice, tau=None, w_n=None, setup=None):
 
 def get_sigmaiw(h5parent, iteration, tau, w_n):
     """Returns the self-energy with the Dyson equation"""
-    giw, _  = get_giw(h5parent, iteration, tau, w_n)
-    return 1j*w_n - .25*giw - 1/giw
+    giw, _ = get_giw(h5parent, iteration, tau, w_n)
+    return 1j * w_n - .25 * giw - 1 / giw
 
 
 def show_conv(beta, u_int, filestr='SB_{simt}_B{beta}', n_freq=5, xlim=2, skip=5, simt='PM'):
     """Plot the evolution of the Green's function in DMFT iterations"""
     freq_arr = []
-    sim_dir = os.path.join(filestr.format(beta=beta, simt=simt), 'U' + str(u_int))
-    iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
+    sim_dir = os.path.join(filestr.format(
+        beta=beta, simt=simt), 'U' + str(u_int))
+    iterations = sorted(
+        [it for it in os.listdir(sim_dir) if 'it' in it])[skip:]
     with open(sim_dir + '/setup', 'r') as read:
         setup = json.load(read)
     tau, w_n = gf.tau_wn_setup(setup)
@@ -159,7 +163,8 @@ def show_conv(beta, u_int, filestr='SB_{simt}_B{beta}', n_freq=5, xlim=2, skip=5
         giw, caste = get_giw(sim_dir, [step], tau, w_n, setup)
         if len(giw.shape) > 1:
             axes[0].plot(w_n, giw[0].real, 'gs:', w_n, giw[0].imag, 'bo:')
-            freq_arr.append(np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
+            freq_arr.append(
+                np.array([giw[0].real[:n_freq], giw[0].imag[:n_freq]]))
         else:
             axes[0].plot(w_n, giw.imag)
             freq_arr.append(giw.imag[:n_freq])
@@ -204,10 +209,11 @@ def fit_dos(beta, avg, filestr='disk/SB_PM_B{}'):
     lgiw = []
 
     ulist = sorted([u_str for u_str in os.listdir(filestr.format(beta))
-                     if 'U' in u_str])
+                    if 'U' in u_str])
     for u_str in ulist:
         sim_dir = os.path.join(filestr.format(beta), u_str)
-        last_iterations = sorted([it for it in os.listdir(sim_dir) if 'it' in it])[-avg:]
+        last_iterations = sorted(
+            [it for it in os.listdir(sim_dir) if 'it' in it])[-avg:]
         with open(sim_dir + '/setup', 'r') as read:
             setup = json.load(read)
             setup['U'] = float(u_str[1:])
@@ -231,7 +237,7 @@ def plot_fit_dos(beta, avg, filestr='SB_PM_B{}', xlim=2):
     w_n = gf.matsubara_freq(beta, len(lgiw[0]))
     omega = np.arange(0, w_n[2], 0.05)
     for u_int, gfit, giw in zip(u_range, fit_gf, lgiw):
-        axes[0].plot(w_n, giw.imag, 'o:', label='U='+str(u_int))
+        axes[0].plot(w_n, giw.imag, 'o:', label='U=' + str(u_int))
         axes[0].plot(omega, gfit(omega), 'k:')
 
     axes[0].set_xlim([0, xlim])
@@ -303,7 +309,7 @@ def autocorrelation_function(spins_log):
     """
 
     if spins_log.dtype == np.dtype('bool'):
-        spins_log = 2.0*(spins_log-0.5)
+        spins_log = 2.0 * (spins_log - 0.5)
     meas = spins_log.shape[0]
     avg = spins_log.mean()
     std = spins_log.std()
@@ -314,6 +320,19 @@ def autocorrelation_function(spins_log):
         cor_dt = np.outer(spins_log, spins_log)
 
     avs = np.array([np.trace(cor_dt, i) for i in range(meas)])
-    avs /= meas-np.arange(meas)
+    avs /= meas - np.arange(meas)
 
-    return (avs-avg**2)/std**2
+    return (avs - avg**2) / std**2
+
+
+def collect_bined_saves():
+    binede_dat = glob('gtau_bin_*')
+    G = np.array([np.load(dfile) for dfile in binede_dat])
+    gtau = G.mean(1)
+    tau, w_n = gf.tau_wn_setup(dict(BETA=32., N_MATSUBARA=32))
+    fw = gf.matsubara_freq(32., 64, -63)
+
+    giw = gf.gt_fouriertrans(gtau, tau, w_n, [1., 0., .25 + 2.5**2 / 4])
+
+    sgiw = np.concatenate((giw.conj().T[::-1], giw.T))
+    np.savez('bined', w_n=fw, giw=sgiw)
