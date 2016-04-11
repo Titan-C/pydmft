@@ -45,11 +45,11 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 def pade_diag(gf_d, gf_o, w_n, w_set, w):
     gf_s = 1j * gf_d.imag + gf_o.real  # Anti-bond
     pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
+    gr_s = gf.pade_rec(pc, w, w_n[w_set])
 
     gf_a = 1j * gf_d.imag - gf_o.real  # bond
     pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
-    gr_a = gf.pade_rec(pc, w + 5e-8j, w_n[w_set])
+    gr_a = gf.pade_rec(pc, w, w_n[w_set])
 
     return gr_s, gr_a
 
@@ -90,8 +90,8 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
         ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
         gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
-        lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
-        lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
+        lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-3j - ss)
+        lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-3j - sa)
         #Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 2)
 
         Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
@@ -122,13 +122,46 @@ plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 ###############################################################################
 # Insulators
 # ----------
-tp = 0.
-urange = [2.175, 2.5, 3., 3.5, 4., 5.]
+tp = 0.3
+urange = [0, .5, 1, 2.175, 2.5, 3., 3.5, 4., 5.]
 giw_s, sigma_iw, w_n = loop_u_tp(
     urange, tp * np.ones_like(urange), BETA)
 
 eps_k = np.linspace(-1., 1., 61)
 plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+
+###############################################################################
+# Insulators
+# ----------
+tp = 0.5
+urange = [0, .5, 2.175, 2.5, 3., 3.5, 4., 5.]
+giw_s, sigma_iw, w_n = loop_u_tp(
+    urange, tp * np.ones_like(urange), BETA)
+
+eps_k = np.linspace(-1., 1., 61)
+plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+###############################################################################
+# Insulators
+# ----------
+tp = 0.8
+urange = [0, .5, 1.2, 1.5, 2., 2.5, 3., 3.5, 4., 5.]
+giw_s, sigma_iw, w_n = loop_u_tp(
+    urange, tp * np.ones_like(urange), BETA)
+
+eps_k = np.linspace(-1., 1., 61)
+plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+
+###############################################################################
+# Insulators
+# ----------
+tp = 0.95
+urange = [0, .5, 1.2, 1.5, 2., 2.5, 3., 3.5, 4., 5.]
+giw_s, sigma_iw, w_n = loop_u_tp(
+    urange, tp * np.ones_like(urange), BETA)
+
+eps_k = np.linspace(-1., 1., 61)
+plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
+
 
 #urange = [3.2]
 #beta = 100.

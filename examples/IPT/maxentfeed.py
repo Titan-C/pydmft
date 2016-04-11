@@ -1,4 +1,8 @@
+r"""
+test maxIteration
+=================
 
+"""
 from __future__ import division, absolute_import, print_function
 
 from dmft.ipt_imag import dmft_loop
