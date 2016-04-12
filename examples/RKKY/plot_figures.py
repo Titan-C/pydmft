@@ -19,13 +19,13 @@ import dmft.ipt_imag as ipt
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=1024))
     giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'ins':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
     giw_d, giw_o, loops = rt.ipt_dmft_loop(
-        beta, u_int, tp, giw_d, giw_o, tau, w_n)
+        beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-13)
     g0iw_d, g0iw_o = rt.self_consistency(
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
@@ -42,12 +42,16 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
 
 
 def plot_pole_eq(w, gf, sig, pole, sty, ax):
-    ax.plot(w, sig.imag, 'r' + sty, label=r'$\Im m \Sigma$')
-    ax.plot(w, -gf.imag / np.pi, 'b' + sty, lw=2, label='DOS')
+    ax.plot(w, np.abs(sig.imag) / np.min(sig.imag),
+            sty, label=r'$\Im m \Sigma$')
+    ax.plot(w, -gf.imag / np.pi, sty,  label='DOS')
     if pole:
-        ax.plot(w, (1 / gf).real, 'g' + sty, label=r'$\Re e G^{-1}$')
+        ax.plot(w, (1 / gf).real, 'g:', label=r'$\Re e G^{-1}$')
     ax.set_ylim([-1, .7])
-    ax.set_xticklabels([])
+    ax.axvline(0)
+    ax.axhline(0)
+    ax.set_xticks(np.arange(-3, 4))
+    ax.set_xticklabels(np.arange(-3, 4))
     ax.set_yticklabels([])
 
 
@@ -71,20 +75,47 @@ def plot_spectral(u_int, tp, beta, seed, w, w_set, pole, sty, ax):
 #
 BETA = 100.
 w = np.linspace(-4, 4, 800)
-w_set = np.concatenate((np.arange(100), np.arange(100, 200, 20)))
-f, ax = plt.subplots(3, 3, sharex=True)
+w_set = np.concatenate((np.arange(75), np.arange(75, 150, 20)))
+f, ax = plt.subplots(2, 3, sharex=True)
+ax[0, 0].set_title(r'$U=2.5$')
+ax[0, 0].set_ylabel(r'$t_\perp=0$ $\Im m \Sigma (\omega)$  |   $A(\omega)$')
+plot_spectral(2.5, 0., BETA, 'met', w, w_set, True, 'b-', ax[0, 0])
+ax[0, 1].set_title(r'$U=2.9$')
+plot_spectral(2.9, 0., BETA, 'met', w, w_set, False, 'b-', ax[0, 1])
+plot_spectral(2.9, 0., BETA, 'ins', w, w_set, False, 'r-', ax[0, 1])
+ax[0, 2].set_title(r'$U=3.5$')
+plot_spectral(3.5, 0., BETA, 'ins', w, w_set, True, 'r-', ax[0, 2])
+
+ax[1, 0].set_ylabel(
+    r'$t_\perp=0.3$ $\Im m \Sigma (\omega)$ |  $A(\omega)$    ')
+plot_spectral(2.5, 0.3, BETA, 'met', w, w_set, True, 'b-', ax[1, 0])
+plot_spectral(2.9, 0.3, BETA, 'met', w, w_set, False, 'b-', ax[1, 1])
+plot_spectral(2.9, 0.3, BETA, 'ins', w, w_set, False, 'r-', ax[1, 1])
+plot_spectral(3.5, 0.3, BETA, 'ins', w, w_set, True, 'r-', ax[1, 2])
+ax[1, 0].set_xlabel(r'$\omega$')
+ax[1, 1].set_xlabel(r'$\omega$')
+ax[1, 2].set_xlabel(r'$\omega$')
+plt.tight_layout()
 plt.subplots_adjust(wspace=0, hspace=0)
-plot_spectral(2.5, 0., BETA, 'met', w, w_set, True, '-', ax[0, 0])
-plot_spectral(2.9, 0., BETA, 'met', w, w_set, False, '-', ax[1, 0])
-plot_spectral(2.9, 0., BETA, 'ins', w, w_set, False, '-', ax[1, 0])
-plot_spectral(3.9, 0., BETA, 'ins', w, w_set, True, '-', ax[2, 0])
 
-plot_spectral(2.5, 0.3, BETA, 'met', w, w_set, True, '-', ax[0, 1])
-plot_spectral(2.9, 0.3, BETA, 'met', w, w_set, False, '-', ax[1, 1])
-plot_spectral(2.9, 0.3, BETA, 'ins', w, w_set, False, '-', ax[1, 1])
-plot_spectral(3.9, 0.3, BETA, 'met', w, w_set, True, '-', ax[2, 1])
+f, ax = plt.subplots(2, 3, sharex=True)
+ax[0, 0].set_title(r'$U=1.0$')
+ax[0, 0].set_ylabel(
+    r'$t_\perp=0.5$ $\Im m \Sigma (\omega)$ |  $A(\omega)$     ')
+plot_spectral(1.0, 0.5, BETA, 'met', w, w_set, True, 'b-', ax[0, 0])
+ax[0, 1].set_title(r'$U=2.1$')
+plot_spectral(2.1, 0.5, BETA, 'met', w, w_set, False, 'b-', ax[0, 1])
+plot_spectral(2.1, 0.5, BETA, 'ins', w, w_set, False, 'r-', ax[0, 1])
+ax[0, 2].set_title(r'$U=3.0$')
+plot_spectral(3.0, 0.5, BETA, 'ins', w, w_set, True, 'r-', ax[0, 2])
 
-plot_spectral(2.5, 0.8, BETA, 'met', w, w_set, True, '-', ax[0, 2])
-plot_spectral(2.9, 0.8, BETA, 'met', w, w_set, False, '-', ax[1, 2])
-plot_spectral(2.9, 0.8, BETA, 'ins', w, w_set, False, '-', ax[1, 2])
-plot_spectral(3.9, 0.8, BETA, 'met', w, w_set, True, '-', ax[2, 2])
+ax[1, 0].set_ylabel(
+    r'$t_\perp=0.8$ $\Im m \Sigma (\omega)$ |  $A(\omega)$     ')
+plot_spectral(1.0, 0.8, BETA, 'met', w, w_set, True, 'b-', ax[1, 0])
+plot_spectral(2.1, 0.8, BETA, 'ins', w, w_set, False, 'r-', ax[1, 1])
+plot_spectral(3.0, 0.8, BETA, 'ins', w, w_set, True, 'r-', ax[1, 2])
+ax[1, 0].set_xlabel(r'$\omega$')
+ax[1, 1].set_xlabel(r'$\omega$')
+ax[1, 2].set_xlabel(r'$\omega$')
+plt.tight_layout()
+plt.subplots_adjust(wspace=0, hspace=0)
