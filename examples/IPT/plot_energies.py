@@ -32,7 +32,7 @@ import slaveparticles.quantum.dos as dos
 
 def hysteresis(beta, u_range):
     log_g_sig = []
-    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(6*beta, 256)))
+    tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(6 * beta, 256)))
     g_iwn = greenF(w_n)
     for u_int in u_range:
         g_iwn, sigma = dmft_loop(u_int, 0.5, g_iwn, w_n, tau)
@@ -57,7 +57,8 @@ U = np.linspace(2.4, 3.6, 41)
 rU = U[::-1]
 
 E_log = []
-BETARANGE = np.around(np.hstack(([1024., 512.], np.logspace(8, -4.5, 48, base=2))), decimals=2)
+BETARANGE = np.around(
+    np.hstack(([1024., 512.], np.logspace(8, -4.5, 48, base=2))), decimals=2)
 
 for BETA in BETARANGE:
     Ti, Vi = energy(BETA, rU, hysteresis(BETA, rU))
@@ -75,7 +76,7 @@ for i, j in zip([0, 9, 12], ['b', 'g', 'r']):
     axe[0].plot(U, Ti, j + '--')
     axe[1].plot(U, Vm, j)
     axe[1].plot(U, Vi, j + '--')
-    axe[2].plot(U, (Tm+Vm)-(Ti+Vi), j+'-')
+    axe[2].plot(U, (Tm + Vm) - (Ti + Vi), j + '-')
 
 axe[0].set_ylabel(r'$\langle T \rangle$')
 axe[1].set_ylabel(r'$\langle V \rangle$')
@@ -103,10 +104,12 @@ Hm = Tm + Vm
 Hi = Ti + Vi
 fig, ax = plt.subplots()
 axins = zoomed_inset_axes(ax, 12, loc=4)
+
+
 def plot_zoom(ul, color):
-    ax.plot(1/BETARANGE, Hm[ul], label='U='+str(U[ul]))
-    axins.plot(1/BETARANGE, Hm[ul], color + '+-')
-    axins.plot(1/BETARANGE, Hi[ul], color + '+-')
+    ax.plot(1 / BETARANGE, Hm[ul], label='U=' + str(U[ul]))
+    axins.plot(1 / BETARANGE, Hm[ul], color + '+-')
+    axins.plot(1 / BETARANGE, Hi[ul], color + '+-')
 
 for u, c in zip([0, 8, 40], ['b', 'g', 'r']):
     plot_zoom(u, c)
@@ -139,13 +142,13 @@ ax.legend(loc=1)
 
 
 def heat_capacity(H, temp):
-    return (np.ediff1d(H)/np.ediff1d(temp)).clip(1e-5)
+    return (np.ediff1d(H) / np.ediff1d(temp)).clip(1e-5)
 
-T = 1/BETARANGE
-plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U='+str(U[0]))
-plt.semilogx(T[:-1], heat_capacity(Hm[8], T), label='met U='+str(U[8]))
-plt.semilogx(T[:-1], heat_capacity(Hi[8], T), '--', label='ins U='+str(U[8]))
-plt.xlim([1/1240, 10])
+T = 1 / BETARANGE
+plt.semilogx(T[:-1], heat_capacity(Hm[0], T), label='U=' + str(U[0]))
+plt.semilogx(T[:-1], heat_capacity(Hm[8], T), label='met U=' + str(U[8]))
+plt.semilogx(T[:-1], heat_capacity(Hi[8], T), '--', label='ins U=' + str(U[8]))
+plt.xlim([1 / 1240, 10])
 plt.legend(loc=0)
 plt.xlabel('T/D')
 plt.ylabel('Heat Capacity')
@@ -162,14 +165,14 @@ plt.ylabel('Heat Capacity')
 
 
 def entropy(H, temp):
-    cv_temp = np.hstack((heat_capacity(H, temp)/temp[:-1], 0))
+    cv_temp = np.hstack((heat_capacity(H, temp) / temp[:-1], 0))
     S = np.array([simps(cv_temp[i:], T[i:]) for i in range(len(T))])
     return log(2.) - S
 
-plt.semilogx(T, entropy(Hm[0], T), label='U='+str(U[0]))
-plt.semilogx(T, entropy(Hm[8], T), label='U='+str(U[8]))
-plt.semilogx(T, entropy(Hi[8], T), '--', label='U='+str(U[8]))
-plt.xlim([1/1240, 10])
+plt.semilogx(T, entropy(Hm[0], T), label='U=' + str(U[0]))
+plt.semilogx(T, entropy(Hm[8], T), label='U=' + str(U[8]))
+plt.semilogx(T, entropy(Hi[8], T), '--', label='U=' + str(U[8]))
+plt.xlim([1 / 1240, 10])
 plt.legend(loc=0)
 plt.xlabel('T/D')
 plt.ylabel('Entropy')
@@ -185,7 +188,11 @@ plt.ylabel('Entropy')
 
 Sm = np.array([entropy(Hm[i], T) for i in range(len(U))])
 Si = np.array([entropy(Hi[i], T) for i in range(len(U))])
-twosol = (Hm-Hi-T*(Sm-Si))*(np.abs((Hm-Hi)) > 1.2e-4)
+twosol = (Hm - Hi - T * (Sm - Si)) * (np.abs((Hm - Hi)) > 1.2e-4)
 rT = T[T < 0.07]
 plt.pcolormesh(U, rT, twosol.T[:len(rT)], cmap=plt.get_cmap('inferno'))
-plt.colorbar()
+plt.axis([x.min(), x.max(), 0, y.max()])
+plt.xlabel(r'$U/D$')
+plt.ylabel(r'$T/D$')
+plt.title(
+    'Phase diagram \n color represents $-\\Im G_{{AA}}(0)$')
