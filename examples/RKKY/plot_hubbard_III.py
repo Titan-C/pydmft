@@ -116,6 +116,13 @@ plt.figure()
 g_b = 1 / (w + tp - sb)
 plt.plot(w, g_b.real, label=r"Re Bond")
 plt.plot(w, g_b.imag, label=r"Im Bond")
+plt.figure()
+g_b = gf.greenF(-1j * w, sb, tp)
+zeta = w + tp - sb
+g_b = 2 * zeta * (1 - np.sqrt(1 - 1 / zeta**2))
+g_b = 1 / (g0_1_b - sb)
+plt.plot(w, g_b.real, label=r"Re Bond")
+plt.plot(w, g_b.imag, label=r"Im Bond")
 plt.plot(w, sb.real - w - tp, label=r'$\Sigma_{S} - w + t_\perp$')
 
 plt.ylabel(r'$G(\omega)$')
