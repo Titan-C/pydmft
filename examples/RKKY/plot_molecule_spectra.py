@@ -14,7 +14,7 @@ from itertools import product, combinations
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as LA
-from dmft.common import matsubara_freq, gw_invfouriertrans
+from dmft.common import matsubara_freq, gw_invfouriertrans, plot_band_dispersion
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
 
@@ -100,9 +100,58 @@ def plot_A_ev_rtp(beta, u_int, mu, tprange):
     plt.xlim([min(w.real), max(w.real)])
 
 plt.figure()
-beta, U = 50., 1
+beta, U = 150., 1
 plot_A_ev_rtp(beta, 1, 0, np.arange(0.0, 1, 0.1))
 plt.title(r'Molecule exitation spectral function, $\beta={}$, $U={}$'.format(beta, U))
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$t_\perp+A(\omega)$')
 plt.legend(loc=0)
+
+
+def plot_A_ev_utp(beta, urange, mu, tprange):
+    w = np.linspace(-2, 2, 1500) + 1j * 5e-3
+    for u_int, tp in zip(urange, tprange):
+        h_at, oper = rt.dimer_hamiltonian(u_int, mu, tp)
+        eig_e, eig_v = op.diagonalize(h_at.todense())
+        gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
+        plt.plot(w.real, u_int + gf.imag / gf.imag.min(), 'k-')
+
+plt.figure()
+beta, tp = 155., .2
+plot_A_ev_utp(beta, np.arange(0.0, 1, 0.05), 0, np.arange(1, 0, -0.05))
+plt.title(
+    r'Molecule exitation spectral function, $\beta={}$, $t_\perp+U=1$'.format(beta))
+plt.xlabel(r'$\omega$')
+plt.ylabel(r'$U+A(\omega)$')
+plt.legend(loc=0)
+
+##########################################################################
+# Diagonal basis
+# ==============
+#
+
+
+def plot_A_ev_utp(beta, urange, mu, tprange):
+    w = np.linspace(-2, 3.5, 1500) + 1j * 1e-2
+    Aw = []
+    for u_int, tp in zip(urange, tprange):
+        h_at, oper = rt.dimer_hamiltonian_bond(u_int, mu, tp)
+        eig_e, eig_v = op.diagonalize(h_at.todense())
+        gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
+        aw = gf.imag / gf.imag.min()
+        Aw.append(aw)
+    return np.array(Aw)
+
+beta = 100.
+A = plot_A_ev_utp(beta, np.linspace(0, 1, 51), 0, np.linspace(0, 1, 51)[::-1])
+
+w = np.linspace(-2, 3.5, 1500)
+plot_band_dispersion(w, A, r'Molecule exitation spectral function, $\beta={}$, $t_\perp+U=1$'.format(
+    beta), np.linspace(0, 1, 51))
+plt.figure(1)
+plt.ylabel(r'$U+A(\omega)$')
+plt.xlim([-2, 3.5])
+plt.figure(2)
+plt.xlabel(r'$\omega$')
+plt.ylabel(r'$U$')
+plt.ylim([-2, 3.5])
