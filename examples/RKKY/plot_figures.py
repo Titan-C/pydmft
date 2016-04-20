@@ -42,11 +42,13 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
 
 
 def plot_pole_eq(w, gf, sig, pole, sty, ax):
-    ax.plot(w, np.abs(sig.imag) / np.min(sig.imag),
-            sty, label=r'$\Im m \Sigma$')
-    ax.plot(w, -gf.imag / np.pi, sty,  label='DOS')
+    ax.plot(w, -np.abs(sig.imag),
+            'r' + sty, label=r'$\Im m \Sigma$')
+    ax.plot(w, sig.real,
+            'g' + sty, label=r'$\Re e \Sigma$')
+    ax.plot(w, -gf.imag / np.pi, 'b' + sty,  label='DOS')
     if pole:
-        ax.plot(w, (1 / gf).real, 'g:', label=r'$\Re e G^{-1}$')
+        ax.plot(w, (1 / gf).real, 'c' + sty, label=r'$\Re e G^{-1}$')
     ax.set_ylim([-1, .7])
     ax.axvline(0)
     ax.axhline(0)
@@ -61,7 +63,7 @@ def hiltrans(zeta):
     return 2 * (zeta - sqr)
 
 
-def plot_spectral(u_int, tp, beta, seed, w, w_set, pole, sty, ax):
+def plot_spectral(u_int, tp, BETA, seed, w, w_set, pole, sty, ax):
 
     siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
     ss = pade_diag(siw_d, siw_o, w_n, w_set, w)
@@ -119,3 +121,14 @@ ax[1, 1].set_xlabel(r'$\omega$')
 ax[1, 2].set_xlabel(r'$\omega$')
 plt.tight_layout()
 plt.subplots_adjust(wspace=0, hspace=0)
+
+f, a = plt.subplots()
+g, b = plt.subplots()
+w = np.linspace(-4, 4, 800)
+w_set = np.concatenate((np.arange(75), np.arange(75, 150, 20)))
+plot_spectral(2.9, 0.3, 100., 'met', w, w_set, False, '-', a)
+plot_spectral(2.9, 0.3, 100., 'ins', w, w_set, False, '-', b)
+a.set_xlabel(r'$\omega$')
+a.legend()
+b.set_xlabel(r'$\omega$')
+b.legend()
