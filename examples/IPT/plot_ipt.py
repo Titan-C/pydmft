@@ -95,6 +95,7 @@ plot_band_dispersion(
 
 omega = np.linspace(-6, 6, 1600)
 from slaveparticles.quantum.dos import bethe_lattice
+from slaveparticles.quantum.operators import fermi_dist
 
 
 def estimate_diferentials(w):
@@ -103,7 +104,7 @@ def estimate_diferentials(w):
     return np.concatenate((mw, [0])) + np.concatenate(([0], mw))
 
 
-def optical_cond(omega, eps_k, sigma_w):
+def optical_cond(omega, eps_k, sigma_w, beta):
     nuv = omega[omega > 0]
     zerofreq = len(nuv)
     dw = omega[1] - omega[0]
@@ -112,12 +113,14 @@ def optical_cond(omega, eps_k, sigma_w):
     lat_gf = 1 / (np.add.outer(-eps_k, omega + 5e-2j) - sigma_w)
     Aw = -lat_gf.imag / np.pi
 
-    a = np.array([[np.sum(Aw[e, -i + zerofreq:zerofreq] * Aw[e, zerofreq:zerofreq + i])
-                   for i in range(1, len(nuv) + 1)] for e in range(len(eps_k))]) / omega[zerofreq:]
+    nf = fermi_dist(omega, beta) - fermi_dist(np.add.outer(nuv, omega), beta)
+
+    a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
+                   for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
 
     return nuv, (bethe_lattice(eps_k, .5).reshape(-1, 1) * a).sum(axis=0) * de * dw
 
 pade_coefs = pade_coefficients(1j * s_iwn.imag, w_n)
 sigma_w = pade_rec(pade_coefs, omega, w_n)
-nuv, con = optical_cond(omega, eps_k, sigma_w)
+nuv, con = optical_cond(omega, eps_k, sigma_w, beta)
 plot(nuv, con)
