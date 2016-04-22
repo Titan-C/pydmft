@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 r"""
-===============================================
-Optical conductivity of local Spectral Function
-===============================================
+=================================================
+Optical conductivity of bonding Spectral Function
+=================================================
 
 """
 # Author: Óscar Nájera
@@ -69,13 +69,15 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
-        Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
+
+        Aw = -lat_gfa.imag / np.pi
+
         a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
                        for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
         recond = (bethe_lattice(eps_k, .5).reshape(-1, 1)
                   * a).sum(axis=0) * de * dw
 
-        title = r'IPT lattice dimer Conduct $U={}$, $t_\perp={}$, $\beta={}$'.format(
+        title = r'IPT lattice dimer Bonding Conduct $U={}$, $t_\perp={}$, $\beta={}$'.format(
             U, tp, BETA)
 
         plt.figure()
