@@ -14,12 +14,30 @@ the contribution of the Hartree-term is not included here as it is cancelled
 """
 from __future__ import division, absolute_import, print_function
 
-from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec, plot_band_dispersion
-
-
 import numpy as np
 import matplotlib.pylab as plt
+
+from dmft.ipt_imag import dmft_loop
+from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec, plot_band_dispersion
+from slaveparticles.quantum.dos import bethe_lattice
+from slaveparticles.quantum.operators import fermi_dist
+
+
+def optical_cond(omega, eps_k, sigma_w, beta):
+    nuv = omega[omega > 0]
+    zerofreq = len(nuv)
+    dw = omega[1] - omega[0]
+    de = eps_k[1] - eps_k[0]
+
+    lat_gf = 1 / (np.add.outer(-eps_k, omega + 4e-2j) - sigma_w)
+    Aw = -lat_gf.imag / np.pi
+
+    nf = fermi_dist(omega, beta) - fermi_dist(np.add.outer(nuv, omega), beta)
+
+    a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
+                   for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
+
+    return nuv, (bethe_lattice(eps_k, .5).reshape(-1, 1) * a).sum(axis=0) * de * dw
 
 U = 3.
 beta = 64.
@@ -30,8 +48,9 @@ g_iwn0 = greenF(w_n)
 fig_giw, giw_ax = plt.subplots()
 fig_gw, gw_ax = plt.subplots()
 fig_sw, sw_ax = plt.subplots(1, 2, sharex=True)
+fig_cond, cond_ax = plt.subplots()
 
-g_iwn, s_iwn = dmft_loop(U, 0.5, -1.j / w_n, w_n, tau, conv=1e-8)
+g_iwn, s_iwn = dmft_loop(U, 0.5, -1.j / w_n, w_n, tau, conv=1e-12)
 giw_ax.plot(w_n, g_iwn.imag, 's-', label='Insulator Solution')
 pade_coefs = pade_coefficients(g_iwn, w_n)
 gw_ax.plot(omega, -pade_rec(pade_coefs, omega, w_n).imag /
@@ -48,6 +67,9 @@ Aw = -lat_gf.imag / np.pi
 
 plot_band_dispersion(
     omega, Aw, r'Insulator Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)
+
+nuv, con = optical_cond(omega, eps_k, sigma_w, beta)
+cond_ax.plot(nuv, con, label='Insulator Solution')
 
 g_iwn, s_iwn = dmft_loop(U, 0.5, g_iwn0, w_n, tau, conv=1e-12)
 giw_ax.plot(w_n, g_iwn.imag, 's-', label='Metal Solution')
@@ -93,34 +115,10 @@ Aw = -lat_gf.imag / np.pi
 plot_band_dispersion(
     omega, Aw, r'Metal Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)
 
-omega = np.linspace(-6, 6, 1600)
-from slaveparticles.quantum.dos import bethe_lattice
-from slaveparticles.quantum.operators import fermi_dist
 
-
-def estimate_diferentials(w):
-    dw = w[1:] - w[:-1]
-    mw = (w[1:] - w[:-1]) / 2
-    return np.concatenate((mw, [0])) + np.concatenate(([0], mw))
-
-
-def optical_cond(omega, eps_k, sigma_w, beta):
-    nuv = omega[omega > 0]
-    zerofreq = len(nuv)
-    dw = omega[1] - omega[0]
-    de = eps_k[1] - eps_k[0]
-
-    lat_gf = 1 / (np.add.outer(-eps_k, omega + 5e-2j) - sigma_w)
-    Aw = -lat_gf.imag / np.pi
-
-    nf = fermi_dist(omega, beta) - fermi_dist(np.add.outer(nuv, omega), beta)
-
-    a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
-                   for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
-
-    return nuv, (bethe_lattice(eps_k, .5).reshape(-1, 1) * a).sum(axis=0) * de * dw
-
-pade_coefs = pade_coefficients(1j * s_iwn.imag, w_n)
-sigma_w = pade_rec(pade_coefs, omega, w_n)
 nuv, con = optical_cond(omega, eps_k, sigma_w, beta)
-plot(nuv, con)
+cond_ax.plot(nuv, con, label='Metal Solution')
+cond_ax.legend(loc=0)
+cond_ax.set_xlabel(r'$\nu$')
+cond_ax.set_ylabel(r'$\sigma(\nu)$')
+cond_ax.set_ylim([0, .1])
