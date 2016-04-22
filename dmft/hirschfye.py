@@ -120,7 +120,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i in range(interaction.shape[0]):
                 Gbin[i] += g[i]
                 Gst[i] += g[i]
-            if mcs % parms['therm'] == 0:
+            if mcs % parms['therm'] == 0 and parms['binned-meas']:
                 Gbin = np.array(Gbin) / parms['therm']
                 np.save(parms['work_dir'] + '/gtau_bin_mcs{}_r{}'.format(mcs,
                                                                          comm.rank),
@@ -394,6 +394,8 @@ def do_input(help_string):
 
     parser.add_argument('-l', '--save_logs', action='store_true',
                         help='Store the changes in the auxiliary field')
+    parser.add_argument('-bin', '--binned_meas', action='store_true',
+                        help='Save measurements in binned intervals every therm updates')
     parser.add_argument('-spin_polarization', type=float, default=0.5,
                         help='Probability distribution of up/down'
                         'auxiliary spins for initial guess')
