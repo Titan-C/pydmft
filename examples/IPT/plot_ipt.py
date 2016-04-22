@@ -24,7 +24,7 @@ import matplotlib.pylab as plt
 U = 3.
 beta = 64.
 tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=3 * beta))
-omega = np.linspace(-3, 3, 600)
+omega = np.linspace(-6, 6, 1600)
 g_iwn0 = greenF(w_n)
 
 fig_giw, giw_ax = plt.subplots()
@@ -49,13 +49,13 @@ Aw = -lat_gf.imag / np.pi
 plot_band_dispersion(
     omega, Aw, r'Insulator Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)
 
-g_iwn, s_iwn = dmft_loop(U, 0.5, g_iwn0, w_n, tau, conv=1e-8)
+g_iwn, s_iwn = dmft_loop(U, 0.5, g_iwn0, w_n, tau, conv=1e-12)
 giw_ax.plot(w_n, g_iwn.imag, 's-', label='Metal Solution')
 pade_coefs = pade_coefficients(g_iwn, w_n)
 gw_ax.plot(omega, -pade_rec(pade_coefs, omega, w_n).imag /
            np.pi, label='Metal Solution')
 
-pade_coefs = pade_coefficients(s_iwn, w_n)
+pade_coefs = pade_coefficients(1j * s_iwn.imag, w_n)
 sigma_w = pade_rec(pade_coefs, omega, w_n)
 sw_ax[0].plot(omega, sigma_w.real, label='Metal Solution')
 sw_ax[1].plot(omega, sigma_w.imag, label='Metal Solution')
@@ -92,3 +92,32 @@ Aw = -lat_gf.imag / np.pi
 
 plot_band_dispersion(
     omega, Aw, r'Metal Band dispersion at $\beta= {}$, $U= {}$'.format(beta, U), eps_k)
+
+omega = np.linspace(-6, 6, 1600)
+from slaveparticles.quantum.dos import bethe_lattice
+
+
+def estimate_diferentials(w):
+    dw = w[1:] - w[:-1]
+    mw = (w[1:] - w[:-1]) / 2
+    return np.concatenate((mw, [0])) + np.concatenate(([0], mw))
+
+
+def optical_cond(omega, eps_k, sigma_w):
+    nuv = omega[omega > 0]
+    zerofreq = len(nuv)
+    dw = omega[1] - omega[0]
+    de = eps_k[1] - eps_k[0]
+
+    lat_gf = 1 / (np.add.outer(-eps_k, omega + 5e-2j) - sigma_w)
+    Aw = -lat_gf.imag / np.pi
+
+    a = np.array([[np.sum(Aw[e, -i + zerofreq:zerofreq] * Aw[e, zerofreq:zerofreq + i])
+                   for i in range(1, len(nuv) + 1)] for e in range(len(eps_k))]) / omega[zerofreq:]
+
+    return nuv, (bethe_lattice(eps_k, .5).reshape(-1, 1) * a).sum(axis=0) * de * dw
+
+pade_coefs = pade_coefficients(1j * s_iwn.imag, w_n)
+sigma_w = pade_rec(pade_coefs, omega, w_n)
+nuv, con = optical_cond(omega, eps_k, sigma_w)
+plot(nuv, con)
