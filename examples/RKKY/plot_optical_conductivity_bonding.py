@@ -70,18 +70,26 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
 
-        Aw = -lat_gfa.imag / np.pi
+        Awa = -lat_gfa.imag / np.pi
+        Aws = -lat_gfs.imag / np.pi
 
-        a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
-                       for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
-        recond = (bethe_lattice(eps_k, .5).reshape(-1, 1)
-                  * a).sum(axis=0) * de * dw
+        ss = np.array([[np.sum(Aws[e] * np.roll(Aws[e], -i) * nf[i])
+                        for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
+        reconds = (bethe_lattice(eps_k, .5).reshape(-1, 1)
+                   * ss).sum(axis=0) * de * dw
+
+        sa = np.array([[np.sum(Awa[e] * np.roll(Awa[e], -i) * nf[i])
+                        for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
+        reconda = (bethe_lattice(eps_k, .5).reshape(-1, 1)
+                   * sa).sum(axis=0) * de * dw
 
         title = r'IPT lattice dimer Bonding Conduct $U={}$, $t_\perp={}$, $\beta={}$'.format(
             U, tp, BETA)
 
         plt.figure()
-        plt.plot(nuv, recond)
+        plt.plot(nuv, reconds, label='sym')
+        plt.plot(nuv, reconda, label='asym')
+        plt.plot(nuv, reconds + reconda, label='sum')
         plt.legend(loc=0)
         plt.xlabel(r'$\nu$')
         plt.ylabel(r'$\sigma(\nu)$')
@@ -93,7 +101,7 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
 # Metals
 # ------
 #
-urange = [1.5, 2., 2.175, 2.5, 3.]
+urange = [2]  # [1.5, 2., 2.175, 2.5, 3.]
 BETA = 100.
 tp = 0.3
 giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")

@@ -32,7 +32,6 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     for u_int, tp in zip(u_range, tprange):
         giw_d, giw_o, loops = rt.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n)
-        giw_s.append((giw_d, giw_o))
         iterations.append(loops)
         g0iw_d, g0iw_o = rt.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
@@ -41,7 +40,7 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
     print(np.array(iterations))
 
-    return np.array(giw_s), np.array(sigma_iw), w_n
+    return np.array(sigma_iw), w_n
 
 
 def pade_diag(gf_d, gf_o, w_n, w_set, w):
@@ -56,60 +55,84 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
     return gr_s, gr_a
 
 
-def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
+def calculate_Aw(sig_d, sig_o, w, eps_k, tp):
+    ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
+
+    lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
+    lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
+    Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
+
+    return Aw
+
+
+def calculate_opt_cond_from_A(Aw, eps_k, w, beta):
     nuv = w[w > 0]
     zerofreq = len(nuv)
     dw = w[1] - w[0]
     de = eps_k[1] - eps_k[0]
+
     nf = fermi_dist(w, beta) - fermi_dist(np.add.outer(nuv, w), beta)
 
-    for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
-        gs, ga = pade_diag(giw_d, giw_o, w_n, w_set, w)
-        ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
+    a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
+                   for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
+    sigma_semi_circ = (bethe_lattice(eps_k, .5).reshape(-1, 1)
+                       * a).sum(axis=0) * de * dw
+    sigma_gaussian = (1 / np.sqrt(np.pi / 2) * np.exp(-2 * eps_k**2).reshape(-1, 1)
+                      * a).sum(axis=0) * de * dw
 
-        lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
-        lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
-        Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
-        a = np.array([[np.sum(Aw[e] * np.roll(Aw[e], -i) * nf[i])
-                       for i in range(len(nuv))] for e in range(len(eps_k))]) / nuv
-        recond = (bethe_lattice(eps_k, .5).reshape(-1, 1)
-                  * a).sum(axis=0) * de * dw
+    return nuv, sigma_semi_circ, sigma_gaussian
+
+
+def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta):
+    for U, (sig_d, sig_o) in zip(ur, sigma_iw):
+        Aw = calculate_Aw(sig_d, sig_o, w, eps_k, tp)
+
+        nuv, sigma_semi_circ, sigma_gaussian = calculate_opt_cond_from_A(
+            Aw, eps_k, w, beta)
+        # To save data manually at some point
+        # np.savez('opt_cond', nuv=nuv, sigma_semi_circ=sigma_semi_circ, sigma_gaussian=sigma_gaussian)
+
+        plt.figure()
+        plt.plot(nuv, sigma_semi_circ, label='semicirc')
+        plt.plot(nuv, sigma_gaussian, label='gaussian')
 
         title = r'IPT lattice dimer Conduct $U={}$, $t_\perp={}$, $\beta={}$'.format(
             U, tp, BETA)
 
-        plt.figure()
-        plt.plot(nuv, recond)
         plt.legend(loc=0)
         plt.xlabel(r'$\nu$')
         plt.ylabel(r'$\sigma(\nu)$')
         plt.title(title)
-        plt.ylim([0, .1])
+        plt.ylim([0, .6])
+        plt.xlim([0, 5])
 
 
 ###############################################################################
 # Metals
 # ------
 #
-urange = [1.5, 2., 2.175, 2.5, 3.]
+urange = [2.5]  # [1.5, 2., 2.175, 2.5, 3.]
 BETA = 100.
 tp = 0.3
-giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
-w = np.linspace(-8, 8, 800)
-eps_k = np.linspace(-1., 1., 61)
+sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
+w = np.linspace(-8, 8, 2000)
+eps_k = np.linspace(-1., 1., 100)
 w_set = np.concatenate((np.arange(100), np.arange(100, 200, 2)))
-plot_optical_cond(giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA)
+plot_optical_cond(sigma_iw, urange, tp, w_n, w, w_set, BETA)
+
+
+#plt.savefig('opt_cond_met_U2.5tp_0.3_B100.pdf', dpi=96, format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
 
 ###############################################################################
 # Insulators
 # ----------
 tp = 0.3
-urange = [2.175, 2.5, 3., 3.5, 4., 5.][::-1]
-giw_s, sigma_iw, w_n = loop_u_tp(
-    urange, tp * np.ones_like(urange), BETA)
+urange = [2.5]  # [2.175, 2.5, 3., 3.5, 4., 5.][::-1]
+sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA)
 
-eps_k = np.linspace(-1., 1., 61)
-plot_optical_cond(giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA)
+eps_k = np.linspace(-1., 1., 100)
+plot_optical_cond(sigma_iw, urange, tp, w_n, w, w_set, BETA)
+#plt.savefig('opt_cond_ins_U2.5tp_0.3_B100.pdf', dpi=96, format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
 
 ###############################################################################
 # Insulators
@@ -168,3 +191,5 @@ plot_optical_cond(giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA)
 # ss, gs = plot_optical_cond(
 # np.array([giw_d, giw_o]), np.array([siw_d, siw_o]), urange, tp, w_n, w,
 # w_set)
+
+#
