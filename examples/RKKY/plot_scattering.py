@@ -60,7 +60,7 @@ BETARANGE = 1 / temp
 # Plot a 2x2 frame following sigma and d_sigma Changing U
 
 
-def plot_zero_w(function_array, iter_range, tp, betarange, ax):
+def plot_zero_w(function_array, iter_range, tp, betarange, ax, color):
     """Plot the zero frequency extrapolation of a function
     Parameters
     ----------
@@ -85,31 +85,33 @@ def plot_zero_w(function_array, iter_range, tp, betarange, ax):
                 w_n, function_array[j][i][0][:2], 1)[1])
             rtp[j].append(np.polyfit(w_n, function_array[j][i][1][:2], 1)[1])
 
-        ax[0].plot(1 / BETARANGE, -np.array(sig_11_0[j]), 'k', label=str(u))
-        ax[1].plot(1 / BETARANGE, tp + np.array(rtp[j]), 'k', label=str(u))
+        ax[0].plot(1 / BETARANGE, -np.array(sig_11_0[j]), color, label=str(u))
+        ax[1].plot(1 / BETARANGE, tp + np.array(rtp[j]), color, label=str(u))
     ax[0].set_ylabel(r'$-\Im m \Sigma_{11}(w=0)$')
     ax[1].set_ylabel(r'$t_\perp + \Re e\Sigma_{12}(w=0)$')
     ax[1].set_xlabel('$T/D$')
     ax[1].set_xlim([min(temp), max(temp)])
     return np.array(sig_11_0)
 
-U_intm = np.arange(.5, 3.1, .4)
+U_inti = [2.625, 3.]
+sigmasI_U = Parallel(n_jobs=-1)(delayed(loop_beta)(u_int, .3, BETARANGE, 'ins')
+                                for u_int in U_inti)
+
+fig, si = plt.subplots(2, 1, sharex=True)
+sig_11_0i = plot_zero_w(sigmasI_U, U_inti, .3, BETARANGE, si, 'r')
+
+U_intm = np.linspace(0, 3, 9)
 sigmasM_U = Parallel(n_jobs=-1)(delayed(loop_beta)
                                 (u_int, .3, BETARANGE, 'met') for u_int in U_intm)
 
-fig, si = plt.subplots(2, 1, sharex=True)
-sig_11_0 = plot_zero_w(sigmasM_U, U_intm, .3, BETARANGE, si)
+#fig, si = plt.subplots(2, 1, sharex=True)
+sig_11_0m = plot_zero_w(sigmasM_U, U_intm, .3, BETARANGE, si, 'b')
+si[0].set_ylim([0, 0.6])
 
 ax = fig.add_axes([.18, .6, .2, .3])
-ax.plot(U_intm, -sig_11_0[:, -1])
-ax.set_xticks(np.arange(.5, 3, 1))
-
-
-U_inti = [2.5, 3., 3.7]
-f, si = plt.subplots(2, 1, sharex=True)
-sigmasI_U = Parallel(n_jobs=-1)(delayed(loop_beta)(u_int, .3, BETARANGE, 'ins')
-                                for u_int in U_inti)
-plot_zero_w(sigmasI_U, U_inti, .3, BETARANGE, si)
+ax.plot(U_intm, -sig_11_0m[:, -7])
+ax.set_xticks(np.arange(0, 3.1, 1))
+si[0].axvline(temp[-7], color='k')
 
 
 # si[0].legend(loc=0)
