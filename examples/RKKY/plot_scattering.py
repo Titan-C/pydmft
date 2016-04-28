@@ -93,22 +93,20 @@ def plot_zero_w(function_array, iter_range, tp, betarange, ax, color):
     ax[1].set_xlim([min(temp), max(temp)])
     return np.array(sig_11_0)
 
-U_inti = [2.625, 3.]
+U_inti = [2.5, 3.]
 sigmasI_U = Parallel(n_jobs=-1)(delayed(loop_beta)(u_int, .3, BETARANGE, 'ins')
                                 for u_int in U_inti)
-
-fig, si = plt.subplots(2, 1, sharex=True)
-sig_11_0i = plot_zero_w(sigmasI_U, U_inti, .3, BETARANGE, si, 'r')
-
-U_intm = np.linspace(0, 3, 9)
+U_intm = np.linspace(0, 3, 13)
 sigmasM_U = Parallel(n_jobs=-1)(delayed(loop_beta)
                                 (u_int, .3, BETARANGE, 'met') for u_int in U_intm)
 
+fig, si = plt.subplots(2, 1, sharex=True)
+sig_11_0i = plot_zero_w(sigmasI_U, U_inti, .3, BETARANGE, si, 'r--')
 #fig, si = plt.subplots(2, 1, sharex=True)
 sig_11_0m = plot_zero_w(sigmasM_U, U_intm, .3, BETARANGE, si, 'b')
 si[0].set_ylim([0, 0.6])
 
-ax = fig.add_axes([.18, .6, .2, .3])
+ax = fig.add_axes([.2, .65, .2, .25])
 ax.plot(U_intm, -sig_11_0m[:, -7])
 ax.set_xticks(np.arange(0, 3.1, 1))
 si[0].axvline(temp[-7], color='k')
