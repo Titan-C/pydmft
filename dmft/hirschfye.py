@@ -63,6 +63,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     comm = MPI.COMM_WORLD
     # Set up default values
     parms = {'global_flip': False,
+             'binned-meas': False,
              'double_flip_prob': 0.,
              't':           0.5,
              'SITES':       1,
