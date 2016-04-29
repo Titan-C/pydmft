@@ -63,7 +63,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     comm = MPI.COMM_WORLD
     # Set up default values
     parms = {'global_flip': False,
-             'binned-meas': False,
+             'binned_meas': False,
              'double_flip_prob': 0.,
              't':           0.5,
              'SITES':       1,
@@ -121,7 +121,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
             for i in range(interaction.shape[0]):
                 Gbin[i] += g[i]
                 Gst[i] += g[i]
-            if mcs % parms['therm'] == 0 and parms['binned-meas']:
+            if mcs % parms['therm'] == 0 and parms['binned_meas']:
                 Gbin = np.array(Gbin) / parms['therm']
                 np.save(parms['work_dir'] + '/gtau_bin_mcs{}_r{}'.format(mcs,
                                                                          comm.rank),
