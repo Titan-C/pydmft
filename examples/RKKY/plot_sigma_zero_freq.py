@@ -106,20 +106,34 @@ def plot_z_diagram_T_vs_U(tp, ur, temp, ax):
     x, y = np.meshgrid(ur, temp)
 
     sd_zew, so_zew = estimate_zero_w_sigma_T_vs_U(tp, ur, temp, 'met')
-    z = np.ma.masked_array(sd_zew[:, :, 0], sd_zew[:, :, 0] > 0)
-    ax.pcolormesh(x, y, 1 / (1 - z), cmap=plt.get_cmap(r'viridis'))
-
-    sd_zew, so_zew = estimate_zero_w_sigma_T_vs_U(tp, ur, temp, 'ins')
-    z = np.ma.masked_array(sd_zew[:, ::-1, 0], sd_zew[:, ::-1, 0] > 0)
-    ax.pcolormesh(x, y, 1 / (1 - z), cmap=plt.get_cmap(r'viridis'), alpha=0.2)
-    CS = ax.contour(x, y, sd_zew[:, ::-1, 1],
-                    levels=-np.arange(.1, 5, .5)[::-1])
+    z = np.ma.masked_array(sd_zew[:, :, 0], sd_zew[:, :, 0] > 70)
+    #z = sd_zew[:, :, 0]
+    c = ax.pcolormesh(x, y, z, cmap=plt.get_cmap(r'viridis'))
+    plt.colorbar(c)
+    CS = ax.contour(x, y, sd_zew[:, :, 1],
+                    levels=[-.5, -.1, -.005])
     ax.clabel(CS, inline=1, fontsize=10)
+    CS = ax.contour(x, y, sd_zew[:, :, 0],
+                    levels=[-5, -.1, 0, 10])
+    ax.clabel(CS, inline=1, fontsize=10)
+
+#    sd_zew, so_zew = estimate_zero_w_sigma_T_vs_U(tp, ur, temp, 'ins')
+#    z = np.ma.masked_array(sd_zew[:, ::-1, 0], sd_zew[:, ::-1, 0] > 2)
+#    #z = sd_zew[:, ::-1, 0]
+#    ax.pcolormesh(x, y, - z, cmap=plt.get_cmap(r'viridis'), alpha=0.5)
+#    CS = ax.contour(x, y, sd_zew[:, ::-1, 1],
+#                    levels=-np.arange(.1, 5, .5)[::-1])
+#    ax.clabel(CS, inline=1, fontsize=10)
+#    CS = ax.contour(x, y, sd_zew[:, ::-1, 0],
+#                    levels=np.arange(-.1, 10, .5))
+#    ax.clabel(CS, inline=1, fontsize=10)
     ax.axis([x.min(), x.max(), y.min(), y.max()])
 
 f, ax = plt.subplots()
-TEMP = np.arange(1 / 500., .14, 1 / 400)
+TEMP = np.arange(1 / 500., .14, 1 / 400.)
 plot_z_diagram_T_vs_U(0.3, UR, TEMP, ax)
+f, ax = plt.subplots()
+plot_z_diagram_T_vs_U(0., UR, TEMP, ax)
 
 ###############################################################################
 
