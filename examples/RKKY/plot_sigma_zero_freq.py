@@ -112,6 +112,9 @@ def plot_z_diagram_T_vs_U(tp, ur, temp, ax):
     sd_zew, so_zew = estimate_zero_w_sigma_T_vs_U(tp, ur, temp, 'ins')
     z = np.ma.masked_array(sd_zew[:, ::-1, 0], sd_zew[:, ::-1, 0] > 0)
     ax.pcolormesh(x, y, 1 / (1 - z), cmap=plt.get_cmap(r'viridis'), alpha=0.2)
+    CS = ax.contour(x, y, sd_zew[:, ::-1, 1],
+                    levels=-np.arange(.1, 5, .5)[::-1])
+    ax.clabel(CS, inline=1, fontsize=10)
     ax.axis([x.min(), x.max(), y.min(), y.max()])
 
 f, ax = plt.subplots()
