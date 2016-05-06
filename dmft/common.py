@@ -90,6 +90,18 @@ def greenF(w_n, sigma=0, mu=0, D=1):
     return 2. / (zeta + sig * sq)
 
 
+def semi_circle_hiltrans(zeta, D=1):
+    """Calculate the Hilbert transform with a semicircular DOS
+
+    See also
+    --------
+    greenF
+    """
+    sqr = np.sqrt(zeta**2 - D**2)
+    sqr = np.sign(sqr.imag) * sqr
+    return 2 * (zeta - sqr)
+
+
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta)` is required and output given

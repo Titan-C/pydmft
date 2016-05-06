@@ -37,7 +37,15 @@ def test_pade():
     w_n = gf.matsubara_freq(200)
     giw = gf.greenF(w_n)
     omega = np.linspace(-0.7, 0.7, 100)  # avoid semicircle edges
-    gw_ref = gf.greenF(-1j*omega + 1e-5)
+    gw_ref = gf.greenF(-1j * omega + 1e-5)
     pade_c = gf.pade_coefficients(giw, w_n)
     gw_cont = gf.pade_rec(pade_c, omega, w_n)
     assert np.allclose(gw_ref, gw_cont, 1e-3)
+
+
+def test_hilbert_trans():
+    """Test causality of Hilbert transforms of semi-circle"""
+    w_n = gf.matsubara_freq(200)
+    giw = gf.greenF(w_n, sigma=-1j / w_n, mu=-0.2)
+    ss = gf.semi_circle_hiltrans(1j * w_n - .2 + 1j / w_n)
+    assert np.allclose(ss, giw)
