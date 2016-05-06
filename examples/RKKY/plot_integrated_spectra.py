@@ -58,12 +58,6 @@ def calculate_Aw(sig_d, sig_o, w_n, w_set, w, eps_k, tp):
     return Aw, ss, sa
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
-
-
 def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
     pdm, pam, pdi, pai = axes
     x, y = np.meshgrid(eps_k, w)
@@ -72,8 +66,8 @@ def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
     Aw, ss, sa = calculate_Aw(siw_d, siw_o, w_n, w_set, w, eps_k, tp)
     Aw = np.clip(Aw, 0, 1,)
     pdm.pcolormesh(x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    gsts = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
-    gsta = hiltrans(w + tp - (sa.real - 1j * np.abs(sa.imag)))
+    gsts = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+    gsta = gf.semi_circle_hiltrans(w + tp - (sa.real - 1j * np.abs(sa.imag)))
     gloc = 0.5 * (gsts + gsta)
     pam.plot(-gloc.imag / np.pi, w)
 
@@ -82,8 +76,8 @@ def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
     Aw, ss, sa = calculate_Aw(siw_d, siw_o, w_n, w_set, w, eps_k, tp)
     Aw = np.clip(Aw, 0, 1,)
     pdi.pcolormesh(x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    gsts = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
-    gsta = hiltrans(w + tp - (sa.real - 1j * np.abs(sa.imag)))
+    gsts = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+    gsta = gf.semi_circle_hiltrans(w + tp - (sa.real - 1j * np.abs(sa.imag)))
     gloc = 0.5 * (gsts + gsta)
     pai.plot(-gloc.imag / np.pi, w)
 

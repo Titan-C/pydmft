@@ -45,11 +45,6 @@ def plot_pole_eq(w, gf, sig, title):
     plt.ylim([-3, 3])
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Make plots out of CTQMC results',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -77,7 +72,8 @@ if __name__ == '__main__':
             gs = gf.pade_contination(giw_s, w_n, w, w_set)
             siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
             ss = gf.pade_contination(siw_s, w_n, w, w_set)
-            gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+            gst = gf.semi_circle_hiltrans(
+                w - tp - (ss.real - 1j * np.abs(ss.imag)))
             lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
             Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
 

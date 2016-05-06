@@ -57,17 +57,11 @@ def plot_pole_eq(w, gf, sig, pole, sty, ax):
     ax.set_yticklabels([])
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
-
-
 def plot_spectral(u_int, tp, BETA, seed, w, w_set, pole, sty, ax):
 
     siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
     ss = pade_diag(siw_d, siw_o, w_n, w_set, w)
-    gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+    gst = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
     plot_pole_eq(w, gst, ss, pole, sty, ax)
 

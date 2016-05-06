@@ -97,14 +97,11 @@ def Kramers(w, gw):
     return K.sum(1).real / np.pi
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
-
 omega = np.linspace(-5, 5, 600)
-gt = hiltrans(omega + 1e-5j)
+gt = gf.semi_circle_hiltrans(omega + 1e-5j)
 plt.plot(omega, gt.real, omega, gt.imag)
 
 gr = Kramers(omega, gt)
 plt.plot(omega, gr.real)
+
+sigw = rw - .3 - .25 * gw - 1 / gw

@@ -45,10 +45,6 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
     return gr_s, gr_a
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
 ###############################################################################
 # Insulator
 # ---------
@@ -139,8 +135,8 @@ plt.xticks(np.linspace(-3, 3, 13))
 
 ###############################################################################
 # Reconstruction
-GAB = hiltrans(w + 1e-2j - tp - (swd + swo))
-G_B = hiltrans(w + 1e-2j + tp - (swd - swo))
+GAB = gf.semi_circle_hiltrans(w + 1e-2j - tp - (swd + swo))
+G_B = gf.semi_circle_hiltrans(w + 1e-2j + tp - (swd - swo))
 
 backl = .5 * (GAB + G_B)
 plt.figure()

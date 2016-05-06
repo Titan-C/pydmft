@@ -58,8 +58,8 @@ def pade_diag(gf_d, gf_o, w_n, w_set, w):
 def calculate_Aw(sig_d, sig_o, w, eps_k, tp):
     ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
 
-    lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
-    lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
+    lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-2j - ss)
+    lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-2j - sa)
     Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
 
     return Aw

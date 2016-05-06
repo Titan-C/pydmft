@@ -77,18 +77,13 @@ def plot_pole_eq(w, gf, sig, title):
     plt.ylim([-3, 3])
 
 
-def hiltrans(zeta):
-    sqr = np.sqrt(zeta**2 - 1)
-    sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
-
-
 def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 
     for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
         gs, ga = pade_diag(giw_d, giw_o, w_n, w_set, w)
         ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
-        gst = hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
+        gst = gf.semi_circle_hiltrans(
+            w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-3j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-3j - sa)
