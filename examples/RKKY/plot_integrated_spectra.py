@@ -39,8 +39,8 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
 def calculate_Aw(sig_d, sig_o, w_n, w_set, w, eps_k, tp):
     ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
 
-    lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
-    lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)
+    lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 7e-3j - ss)
+    lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 7e-3j - sa)
     Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
 
     return Aw, ss, sa
@@ -70,24 +70,31 @@ def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
     pai.plot(-gloc.imag / np.pi, w)
 
 
-w = np.linspace(-3, 3, 400)
+def write_labels_e_struct(axes):
+    axes[0].set_yticks(np.linspace(-2.5, 2.5, 5))
+    axes[1].set_yticks(np.linspace(-2.5, 2.5, 5))
+    axes[1].set_yticklabels([])
+    axes[1].set_xticklabels([])
+    axes[2].set_yticks(np.linspace(-2.5, 2.5, 5))
+    axes[3].set_yticks(np.linspace(-2.5, 2.5, 5))
+    axes[3].set_yticklabels([])
+    axes[3].set_xticklabels([])
+    axes[0].set_ylabel(r'$\omega$')
+    axes[2].set_ylabel(r'$\omega$')
+    axes[2].set_xlabel(r'$\epsilon$')
+    axes[3].set_xlabel(r'$A(\omega)$')
+
+w = np.linspace(-3, 3, 800)
 eps_k = np.linspace(-1., 1., 61)
 w_set = np.arange(200)
-fig, ax = plt.subplots(2, 2, gridspec_kw=dict(
-    wspace=0.05, hspace=0.1, width_ratios=[3, 1]))
-axes = ax.flatten()
-plot_spectra(2.5, .3, 100., w, w_set, eps_k, axes)
-axes[0].set_yticks(np.linspace(-2.5, 2.5, 5))
-axes[1].set_yticks(np.linspace(-2.5, 2.5, 5))
-axes[1].set_yticklabels([])
-axes[1].set_xticklabels([])
-axes[2].set_yticks(np.linspace(-2.5, 2.5, 5))
-axes[3].set_yticks(np.linspace(-2.5, 2.5, 5))
-axes[3].set_yticklabels([])
-axes[3].set_xticklabels([])
-axes[0].set_ylabel(r'$\omega$')
-axes[2].set_ylabel(r'$\omega$')
-axes[2].set_xlabel(r'$\epsilon$')
-axes[3].set_xlabel(r'$A(\omega)$')
+for U in [2.3, 2.7, 3.2]:
+    fig, ax = plt.subplots(2, 2, gridspec_kw=dict(
+        wspace=0.05, hspace=0.1, width_ratios=[3, 1]))
+    axes = ax.flatten()
+    plot_spectra(U, .3, 100., w, w_set, eps_k, axes)
+
+    write_labels_e_struct(axes)
+    axes[0].set_title(
+        r"Electronic $\beta={}$, $t_\perp={}$, $U={}$".format(100, .3, U))
 
 #plt.savefig('ipt_arpes_MIT.pdf', format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
