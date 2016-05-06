@@ -30,11 +30,11 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-    return giw_d, giw_o, siw_d, siw_o, w_n
+    return siw_d, siw_o, w_n
 
 
 def construct_dispersions(BETA, u_int, tp, seed):
-    giw_d, giw_o, siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
+    siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
 
     w = np.linspace(-3, 3, 800)
     eps_k = np.linspace(-1., 1., 61)

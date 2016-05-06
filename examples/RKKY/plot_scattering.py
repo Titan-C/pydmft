@@ -104,7 +104,7 @@ fig, si = plt.subplots(2, 1, sharex=True)
 sig_11_0i = plot_zero_w(sigmasI_U, U_inti, .3, BETARANGE, si, 'r--')
 #fig, si = plt.subplots(2, 1, sharex=True)
 sig_11_0m = plot_zero_w(sigmasM_U, U_intm, .3, BETARANGE, si, 'b')
-si[0].set_ylim([0, 0.6])
+si[0].set_ylim([0, 0.5])
 
 ax = fig.add_axes([.2, .65, .2, .25])
 ax.plot(U_intm, -sig_11_0m[:, -7])
