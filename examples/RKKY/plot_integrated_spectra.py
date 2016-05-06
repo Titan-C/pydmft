@@ -70,7 +70,7 @@ def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
     pai.plot(-gloc.imag / np.pi, w)
 
 
-w = np.linspace(-3, 3, 800)
+w = np.linspace(-3, 3, 400)
 eps_k = np.linspace(-1., 1., 61)
 w_set = np.arange(200)
 fig, ax = plt.subplots(2, 2, gridspec_kw=dict(
@@ -90,4 +90,4 @@ axes[2].set_ylabel(r'$\omega$')
 axes[2].set_xlabel(r'$\epsilon$')
 axes[3].set_xlabel(r'$A(\omega)$')
 
-#plt.savefig('arpes_coexistence.pdf', dpi=96, format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
+#plt.savefig('ipt_arpes_MIT.pdf', format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)

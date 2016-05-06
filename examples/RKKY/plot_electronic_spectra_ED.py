@@ -33,10 +33,11 @@ def extract_data(dirname):
 
 
 def calculate_Aw(u_int, eps_k, tp):
-    w, ss, sa = extract_data('extract_U' + str(u_int))
+    w, ss, sa = extract_data(
+        '/home/oscar/Dropbox/VO2/ED_arpes/extract_U' + str(u_int))
 
-    lat_gfs = 1 / np.add.outer(-eps_k, w + u_int / 4 + tp + 4e-5j - ss)
-    lat_gfa = 1 / np.add.outer(-eps_k, w + u_int / 4 - tp + 4e-5j - sa)
+    lat_gfs = 1 / np.add.outer(-eps_k, w + u_int / 4 + tp - ss)
+    lat_gfa = 1 / np.add.outer(-eps_k, w + u_int / 4 - tp - sa)
     Aw = -.5 * (lat_gfa + lat_gfs).imag / np.pi
 
     return Aw, ss, sa, w
@@ -50,8 +51,8 @@ def plot_spectra(tp, eps_k, axes):
     x, y = np.meshgrid(eps_k, w)
     Aw = np.clip(Aw, 0, 1,)
     pdm.pcolormesh(x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    gsts = gf.semi_circle_hiltrans(w + u_int / 4 + tp + 4e-5j - ss)
-    gsta = gf.semi_circle_hiltrans(w + u_int / 4 - tp + 4e-5j - sa)
+    gsts = gf.semi_circle_hiltrans(w + u_int / 4 + tp - ss)
+    gsta = gf.semi_circle_hiltrans(w + u_int / 4 - tp - sa)
     gloc = 0.5 * (gsts + gsta)
     pam.plot(-gloc.imag / np.pi, w)
 
@@ -60,8 +61,8 @@ def plot_spectra(tp, eps_k, axes):
     Aw, ss, sa, w = calculate_Aw(u_int, eps_k, 0.6)
     Aw = np.clip(Aw, 0, 1,)
     pdi.pcolormesh(x, y, Aw.T, cmap=plt.get_cmap(r'inferno'))
-    gsts = gf.semi_circle_hiltrans(w + u_int / 4 + tp + 4e-5j - ss)
-    gsta = gf.semi_circle_hiltrans(w + u_int / 4 - tp + 4e-5j - sa)
+    gsts = gf.semi_circle_hiltrans(w + u_int / 4 + tp - ss)
+    gsta = gf.semi_circle_hiltrans(w + u_int / 4 - tp - sa)
     gloc = 0.5 * (gsts + gsta)
     pai.plot(-gloc.imag / np.pi, w)
 
@@ -90,4 +91,4 @@ axes[2].set_ylabel(r'$\omega$')
 axes[2].set_xlabel(r'$\epsilon$')
 axes[3].set_xlabel(r'$A(\omega)$')
 
-#plt.savefig('arpes_coexistence.pdf', dpi=96, format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
+#plt.savefig('arpes_ED.pdf', format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
