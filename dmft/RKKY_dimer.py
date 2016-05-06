@@ -207,3 +207,31 @@ def epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta):
     """
     return (-siw_d.imag * giw_d.imag + siw_o.real * giw_o.real +
             u_int**2 / 4 / w_n**2).sum() / beta - beta * u_int**2 / 32 + u_int / 8
+
+###############################################################################
+# The Symmetric Anti-Symmetric Basis
+#
+
+
+def pade_diag(gf_aa, gf_ab, w_n, w_set, w):
+    """Take diagonal and off diagonal Matsubara functions in the local
+    basis and return real axis functions in the symmetric and
+    anti-symmetric basis. Such that
+
+           ⎡ⅈ⋅ωₙ + μ  - t⟂          0       ⎤     ⎡Σ_AA + Σ_AB       0     ⎤
+G^{-1,0} = ⎢                                ⎥  -  ⎢                        ⎥
+           ⎣        0        ⅈ⋅ωₙ + μ  + t⟂ ⎦     ⎣     0       Σ_AA - Σ_AB⎦
+
+The Symmetric sum (Anti-bonding) returned first, Asymmetric is returned second
+
+"""
+
+    gf_s = 1j * gf_aa.imag + gf_ab.real  # Anti-bond
+    pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
+    gr_s = gf.pade_rec(pc, w, w_n[w_set])
+
+    gf_a = 1j * gf_aa.imag - gf_ab.real  # bond
+    pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
+    gr_a = gf.pade_rec(pc, w, w_n[w_set])
+
+    return gr_s, gr_a

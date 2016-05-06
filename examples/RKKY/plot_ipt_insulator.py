@@ -33,18 +33,6 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
     return giw_d, giw_o, siw_d, siw_o, g0iw_d, g0iw_o, w_n
 
 
-def pade_diag(gf_d, gf_o, w_n, w_set, w):
-    gf_s = 1j * gf_d.imag + gf_o.real  # Anti-bond
-    pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w, w_n[w_set])
-
-    gf_a = 1j * gf_d.imag - gf_o.real  # bond
-    pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
-    gr_a = gf.pade_rec(pc, w, w_n[w_set])
-
-    return gr_s, gr_a
-
-
 ###############################################################################
 # Insulator
 # ---------

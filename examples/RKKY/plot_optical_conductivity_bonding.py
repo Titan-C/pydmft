@@ -44,18 +44,6 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     return np.array(giw_s), np.array(sigma_iw), w_n
 
 
-def pade_diag(gf_d, gf_o, w_n, w_set, w):
-    gf_s = 1j * gf_d.imag + gf_o.real  # Anti-bond
-    pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w, w_n[w_set])
-
-    gf_a = 1j * gf_d.imag - gf_o.real  # bond
-    pc = gf.pade_coefficients(gf_a[w_set], w_n[w_set])
-    gr_a = gf.pade_rec(pc, w, w_n[w_set])
-
-    return gr_s, gr_a
-
-
 def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
     nuv = w[w > 0]
     zerofreq = len(nuv)
@@ -64,8 +52,8 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta):
     nf = fermi_dist(w, beta) - fermi_dist(np.add.outer(nuv, w), beta)
 
     for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
-        gs, ga = pade_diag(giw_d, giw_o, w_n, w_set, w)
-        ss, sa = pade_diag(sig_d, sig_o, w_n, w_set, w)
+        gs, ga = rt.pade_diag(giw_d, giw_o, w_n, w_set, w)
+        ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
 
         lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 4e-3j - ss)
         lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 4e-3j - sa)

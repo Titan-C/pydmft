@@ -33,14 +33,6 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
     return siw_d, siw_o, w_n
 
 
-def pade_diag(gf_d, gf_o, w_n, w_set, w):
-    gf_s = 1j * gf_d.imag + gf_o.real  # Anti-bond
-    pc = gf.pade_coefficients(gf_s[w_set], w_n[w_set])
-    gr_s = gf.pade_rec(pc, w, w_n[w_set])
-
-    return gr_s
-
-
 def plot_pole_eq(w, gf, sig, pole, sty, ax):
     ax.plot(w, -np.abs(sig.imag),
             'r' + sty, label=r'$\Im m \Sigma$')
@@ -60,7 +52,7 @@ def plot_pole_eq(w, gf, sig, pole, sty, ax):
 def plot_spectral(u_int, tp, BETA, seed, w, w_set, pole, sty, ax):
 
     siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
-    ss = pade_diag(siw_d, siw_o, w_n, w_set, w)
+    ss, _ = rt.pade_diag(siw_d, siw_o, w_n, w_set, w)
     gst = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
     plot_pole_eq(w, gst, ss, pole, sty, ax)
