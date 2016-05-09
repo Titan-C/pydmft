@@ -199,8 +199,9 @@ def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
 
     st_d, st_o = _dimer_sigma(g0t_d, g0t_o, u_int)
 
+    dj2d = -2 * ((st_d[2] - 2 * st_d[1] + st_d[0]) / tau[1]**2)
     sw_d = gt_fouriertrans(
-        st_d, tau, w_n, [u_int**2 / 4, 0., u_int**2 / 4 + 4 * tp])
+        st_d, tau, w_n, [u_int**2 / 4, 0., dj2d])
     dj1o = 2 * (st_o[1] - st_o[0]) / tau[1]
     sw_o = gt_fouriertrans(st_o, tau, w_n, [0., dj1o, 0.])
 
