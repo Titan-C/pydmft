@@ -48,7 +48,7 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     nuv = w[w > 0]
     zerofreq = len(nuv)
     dw = w[1] - w[0]
-    E = np.linspace(-1, 1, 300)
+    E = np.linspace(-1, 1, 61)
     dos = np.exp(-2 * E**2) / np.sqrt(np.pi / 2)
     de = E[1] - E[0]
     dosde = (dos * de).reshape(-1, 1)
@@ -59,8 +59,8 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
         gs, ga = rt.pade_diag(giw_d, giw_o, w_n, w_set, w)
         ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
 
-        lat_Aa = (-1 / np.add.outer(-E, w + tp + 5e-3j - sa)).imag / np.pi
-        lat_As = (-1 / np.add.outer(-E, w - tp + 5e-3j - ss)).imag / np.pi
+        lat_Aa = (-1 / np.add.outer(-E, w + tp + 4e-2j - sa)).imag / np.pi
+        lat_As = (-1 / np.add.outer(-E, w - tp + 4e-2j - ss)).imag / np.pi
         #lat_Aa = .5 * (lat_Aa + lat_As)
         #lat_As = lat_Aa
 
@@ -72,23 +72,19 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
                        for i in range(len(nuv))] for e in range(len(E))])
         b += np.array([[np.sum(lat_As[e] * np.roll(lat_Aa[e], -i) * nf[i])
                         for i in range(len(nuv))] for e in range(len(E))])
-        b *= tp**2 * eta**2 / 2 / .25
+        #b *= tp**2 * eta**2 / 2 / .25
 
-        sigma_E_sum = (dosde * (a)).sum(axis=0) * dw / nuv
-        plt.plot(nuv, sigma_E_sum, '--')
-        sigma_E_sum = (dosde * (b)).sum(axis=0) * dw / nuv
-        plt.plot(nuv, sigma_E_sum, ':')
-        sigma_E_sum = (dosde * (a + b)).sum(axis=0) * dw / nuv
+        sigma_E_sum_a = .5 * (dosde * (a)).sum(axis=0) * dw / nuv
+        plt.plot(nuv, sigma_E_sum_a, 'k--')
+        sigma_E_sum_i = .5 * (dosde * (b)).sum(axis=0) * dw / nuv
+        plt.plot(nuv, sigma_E_sum_i, 'k:')
+        sigma_E_sum = .5 * (dosde * (a + b)).sum(axis=0) * dw / nuv
         plt.plot(nuv, sigma_E_sum)
 
         # To save data manually at some point
         np.savez('opt_cond{}'.format(seed), nuv=nuv, sigma_E_sum=sigma_E_sum)
 
-        plt.xlabel(r'$\nu$')
-        plt.ylabel(r'$\sigma(\nu)$')
-        # plt.title(title)
-        plt.ylim([0, .6])
-        plt.xlim([0, 3])
+        return sigma_E_sum_a, sigma_E_sum_i, sigma_E_sum, nuv
 
 
 ###############################################################################
@@ -101,7 +97,25 @@ tp = 0.3
 w = np.linspace(-6, 6, 800)
 w_set = np.concatenate((np.arange(100), np.arange(100, 200, 2)))
 giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
-plot_optical_cond(giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'met')
+
+sm_a, sm_i, sm, nuv = plot_optical_cond(
+    giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'met')
 
 giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA)
-plot_optical_cond(giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'ins')
+si_a, si_i, si, nuv = plot_optical_cond(
+    giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'ins')
+
+fig, ax = plt.subplots(2, 1, sharex=True, sharey=True)
+ax[0].plot(nuv, sm_a, '--')
+ax[0].plot(nuv, sm_i, ':')
+ax[0].plot(nuv, sm, '-')
+
+ax[1].plot(nuv, si_a, '--')
+ax[1].plot(nuv, si_i, ':')
+ax[1].plot(nuv, si, '-')
+ax[0].set_xlim([0, 3])
+ax[0].set_ylim([0, 0.7])
+
+ax[1].set_xlabel(r'$\omega$')
+ax[0].set_ylabel(r'Metal $\sigma(\omega)$')
+ax[1].set_ylabel(r'Insulator $\sigma(\omega)$')
