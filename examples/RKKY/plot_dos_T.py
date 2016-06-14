@@ -26,6 +26,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 """
 
     sigma_iw = []
+    g_iw = []
     lw_n = []
     print('U: ', u_int, 'tp: ', tp)
     for beta in betarange:
@@ -38,6 +39,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
         giw_d, giw_o, loops = rt.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-13)
+        g_iw.append((giw_d.imag, giw_o.real))
         g0iw_d, g0iw_o = rt.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
@@ -45,7 +47,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
         print(seed, 'beta:', beta, ' loops: ', loops)
 
-    return np.array(sigma_iw), np.array(lw_n)
+    return np.array(g_iw), np.array(sigma_iw), np.array(lw_n)
 
 
 def lin_approx(w_n, rf_iwn):
@@ -71,8 +73,8 @@ tp = 0.3
 temp = np.linspace(0.002, 0.03, 20)
 betarange = 1 / temp
 
-sigmai_iw, lw_n = loop_beta(U, tp, betarange)
-sigmam_iw, lw_n = loop_beta(U, tp, betarange, 'met')
+gi_iw, sigmai_iw, lw_n = loop_beta(U, tp, betarange)
+gm_iw, sigmam_iw, lw_n = loop_beta(U, tp, betarange, 'met')
 
 fig, ax_sig = plt.subplots(1, 2, sharex=True, sharey=True)
 
@@ -87,7 +89,25 @@ ax_sig[1].set_ylim([-1, 0])
 ax_sig[1].set_xlabel(r'$i\omega_n$')
 ax_sig[0].set_xlabel(r'$\Sigma(i\omega_n)$')
 
-# Low freq review
+# Low freq review sigma
+
+ins_mc = -np.array([lin_approx(wn, sig_d)
+                    for (sig_d, sig_o), wn in zip(gi_iw, lw_n)]).T
+
+fih, ax_zw = plt.subplots(2, 1, sharex=True)
+ax_zw[0].plot(temp, ins_mc[0])
+ax_zw[1].plot(temp, ins_mc[1])
+
+met_mc = -np.array([lin_approx(wn, sig_d)
+                    for (sig_d, sig_o), wn in zip(gm_iw, lw_n)]).T
+ax_zw[0].plot(temp, met_mc[0])
+ax_zw[1].plot(temp, met_mc[1])
+
+ax_zw[1].set_xlabel('T')
+ax_zw[0].set_ylabel(r'$-dG/dw$')
+ax_zw[1].set_ylabel(r'$G(0)$')
+ax_zw[1].set_xlim([0, 0.05])
+# Low freq review sigma
 
 ins_mc = -np.array([lin_approx(wn, sig_d)
                     for (sig_d, sig_o), wn in zip(sigmai_iw, lw_n)]).T
