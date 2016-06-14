@@ -40,9 +40,9 @@ def construct_dispersions(BETA, u_int, tp, seed):
     eps_k = np.linspace(-1., 1., 61)
     w_set = np.arange(200)
 
-    ss = gf.pade_contination(
+    ss = gf.pade_continuation(
         1j * siw_d.imag + siw_o.real, w_n, w, w_set)  # A-bond
-    sa = gf.pade_contination(
+    sa = gf.pade_continuation(
         1j * siw_d.imag - siw_o.real, w_n, w, w_set)  # bond
     lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
     lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
@@ -68,7 +68,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
     for e in eps_k:
         gd = rt.mat_inv(1j * w_n - e - 1j * siw_d.imag, -tp - siw_o.real)[0]
         Ag.append(np.clip(
-            np.abs(-gf.pade_contination(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
+            np.abs(-gf.pade_continuation(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
 
     gf.plot_band_dispersion(w, np.asarray(
         Ag), 'Local ' + title, eps_k, 'intensity')
@@ -81,7 +81,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
     for e in eps_k:
         gd = rt.mat_inv(1j * w_n - e - 1j * siw_d.imag, -tp - siw_o.real)[0]
         Ag.append(np.clip(
-            np.abs(-gf.pade_contination(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
+            np.abs(-gf.pade_continuation(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
 
     gf.plot_band_dispersion(w, np.asarray(
         Ag), 'Local ' + title, eps_k, 'intensity')

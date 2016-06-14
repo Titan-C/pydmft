@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 r"""
+=========================
 Continuations of HF dimer
+=========================
+
 """
 # Created Mon May  2 09:52:26 2016
 # Author: Óscar Nájera
@@ -83,8 +86,8 @@ ssiw[ssiw < .01] = .005
 plt.plot(nwn, sst)
 plt.plot(nwn, .0007 / (nwn**2 + .2**2) + 2e-4)
 omega = np.linspace(-4, 4, 600)
-gw = gf.pade_contination(avgiw, nwn, omega, np.arange(128, 200))
-sw = gf.pade_contination(avsiw, nwn, omega, np.arange(128, 200))
+gw = gf.pade_continuation(avgiw, nwn, omega, np.arange(128, 200))
+sw = gf.pade_continuation(avsiw, nwn, omega, np.arange(128, 200))
 plt.plot(omega, gw.imag, lw=3)
 plt.plot(omega, sw.imag, lw=3)
 np.savez('/home/oscar/dev/Maxent/Dimer_{}_g_b{}U{}'.format(seed, beta, u_int),

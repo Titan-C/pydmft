@@ -69,9 +69,9 @@ if __name__ == '__main__':
             giw_s = np.squeeze(.5 * (giw['sym_up'].data + giw['sym_dw'].data))
             giw_s = giw_s[len(giw_s) / 2:len(giw_s) / 2 + 300]
 
-            gs = gf.pade_contination(giw_s, w_n, w, w_set)
+            gs = gf.pade_continuation(giw_s, w_n, w, w_set)
             siw_s = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
-            ss = gf.pade_contination(siw_s, w_n, w, w_set)
+            ss = gf.pade_continuation(siw_s, w_n, w, w_set)
             gst = gf.semi_circle_hiltrans(
                 w - tp - (ss.real - 1j * np.abs(ss.imag)))
             lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)

@@ -293,7 +293,7 @@ def pade_rec(pc, w, w_n):
     return an / bn
 
 
-def pade_contination(gfunc, w_n, w, w_set=None):
+def pade_continuation(gfunc, w_n, w, w_set=None):
     """Continate the green Function by Padé
 
     Parameters

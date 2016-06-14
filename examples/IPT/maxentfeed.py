@@ -6,7 +6,7 @@ test maxIteration
 from __future__ import division, absolute_import, print_function
 
 from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, pade_contination, plot_band_dispersion
+from dmft.common import greenF, tau_wn_setup, pade_continuation, plot_band_dispersion
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
@@ -30,8 +30,8 @@ def ipt_feed(U, beta):
     plt.plot(w_n, g_iwn.imag)
 
     omega = np.linspace(-3, 3, 600)
-    gw = pade_contination(g_iwn, w_n[:x], omega)
-    sw = pade_contination(s_iwn, w_n[:x], omega)
+    gw = pade_continuation(g_iwn, w_n[:x], omega)
+    sw = pade_continuation(s_iwn, w_n[:x], omega)
     plt.plot(omega, -gw.imag)
     plt.plot(omega, -sw.imag)
     plt.plot(omega, sw.real)
@@ -66,8 +66,8 @@ def ipt_dimer(u_int, tp, beta, seed):
     plt.plot(w_n, g_iwn.imag)
 
     omega = np.linspace(-3, 3, 600)
-    gw = pade_contination(g_iwn, w_n[:x], omega)
-    sw = pade_contination(s_iwn, w_n[:x], omega)
+    gw = pade_continuation(g_iwn, w_n[:x], omega)
+    sw = pade_continuation(s_iwn, w_n[:x], omega)
     plt.plot(omega, -gw.imag)
     plt.plot(omega, -sw.imag)
     plt.plot(omega, sw.real)

@@ -48,7 +48,7 @@ def processing(BETA, U, tp, ax):
 
     sidab = 1j * w_n - tp - .25 * giw_s - 1 / giw_s
     w = np.linspace(0, 1, 40)
-    swa = gf.pade_contination(sidab, w_n[:int(1.8 * BETA)], 1j * w)
+    swa = gf.pade_continuation(sidab, w_n[:int(1.8 * BETA)], 1j * w)
     ax[0].plot(w_n, sidab.imag)
     ax[0].plot(w, swa.imag, "k:")
     ax[1].plot(w_n, sidab.real)
