@@ -16,7 +16,6 @@ import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
-from slaveparticles.quantum.dos import bethe_lattice
 from slaveparticles.quantum.operators import fermi_dist
 
 
@@ -26,25 +25,20 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     if seed == 'mott gap':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
-    giw_s = []
     sigma_iw = []
-    iterations = []
     for u_int, tp in zip(u_range, tprange):
         giw_d, giw_o, loops = rt.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n)
-        giw_s.append((giw_d, giw_o))
-        iterations.append(loops)
         g0iw_d, g0iw_o = rt.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
+        print(seed, ' U', u_int, ' tp: ', tp, ' loops: ', loops)
 
-    print(np.array(iterations))
-
-    return np.array(giw_s), np.array(sigma_iw), w_n
+    return np.array(sigma_iw), w_n
 
 
-def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
+def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     nuv = w[w > 0]
     zerofreq = len(nuv)
     dw = w[1] - w[0]
@@ -55,8 +49,7 @@ def plot_optical_cond(giw_s, sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     nf = fermi_dist(w, beta) - fermi_dist(np.add.outer(nuv, w), beta)
     eta = 0.8
 
-    for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
-        gs, ga = rt.pade_diag(giw_d, giw_o, w_n, w_set, w)
+    for U, (sig_d, sig_o) in zip(ur, sigma_iw):
         ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
 
         lat_Aa = (-1 / np.add.outer(-E, w + tp + 4e-2j - sa)).imag / np.pi
@@ -96,14 +89,14 @@ BETA = 100.
 tp = 0.3
 w = np.linspace(-6, 6, 800)
 w_set = np.concatenate((np.arange(100), np.arange(100, 200, 2)))
-giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
+sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA, "M")
 
 sm_a, sm_i, sm, nuv = plot_optical_cond(
-    giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'met')
+    sigma_iw, urange, tp, w_n, w, w_set, BETA, 'met')
 
-giw_s, sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA)
+sigma_iw, w_n = loop_u_tp(urange, tp * np.ones_like(urange), BETA)
 si_a, si_i, si, nuv = plot_optical_cond(
-    giw_s, sigma_iw, urange, tp, w_n, w, w_set, BETA, 'ins')
+    sigma_iw, urange, tp, w_n, w, w_set, BETA, 'ins')
 
 fig, ax = plt.subplots(2, 1, sharex=True, sharey=True)
 ax[0].plot(nuv, sm_a, '--')
