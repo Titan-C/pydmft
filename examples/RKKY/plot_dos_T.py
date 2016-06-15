@@ -11,6 +11,9 @@ Evolution of DOS as function of temperature
 from __future__ import division, absolute_import, print_function
 
 import matplotlib.pyplot as plt
+plt.matplotlib.rcParams.update({'axes.labelsize': 22,
+                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
+                                'axes.titlesize': 22})
 import numpy as np
 
 import dmft.common as gf
@@ -70,7 +73,7 @@ def lin_approx(w_n, rf_iwn):
 U = 2.5
 tp = 0.3
 
-temp = np.linspace(0.002, 0.03, 20)
+temp = np.linspace(0.002, 0.04, 20)
 betarange = 1 / temp
 
 gi_iw, sigmai_iw, lw_n = loop_beta(U, tp, betarange)
@@ -88,9 +91,9 @@ ax_sig[1].set_xlim([0, 2])
 ax_sig[1].set_ylim([-1, 0])
 ax_sig[0].set_xlabel(r'$i\omega_n$')
 ax_sig[1].set_xlabel(r'$i\omega_n$')
-ax_sig[0].set_ylabel(r'$\Sigma(i\omega_n)$')
+ax_sig[0].set_ylabel(r'$\Sigma_{11}(i\omega_n)$')
 
-# Low freq review sigma
+# Low freq review G
 
 ins_mc = -np.array([lin_approx(wn, sig_d)
                     for (sig_d, sig_o), wn in zip(gi_iw, lw_n)]).T
@@ -105,9 +108,9 @@ ax_zw[0].plot(temp, met_mc[0])
 ax_zw[1].plot(temp, met_mc[1])
 
 ax_zw[1].set_xlabel('T')
-ax_zw[0].set_ylabel(r'$-dG/dw$')
-ax_zw[1].set_ylabel(r'$G(0)$')
-ax_zw[1].set_xlim([0, 0.05])
+ax_zw[0].set_ylabel(r'$-dG_{11}/dw(0)$')
+ax_zw[1].set_ylabel(r'$G_{11}(0)$')
+ax_zw[1].set_xlim([0, 0.04])
 # Low freq review sigma
 
 ins_mc = -np.array([lin_approx(wn, sig_d)
@@ -123,30 +126,28 @@ ax_zw[0].plot(temp, met_mc[0])
 ax_zw[1].plot(temp, met_mc[1])
 
 ax_zw[1].set_xlabel('T')
-ax_zw[0].set_ylabel(r'$-d\Sigma/dw$')
-ax_zw[1].set_ylabel(r'$\Sigma(0)$')
-ax_zw[1].set_xlim([0, 0.05])
+ax_zw[0].set_ylabel(r'$-d\Sigma_{11}/dw(0)$')
+ax_zw[1].set_ylabel(r'$\Sigma_{11}(0)$')
+ax_zw[1].set_xlim([0, 0.04])
 
 # Pade Continuations
 plt.figure()
 w = np.linspace(-3, 3, 800)
 for (siw_d, siw_o), wn, beta in zip(sigmam_iw, lw_n, betarange):
     w_set = 0
-    if 2 * beta < 200:
-        w_set = np.arange(200)
+    if 2 * beta < 150:
+        w_set = np.arange(150).astype(int)
     else:
-        w_set = np.ceil(np.arange(0, 2 * beta, 2 * beta / 200)).astype(int)
-    sig_ss = gf.pade_continuation(
-        1j * siw_d + siw_o, wn, w, w_set)  # A-bond
+        w_set = np.arange(0, 2 * beta, 2 * beta / 150).astype(int)
+    sig_ss, sig_sa = rt.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
     plt.plot(w, 70 / beta + np.abs(sig_ss.imag))
 
-# [::2]:
 for (siw_d, siw_o), wn, beta in list(zip(sigmai_iw, lw_n, betarange)):
     w_set = 0
     if 2 * beta < 150:
         w_set = np.arange(150).astype(int)
     else:
-        w_set = np.arange(0, 2 * beta + 1, 2 * beta / 150).astype(int)
+        w_set = np.arange(0, 2 * beta, 2 * beta / 150).astype(int)
     sig_ss, sig_sa = rt.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
 
     plt.figure('si')
@@ -160,6 +161,12 @@ for (siw_d, siw_o), wn, beta in list(zip(sigmai_iw, lw_n, betarange)):
     plt.plot(w, 100 / beta - gss_w.imag / np.pi)
 
 plt.figure('a')
-plt.ylim([0, 3.7])
+plt.ylim([0, 5.7])
+plt.xlabel(r'$\omega$')
+plt.ylabel(r'$A(\omega)$')
+plt.yticks(100 / betarange[::2], np.around(1 / betarange, 3)[::2])
 plt.figure('si')
-plt.ylim([0, 5.4])
+plt.yticks(100 / betarange[::2], np.around(1 / betarange, 3)[::2])
+plt.ylim([0, 7.6])
+plt.ylabel(r'$\Im \Sigma_{AB}(\omega)$')
+plt.xlabel(r'$\omega$')
