@@ -86,8 +86,9 @@ for (sig_d, sig_o), wn in zip(sigmam_iw, lw_n):
 
 ax_sig[1].set_xlim([0, 2])
 ax_sig[1].set_ylim([-1, 0])
+ax_sig[0].set_xlabel(r'$i\omega_n$')
 ax_sig[1].set_xlabel(r'$i\omega_n$')
-ax_sig[0].set_xlabel(r'$\Sigma(i\omega_n)$')
+ax_sig[0].set_ylabel(r'$\Sigma(i\omega_n)$')
 
 # Low freq review sigma
 
