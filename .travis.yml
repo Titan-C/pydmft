@@ -6,6 +6,7 @@ addons:
     sources:
     - ubuntu-toolchain-r-test
     - boost-latest
+    - xvfb
     packages:
     - gcc-5
     - g++-5
@@ -50,6 +51,11 @@ install:
     - export C_INCLUDE_PATH=$HOME/miniconda3/envs/testenv/include:$C_INCLUDE_PATH
     - export CPLUS_INCLUDE_PATH=$HOME/miniconda3/envs/testenv/include:$CPLUS_INCLUDE_PATH
     - python setup.py install
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 
 script:
     - python setup.py test
