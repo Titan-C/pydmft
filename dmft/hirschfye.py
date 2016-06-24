@@ -74,7 +74,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
              'group':       'temp/' + time.asctime(),
              }
     parms.update(parms_user)
-    if not os.path.exists(parms_user['work_dir']):
+    if not os.path.exists(parms_user['work_dir']) and comm.rank == 0:
         os.makedirs(parms_user['work_dir'])
 
     # Retarded field includes the Hirsh-Fye minus sign in GF
