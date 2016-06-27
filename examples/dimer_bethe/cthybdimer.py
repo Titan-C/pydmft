@@ -132,10 +132,10 @@ def dmft_loop(setup, u_int, G_iw):
                                                'tp'], giw_d, giw_o, tau, w_n)
         gss = giw_d + giw_o
         gsa = giw_d - giw_o
-        gss = np.concatenate((gss[::-1], gss))
-        gsa = np.concatenate((gsa[::-1], gsa))
+        gss = np.concatenate((gss[::-1].conj(), gss))
+        gsa = np.concatenate((gsa[::-1].conj(), gsa))
         for name, gblock in imp_sol.G_iw:
-            gblock.data[:] = gsa if 'asym' in name else gss
+            gblock.data[:,0,0] = gsa if 'asym' in name else gss
 
     if G_iw is not None:
         imp_sol.G_iw << G_iw
