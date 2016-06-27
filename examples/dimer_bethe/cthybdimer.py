@@ -22,6 +22,8 @@ from pytriqs.gf.local import SemiCircular, iOmega_n, inverse
 from pytriqs.operators import c, dagger
 
 import dmft.plot.triqs_dimer as tdimer
+import dmft.RKKY_dimer as rt
+import dmft.common as gf
 
 
 def prepare_interaction(u_int):
@@ -104,7 +106,7 @@ def dmft_loop(setup, u_int, G_iw):
     try:
         with HDFArchive(setup['ofile'].format(**setup), 'r') as outp:
             g_iw_seed = tdimer.get_giw(outp[src_U], slice(-1, None))
-            tdimer.paramagnetic_hf_clean(imp_sol.G_iw, u_int, setup['tp'])
+            tdimer.paramagnetic_hf_clean(g_iw_seed, u_int, setup['tp'])
             last_loop = len(outp[src_U])
             src_pt = len(g_iw_seed.mesh) / 2
             try:
@@ -123,10 +125,20 @@ def dmft_loop(setup, u_int, G_iw):
                         name_o].data[src_pt - work_pt:src_pt + work_pt]
     except (KeyError, IOError):
         last_loop = 0
+        freqs = int(3 * setup['BETA'])
+        tau, w_n = gf.tau_wn_setup(dict(BETA=setup['BETA'], N_MATSUBARA=freqs))
+        giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+        giw_d, giw_o, loops = rt.ipt_dmft_loop(setup['BETA'], u_int, setup[
+                                               'tp'], giw_d, giw_o, tau, w_n)
+        gss = giw_d + giw_o
+        gsa = giw_d - giw_o
+        gss = np.concatenate((gss[::-1], gss))
+        gsa = np.concatenate((gsa[::-1], gsa))
         for name, gblock in imp_sol.G_iw:
-            gblock << SemiCircular(1)
-        if G_iw is not None:
-            imp_sol.G_iw << G_iw
+            gblock.data[:] = gsa if 'asym' in name else gss
+
+    if G_iw is not None:
+        imp_sol.G_iw << G_iw
 
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node():
