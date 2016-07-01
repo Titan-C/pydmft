@@ -122,6 +122,8 @@ def show_conv(BETA, u_int, tp=0.25, filestr='DIMER_{simt}_B{BETA}_tp{tp}',
 
     for it in iters:
         src = sim_dir + '/{}/gtau_{}.npy'.format(it, flavor)
+        if not os.path.exists(src):
+            continue
         giw, _ = get_giw(src, tau, w_n, setup)
 
         axes[0].plot(w_n, giw[names[entry]].imag, 'bo:')
