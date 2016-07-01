@@ -17,7 +17,7 @@ import dmft.ipt_imag as ipt
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=256))
     giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'mott gap':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
@@ -44,11 +44,19 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
     return np.array(giw_s), np.array(sigma_iw), np.array(ekin), np.array(epot), w_n
 
-urange = np.linspace(1.4, 2.2, 70)
-giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
-    urange, .6 * np.ones_like(urange), 22.)
+urange = np.linspace(2.8, 3.4, 300)
+data = []
+for beta in [16., 18., 20., 22., 24., 26., 28., 30.,  35., 40., 50.]:
+    giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+        urange, .3 * np.ones_like(urange), beta, 'met')
+    data.append((giw_s, sigma_iw, ekin, epot, w_n, beta))
 
-plt.plot(urange, 2 * epot / urange, '+-')
+for sim in data:
+    giw_s, sigma_iw, ekin, epot, w_n, beta = sim
+    plt.plot(urange, 2 * epot / urange, '-', label=beta)
+
 plt.title(r'Double occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$U/D$')
+plt.legend()
+plt.show()
