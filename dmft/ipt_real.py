@@ -27,8 +27,8 @@ def real_IPT_sigma(Aw, nf, U):
 
 def dimer_solver(w, dw, tp, U, nfp, gss, gsa):
     # Self consistency in diagonal basis
-    g0ss = 1 / (w + 5e-3j - tp - .25 * gss)
-    g0sa = 1 / (w + 5e-3j + tp - .25 * gsa)
+    g0ss = 1 / (w + 3e-3j - tp - .25 * gss)
+    g0sa = 1 / (w + 3e-3j + tp - .25 * gsa)
 
     # Rotate to local basis
     A0d = -0.5 * (g0ss + g0sa).imag / np.pi
@@ -66,10 +66,10 @@ def dimer_dmft(U, tp, nfp, w, dw, gss, gsa):
         gss_old = gss.copy()
         gsa_old = gsa.copy()
         (gss, gsa), (ss, sa) = dimer_solver(w, dw, tp, U, nfp, gss, gsa)
-        converged = np.allclose(gss_old, gss)
-        converged *= np.allclose(gsa_old, gsa)
+        converged = np.allclose(gss_old, gss, 1e-7)
+        converged *= np.allclose(gsa_old, gsa, 1e-7)
         loops += 1
-        if loops > 2000:
+        if loops > 3000:
             converged = True
             print('Failed to converge in less than 3000 iterations')
 
