@@ -70,3 +70,4 @@ fort.*
 !*org
 *.sum
 *.ipynb
+*.pdf
