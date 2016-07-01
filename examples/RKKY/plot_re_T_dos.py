@@ -196,7 +196,7 @@ plt.savefig('dimer_epsilon_Tevo_U2.5tp.3_iptre_fixfreq.pdf')
 def aal_ef(eps_sample, t, e_tip=-1300 + 960j, a=20):
     beta = (eps_sample - 1) / (eps_sample + 2)
     alpha = 4 * np.pi * a ** 3 * (e_tip - 1) / (e_tip + 2)
-    return alpha * (1 + beta) / (1 - alpha * beta / (16 * np.pi * (a + 40 * np.cos(t))**3))
+    return alpha * (1 + beta) / (1 - alpha * beta / (16 * np.pi * (3 * a + 2 * a * np.cos(t))**3))
 
 
 t = np.linspace(-np.pi, np.pi, 600)
