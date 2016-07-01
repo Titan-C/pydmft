@@ -191,7 +191,7 @@ Si = np.array([entropy(Hi[i], T) for i in range(len(U))])
 twosol = (Hm - Hi - T * (Sm - Si)) * (np.abs((Hm - Hi)) > 1.2e-4)
 rT = T[T < 0.07]
 plt.pcolormesh(U, rT, twosol.T[:len(rT)], cmap=plt.get_cmap('inferno'))
-plt.axis([x.min(), x.max(), 0, y.max()])
+#plt.axis([x.min(), x.max(), 0, y.max()])
 plt.xlabel(r'$U/D$')
 plt.ylabel(r'$T/D$')
 plt.title(

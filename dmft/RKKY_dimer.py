@@ -218,9 +218,9 @@ def pade_diag(gf_aa, gf_ab, w_n, w_set, w):
     basis and return real axis functions in the symmetric and
     anti-symmetric basis. Such that
 
-           ⎡ⅈ⋅ωₙ + μ  - t⟂          0       ⎤     ⎡Σ_AA + Σ_AB       0     ⎤
-G^{-1,0} = ⎢                                ⎥  -  ⎢                        ⎥
-           ⎣        0        ⅈ⋅ωₙ + μ  + t⟂ ⎦     ⎣     0       Σ_AA - Σ_AB⎦
+         ⎡ⅈ⋅ωₙ + μ  - t⟂          0       ⎤     ⎡Σ_AA + Σ_AB       0     ⎤
+G^{-1} = ⎢                                ⎥  -  ⎢                        ⎥
+         ⎣        0        ⅈ⋅ωₙ + μ  + t⟂ ⎦     ⎣     0       Σ_AA - Σ_AB⎦
 
 The Symmetric sum (Anti-bonding) returned first, Asymmetric is returned second
 

@@ -22,7 +22,7 @@ import dmft.ipt_imag as ipt
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=1024))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=2**12))
     giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'ins':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
@@ -37,7 +37,7 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
 
 
 def calculate_Aw(sig_d, sig_o, w_n, w_set, w, eps_k, tp):
-    ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
+    ss, sa = rt.pade_diag(1j * sig_d.imag, sig_o.real, w_n, w_set, w)
 
     lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 7e-3j - ss)
     lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 7e-3j - sa)
@@ -84,17 +84,17 @@ def write_labels_e_struct(axes):
     axes[2].set_xlabel(r'$\epsilon$')
     axes[3].set_xlabel(r'$A(\omega)$')
 
-w = np.linspace(-3, 3, 800)
+w = np.linspace(-3, 3, 1000)
 eps_k = np.linspace(-1., 1., 61)
-w_set = np.arange(200)
-for U in [2.3, 2.7, 3.2]:
+w_set = np.arange(150)
+for U in [2.5]:
     fig, ax = plt.subplots(2, 2, gridspec_kw=dict(
         wspace=0.05, hspace=0.1, width_ratios=[3, 1]))
     axes = ax.flatten()
-    plot_spectra(U, .3, 100., w, w_set, eps_k, axes)
+    plot_spectra(U, .3, 100, w, w_set, eps_k, axes)
 
     write_labels_e_struct(axes)
     axes[0].set_title(
-        r"Electronic $\beta={}$, $t_\perp={}$, $U={}$".format(100, .3, U))
+        r"$\beta={}$, $t_\perp={}$, $U={}$".format(100, .3, U))
 
 #plt.savefig('ipt_arpes_MIT.pdf', format='pdf', transparent=False, bbox_inches='tight', pad_inches=0.05)
