@@ -66,8 +66,8 @@ def dimer_dmft(U, tp, nfp, w, dw, gss, gsa):
         gss_old = gss.copy()
         gsa_old = gsa.copy()
         (gss, gsa), (ss, sa) = dimer_solver(w, dw, tp, U, nfp, gss, gsa)
-        converged = np.allclose(gss_old, gss, 1e-7)
-        converged *= np.allclose(gsa_old, gsa, 1e-7)
+        converged = np.allclose(gss_old, gss)
+        converged *= np.allclose(gsa_old, gsa)
         loops += 1
         if loops > 3000:
             converged = True

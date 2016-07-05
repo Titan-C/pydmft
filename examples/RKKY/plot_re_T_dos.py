@@ -59,7 +59,7 @@ gwi, swi = loop_beta(U, tp, betarange)
 
 plt.figure()
 w = np.linspace(-6, 6, 2**13)
-for (gss, gsa), beta in zip(swi, betarange):
+for (gss, gsa), beta in zip(gwi, betarange):
     gloc = .5 * (gss + gsa)
     plt.plot(w, 100 / beta - gloc.imag / np.pi)
 
@@ -83,12 +83,12 @@ plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_ontop.pdf')
 
 ###############################################################################
 plt.xlim([-.3, .3])
-plt.ylim([0, 0.08])
+plt.ylim([0, 0.05])
 plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_gapzoom.pdf')
 
 ###############################################################################
-plt.xlim([.4, 1])
-plt.ylim([0.2, 0.38])
+plt.xlim([.4, 1.2])
+plt.ylim([0.2, 0.4])
 plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_qp_zoom.pdf')
 # plt.close('all')
 
@@ -206,9 +206,10 @@ sam = []
 for ep in epr:
     am = aal_ef(ep, t)
     sam.append(abs(trapz(am * np.cos(2 * t), t)))
+
 sap = []
 for ep in epp:
-    am = aal_ef(ep, t)
+    am = aal_ef(ep, t, -474.41 + 248.61j)
     sap.append(abs(trapz(am * np.cos(2 * t), t)))
 
 # This normalization because this is an intensity measure so just to have
