@@ -12,20 +12,20 @@ is tracked through the first orders transition.
 
 from __future__ import division, absolute_import, print_function
 
-import matplotlib.pyplot as plt
-plt.matplotlib.rcParams.update({'axes.labelsize': 22,
-                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
-                                'axes.titlesize': 22})
 import numpy as np
+import scipy.signal as signal
+from scipy.integrate import trapz
+import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
 import dmft.ipt_real as ipt
 from slaveparticles.quantum.operators import fermi_dist
 import slaveparticles.quantum.dos as dos
-import scipy.signal as signal
-from scipy.integrate import trapz
+
+plt.matplotlib.rcParams.update({'axes.labelsize': 22,
+                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
+                                'axes.titlesize': 22})
 
 
 def loop_beta(u_int, tp, betarange, seed='mott gap'):
@@ -49,73 +49,39 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
     return np.array(g), np.array(s)
 
-U = 2.95
-tp = 0.35
 
-temp = np.linspace(0.03, 0.05, 30)
-#temp = np.linspace(0.04, 0.05, 30)
-betarange = np.concatenate(
-    (np.array([80., 70., 60., 50., 40.]), 1 / temp))
-betarange = np.concatenate((betarange, betarange[::-1]))
-
-try:
-    storage = np.load('dimer_Tevol_U{}tp{}.npz'.format(U, tp))
-    temp = storage['temp']
-    betarange = storage['betarange']
-    gwi = storage['gwi']
-    swi = storage['swi']
-except FileNotFoundError:
-    gwi, swi = loop_beta(U, tp, betarange)
-    np.savez('dimer_Tevol_U{}tp{}.npz'.format(U, tp), temp=temp,
-             betarange=betarange, gwi=gwi, swi=swi)
+def simulation(U, tp, betarange):
+    try:
+        storage = np.load('dimer_Tevol_U{}tp{}.npz'.format(U, tp))
+        temp = storage['temp']
+        betarange = storage['betarange']
+        gwi = storage['gwi']
+        swi = storage['swi']
+    except FileNotFoundError:
+        gwi, swi = loop_beta(U, tp, betarange)
+        np.savez('dimer_Tevol_U{}tp{}.npz'.format(U, tp), temp=temp,
+                 betarange=betarange, gwi=gwi, swi=swi)
+    return gwi, swi
 
 
-plt.figure()
-w = np.linspace(-6, 6, 2**13)
-for (gss, gsa), beta in zip(gwi, betarange):
-    gloc = .5 * (gss + gsa)
-    plt.plot(w, 100 / beta - gloc.imag / np.pi)
+def plot_spectralfunc(gwi, betarange, yshift=False):
+    plt.figure()
+    shift = 0
+    for (gss, gsa), beta in zip(gwi, betarange):
+        gloc = .5 * (gss + gsa)
+        if yshift:
+            shift = 100 / beta
+        plt.plot(w, shift - gloc.imag / np.pi)
 
+    plt.xlabel(r'$\omega$')
+    plt.ylabel(r'$A(\omega)$')
+    plt.xlim([-3, 3])
 
-plt.yticks(100 / betarange[[0, 1, 2, 3, 4, 5, -1]],
-           np.around(1 / betarange, 3)[[0, 1, 2, 3, 4, 5, -1]])
-plt.xlabel(r'$\omega$')
-plt.ylabel(r'$A(\omega)$')
-plt.xlim([-3, 3])
-plt.savefig('dimer_sig_Tevo_U{}tp{}_iptre_yshift.pdf'.format(U, tp))
-
-eps_k = np.linspace(-1., 1., 61)
-#ss, sa = swi[18]
-#lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
-#lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
-#Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 8)
-#gf.plot_band_dispersion(w, Aw, 'Local ', eps_k, 'intensity')
-#gf.plot_band_dispersion(w, -lat_gfa.imag / np.pi, 'Local ', eps_k, 'intensity')
-#plt.ylim([-3, 3])
-###############################################################################
-
-plt.figure()
-for (gss, gsa), beta in zip(gwi, betarange):
-    gloc = .5 * (gss + gsa)
-    plt.plot(w, - gloc.imag / np.pi)
-
-plt.xlabel(r'$\omega$')
-plt.ylabel(r'$A(\omega)$')
-plt.xlim([-3, 3])
-plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_ontop.pdf'.format(U, tp))
 
 ###############################################################################
-plt.xlim([-.3, .3])
-plt.ylim([0, 0.05])
-plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_gapzoom.pdf'.format(U, tp))
-
-###############################################################################
-plt.xlim([.4, 1.2])
-plt.ylim([0.2, 0.4])
-plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_qp_zoom.pdf'.format(U, tp))
-# plt.close('all')
-
-###############################################################################
+# Polarization Bubble and optical conductivity
+# --------------------------------------------
+#
 
 
 def bubble(A1, A2, nf):
@@ -151,61 +117,130 @@ def optical_cond(ss, sa, tp, w, beta):
 
     return np.sum((a, b, c, d), axis=0)
 
-resi = Parallel(n_jobs=-1, verbose=5)(delayed(optical_cond)
-                                      (ss, sa, tp, w, beta) for (ss, sa), beta in zip(swi, betarange))
+###############################################################################
+# s-SNIM Experiment
+# -----------------
+#
+
+
+def permitivity(real_sig, betarange, unit_weight):
+    dw = w[1] - w[0]
+    epsilon = []
+    for res, beta in zip(real_sig, betarange):
+        sig = signal.hilbert(res, len(res) * 4)[:len(res)]
+        ep = 1 + 4 * np.pi * 1j * sig / \
+            (w - dw / 2) * unit_weight
+        epsilon.append(ep)
+    return epsilon
+
+
+def plot_epsilon(epsilon, w):
+    plt.figure()
+    for ep in epsilon:
+        plt.plot(w, ep.real, '-', w, ep.imag, ':')
+    plt.xlabel(r'$\omega$')
+    plt.ylabel(r'$\varepsilon$')
+
+
+def aal_ef(eps_sample, t, e_tip=-1300 + 960j, a=20):
+    beta = (eps_sample - 1) / (eps_sample + 2)
+    alpha = 4 * np.pi * a ** 3 * (e_tip - 1) / (e_tip + 2)
+    return alpha * (1 + beta) / (1 - alpha * beta / (16 * np.pi * (3 * a + 2 * a * np.cos(t))**3))
+
+
+###############################################################################
+# Spectral function Dispersion
+
+# eps_k = np.linspace(-1., 1., 61)
+
+# ss, sa = swi[18]
+# lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
+# lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
+# Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 8)
+# gf.plot_band_dispersion(w, Aw, 'Local ', eps_k, 'intensity')
+# gf.plot_band_dispersion(w, -lat_gfa.imag / np.pi, 'Local ', eps_k, 'intensity')
+# plt.ylim([-3, 3])
+
+###############################################################################
+
+w = np.linspace(-6, 6, 2**13)
+t = np.linspace(-np.pi, np.pi, 600)
+cos2 = np.cos(2 * t)
+
 # Reference insulator data from http://dx.doi.org/10.1126/science.1150124
 s_ins = np.loadtxt(
     '/home/oscar/Dropbox/org/phd/dimer_lattice/optical conductivity/ins_340.csv', comments='x', delimiter=',').T
 s_exp_weight = trapz(s_ins[1], x=s_ins[0] / 8056.54)
+
+U = 2.95
+tp = 0.35
+
+temp = np.linspace(0.03, 0.05, 30)
+# temp = np.linspace(0.04, 0.05, 30)
+betarange = np.concatenate(
+    (np.array([100., 70., 60., 50., 40.]), 1 / temp))
+betarange = np.concatenate((betarange, betarange[::-1]))
+
+gwi, swi = simulation(U, tp, betarange)
+resi = Parallel(n_jobs=-1, verbose=5)(delayed(optical_cond)
+                                      (ss, sa, tp, w, beta) for (ss, sa), beta in zip(swi, betarange))
+
+###############################################################################
+# Plots
+# -----
+
+temp_set = [0, 1, 2, 3, 4, 34]
+plot_spectralfunc(gwi, betarange, yshift=True)
+plt.yticks(100 / betarange[temp_set], np.around(1 / betarange, 3)[temp_set])
+plt.savefig('dimer_sig_Tevo_U{}tp{}_iptre_yshift.pdf'.format(U, tp))
+
+plot_spectralfunc(gwi, betarange, yshift=False)
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_ontop.pdf'.format(U, tp))
+plt.xlim([-.6, .6])
+plt.ylim([0, 0.11])
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_gapzoom.pdf'.format(U, tp))
+plt.xlim([.6, 1.8])
+plt.ylim([0.11, 0.45])
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_qp_zoom.pdf'.format(U, tp))
+
 rdw = (w > 0) * (w < s_ins[0][-1] / 8056.54)
-sim_weight = trapz(resi[0][rdw], x=w[rdw])
+sig_wei = 12
+sim_weight = trapz(resi[sig_wei][rdw], x=w[rdw])
+unit_weight = s_exp_weight / sim_weight  # / 8056.54
 
 plt.figure()
 for res, beta in zip(resi, betarange):
-    #plt.plot(w, s_exp_weight / sim_weight * res)
-    plt.plot(w,  res)
+    plt.plot(w, unit_weight * res)
+    #plt.plot(w,  res)
 
-#plt.plot(w, s_exp_weight / sim_weight * res, lw=2)
+plt.plot(w, unit_weight * resi[sig_wei], lw=2)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$\Re \sigma(\omega)$')
-#plt.ylim([0, 6000])
+plt.axvline(s_ins[0][-1] / 8056.54)
+# plt.ylim([0, 6000])
 plt.xlim([0, 3])
 # plt.show()
 plt.savefig('dimer_resigma_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 ###############################################################################
-#plt.xlim([0, 0.6])
-#plt.ylim([0., 0.8])
+# plt.xlim([0, 0.6])
+# plt.ylim([0., 0.8])
 plt.xlim([0, 3])
 plt.savefig('dimer_resigma_Tevo_U{}tp{}_iptre_gapzoom.pdf'.format(U, tp))
 
-plt.figure()
-dw = w[1] - w[0]
-epsilon = []
-for res, beta in zip(resi, betarange):
-    sig = signal.hilbert(res, len(res) * 4)[:len(res)]
-    ep = 1 + 4 * np.pi * 1j * sig / \
-        (w - dw / 2) * s_exp_weight / sim_weight / 8056.54
-    epsilon.append(ep)
-    plt.plot(w, ep.real, '-', w, ep.imag, ':')
+epsilon = permitivity(resi, betarange, unit_weight)
+plot_epsilon(epsilon, w)
 plt.axvline(w[4174])
 plt.axvline(w[4247])
-plt.ylim([-40, 40])
+plt.ylim([-40, 110])
 plt.xlim([0.01, .6])
-plt.xlabel(r'$\omega$')
-plt.ylabel(r'$\varepsilon$')
 plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 ###############################################################################
 
 plt.figure()
-epr = []
-epp = []
-for ep in epsilon:
-    epr.append(ep[4174])
-    epp.append(ep[4247])
-epr = np.array(epr)
-epp = np.array(epp)
+epr = np.array([ep[4174] for ep in epsilon])
+epp = np.array([ep[4247] for ep in epsilon])
 plt.plot(1 / betarange, epr.real, 'g', label=r'$\omega=0.115$')
 plt.plot(1 / betarange, epr.imag, "g--")
 plt.plot(1 / betarange, epp.real, 'r', label=r'$\omega=0.222$')
@@ -216,30 +251,13 @@ plt.legend(loc=0)
 plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre_fixfreq.pdf'.format(U, tp))
 ###############################################################################
 
-
-def aal_ef(eps_sample, t, e_tip=-1300 + 960j, a=20):
-    beta = (eps_sample - 1) / (eps_sample + 2)
-    alpha = 4 * np.pi * a ** 3 * (e_tip - 1) / (e_tip + 2)
-    return alpha * (1 + beta) / (1 - alpha * beta / (16 * np.pi * (3 * a + 2 * a * np.cos(t))**3))
-
-
-t = np.linspace(-np.pi, np.pi, 600)
-
-plt.figure()
-sam = []
-for ep in epr:
-    am = aal_ef(ep, t)
-    sam.append(abs(trapz(am * np.cos(2 * t), t)))
-
-sap = []
-for ep in epp:
-    am = aal_ef(ep, t, -474.41 + 248.61j)
-    sap.append(abs(trapz(am * np.cos(2 * t), t)))
-
 # This normalization because this is an intensity measure so just to have
 # readable numbers
-sam = np.array(sam) / 1e4
-sap = np.array(sap) / 1e4
+sam = np.array([abs(trapz(aal_ef(ep, t) * cos2, t)) for ep in epr]) / 1e4
+sap = np.array([abs(trapz(aal_ef(ep, t) * cos2, t, -474.41 + 248.61j))
+                for ep in epp]) / 1e4
+
+plt.figure()
 plt.plot(1 / betarange, sam, 'g', label=r'$\omega=0.115$')
 plt.plot(1 / betarange, sap, 'r', label=r'$\omega=0.222$')
 plt.xlabel('T')
