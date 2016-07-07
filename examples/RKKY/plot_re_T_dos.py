@@ -17,6 +17,7 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'xtick.labelsize': 14, 'ytick.labelsize': 14,
                                 'axes.titlesize': 22})
 import numpy as np
+from joblib import Parallel, delayed
 
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
@@ -48,22 +49,24 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
     return np.array(g), np.array(s)
 
-U = 2.5
-tp = 0.3
+U = 2.95
+tp = 0.35
 
-temp = np.linspace(0.0165, 0.0285, 50)
-betarange = np.concatenate((np.array([100., 90., 80., 70., ]), 1 / temp))
-
+temp = np.linspace(0.03, 0.05, 30)
+#temp = np.linspace(0.04, 0.05, 30)
+betarange = np.concatenate(
+    (np.array([80., 70., 60., 50., 40.]), 1 / temp))
+betarange = np.concatenate((betarange, betarange[::-1]))
 
 try:
-    storage = np.load('dimer_Tevol_U2.5tp0.3')
+    storage = np.load('dimer_Tevol_U{}tp{}.npz'.format(U, tp))
     temp = storage['temp']
     betarange = storage['betarange']
-    gwi = storage['giw']
-    swi = storage['siw']
+    gwi = storage['gwi']
+    swi = storage['swi']
 except FileNotFoundError:
     gwi, swi = loop_beta(U, tp, betarange)
-    np.savez('dimer_Tevol_U2.5tp0.3.npz', temp=temp,
+    np.savez('dimer_Tevol_U{}tp{}.npz'.format(U, tp), temp=temp,
              betarange=betarange, gwi=gwi, swi=swi)
 
 
@@ -73,12 +76,22 @@ for (gss, gsa), beta in zip(gwi, betarange):
     gloc = .5 * (gss + gsa)
     plt.plot(w, 100 / beta - gloc.imag / np.pi)
 
-plt.yticks(100 / betarange[[0, 1, 2, 3, 4, - 1]],
-           np.around(1 / betarange, 3)[[0, 1, 2, 3, 4, - 1]])
+
+plt.yticks(100 / betarange[[0, 1, 2, 3, 4, 5, -1]],
+           np.around(1 / betarange, 3)[[0, 1, 2, 3, 4, 5, -1]])
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega)$')
 plt.xlim([-3, 3])
-plt.savefig('dimer_sig_Tevo_U2.5tp.3_iptre_yshift.pdf')
+plt.savefig('dimer_sig_Tevo_U{}tp{}_iptre_yshift.pdf'.format(U, tp))
+
+eps_k = np.linspace(-1., 1., 61)
+#ss, sa = swi[18]
+#lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
+#lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
+#Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 8)
+#gf.plot_band_dispersion(w, Aw, 'Local ', eps_k, 'intensity')
+#gf.plot_band_dispersion(w, -lat_gfa.imag / np.pi, 'Local ', eps_k, 'intensity')
+#plt.ylim([-3, 3])
 ###############################################################################
 
 plt.figure()
@@ -89,17 +102,17 @@ for (gss, gsa), beta in zip(gwi, betarange):
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$A(\omega)$')
 plt.xlim([-3, 3])
-plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_ontop.pdf')
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_ontop.pdf'.format(U, tp))
 
 ###############################################################################
 plt.xlim([-.3, .3])
 plt.ylim([0, 0.05])
-plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_gapzoom.pdf')
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_gapzoom.pdf'.format(U, tp))
 
 ###############################################################################
 plt.xlim([.4, 1.2])
 plt.ylim([0.2, 0.4])
-plt.savefig('dimer_dos_Tevo_U2.5tp.3_iptre_qp_zoom.pdf')
+plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_qp_zoom.pdf'.format(U, tp))
 # plt.close('all')
 
 ###############################################################################
@@ -136,11 +149,10 @@ def optical_cond(ss, sa, tp, w, beta):
     c = pol_bubble_conv(lat_Aa, lat_As, nf, w, dosde)
     d = pol_bubble_conv(lat_As, lat_Aa, nf, w, dosde)
 
-    return a, b, c, d
-resi = []
-for (ss, sa), beta in zip(swi, betarange):
-    resi.append(np.sum(optical_cond(ss, sa, tp, w, beta), axis=0))
+    return np.sum((a, b, c, d), axis=0)
 
+resi = Parallel(n_jobs=-1, verbose=5)(delayed(optical_cond)
+                                      (ss, sa, tp, w, beta) for (ss, sa), beta in zip(swi, betarange))
 # Reference insulator data from http://dx.doi.org/10.1126/science.1150124
 s_ins = np.loadtxt(
     '/home/oscar/Dropbox/org/phd/dimer_lattice/optical conductivity/ins_340.csv', comments='x', delimiter=',').T
@@ -150,20 +162,22 @@ sim_weight = trapz(resi[0][rdw], x=w[rdw])
 
 plt.figure()
 for res, beta in zip(resi, betarange):
-    plt.plot(w, s_exp_weight / sim_weight * res)
+    #plt.plot(w, s_exp_weight / sim_weight * res)
+    plt.plot(w,  res)
 
-plt.plot(w, s_exp_weight / sim_weight * res, lw=2)
+#plt.plot(w, s_exp_weight / sim_weight * res, lw=2)
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$\Re \sigma(\omega)$')
-plt.ylim([0, 6000])
+#plt.ylim([0, 6000])
 plt.xlim([0, 3])
-plt.show()
-plt.savefig('dimer_resigma_Tevo_U2.5tp.3_iptre.pdf')
+# plt.show()
+plt.savefig('dimer_resigma_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 ###############################################################################
-plt.xlim([0, 0.6])
-plt.ylim([0., 0.8])
-plt.savefig('dimer_resigma_Tevo_U2.5tp.3_iptre_gapzoom.pdf')
+#plt.xlim([0, 0.6])
+#plt.ylim([0., 0.8])
+plt.xlim([0, 3])
+plt.savefig('dimer_resigma_Tevo_U{}tp{}_iptre_gapzoom.pdf'.format(U, tp))
 
 plt.figure()
 dw = w[1] - w[0]
@@ -180,7 +194,7 @@ plt.ylim([-40, 40])
 plt.xlim([0.01, .6])
 plt.xlabel(r'$\omega$')
 plt.ylabel(r'$\varepsilon$')
-plt.savefig('dimer_epsilon_Tevo_U2.5tp.3_iptre.pdf')
+plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 ###############################################################################
 
@@ -199,7 +213,7 @@ plt.plot(1 / betarange, epp.imag, "r--")
 plt.xlabel('T')
 plt.ylabel(r'$\varepsilon$')
 plt.legend(loc=0)
-plt.savefig('dimer_epsilon_Tevo_U2.5tp.3_iptre_fixfreq.pdf')
+plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre_fixfreq.pdf'.format(U, tp))
 ###############################################################################
 
 
@@ -231,4 +245,4 @@ plt.plot(1 / betarange, sap, 'r', label=r'$\omega=0.222$')
 plt.xlabel('T')
 plt.ylabel('2$^{nd}$ harmonic amplitude')
 plt.legend(loc=0)
-plt.savefig('dimer_s2_Tevo_U2.5tp.3_iptre_fixfreq.pdf')
+plt.savefig('dimer_s2_Tevo_U{}tp{}_iptre_fixfreq.pdf'.format(U, tp))

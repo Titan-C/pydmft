@@ -189,6 +189,7 @@ def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
         beta / 4 * (t_sqr + tp**2)
 
 
+# TODO Use Sigma tail expansions out of derivatives of Sigma(tau)
 def epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta):
     """Calculates the potential energy per spin
 
