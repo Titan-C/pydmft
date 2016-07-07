@@ -54,7 +54,17 @@ tp = 0.3
 temp = np.linspace(0.0165, 0.0285, 50)
 betarange = np.concatenate((np.array([100., 90., 80., 70., ]), 1 / temp))
 
-gwi, swi = loop_beta(U, tp, betarange)
+
+try:
+    storage = np.load('dimer_Tevol_U2.5tp0.3')
+    temp = storage['temp']
+    betarange = storage['betarange']
+    gwi = storage['giw']
+    swi = storage['siw']
+except FileNotFoundError:
+    gwi, swi = loop_beta(U, tp, betarange)
+    np.savez('dimer_Tevol_U2.5tp0.3.npz', temp=temp,
+             betarange=betarange, gwi=gwi, swi=swi)
 
 
 plt.figure()
