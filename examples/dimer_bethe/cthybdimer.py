@@ -128,7 +128,7 @@ def dmft_loop(setup, u_int, G_iw):
         freqs = int(3 * setup['BETA'])
         tau, w_n = gf.tau_wn_setup(dict(BETA=setup['BETA'], N_MATSUBARA=freqs))
         giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(setup['BETA'], u_int, setup[
+        giw_d, giw_o, loops = rt.ipt_dmft_loop(setup['BETA'], u_int + 1, setup[
                                                'tp'], giw_d, giw_o, tau, w_n)
         gss = giw_d + giw_o
         gsa = giw_d - giw_o
