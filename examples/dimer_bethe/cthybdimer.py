@@ -128,7 +128,11 @@ def dmft_loop(setup, u_int, G_iw):
         freqs = int(3 * setup['BETA'])
         tau, w_n = gf.tau_wn_setup(dict(BETA=setup['BETA'], N_MATSUBARA=freqs))
         giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(setup['BETA'], u_int + 1, setup[
+        seed_U = u_int
+        if setup['ins']:
+            giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
+            seed_U += 1
+        giw_d, giw_o, loops = rt.ipt_dmft_loop(setup['BETA'], seed_U, setup[
                                                'tp'], giw_d, giw_o, tau, w_n)
         gss = giw_d + giw_o
         gsa = giw_d - giw_o
@@ -207,6 +211,8 @@ def do_setup():
 
     parser.add_argument('-afm', '--AFM', action='store_true',
                         help='Use the self-consistency for Antiferromagnetism')
+    parser.add_argument('-ins', action='store_true',
+                        help='Give a IPT insulator starting seed')
     parser.add_argument('-sg', '--save_gtau', action='store_true',
                         help='Saves Gtau in file')
     parser.add_argument('-dm', '--double_moves', action='store_true',
