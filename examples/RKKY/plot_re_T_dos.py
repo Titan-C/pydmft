@@ -176,7 +176,7 @@ s_exp_weight = trapz(s_ins[1], x=s_ins[0] / 8056.54)
 #tp = 0.3
 #higb = np.array([100., 70., 60., 50.])
 #temp = np.linspace(0.023, 0.035, 30)
-#sig_wei = 20
+sig_wei = 20
 ###############################################################################
 U = 2.5
 tp = 0.3
@@ -199,9 +199,11 @@ resi = Parallel(n_jobs=-1, verbose=5)(delayed(optical_cond)
 temp_set = [0, 1, 2, 3, 4, len(temp)]
 plot_spectralfunc(gwi, betarange, yshift=True)
 plt.yticks(100 / betarange[temp_set], np.around(1 / betarange, 3)[temp_set])
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.savefig('dimer_sig_Tevo_U{}tp{}_iptre_yshift.pdf'.format(U, tp))
 
 plot_spectralfunc(gwi, betarange, yshift=False)
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.savefig('dimer_dos_Tevo_U{}tp{}_iptre_ontop.pdf'.format(U, tp))
 plt.xlim([-.6, .6])
 plt.ylim([0, 0.11])
@@ -223,11 +225,12 @@ plt.plot(w, unit_weight * resi[sig_wei], lw=2,
 plt.plot(w, unit_weight * resi[len(temp) + 1], lw=2,
          label=r'$T={:.3}$'.format(1 / betarange[len(temp) + 1]))
 plt.xlabel(r'$\omega$')
-plt.ylabel(r'$\Re \sigma(\omega)$')
+plt.ylabel(r'$\Re \sigma(\omega)[\Omega cm]^{-1}$')
 plt.axvline(s_ins[0][-1] / 8056.54)
 plt.ylim([0, 8000])
 plt.xlim([0, 2])
 plt.legend(loc=0)
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.savefig('dimer_resigma_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 epsilon = permitivity(resi, betarange, unit_weight)
@@ -237,6 +240,7 @@ plt.axvline(w[4247])
 plt.ylim([-40, 110])
 #plt.ylim([-1, 10])
 plt.xlim([0.01, .6])
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre.pdf'.format(U, tp))
 
 ###############################################################################
@@ -249,8 +253,9 @@ plt.plot(1 / betarange, epr.imag, "g--")
 plt.plot(1 / betarange, epp.real, 'r', label=r'$\omega=0.222$')
 plt.plot(1 / betarange, epp.imag, "r--")
 plt.xlabel('T')
-plt.ylabel(r'$\varepsilon$')
+plt.ylabel(r'$\varepsilon_r$')
 plt.legend(loc=0)
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.savefig('dimer_epsilon_Tevo_U{}tp{}_iptre_fixfreq.pdf'.format(U, tp))
 ###############################################################################
 
@@ -261,9 +266,10 @@ sap = np.array([abs(trapz(aal_ef(ep, t) * cos2, t, -474.41 + 248.61j))
                 for ep in epp]) / 1e4
 
 plt.figure()
-plt.plot(1 / betarange, sam, 'g', label=r'$\omega=0.115$')
+plt.plot(1 / betarange, sam, 'x-', label=r'$\omega=0.115$')
 plt.plot(1 / betarange, sap, 'r', label=r'$\omega=0.222$')
 plt.xlabel('T')
 plt.ylabel('2$^{nd}$ harmonic amplitude')
+plt.title(r'$U={}$ $t_\perp={}$'.format(U, tp))
 plt.legend(loc=0)
 plt.savefig('dimer_s2_Tevo_U{}tp{}_iptre_fixfreq.pdf'.format(U, tp))
