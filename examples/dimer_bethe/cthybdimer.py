@@ -135,10 +135,15 @@ def dmft_loop(setup, u_int, G_iw):
         gss = np.concatenate((gss[::-1].conj(), gss))
         gsa = np.concatenate((gsa[::-1].conj(), gsa))
         for name, gblock in imp_sol.G_iw:
-            gblock.data[:,0,0] = gsa if 'asym' in name else gss
+            gblock.data[:, 0, 0] = gsa if 'asym' in name else gss
 
-    if G_iw is not None:
-        imp_sol.G_iw << G_iw
+        # This next is in the exception because better than a starting
+        # guess from IPT is a guess from the previous QMC data point
+        # that comes in G_iw. This is also in the case I'm reaching to
+        # known data point that it shall not be reseeded with the
+        # previous data point of QMC but from disk
+        if G_iw is not None:
+            imp_sol.G_iw << G_iw
 
     for loop in range(last_loop, last_loop + setup['Niter']):
         if mpi.is_master_node():
