@@ -112,7 +112,7 @@ def dmft_loop(setup, u_int, G_iw):
             try:
                 for name, gblock in imp_sol.G_iw:
                     gblock.data[:] = g_iw_seed[name].data[
-                        src_pt - work_pt:src_pt + work_pt]
+                        int(src_pt - work_pt):int(src_pt + work_pt)]
             except IndexError:
                 import itertools
                 spin = ['up', 'dw']
