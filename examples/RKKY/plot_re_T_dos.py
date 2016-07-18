@@ -20,6 +20,8 @@ from joblib import Parallel, delayed
 
 import dmft.common as gf
 import dmft.ipt_real as ipt
+from dmft.utils import optical_conductivity
+
 from slaveparticles.quantum.operators import fermi_dist
 import slaveparticles.quantum.dos as dos
 
@@ -81,24 +83,6 @@ def plot_spectralfunc(gwi, betarange, yshift=False):
 # Polarization Bubble and optical conductivity
 # --------------------------------------------
 #
-
-
-def bubble(A1, A2, nf):
-    # sig = int dw A(w)*A(w+w')*(nf(w)-nf(w+w'))
-    #     = int dw A^+(w)*A(w+w')-A(w)*A^+(w+w')
-    return signal.fftconvolve((A1 * nf)[::-1], A2, mode='same') - \
-        signal.fftconvolve(A1[::-1], A2 * nf, mode='same')
-
-
-def pol_bubble_conv(lat_A1, lat_A2, nf, w, dosde):
-    dw = w[1] - w[0]
-    lat_sig = np.array([bubble(A1, A2, nf) for A1, A2 in zip(lat_A1, lat_A2)])
-    resig = (dosde * lat_sig).sum(axis=0) * dw / (w - dw / 2)
-    center = int(len(w) / 2)
-    resig[center] = (resig[center - 1] + resig[center + 1]) / 2
-    return resig
-
-
 def optical_cond(ss, sa, tp, w, beta):
     E = np.linspace(-1, 1, 61)
     dos = np.exp(-2 * E**2) / np.sqrt(np.pi / 2)
@@ -109,10 +93,10 @@ def optical_cond(ss, sa, tp, w, beta):
     lat_Aa = (-1 / np.add.outer(-E, w + tp - sa)).imag / np.pi
     lat_As = (-1 / np.add.outer(-E, w - tp - ss)).imag / np.pi
 
-    a = pol_bubble_conv(lat_Aa, lat_Aa, nf, w, dosde)
-    b = pol_bubble_conv(lat_As, lat_As, nf, w, dosde)
-    c = pol_bubble_conv(lat_Aa, lat_As, nf, w, dosde)
-    d = pol_bubble_conv(lat_As, lat_Aa, nf, w, dosde)
+    a = optical_conductivity(lat_Aa, lat_Aa, nf, w, dosde)
+    b = optical_conductivity(lat_As, lat_As, nf, w, dosde)
+    c = optical_conductivity(lat_Aa, lat_As, nf, w, dosde)
+    d = optical_conductivity(lat_As, lat_Aa, nf, w, dosde)
 
     return np.sum((a, b, c, d), axis=0)
 

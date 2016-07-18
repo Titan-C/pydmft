@@ -19,3 +19,6 @@ Modules Reference API
 
 .. automodule:: dmft.plot.hf_single_site
     :members:
+
+.. automodule:: dmft.utils
+    :members:
