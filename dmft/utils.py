@@ -12,6 +12,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import scipy.signal as signal
+from scipy.integrate import trapz
 
 
 def bubble(A1, A2, nf):
@@ -64,4 +65,11 @@ bubble
     resig = (dosde * lat_sig).sum(axis=0) * dw / (w - dw / 2)
     center = int(len(w) / 2)
     resig[center] = (resig[center - 1] + resig[center + 1]) / 2
+    return resig
+
+
+def dc_conductivity(lat_A1, lat_A2, dnf, w, dosde):
+    lat_sig = np.array([trapz(A1 * A2 * dnf, w)
+                        for A1, A2 in zip(lat_A1, lat_A2)])
+    resig = (dosde * lat_sig).sum(axis=0)
     return resig
