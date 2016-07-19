@@ -9,6 +9,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import pytest
 import dmft.common as gf
+import slaveparticles.quantum.dos as dos
+from scipy.integrate import simps
 
 
 @pytest.mark.parametrize("chempot", [0, 0.5, -0.8, 4.])
@@ -49,3 +51,15 @@ def test_hilbert_trans():
     giw = gf.greenF(w_n, sigma=-1j / w_n, mu=-0.2)
     ss = gf.semi_circle_hiltrans(1j * w_n - .2 + 1j / w_n)
     assert np.allclose(ss, giw)
+
+
+def test_hilbert_trans():
+    """Test hilbert transform of semi-circle to direct integral"""
+
+    w = np.linspace(-1, 1, 2**8)
+    w_n = gf.matsubara_freq(20)
+    giw = gf.greenF(w_n)
+    rho_w = dos.bethe_lattice(w, .5)
+    Apiw = np.array([simps(rho_w / (1j * iw - w), w)for iw in w_n])
+
+    assert np.allclose(Apiw, giw, 2e-4)
