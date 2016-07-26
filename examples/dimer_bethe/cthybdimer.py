@@ -100,6 +100,8 @@ def dmft_loop(setup, u_int, G_iw):
                      n_iw=int(3 * setup['BETA']), n_tau=int(100 * setup['BETA']))
     work_pt = len(imp_sol.G_iw.mesh) / 2
     h_int, operators = prepare_interaction(u_int)
+    operators_d = [c('asym_up', 0), c('sym_up', 0),
+                   c('asym_dw', 0), c('sym_dw', 0)]
 
     src_U = 'U' + str(u_int)
 
@@ -176,9 +178,13 @@ def dmft_loop(setup, u_int, G_iw):
                     '/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
                 last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
                 last_run[
-                    '/U{}/it{:03}/density'.format(u_int, loop)] = density_correlators(imp_sol, operators)
+                    '/U{}/it{:03}/density_l'.format(u_int, loop)] = density_correlators(imp_sol, operators)
                 last_run[
-                    '/U{}/it{:03}/occup'.format(u_int, loop)] = density_occup(imp_sol, operators)
+                    '/U{}/it{:03}/occup_l'.format(u_int, loop)] = density_occup(imp_sol, operators)
+                last_run[
+                    '/U{}/it{:03}/density_d'.format(u_int, loop)] = density_correlators(imp_sol, operators_d)
+                last_run[
+                    '/U{}/it{:03}/occup_d'.format(u_int, loop)] = density_occup(imp_sol, operators_d)
 
                 if setup['save_gtau']:
                     last_run[
