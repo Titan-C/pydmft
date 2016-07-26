@@ -57,8 +57,8 @@ def density_correlators(solver_core, operators):
 
     nn_avg = []
     for i, j in flavor_pairs:
-        n_i_x_n_j = dagger(operators[i]) * operators[i] * \
-            dagger(operators[j]) * operators[j]
+        n_i_x_n_j = dagger(operators[i]) * dagger(operators[j]) *\
+            operators[j] * operators[i]
         nn_avg.append(trace_rho_op(solver_core.density_matrix,
                                    n_i_x_n_j,
                                    solver_core.h_loc_diagonalization))
