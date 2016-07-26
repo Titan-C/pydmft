@@ -94,9 +94,9 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     double_occ = np.zeros(len(flavor_pairs))
 
     flavors = 2 * parms['BANDS'] * parms['SITES']
-    flavors_ind = product(range(2), range(parms['SITES']))
+    flavors_ind = list(product(range(2), range(parms['SITES'])))
     occupation = np.zeros(flavors)
-    double_occ = np.zeros(flavors * (flavors - 1) / 2)
+    double_occ = np.zeros(len(flavor_pairs))
     ntau = 2 * parms['N_MATSUBARA']
     chi = np.zeros(ntau)
     hffast.set_seed(parms['SEED'])
@@ -142,6 +142,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     Gst /= parms['sweeps'] * comm.Get_size()
 
     acc /= v.size * parms['meas'] * (parms['sweeps'] + parms['therm'])
+    occupation /= 2 * parms['N_MATSUBARA'] * parms['sweeps']
     double_occ /= 2 * parms['N_MATSUBARA'] * parms['sweeps']
 
     print('occ', occupation)
@@ -152,8 +153,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     comm.Allreduce(chi.copy(), chi)
 
     if comm.rank == 0:
-        save_output(parms, occupation, double_occ / comm.Get_size(),
-                    acc, chi, vlog, ar)
+        save_output(parms, occupation / comm.Get_size(),
+                    double_occ / comm.Get_size(), acc, chi, vlog, ar)
 
     # Recover Conventional GF sign in average
     return [-1 * avg_g(gst, parms) for gst in Gst]
@@ -181,8 +182,7 @@ def orbital_occupation(g, occupation, slices, flavors_ind):
     the signs of the Green functions are reversed and that after this
     observable is calculated g(0+) one has to apply n= 1-g(0+) """
 
-    for k, i in enumerate(flavors_ind):
-        spin_i, site_i = i
+    for k, (spin_i, site_i) in enumerate(flavors_ind):
         g_i = g[spin_i][
             site_i * slices:(site_i + 1) * slices, site_i * slices:(site_i + 1) * slices]
         occupation[k] += np.trace(g_i)
