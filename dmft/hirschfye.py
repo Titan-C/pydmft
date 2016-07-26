@@ -94,6 +94,8 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     double_occ = np.zeros(len(flavor_pairs))
 
     flavors = 2 * parms['BANDS'] * parms['SITES']
+    flavors_ind = product(range(2), range(parms['SITES']))
+    occupation = np.zeros(flavors)
     double_occ = np.zeros(flavors * (flavors - 1) / 2)
     ntau = 2 * parms['N_MATSUBARA']
     chi = np.zeros(ntau)
@@ -128,6 +130,7 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
                         np.squeeze([-1 * avg_g(gst, parms) for gst in Gbin]))
                 Gbin = [np.zeros_like(gx) for gx in GX]
 
+            orbital_occupation(g, occupation, ntau, flavors_ind)
             double_occupation(g, double_occ, ntau, flavor_pairs)
             if parms['save_logs']:
                 vlog.append(v > 0)
@@ -141,13 +144,15 @@ def imp_solver(g0_blocks, v, interaction, parms_user):
     acc /= v.size * parms['meas'] * (parms['sweeps'] + parms['therm'])
     double_occ /= 2 * parms['N_MATSUBARA'] * parms['sweeps']
 
+    print('occ', occupation)
     print('docc', double_occ, 'acc ', acc, 'nsign', anrat, 'rank', comm.rank)
 
+    comm.Allreduce(occupation.copy(), occupation)
     comm.Allreduce(double_occ.copy(), double_occ)
     comm.Allreduce(chi.copy(), chi)
 
     if comm.rank == 0:
-        save_output(parms, double_occ / comm.Get_size(),
+        save_output(parms, occupation, double_occ / comm.Get_size(),
                     acc, chi, vlog, ar)
 
     # Recover Conventional GF sign in average
@@ -169,6 +174,20 @@ def measure_chi(v, slices):
     return chi
 
 
+def orbital_occupation(g, occupation, slices, flavors_ind):
+    """Calculates the orbital occupation
+
+    It is relevant to remember that under this Hirsh-Fye simulation
+    the signs of the Green functions are reversed and that after this
+    observable is calculated g(0+) one has to apply n= 1-g(0+) """
+
+    for k, i in enumerate(flavors_ind):
+        spin_i, site_i = i
+        g_i = g[spin_i][
+            site_i * slices:(site_i + 1) * slices, site_i * slices:(site_i + 1) * slices]
+        occupation[k] += np.trace(g_i)
+
+
 def double_occupation(g, double_occ, slices, flavor_pairs):
     """Calculates the density-density correlator between spin flavors"""
     for k, (i, j) in enumerate(flavor_pairs):
@@ -186,10 +205,11 @@ def susceptibility(v):
     pass
 
 
-def save_output(params, double_occ, acceptance, chi, vlog, ar):
+def save_output(params, occupation, double_occ, acceptance, chi, vlog, ar):
     """Saves the simulation status"""
     if not os.path.exists(params['work_dir']):
         os.makedirs(params['work_dir'])
+    np.save(params['work_dir'] + '/occupation', occupation)
     np.save(params['work_dir'] + '/double_occ', double_occ)
     np.save(params['work_dir'] + '/acceptance', acceptance)
     np.save(params['work_dir'] + '/chi', chi)
