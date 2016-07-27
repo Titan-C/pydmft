@@ -151,11 +151,12 @@ def get_sigmaiw(giw_d, giw_o, w_n, tp):
     return siw_d, siw_o
 
 
-def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
+def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12, t=.5):
 
     converged = False
     loops = 0
     iw_n = 1j * w_n
+    t_sqr = t * t
 
     while not converged:
         # Half-filling, particle-hole cleaning
@@ -165,7 +166,7 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
         giw_d_old = giw_d.copy()
         giw_o_old = giw_o.copy()
 
-        g0iw_d, g0iw_o = self_consistency(iw_n, giw_d, giw_o, 0., tp, 0.25)
+        g0iw_d, g0iw_o = self_consistency(iw_n, giw_d, giw_o, 0., tp, t_sqr)
 
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         giw_d, giw_o = dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
@@ -176,7 +177,7 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12):
         loops += 1
         if loops > 3000:
             converged = True
-            print('B', BETA, 'tp', tp, 'U', u_int)
+            print('B', BETA, 'tp', tp, 'U', u_int, 'D', 2 * t)
             print('Failed to converge in less than 3000 iterations')
 
     return giw_d, giw_o, loops
