@@ -46,7 +46,7 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
 urange = np.linspace(2.8, 3.4, 300)
 data = []
-for beta in [16., 18., 20., 22., 24., 26., 28., 30.,  35., 40., 50.]:
+for beta in [16., 18., 20., 22., 24., 26., 28.]:
     giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
         urange, .3 * np.ones_like(urange), beta, 'met')
     data.append((giw_s, sigma_iw, ekin, epot, w_n, beta))

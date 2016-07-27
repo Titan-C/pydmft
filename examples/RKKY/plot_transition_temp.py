@@ -52,28 +52,17 @@ urange = np.arange(2.8, 3.4, .1)
 data = []
 temp = np.linspace(0.015, 0.06, 90)
 betarange = 1 / temp
-#betarange = np.concatenate((betarange, betarange[::-1]))
+
 for u_int in urange:
     giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
         u_int, .3, betarange, 'mott gap')
     data.append((giw_s, sigma_iw, ekin, epot, w_n, u_int))
-
-for sim in data:
-    giw_s, sigma_iw, ekin, epot, w_n, u_int = sim
-    plt.plot(1 / betarange, 2 * epot / u_int, '-', label=u_int)
-
-plt.title(r'Double occupation')
-plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
-plt.xlabel(r'$U/D$')
-plt.legend()
-plt.show()
 
 for u_int in urange:
     giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
         u_int, .3, betarange, 'met')
     data.append((giw_s, sigma_iw, ekin, epot, w_n, u_int))
 
-# plt.figure()
 for sim in data:
     giw_s, sigma_iw, ekin, epot, w_n, u_int = sim
     plt.plot(1 / betarange, 2 * epot / u_int, 'x-', label=u_int)

@@ -42,11 +42,10 @@ figz, axz = plt.subplots()
 for beta, result in zip(betarange, results):
     u_zet = [matsubara_Z(sigma.imag, beta) for _, sigma in result]
     axz.plot(U, u_zet, '+-', label='$\\beta={}$'.format(beta))
-axz.set_title('Hysteresis loop of the quasiparticle weigth')
+axz.set_title('Quasiparticle weigth')
 axz.legend(loc=0)
 axz.set_ylabel('Z')
 axz.set_xlabel('U/D')
-axz.set_title('Hysteresis loop of the Density of states')
 
 
 ###############################################################################
@@ -60,6 +59,7 @@ for beta, result in zip(betarange, results):
     axf.plot(U, u_fl, 'x:', label='$\\beta={}$'.format(beta))
 
 axf.set_ylabel('Dos(0)')
+axz.set_title('Density of states at Fermi level')
 axf.set_xlabel('U/D')
 
 
@@ -82,13 +82,13 @@ axf.set_xlabel('U/D')
 figd, axd = plt.subplots()
 for beta, result in zip(betarange, results):
     tau, w_n = tau_wn_setup(dict(BETA=beta, N_MATSUBARA=beta))
-    V = np.asarray([2*(0.5*s*g+u**2/8./w_n**2).real.sum()/beta
-                    for (g, s), u in zip(result, U)]) - 0.25*beta*U**2/8.
+    V = np.asarray([2 * (0.5 * s * g + u**2 / 8. / w_n**2).real.sum() / beta
+                    for (g, s), u in zip(result, U)]) - 0.25 * beta * U**2 / 8.
 
-    D = 2./U*V + 0.25
+    D = 2. / U * V + 0.25
     axd.plot(U, D, '-', label='$\\beta={}$'.format(beta))
 
-axd.set_title('Hysteresis loop of the double occupation')
+axd.set_title('Double occupation')
 axd.legend(loc=0)
 axd.set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 axd.set_xlabel('U/D')
