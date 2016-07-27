@@ -349,3 +349,39 @@ def plot_zero_w_sigma(beta, tp, skip_list=[]):
     plt.xlabel(r'U/D')
     plt.title(r'$Z(t_\perp + \Sigma_{{AB}}(w=0))$ tp{} $\beta$=100'.format(tp))
     plt.savefig('ZSIGMA_AB_cut_tp{}_B100.png'.format(tp))
+
+
+def extract_density_correlators(filename, skiplist):
+    """Recover from file the measured density correlators"""
+    with HDFArchive(filename, 'r') as datarecord:
+        nn = []
+        n = []
+        u = []
+        for uk in datarecord:
+            if uk in skiplist:
+                continue
+            last_it = list(datarecord[uk].keys())[-1]
+            nn.append(datarecord[uk][last_it]['density'])
+            n.append(datarecord[uk][last_it]['occup'])
+            u.append(float(uk[1:]))
+    nn = np.array(nn)
+    n = np.array(n)
+    u = np.array(u)
+    return nn, n, u
+
+
+def plot_cor(ldensity_cor, u_int):
+    """plot Density correlators"""
+    fig, axe = plt.subplots(3, 1, sharex=True)
+    d = np.mean(ldensity_cor[:, [1, 4]], axis=1)
+    axe[0].plot(u_int, d, '+:')
+    axe[0].set_ylabel(r'$\langle d \rangle$')
+    mfl = 1 - 2 * d
+    axe[1].plot(u_int, mfl, 'x:')
+    axe[1].set_ylabel(r'$\langle (n_\uparrow - n_\downarrow)^2 \rangle$')
+    msc = ldensity_cor.T[0] - ldensity_cor.T[2] - \
+        ldensity_cor.T[3] + ldensity_cor.T[5]
+    axe[2].plot(u_int, msc, 'x:')
+    axe[2].set_ylabel(r'$\langle m_A m_B \rangle$')
+    axe[2].set_xlabel('U/D')
+    fig.subplots_adjust(hspace=0)
