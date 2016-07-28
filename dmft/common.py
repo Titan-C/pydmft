@@ -99,7 +99,7 @@ def semi_circle_hiltrans(zeta, D=1):
     """
     sqr = np.sqrt(zeta**2 - D**2)
     sqr = np.sign(sqr.imag) * sqr
-    return 2 * (zeta - sqr)
+    return 2 * (zeta - sqr) / D**2
 
 
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):

@@ -25,10 +25,10 @@ def real_IPT_sigma(Aw, nf, U):
     return -np.pi * U**2 * (Apmm + Ampp)
 
 
-def dimer_solver(w, dw, tp, U, nfp, gss, gsa):
+def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5):
     # Self consistency in diagonal basis
-    g0ss = 1 / (w + 3e-3j - tp - .25 * gss)
-    g0sa = 1 / (w + 3e-3j + tp - .25 * gsa)
+    g0ss = 1 / (w + 3e-3j - tp - t * t * gss)
+    g0sa = 1 / (w + 3e-3j + tp - t * t * gsa)
 
     # Rotate to local basis
     A0d = -0.5 * (g0ss + g0sa).imag / np.pi
@@ -51,23 +51,23 @@ def dimer_solver(w, dw, tp, U, nfp, gss, gsa):
 
     # Semi-circle Hilbert Transform
     ss = rss - 1j * np.abs(iss)
-    gss = gf.semi_circle_hiltrans(w - tp - ss)
+    gss = gf.semi_circle_hiltrans(w - tp - ss, 2 * t)
     sa = rsa - 1j * np.abs(isa)
-    gsa = gf.semi_circle_hiltrans(w + tp - sa)
+    gsa = gf.semi_circle_hiltrans(w + tp - sa, 2 * t)
 
     return (gss, gsa), (ss, sa)
 
 
-def dimer_dmft(U, tp, nfp, w, dw, gss, gsa):
+def dimer_dmft(U, tp, nfp, w, dw, gss, gsa, conv=1e-7, t=0.5):
 
     converged = False
     loops = 0
     while not converged:
         gss_old = gss.copy()
         gsa_old = gsa.copy()
-        (gss, gsa), (ss, sa) = dimer_solver(w, dw, tp, U, nfp, gss, gsa)
-        converged = np.allclose(gss_old, gss)
-        converged *= np.allclose(gsa_old, gsa)
+        (gss, gsa), (ss, sa) = dimer_solver(w, dw, tp, U, nfp, gss, gsa, t)
+        converged = np.allclose(gss_old, gss, conv)
+        converged *= np.allclose(gsa_old, gsa, conv)
         loops += 1
         if loops > 3000:
             converged = True
