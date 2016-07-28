@@ -45,8 +45,9 @@ def loop_u_tp(Drange, tprange, beta, seed='mott gap'):
     return np.array(giw_s), np.array(sigma_iw), np.array(ekin), np.array(epot), w_n
 
 Drange = np.linspace(0.05, .85, 61)
+Drange = np.concatenate((Drange[::-1], Drange))
 data = []
-for beta in [16., 18., 20., 22., 24., 26., 28.]:
+for beta in [16., 18., 20., 22., 24., 26., 28., 40., 100., 200.]:
     giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
         Drange, .3 * np.ones_like(Drange), beta, 'met')
     data.append((giw_s, sigma_iw, ekin, epot, w_n, beta))
@@ -55,7 +56,23 @@ for sim in data:
     giw_s, sigma_iw, ekin, epot, w_n, beta = sim
     plt.plot(Drange, 2 * epot, '-', label=beta)
 
-plt.title(r'Double occupation')
+plt.title(r'Double occupation $t_\perp/U=0.3$')
+plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
+plt.xlabel(r'$D/U$')
+plt.legend()
+
+###############################################################################
+data = []
+for beta in [16., 18., 20., 22., 24., 26., 28., 40., 100., 200.]:
+    giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+        Drange, .15 * np.ones_like(Drange), beta, 'met')
+    data.append((giw_s, sigma_iw, ekin, epot, w_n, beta))
+
+for sim in data:
+    giw_s, sigma_iw, ekin, epot, w_n, beta = sim
+    plt.plot(Drange, 2 * epot, '-', label=beta)
+
+plt.title(r'Double occupation $t_\perp/U=0.15$')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$D/U$')
 plt.legend()
