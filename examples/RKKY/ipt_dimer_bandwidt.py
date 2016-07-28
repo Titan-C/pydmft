@@ -58,13 +58,25 @@ def loop_tp_u(tprange, Drange, beta, filestr, seed='mott gap'):
 
 if __name__ == "__main__":
 
-    Drange = np.linspace(0.05, .85, 61)
+    Drange = np.linspace(0.05, 1.1, 81)
     tpr = np.arange(0, 1.1, 0.02)
     BETARANGE = [100., 30.]
     jobs = [(job.T[0], job.T[1], BETA, 'disk/phase_Dimer_ipt_D_met_B{:.5}', 'metal')
             for BETA in BETARANGE
             for job in np.array(list(itertools.product(tpr, Drange))).reshape(len(tpr), len(Drange), 2)]
     jobs += [(job.T[0], job.T[1][::-1], BETA, 'disk/phase_Dimer_ipt_D_ins_B{:.5}')
+             for BETA in BETARANGE
+             for job in np.array(list(itertools.product(tpr, Drange))).reshape(len(tpr), len(Drange), 2)]
+
+    Parallel(n_jobs=-1, verbose=5)(delayed(loop_tp_u)(*job) for job in jobs)
+
+    tpr = [.15, .3, .5]
+    BETARANGE = 1 / np.arange(1 / 512., .4, 1 / 400)
+    Drange = np.linspace(0.05, 1.1, 81)
+    jobs = [(job.T[0], job.T[1], BETA, 'disk/phase_Dimer_ipt_D_met_tp{}/B{{:.5}}'.format(job[0][0]), 'metal')
+            for BETA in BETARANGE
+            for job in np.array(list(itertools.product(tpr, Drange))).reshape(len(tpr), len(Drange), 2)]
+    jobs += [(job.T[0], job.T[1][::-1], BETA, 'disk/phase_Dimer_ipt_D_ins_tp{}/B{{:.5}}'.format(job[0][0]))
              for BETA in BETARANGE
              for job in np.array(list(itertools.product(tpr, Drange))).reshape(len(tpr), len(Drange), 2)]
 
