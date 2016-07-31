@@ -15,7 +15,7 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
 
 
-def real_IPT_sigma(Aw, nf, U):
+def sigma(Aw, nf, U):
     Ap = Aw * nf
     Am = Aw * nf[::-1]
     App = signal.fftconvolve(Ap[::-1], Am, mode='same')
@@ -25,10 +25,21 @@ def real_IPT_sigma(Aw, nf, U):
     return -np.pi * U**2 * (Apmm + Ampp)
 
 
-def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5):
+def ph_hf_sigma(Aw, nf, U):
+    # because of ph and half-fill in the Single band one can work with
+    # A^+ only
+    Ap = Aw * nf
+    # convolution A^+ * A^+
+    App = signal.fftconvolve(Ap, Ap, mode='same')
+    # convolution A^-(-w) * App
+    Appp = signal.fftconvolve(Ap, App, mode='same')
+    return -np.pi * U**2 * (Appp + Appp[::-1])
+
+
+def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5, eta=3e-3j):
     # Self consistency in diagonal basis
-    g0ss = 1 / (w + 3e-3j - tp - t * t * gss)
-    g0sa = 1 / (w + 3e-3j + tp - t * t * gsa)
+    g0ss = 1 / (w + eta - tp - .25 * gss)
+    g0sa = 1 / (w + eta + tp - .25 * gsa)
 
     # Rotate to local basis
     A0d = -0.5 * (g0ss + g0sa).imag / np.pi
@@ -38,8 +49,8 @@ def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5):
     A0o = 0.5 * (A0o - A0o[::-1])  # * tp
 
     # Second order diagram
-    isd = real_IPT_sigma(A0d, nfp, U) * dw * dw
-    iso = real_IPT_sigma(A0o, nfp, U) * dw * dw
+    isd = sigma(A0d, nfp, U) * dw * dw
+    iso = sigma(A0o, nfp, U) * dw * dw
 
     # Rotate to diagonal basis
     iss = isd + iso
