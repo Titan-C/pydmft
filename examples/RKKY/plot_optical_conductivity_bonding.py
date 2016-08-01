@@ -16,6 +16,7 @@ import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
+from dmft.utils import optical_conductivity
 from slaveparticles.quantum.operators import fermi_dist
 
 
@@ -46,7 +47,7 @@ def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     dos = np.exp(-2 * E**2) / np.sqrt(np.pi / 2)
     de = E[1] - E[0]
     dosde = (dos * de).reshape(-1, 1)
-    nf = fermi_dist(w, beta) - fermi_dist(np.add.outer(nuv, w), beta)
+    nf = fermi_dist(w, beta)
     eta = 0.8
 
     for U, (sig_d, sig_o) in zip(ur, sigma_iw):
@@ -57,21 +58,18 @@ def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
         #lat_Aa = .5 * (lat_Aa + lat_As)
         #lat_As = lat_Aa
 
-        a = np.array([[np.sum(lat_Aa[e] * np.roll(lat_Aa[e], -i) * nf[i])
-                       for i in range(len(nuv))] for e in range(len(E))])
-        a += np.array([[np.sum(lat_As[e] * np.roll(lat_As[e], -i) * nf[i])
-                        for i in range(len(nuv))] for e in range(len(E))])
-        b = np.array([[np.sum(lat_Aa[e] * np.roll(lat_As[e], -i) * nf[i])
-                       for i in range(len(nuv))] for e in range(len(E))])
-        b += np.array([[np.sum(lat_As[e] * np.roll(lat_Aa[e], -i) * nf[i])
-                        for i in range(len(nuv))] for e in range(len(E))])
+        a = optical_conductivity(lat_Aa, lat_Aa, nf, w, dosde)
+        a += optical_conductivity(lat_As, lat_As, nf, w, dosde)
+        b = optical_conductivity(lat_Aa, lat_As, nf, w, dosde)
+        b += optical_conductivity(lat_As, lat_Aa, nf, w, dosde)
+
         #b *= tp**2 * eta**2 / 2 / .25
 
-        sigma_E_sum_a = .5 * (dosde * (a)).sum(axis=0) * dw / nuv
+        sigma_E_sum_a = .5 * a[w > 0]
         plt.plot(nuv, sigma_E_sum_a, 'k--')
-        sigma_E_sum_i = .5 * (dosde * (b)).sum(axis=0) * dw / nuv
+        sigma_E_sum_i = .5 * b[w > 0]
         plt.plot(nuv, sigma_E_sum_i, 'k:')
-        sigma_E_sum = .5 * (dosde * (a + b)).sum(axis=0) * dw / nuv
+        sigma_E_sum = .5 * (a + b)[w > 0]
         plt.plot(nuv, sigma_E_sum)
 
         # To save data manually at some point
