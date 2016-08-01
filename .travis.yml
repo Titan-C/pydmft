@@ -35,8 +35,8 @@ before_install:
     - chmod +x miniconda.sh
     - ./miniconda.sh -b
     - export PATH=$HOME/miniconda3/bin:$PATH
-    - conda update --yes conda
-    - conda create --yes -n testenv python=$PYTHON_VERSION nomkl openblas pip scipy numpy
+    - conda update --yes --quiet conda
+    - conda create --yes --quiet -n testenv python=$PYTHON_VERSION nomkl openblas pip scipy numpy
       matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
       joblib pandas numba
     - source activate testenv
