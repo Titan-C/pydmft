@@ -45,7 +45,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
     for beta in betarange:
         print('U: ', u_int, 'tp: ', tp, 'Beta', beta)
         nfp = dos.fermi_dist(w, beta)
-        (gss, gsa), (ss, sa) = ipt.dimer_dmft(u_int, tp, nfp, w, dw, gss, gss)
+        (gss, gsa), (ss, sa) = ipt.dimer_dmft(u_int, tp, nfp, w, dw, gss, gsa)
         g.append((gss, gsa))
         s.append((ss, sa))
 

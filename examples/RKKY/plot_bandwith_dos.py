@@ -68,9 +68,9 @@ def plot_spectralfunc(gwi, drange, yshift=False):
     plt.xlim([-1.7, 0])
 
 drange = 1 / np.array([2.5, 2.7, 2.9])
-giw, swi, w, nfp = loop_bandwidth(drange, 0.3, 80)
+giw, swi, w, nfp = loop_bandwidth(drange, 0.2, 60)
 plot_spectralfunc(giw, drange)
-plt.title(r"Bandwidth drop @ $t_\perp/U=0.2$, $\beta/U=150$")
+plt.title(r"Bandwidth drop @ $t_\perp/U=0.2$, $\beta/U=60$")
 
 #giw, swi, w, nfp = loop_bandwidth(drange, 0.3, 180)
 #plot_spectralfunc(giw, drange)
