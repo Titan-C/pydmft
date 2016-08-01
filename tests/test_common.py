@@ -45,21 +45,30 @@ def test_pade():
     assert np.allclose(gw_ref, gw_cont, 1e-3)
 
 
-def test_hilbert_trans():
-    """Test causality of Hilbert transforms of semi-circle"""
+@pytest.mark.parametrize("halfbandwidth", [0.5, 1., 2.])
+def test_hilbert_trans_func(halfbandwidth):
+    """Test Hilbert transforms of semi-circle"""
+    # Match in the 2 forms
     w_n = gf.matsubara_freq(200)
-    giw = gf.greenF(w_n, sigma=-1j / w_n, mu=-0.2)
-    ss = gf.semi_circle_hiltrans(1j * w_n - .2 + 1j / w_n)
+    giw = gf.greenF(w_n, sigma=-1j / w_n, mu=-0.2, D=halfbandwidth)
+    ss = gf.semi_circle_hiltrans(1j * w_n - .2 + 1j / w_n, D=halfbandwidth)
     assert np.allclose(ss, giw)
 
+    # corresponds to semi-circle
+    w = np.linspace(-3, 3, 2**9)
+    ss = gf.semi_circle_hiltrans(w + 1e-5j, D=halfbandwidth)
+    assert np.allclose(dos.bethe_lattice(
+        w,  halfbandwidth / 2), - ss.imag / np.pi, atol=1e-4)
 
-def test_hilbert_trans():
+
+@pytest.mark.parametrize("halfbandwidth", [0.5, 1., 2.])
+def test_hilbert_trans_integral(halfbandwidth):
     """Test hilbert transform of semi-circle to direct integral"""
 
-    w = np.linspace(-1, 1, 2**8)
+    w = np.linspace(-3, 3, 2**9)
     w_n = gf.matsubara_freq(20)
-    giw = gf.greenF(w_n)
-    rho_w = dos.bethe_lattice(w, .5)
-    Apiw = np.array([simps(rho_w / (1j * iw - w), w)for iw in w_n])
+    giw = gf.greenF(w_n, D=halfbandwidth)
+    rho_w = dos.bethe_lattice(w,  halfbandwidth / 2)
+    Apiw = np.array([simps(rho_w / (1j * iw - w), w) for iw in w_n])
 
     assert np.allclose(Apiw, giw, 2e-4)
