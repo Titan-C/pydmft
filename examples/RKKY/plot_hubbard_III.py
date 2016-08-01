@@ -15,6 +15,7 @@ import numpy as np
 
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
+from dmft.plot import plot_band_dispersion
 import slaveparticles.quantum.operators as op
 
 
@@ -141,4 +142,4 @@ lat_gf = 1 / (np.add.outer(-eps_k, w + tp + 8e-2j) - sp_2 / g0_1_b) + \
 Aw = -lat_gf.imag / np.pi / 2
 
 
-gf.plot_band_dispersion(w, Aw, 'Hubbard III band dispersion', eps_k)
+plot_band_dispersion(w, Aw, 'Hubbard III band dispersion', eps_k)

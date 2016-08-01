@@ -11,10 +11,12 @@ spectral function are evaluated by means of the Lehmann representation
 
 from __future__ import division, absolute_import, print_function
 from itertools import product, combinations
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as LA
-from dmft.common import matsubara_freq, gw_invfouriertrans, plot_band_dispersion
+import matplotlib.pyplot as plt
+
+from dmft.common import matsubara_freq, gw_invfouriertrans
+from dmft.plot import plot_band_dispersion
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
 

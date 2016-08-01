@@ -140,8 +140,8 @@ def aal_ef(eps_sample, t, e_tip=-1300 + 960j, a=20):
 # lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 5e-2j - ss)
 # lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
 # Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 8)
-# gf.plot_band_dispersion(w, Aw, 'Local ', eps_k, 'intensity')
-# gf.plot_band_dispersion(w, -lat_gfa.imag / np.pi, 'Local ', eps_k, 'intensity')
+# plot_band_dispersion(w, Aw, 'Local ', eps_k, 'intensity')
+# plot_band_dispersion(w, -lat_gfa.imag / np.pi, 'Local ', eps_k, 'intensity')
 # plt.ylim([-3, 3])
 
 ###############################################################################

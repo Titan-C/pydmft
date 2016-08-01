@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import dmft.plot.triqs_dimer as tdp
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
+from dmft.plot import plot_band_dispersion
 import dmft.plot.hf_single_site
 import dmft.ipt_imag as ipt
 
@@ -90,6 +91,6 @@ if __name__ == '__main__':
 
             plot_pole_eq(w, gst, ss, title)
             plt.savefig('Pole_eq_B100_tp{}_U{}.png'.format(tp, U))
-            gf.plot_band_dispersion(w, Aw, title, eps_k)
+            plot_band_dispersion(w, Aw, title, eps_k)
             plt.savefig('Arpes_eq_B100_tp{}_U{}.png'.format(tp, U))
             plt.savefig('Arpes_den_eq_B100_tp{}_U{}.png'.format(tp, U))

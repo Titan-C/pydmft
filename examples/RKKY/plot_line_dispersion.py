@@ -16,6 +16,7 @@ import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
+from dmft.plot import plot_band_dispersion
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
@@ -87,7 +88,7 @@ def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
         ax = plot_greenfunct(w, ss, title, r'$\Sigma$')
 
         plot_pole_eq(w, gst, ss, title)
-        gf.plot_band_dispersion(w, Aw, title, eps_k)
+        plot_band_dispersion(w, Aw, title, eps_k)
 
 ###############################################################################
 # Metals

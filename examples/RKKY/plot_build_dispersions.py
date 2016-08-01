@@ -16,6 +16,7 @@ import numpy as np
 import dmft.common as gf
 import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
+from dmft.plot import plot_band_dispersion
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
@@ -52,14 +53,14 @@ def construct_dispersions(BETA, u_int, tp, seed):
         u_int, tp, BETA)
 
     # Continuate in Sigma Diagonal then return to local
-    gf.plot_band_dispersion(w, Aw, 'Local ' + title, eps_k, 'intensity')
+    plot_band_dispersion(w, Aw, 'Local ' + title, eps_k, 'intensity')
     file_r = "Aew_B{}U{}tp{}_{}_".format(BETA, u_int, tp, seed)
     plt.savefig(file_r + 'psl.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
 
     # Continuate in Sigma Diagonal only plot anti-bonding
     Aw = np.clip(-lat_gfs.imag / np.pi, 0, 2)
-    gf.plot_band_dispersion(w,  Aw, 'Anti-Bond ' + title, eps_k,  'intensity')
+    plot_band_dispersion(w,  Aw, 'Anti-Bond ' + title, eps_k,  'intensity')
     plt.savefig(file_r + 'psa.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
 
@@ -70,7 +71,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
         Ag.append(np.clip(
             np.abs(-gf.pade_continuation(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
 
-    gf.plot_band_dispersion(w, np.asarray(
+    plot_band_dispersion(w, np.asarray(
         Ag), 'Local ' + title, eps_k, 'intensity')
     plt.savefig(file_r + 'pgl.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
@@ -83,7 +84,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
         Ag.append(np.clip(
             np.abs(-gf.pade_continuation(gd, w_n, w + 1e-2j, w_set).imag / np.pi), 0, 2))
 
-    gf.plot_band_dispersion(w, np.asarray(
+    plot_band_dispersion(w, np.asarray(
         Ag), 'Local ' + title, eps_k, 'intensity')
     plt.savefig(file_r + 'pgls.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)

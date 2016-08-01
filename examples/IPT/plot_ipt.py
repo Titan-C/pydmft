@@ -18,7 +18,8 @@ import numpy as np
 import matplotlib.pylab as plt
 
 from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec, plot_band_dispersion
+from dmft.common import greenF, tau_wn_setup, pade_coefficients, pade_rec
+from dmft.plot import plot_band_dispersion
 from slaveparticles.quantum.dos import bethe_lattice
 from slaveparticles.quantum.operators import fermi_dist
 

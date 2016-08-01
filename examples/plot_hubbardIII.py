@@ -27,6 +27,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import dmft.common as gf
+from dmft.plot import plot_band_dispersion
 
 
 w = np.linspace(-3, 3, 800)
@@ -73,4 +74,4 @@ eps_k = np.linspace(-1, 1, 61)
 lat_gf = 1 / (np.add.outer(-eps_k, w + 8e-2j) - U**2 / 4 / g0_1)
 Aw = -lat_gf.imag / np.pi
 
-gf.plot_band_dispersion(w, Aw, 'Hubbard III band dispersion', eps_k)
+plot_band_dispersion(w, Aw, 'Hubbard III band dispersion', eps_k)
