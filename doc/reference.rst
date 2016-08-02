@@ -11,6 +11,9 @@ Modules Reference API
 .. automodule:: dmft.ipt_imag
     :members:
 
+.. automodule:: dmft.ipt_real
+    :members:
+
 .. automodule:: dmft.hirschfye
     :members:
 

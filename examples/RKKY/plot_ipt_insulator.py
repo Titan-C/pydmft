@@ -14,8 +14,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
 import dmft.ipt_imag as ipt
+from dmft.ipt_real import dimer_dmft as dimer_dmft_real
+import dmft.RKKY_dimer as rt
+from slaveparticles.quantum import dos
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
@@ -152,3 +154,67 @@ plt.ylabel(r'$G_{11}(\omega)$')
 plt.title(title)
 plt.grid(which='both')
 plt.xticks(np.linspace(-3, 3, 13))
+
+###############################################################################
+# Insulator in IPT Imag
+# ---------------------
+#
+
+plt.close('all')
+u_int = 2.5
+BETA = 100.
+tp = 0.3
+title = r'IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(
+    u_int, tp, BETA)
+giw_d, giw_o, siw_d, siw_o, g0iw_d, g0iw_o, w_n = ipt_u_tp(
+    u_int, tp, BETA, 'ins')
+w = np.linspace(-3, 3, 800)
+eps_k = np.linspace(-1., 1., 61)
+w_set = np.concatenate((np.arange(100), np.arange(100, 200, 2)))
+
+plt.figure()
+gwd = gf.pade_continuation(1j * giw_d.imag, w_n, w, w_set)
+plt.plot(w, gwd.real, label=r'$\Re e G_{11}$')
+plt.plot(w, -gwd.imag, label=r'$-\Im m G_{11}$')
+
+swd = gf.pade_continuation(1j * siw_d.imag, w_n, w, w_set)
+swd = swd.real - 1j * np.abs(swd.imag)
+plt.plot(w, swd.real, label=r'$\Re e \Sigma_{11}$')
+plt.plot(w, swd.imag, label=r'$\Im m \Sigma_{11}$')
+plt.legend(loc=0)
+plt.ylim([-3, 3])
+plt.xlabel(r'$\omega$')
+plt.title(title)
+plt.grid(which='both')
+plt.xticks(np.linspace(-3, 3, 13))
+plt.savefig('IPT_imag_Dimer_mott_ins.pdf', transparent=False,
+            bbox_inches='tight', pad_inches=0.05)
+
+
+###############################################################################
+# Insulator in IPT Real
+# ---------------------
+
+w = np.linspace(-6, 6, 2**13)
+dw = w[1] - w[0]
+nfp = dos.fermi_dist(w, BETA)
+gwd = gf.pade_continuation(1j * giw_d.imag, w_n, w, w_set)
+(gss, gsa), (ss, sa) = dimer_dmft_real(u_int, tp, nfp, w, dw, gwd, gwd)
+
+rgwd = 0.5 * (gss + gsa)
+rswd = 0.5 * (ss + sa)
+
+plt.plot(w, rgwd.real, label=r'$\Re e G_{11}$')
+plt.plot(w, -rgwd.imag, label=r'$-\Im m G_{11}$')
+plt.plot(w, rswd.real, label=r'$\Re e \Sigma_{11}$')
+plt.plot(w, rswd.imag, label=r'$\Im m \Sigma_{11}$')
+plt.legend(loc=0)
+plt.xlim([-3, 3])
+plt.ylim([-2, 2.5])
+plt.xlabel(r'$\omega$')
+plt.ylabel(r'$\Sigma_{11}(\omega)$')
+plt.title(title)
+plt.grid(which='both')
+plt.xticks(np.linspace(-3, 3, 13))
+plt.savefig('IPT_imag_Dimer_mott_ins.pdf', transparent=False,
+            bbox_inches='tight', pad_inches=0.05)

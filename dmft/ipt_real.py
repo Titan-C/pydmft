@@ -70,6 +70,35 @@ def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5, eta=3e-3j):
 
 
 def dimer_dmft(U, tp, nfp, w, dw, gss, gsa, conv=1e-7, t=0.5):
+    """Solve DMFT equations in real frequencies for the dimer
+
+    Parameters
+    ----------
+    U : float
+        Couloumb interaction
+    tp : float
+        Dimerization
+    npf : 1D real ndarray
+        Thermal Fermi function
+    w : 1D real ndarray
+        frequency grid. Has to be equispaced and symmetric
+    dw : float
+        frequency separation
+    gss : 1D complex ndarray
+        Starting guess for the symmetric Green function
+    gsa : 1D complex ndarray
+        Starting guess for the asymmetric Green function
+    conv : float
+        convergence criteria
+    t : float
+        hopping
+
+    Returns
+    -------
+    (gss, gsa) : tuple of 1D complex ndarray, Green Functions
+    (ss, sa) : tuple of 1D complex ndarray, Self-Energy
+
+    """
 
     converged = False
     loops = 0
