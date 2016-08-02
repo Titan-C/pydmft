@@ -49,7 +49,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
     lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 5e-2j - sa)
     Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 2)
 
-    title = r'Spectral Function dispersion $U={}$, $t_\perp={}$, $\beta={}$'.format(
+    title = 'Spectral Function dispersion\n$U={}$, $t_\\perp={}$, $\\beta={}$'.format(
         u_int, tp, BETA)
 
     # Continuate in Sigma Diagonal then return to local
