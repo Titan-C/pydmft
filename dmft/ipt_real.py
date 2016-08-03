@@ -38,8 +38,8 @@ def ph_hf_sigma(Aw, nf, U):
 
 def dimer_solver(w, dw, tp, U, nfp, gss, gsa, t=0.5, eta=3e-3j):
     # Self consistency in diagonal basis
-    g0ss = 1 / (w + eta - tp - .25 * gss)
-    g0sa = 1 / (w + eta + tp - .25 * gsa)
+    g0ss = 1 / (w + eta - tp - t * t * gss)
+    g0sa = 1 / (w + eta + tp - t * t * gsa)
 
     # Rotate to local basis
     A0d = -0.5 * (g0ss + g0sa).imag / np.pi
@@ -106,8 +106,8 @@ def dimer_dmft(U, tp, nfp, w, dw, gss, gsa, conv=1e-7, t=0.5):
         gss_old = gss.copy()
         gsa_old = gsa.copy()
         (gss, gsa), (ss, sa) = dimer_solver(w, dw, tp, U, nfp, gss, gsa, t)
-        converged = np.allclose(gss_old, gss, conv)
-        converged *= np.allclose(gsa_old, gsa, conv)
+        converged = np.allclose(gss_old, gss, atol=conv)
+        converged *= np.allclose(gsa_old, gsa, atol=conv)
         loops += 1
         if loops > 3000:
             converged = True
