@@ -20,7 +20,7 @@ from slaveparticles.quantum import dos
 
 
 def plot_gf(gw, sw, axes):
-    axes[0].plot(w, -gw.imag)
+    axes[0].plot(w, -gw.imag / np.pi)
     axes[1].plot(w, sw.real)
     axes[1].axhline(0, color='k')
     axes[2].plot(w, -sw.imag)
@@ -72,10 +72,9 @@ axes[0, 0].set_ylabel(r'$A_{11}(\omega)$')
 axes[1, 0].set_ylabel(r'$\Re e \Sigma_{11}(\omega)$')
 axes[2, 0].set_ylabel(r'$-\Im m \Sigma_{11}(\omega)$')
 
-for ax in axes.flatten():
-    ax.set_yticks([])
-for ax, lim in zip(axes, [[0, 2], [-8, 8], [0, 2]]):
+for ax, lim in zip(axes, [[0, 0.7], [-8, 8], [0, 2]]):
     ax[0].set_ylim(lim)
+    ax[0].set_yticklabels([])
     ax[1].set_ylim(lim)
 
 axes[2, 0].set_xlabel(r'$\omega$')
@@ -107,11 +106,11 @@ axes[0, 0].set_ylabel(r'$A_{sym}(\omega)$')
 axes[1, 0].set_ylabel(r'$\Re e \Sigma_{sym}(\omega)$')
 axes[2, 0].set_ylabel(r'$-\Im m \Sigma_{sym}(\omega)$')
 
-for ax in axes.flatten():
-    ax.set_yticks([])
 for ax, lim in zip(axes, [[0, 2], [-8, 8], [0, 2]]):
     ax[0].set_ylim(lim)
+    ax[0].set_yticks([])
     ax[1].set_ylim(lim)
+
 axes[2, 1].set_ylim([0, 2.6])
 
 axes[2, 0].set_xlabel(r'$\omega$')
@@ -143,10 +142,9 @@ axes[0, 0].set_ylabel(r'$A_{sym}(\omega)$')
 axes[1, 0].set_ylabel(r'$\Re e \Sigma_{sym}(\omega)$')
 axes[2, 0].set_ylabel(r'$-\Im m \Sigma_{sym}(\omega)$')
 
-for ax in axes.flatten():
-    ax.set_yticks([])
 for ax, lim in zip(axes, [[0, 2], [-4, 4], [0, 4]]):
     ax[0].set_ylim(lim)
+    ax[0].set_yticks([])
     ax[1].set_ylim(lim)
 
 axes[2, 0].set_xlabel(r'$\omega$')
