@@ -30,9 +30,9 @@ def sorted_basis():
     return basis
 
 
-def dimer_hamiltonian(U, mu, tp):
-    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
-    symmetry. Include chemical potential for grand Canonical calculations
+def dimer_hamiltonian(u_int, mu, tp, basis_fermions=None):
+    r"""Generate an isolated bi-atomic Hamiltonian in particle-hole
+    symmetry at mu=0. Include chemical potential for grand Canonical calculations
 
     .. math::
         \mathcal{H} - \mu N =
@@ -42,44 +42,64 @@ def dimer_hamiltonian(U, mu, tp):
                  b^\dagger_\uparrow a_\uparrow +
                  a^\dagger_\downarrow b_\downarrow +
                  b^\dagger_\downarrow a_\downarrow)
-
         - \mu(n_{a\uparrow} + n_{a\downarrow})
         - \mu(n_{b\uparrow} + n_{b\downarrow})
 
+    Parameters:
+        u_int (float): local Coulomb interaction
+        mu (float): chemical potential
+        tp (float): hopping amplitude between atoms
+        basis_fermions (list): 4 element list with sparse matrices
+            representing fermion destruction operators
+            default basis is [a_up, b_up, a_dw, b_dw]
+
+    Returns
+    -------
+    h_loc : scipy.sparse.csr.csr_matrix
+        Hamiltonian
+    basis_fermions : list scipy.sparse.csr.csr_matrix
+        fermion desctruction operators in sparse matrix form
+
+
     """
-    a_up, b_up, a_dw, b_dw = sorted_basis()
-    sigma_za = a_up.T * a_up - a_dw.T * a_dw
-    sigma_zb = b_up.T * b_up - b_dw.T * b_dw
-    H  = - U / 2 * sigma_za * sigma_za - mu * (a_up.T * a_up + a_dw.T * a_dw)
-    H += - U / 2 * sigma_zb * sigma_zb - mu * (b_up.T * b_up + b_dw.T * b_dw)
-    H += tp * (a_up.T * b_up + a_dw.T * b_dw + b_up.T * a_up + b_dw.T * a_dw)
-    return H, [a_up, b_up, a_dw,  b_dw]
+    if basis_fermions is None:
+        basis_fermions = sorted_basis()
+
+    a_up, b_up, a_dw, b_dw = basis_fermions
+    spin_za = a_up.T * a_up - a_dw.T * a_dw
+    spin_zb = b_up.T * b_up - b_dw.T * b_dw
+    h_loc = - u_int / 2 * spin_za * spin_za - \
+        mu * (a_up.T * a_up + a_dw.T * a_dw)
+    h_loc += - u_int / 2 * spin_zb * spin_zb - \
+        mu * (b_up.T * b_up + b_dw.T * b_dw)
+    h_loc += tp * (a_up.T * b_up + a_dw.T * b_dw +
+                   b_up.T * a_up + b_dw.T * a_dw)
+    return h_loc, [a_up, b_up, a_dw,  b_dw]
 
 
-def dimer_hamiltonian_bond(U, mu, tp):
-    r"""Generate a single orbital isolated atom Hamiltonian in particle-hole
-    symmetry. Include chemical potential for grand Canonical calculations
+def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
+    r"""Generate an isolated bi-atomic Hamiltonian in particle-hole
+    symmetry at mu=0. Include chemical potential for grand Canonical calculations
 
-    This in the basis of Bonding and Anti-bonding states
+    This in the diagonal basis [as_up, s_up, as_dw, s_dw]
 
     See also
     --------
     dimer_hamiltonian
     """
+    if basis_fermions is None:
+        basis_fermions = sorted_basis()
+
     from math import sqrt
-    as_up, s_up, as_dw, s_dw = sorted_basis()
+    as_up, s_up, as_dw, s_dw = basis_fermions
 
     a_up = (-as_up + s_up) / sqrt(2)
-    b_up = ( as_up + s_up) / sqrt(2)
+    b_up = (as_up + s_up) / sqrt(2)
     a_dw = (-as_dw + s_dw) / sqrt(2)
-    b_dw = ( as_dw + s_dw) / sqrt(2)
+    b_dw = (as_dw + s_dw) / sqrt(2)
 
-    sigma_za = a_up.T * a_up - a_dw.T * a_dw
-    sigma_zb = b_up.T * b_up - b_dw.T * b_dw
-    H  = - U / 2 * sigma_za * sigma_za - mu * (a_up.T * a_up + a_dw.T * a_dw)
-    H += - U / 2 * sigma_zb * sigma_zb - mu * (b_up.T * b_up + b_dw.T * b_dw)
-    H += tp * (a_up.T * b_up + a_dw.T * b_dw + b_up.T * a_up + b_dw.T * a_dw)
-    return H, [as_up, s_up, as_dw, s_dw]
+    return dimer_hamiltonian(u_int, mu, tp, [a_up, b_up, a_dw, b_dw])[0],\
+        basis_fermions
 
 
 ###############################################################################
