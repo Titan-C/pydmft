@@ -72,3 +72,31 @@ def test_hilbert_trans_integral(halfbandwidth):
     Apiw = np.array([simps(rho_w / (1j * iw - w), w) for iw in w_n])
 
     assert np.allclose(Apiw, giw, 2e-4)
+
+
+@pytest.mark.parametrize("moments", [(1, 0, 0.5), (.5, -.2, -7)])
+def test_tail_fit(moments):
+    wn = gf.matsubara_freq(50)
+    moment = np.array(moments)
+    tail = gf.tail(wn, moment * np.array([1j, 1, 1j]),
+                   np.arange(len(moment)) + 1)
+    tailn = np.sum(np.random.randn(len(wn), 2) *
+                   0.00005 * np.array((1, 1j)), 1)
+    tail = tail + tailn
+
+    fit_moments = gf.lin_tail_fit(wn, tail, -20, 30)[1]
+    print(fit_moments - moment)
+    assert np.allclose(moment, fit_moments, atol=3e-3)
+
+
+def test_tail_fit_semicirc():
+    wn = gf.matsubara_freq(50)
+    gci = gf.greenF(wn)
+    tailn = np.sum(np.random.randn(len(wn), 2) *
+                   0.00006 * np.array((1, 1j)), 1) / (wn**2 + 3)
+    tail = gci + tailn
+
+    fit_moments = gf.lin_tail_fit(wn, tail, -45, 45)[1]
+    moment = np.array((-1, 0, 0.25))
+    print(fit_moments - moment)
+    assert np.allclose(moment, fit_moments, atol=7e-3)

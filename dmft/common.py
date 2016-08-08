@@ -11,7 +11,7 @@ from __future__ import absolute_import, division, print_function
 
 import numpy as np
 from numpy.fft import fft, ifft
-import matplotlib.pyplot as plt
+from scipy.linalg import lstsq
 
 
 def matsubara_freq(beta=16., size=256, fer=1):
@@ -225,6 +225,48 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     g_tau = fft(giwn, len(tau)) * np.exp(-1j * np.pi * tau / beta)
 
     return (g_tau * 2 / beta).real + time_tail
+
+
+def tail(w_n, coef, powers):
+    return np.sum([c / w_n**p for c, p in zip(coef, powers)], 0)
+
+
+def lin_tail_fit(w_n, inp_gf, x, span=30, negative_freq=False):
+    """Perform a Least squares fit to the tail of Green function
+
+    the fit is done in inp_gf[-x:-x + span]
+
+    Parameters:
+        w_n (real 1D ndarray) : Matsubara frequencies
+        inp_gf (complex 1D ndarray) : Green function to fit
+        x (int) : counting from last element from where to do the fit
+        span (int) : amount of frequencies to do the fit over
+        negative_freq (bool) : Array has negative Matsubara frequencies
+    Returns:
+        complex 1D ndarray : Tail patched Green function (copy of origal)
+        real 1D ndarray : The First 3 moments
+"""
+    def tail_coef(w_n, data, powers):
+        A = np.array([1 / w_n**p for p in powers]).T
+        return lstsq(A, data)[0]
+
+    tw_n = w_n[-x:-x + span].copy()
+    datar = inp_gf[-x:-x + span].real.copy()
+    datai = inp_gf[-x:-x + span].imag.copy()
+
+    re_c = tail_coef(tw_n, datar, [2])
+    re_tail = tail(w_n, re_c, [2])
+    im_c = tail_coef(tw_n, datai, [1, 3])
+    im_tail = tail(w_n, im_c, [1, 3])
+
+    f_tail = re_tail + 1j * im_tail
+
+    patgf = inp_gf.copy()
+    patgf[-x:] = f_tail[-x:]
+    if negative_freq:
+        patgf[:x] = f_tail[:x].conj()
+
+    return patgf, np.array([im_c[0], re_c[0], im_c[1]])
 
 
 def fit_gf(w_n, giw, p=2):
