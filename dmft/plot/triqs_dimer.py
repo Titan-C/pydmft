@@ -30,8 +30,8 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
                 gf_iw << iOmega_n + u_int / 2. + shift * \
                     tp - 0.25 * gf_iw - inverse(gf_iw)
 
-            axes[0].oplot(gf_iw.imag, 'bo:', label=None)
-            axes[0].oplot(gf_iw.real, 'gs:', label=None)
+            axes[0].oplot(gf_iw, 'bo:', mode="I", label=None)
+            axes[0].oplot(gf_iw, 'gs:', mode="R", label=None)
 
             gf_iw = np.squeeze([gf_iw(i) for i in range(n_freq)])
             freq_arr.append([gf_iw.real, gf_iw.imag])
