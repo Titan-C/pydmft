@@ -183,6 +183,10 @@ def dmft_loop(setup, u_int, G_iw):
                     '/U{}/it{:03}/density_matrix'.format(u_int, loop)] = imp_sol.density_matrix
                 last_run[
                     '/U{}/it{:03}/h_loc'.format(u_int, loop)] = imp_sol.h_loc_diagonalization
+                last_run[
+                    '/U{}/it{:03}/pertord'.format(u_int, loop)] = imp_sol.perturbation_order_total
+                last_run[
+                    '/U{}/it{:03}/pertord_ind'.format(u_int, loop)] = imp_sol.perturbation_order
 
                 if setup['save_gtau']:
                     last_run[
@@ -221,7 +225,7 @@ def do_setup():
                         help='Saves Gtau in file')
     parser.add_argument('-dm', '--double_moves', action='store_true',
                         help='Enables double moves during sampling')
-    parser.add_argument('-pert', action='store_true',
+    parser.add_argument('-pert', action='store_false', default=True,
                         help='Saves the perturbation order histogram')
     parser.add_argument('-new_seed', type=float, nargs=3, default=False,
                         metavar=('U_src', 'U_target', 'avg_over'),
