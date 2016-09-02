@@ -190,11 +190,13 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     freq_tail_fourier
     """
 
-    beta = -tau[0]
+    beta = tau[1] + tau[-1]
     freq_tail, time_tail = freq_tail_fourier(tail_coef, beta, tau, w_n)
 
     giwn = g_iwn - freq_tail
 
-    g_tau = fft(giwn, len(tau))
+    g_tau = fft(giwn)
+    g_tau *= np.exp(-1j * np.pi * (1 + len(w_n)) * tau / beta) / beta
+    g_tau += time_tail
 
-    return g_tau * 2 / beta + time_tail
+    return g_tau
