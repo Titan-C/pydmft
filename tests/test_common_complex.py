@@ -23,7 +23,7 @@ def test_matsubara_axis(beta):
 def test_imaginary_time_array(beta):
     tau, wn = cgf.tau_wn_setup(beta, 3 * beta)
     assert len(wn) % 2 == 0
-    assert len(tau) == 2 * len(wn)
+    assert len(tau) == len(wn)
 
 
 @pytest.mark.parametrize("beta", np.random.rand(48) * 100)
