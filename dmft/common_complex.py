@@ -77,8 +77,7 @@ def tau_wn_setup(beta, n_matsubara):
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta)` is required and output given
-    into positive fermionic matsubara frequencies up to the given cutoff.
-    Time array is twice as dense as frequency array
+    into fermionic Matsubara frequencies.
 
     .. math:: G(i\omega_n) = \int_0^\beta G(\tau)
        e^{i\omega_n \tau} d\tau
@@ -90,7 +89,7 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     tau : real float array
             Imaginary time points
     w_n : real float array
-            fermionic matsubara frequencies. Only use the positive ones
+            fermionic Matsubara frequencies. Balanced positive & negative frequencies
     tail_coef : list of floats size 3
         The first moments of the tails
 
@@ -111,53 +110,17 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     return beta * ifftshift(ifft(gtau * np.exp(1j * np.pi * tau / beta))) + freq_tail
 
 
-def freq_tail_fourier(tail_coef, beta, tau, w_n):
-    r"""Fourier transforms analytically the slow decaying tail_coefs of
-    the Greens functions [matsubara]_
-
-    +------------------------+-----------------------------------------+
-    | :math:`G(iw)`          | :math:`G(t)`                            |
-    +========================+=========================================+
-    | :math:`(i\omega)^{-1}` | :math:`-\frac{1}{2}`                    |
-    +------------------------+-----------------------------------------+
-    | :math:`(i\omega)^{-2}` | :math:`\frac{1}{2}(\tau-\beta/2)`       |
-    +------------------------+-----------------------------------------+
-    | :math:`(i\omega)^{-3}` | :math:`-\frac{1}{4}(\tau^2 -\beta\tau)` |
-    +------------------------+-----------------------------------------+
-
-    See also
-    --------
-    gw_invfouriertrans
-    gt_fouriertrans
-
-    References
-    ----------
-    .. [matsubara] https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain
-
-    """
-
-    freq_tail =   tail_coef[0] / (1.j * w_n)\
-        + tail_coef[1] / (1.j * w_n)**2\
-        + tail_coef[2] / (1.j * w_n)**3
-
-    time_tail = - tail_coef[0] / 2 \
-        + tail_coef[1] / 2 * (tau - beta / 2) \
-                - tail_coef[2] / 4 * (tau**2 - beta * tau)
-
-    return freq_tail, time_tail
-
-
 def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
-    r"""Performs an inverse fourier transform of the green Function in which
-    only the imaginary positive matsubara frequencies
-    :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
-    The high frequency tails are transformer analytically up to the third moment.
+    r"""Performs an inverse fourier transform of the green Function in
+    which the imaginary Matsubara frequencies :math:`\omega_n=
+    \pi(2n+1)/\beta` with :math:`n \in [-N, N]` are used.  The high
+    frequency tails are transformer analytically up to the third
+    moment.
 
-    Output is the real valued positivite imaginary time green function.
-    For the positive time output :math:`\tau \in [0;\beta)`.
-    Array sizes need not match between frequencies and times, but a time array
-    twice as dense is recommended for best performance of the Fast Fourrier
-    transform.
+    Output is the imaginary time Green's function for the positive
+    time output :math:`\tau \in [0;\beta)`. Array sizes of frequencies
+    and times must be even and the same. Preferably power of 2 to take
+    the most advantage of the FFT
 
     .. math::
        G(\tau) &= \frac{1}{\beta} \sum_{\omega_n}
@@ -173,7 +136,7 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     tau : real float array
             Imaginary time points
     w_n : real float array
-            fermionic matsubara frequencies. Only use the positive ones
+            fermionic matsubara frequencies. Balanced positive & negative frequencies
     tail_coef : list of floats size 3
         The first moments of the tails
 
