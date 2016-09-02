@@ -246,7 +246,7 @@ def retarded_weiss(g0tau):
     delta_tau = np.arange(slices)
 
     gind = slices + np.subtract.outer(delta_tau, delta_tau)
-    g0t_mat = np.empty((slices * n1, slices * n2))
+    g0t_mat = np.empty((slices * n1, slices * n2), g0tau.dtype)
 
     for i in range(n1):
         for j in range(n2):
