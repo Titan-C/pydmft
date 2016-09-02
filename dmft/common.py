@@ -179,7 +179,7 @@ def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
-    The high frequency tails are transformer analytically up to the third moment.
+    The high frequency tails are transformed analytically up to the third moment.
 
     Output is the real valued positivite imaginary time green function.
     For the positive time output :math:`\tau \in [0;\beta)`.
