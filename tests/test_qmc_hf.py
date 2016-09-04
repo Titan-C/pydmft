@@ -10,7 +10,9 @@ from itertools import product
 from random import randrange
 import os
 import numpy as np
+import scipy.linalg as la
 import pytest
+import dmft.common_complex as cgf
 import dmft.hirschfye as hf
 import dmft.plot.hf_single_site as phf
 import dmft.hffast as hffast
@@ -38,6 +40,46 @@ def test_hf_fast_updatecond(chempot, u_int, updater):
     """Test over the fast update after a spin flip"""
     UPDATE_PARAMS.update(MU=chempot, U=u_int)
     _, _, g0t, _, v, _ = hf.setup_PM_sim(UPDATE_PARAMS)
+    v = np.squeeze(v)
+    g0ttp = hf.retarded_weiss(g0t)
+    kroneker = np.eye(v.size)
+
+    groot = hf.gnewclean(g0ttp, v, kroneker)
+    g_fast_flip = np.copy(groot)
+
+    flip = randrange(v.size)
+    v[flip] *= -1
+
+    g_flip = hf.gnewclean(g0ttp, v, kroneker)
+    updater(g_fast_flip, 2 * v[flip], flip)
+
+    assert np.allclose(g_flip, g_fast_flip)
+
+
+@pytest.mark.parametrize("chempot, u_int, updater",
+                         product([0, 0.3], [2, 2.3], [hf.gnew]))
+def test_hf_fast_updatecond_complex(chempot, u_int, updater):
+    """Test over the fast update after a spin flip"""
+    w_n = cgf.matsubara_freq(20, 20)
+    SO_N1 = np.array([[0, 1j, -1],
+                      [-1j, 0, 1j],
+                      [-1, -1j, 0]]) / 2
+
+    # Semi circle GF by iteration
+    H_loc = SO_N1 + chempot * np.eye(3)
+    g_0_1 = [1j * wn * np.eye(3) - H_loc for wn in w_n]
+    g_0 = [la.inv(g) for g in g_0_1]
+    for i in range(40):
+        g_0_1 = [1j * wn * np.eye(3) - H_loc - 0.25 *
+                 g for wn, g in zip(w_n, g_0)]
+        g_0 = [la.inv(g) for g in g_0_1]
+
+    G_tail = [np.eye(3).reshape(3, 3, 1), H_loc.reshape(3, 3, 1), 0]
+    tau = np.arange(0, 20, 20 / len(w_n))
+
+    g_0 = np.array(g_0)
+    g0t = cgf.gw_invfouriertrans(np.rollaxis(g_0, 0, 3), tau, w_n, G_tail)
+    v = hf.ising_v(tau[1], 1., len(tau) * 3)
     v = np.squeeze(v)
     g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
