@@ -7,6 +7,7 @@ Created on Tue Nov 25 12:44:23 2014
 
 from __future__ import division, absolute_import, print_function
 from itertools import product
+from random import randrange
 import os
 import numpy as np
 import pytest
@@ -44,7 +45,7 @@ def test_hf_fast_updatecond(chempot, u_int, updater):
     groot = hf.gnewclean(g0ttp, v, kroneker)
     g_fast_flip = np.copy(groot)
 
-    flip = 5
+    flip = randrange(v.size)
     v[flip] *= -1
 
     g_flip = hf.gnewclean(g0ttp, v, kroneker)

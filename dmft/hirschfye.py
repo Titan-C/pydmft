@@ -13,9 +13,10 @@ import os
 import struct
 import time
 from itertools import combinations, product
+from math import exp
 
 from mpi4py import MPI
-from scipy.linalg.blas import dger
+from scipy.linalg.blas import dger, zgeru
 import scipy.linalg as la
 import numba
 import numpy as np
@@ -312,12 +313,15 @@ def gnew(g, dv, k):
     .. math:: G'_{ij} = G_{ij} + \\alpha (G_{ik} - \\delta_{ik})G_{kj}
 
     no sumation in the indexes"""
-    ee = np.exp(dv) - 1.
+    ee = exp(dv) - 1.
     a = ee / (1. + (1. - g[k, k]) * ee)
     x = g[:, k].copy()
     x[k] -= 1
     y = g[k, :].copy()
-    g = dger(a, x, y, 1, 1, g, 1, 1, 1)
+    if np.issubdtype(g.dtype, np.float):
+        g = dger(a, x, y, 1, 1, g, 1, 1, 1)
+    if np.issubdtype(g.dtype, np.complex128):
+        g = zgeru(a, x, y, 1, 1, g, 1, 1, 1)
 
 
 def g2flip(g, dv, l, k):
