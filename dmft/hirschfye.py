@@ -262,7 +262,7 @@ def avg_gblock(gmat):
     the Greens Function"""
 
     slices = gmat.shape[0]
-    xga = np.zeros(2 * slices)
+    xga = np.zeros(2 * slices, gmat.dtype)
     for i in range(2 * slices):
         xga[i] = np.trace(gmat, offset=slices - i)
 
@@ -274,7 +274,7 @@ def avg_gblock(gmat):
 def avg_g(gst, parms):
     n1, n2, slices = parms['SITES'], parms['SITES'], parms['N_MATSUBARA'] * 2
 
-    gst_m = np.empty((n1, n2, slices))
+    gst_m = np.empty((n1, n2, slices), gst.dtype)
     for i in range(n1):
         for j in range(n2):
             gst_m[i, j] = avg_gblock(gst[i * slices:(i + 1) * slices,

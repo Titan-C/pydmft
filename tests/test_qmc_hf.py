@@ -79,7 +79,7 @@ def test_hf_fast_updatecond_complex(chempot, u_int, updater):
 
     g_0 = np.array(g_0)
     g0t = cgf.gw_invfouriertrans(np.rollaxis(g_0, 0, 3), tau, w_n, G_tail)
-    v = hf.ising_v(tau[1], 1., len(tau) * 3)
+    v = hf.ising_v(tau[1], u_int, len(tau) * 3)
     v = np.squeeze(v)
     g0ttp = hf.retarded_weiss(g0t)
     kroneker = np.eye(v.size)
@@ -94,6 +94,36 @@ def test_hf_fast_updatecond_complex(chempot, u_int, updater):
     updater(g_fast_flip, 2 * v[flip], flip)
 
     assert np.allclose(g_flip, g_fast_flip)
+
+
+def generate_random_gf(beta, size):
+    """Generates a gf in a bethe lattice with a random Hamiltonian"""
+    w_n = cgf.matsubara_freq(beta=beta, pos_size=beta)
+    tau = np.arange(0, beta, beta / len(w_n))
+
+    H_loc = np.random.randn(size, size) + 1j * np.random.randn(size, size)
+    H_loc = H_loc + H_loc.T.conj()  # Make Hermitian hamiltonian
+    g_0_1 = [1j * wn * np.eye(size) - H_loc for wn in w_n]
+    g_0 = [la.inv(g) for g in g_0_1]
+
+    for i in range(40):
+        g_0_1 = [1j * wn * np.eye(size) - H_loc - 0.25 *
+                 g for wn, g in zip(w_n, g_0)]
+        g_0 = [la.inv(g) for g in g_0_1]
+
+    g_tail = [np.eye(size).reshape(size, size, 1),
+              H_loc.reshape(size, size, 1), 0]
+    g_tau = cgf.gw_invfouriertrans(np.rollaxis(
+        np.array(g_0), 0, 3), tau, w_n, g_tail)
+    return g_tau
+
+
+@pytest.mark.parametrize("sites", [1, 2, 3])
+def test_retardedweissfield_and_back(sites):
+    g0t = generate_random_gf(16, sites)
+    g0ttp = hf.retarded_weiss(g0t)
+    col_g0t = -1 * hf.avg_g(g0ttp, dict(SITES=sites, N_MATSUBARA=16))
+    assert np.allclose(g0t, col_g0t)
 
 
 @pytest.mark.parametrize("chempot, u_int, updater",
