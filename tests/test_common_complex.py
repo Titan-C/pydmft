@@ -7,9 +7,8 @@ Tests the greens functions library with complex Imaginary time
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import pytest
+import scipy.linalg as la
 import dmft.common_complex as cgf
-import slaveparticles.quantum.dos as dos
-from scipy.integrate import simps
 
 
 @pytest.mark.parametrize("beta", [20, 15, 31.4])
@@ -45,3 +44,33 @@ def test_fourier_trasforms(chempot, beta=50., n_matsubara=50):
         g_tau = cgf.gw_invfouriertrans(gwr, tau, wn, [1., -chempot, 0.25])
         g_iomega = cgf.gt_fouriertrans(g_tau, tau, wn, [1., -chempot, 0.25])
         assert np.allclose(gwr, g_iomega)
+
+
+def generate_random_gf(beta, size):
+    """Generates a gf in a bethe lattice with a random Hamiltonian"""
+    w_n = cgf.matsubara_freq(beta=beta, pos_size=beta)
+    tau = np.arange(0, beta, beta / len(w_n))
+
+    H_loc = np.random.randn(size, size) + 1j * np.random.randn(size, size)
+    H_loc = H_loc + H_loc.T.conj()  # Make Hermitian hamiltonian
+    g_0_1 = [1j * wn * np.eye(size) - H_loc for wn in w_n]
+    g_0 = [la.inv(g) for g in g_0_1]
+
+    for i in range(40):
+        g_0_1 = [1j * wn * np.eye(size) - H_loc - 0.25 *
+                 g for wn, g in zip(w_n, g_0)]
+        g_0 = [la.inv(g) for g in g_0_1]
+
+    g_tail = [np.eye(size).reshape(size, size, 1),
+              H_loc.reshape(size, size, 1),
+              0.25 * np.eye(size).reshape(size, size, 1)]
+    return np.rollaxis(np.array(g_0), 0, 3), g_tail, w_n, tau
+
+
+@pytest.mark.parametrize("sites", [1, 2, 3])
+def test_fourier_trasforms(sites):
+    g0iw, tail, wn, tau = generate_random_gf(16, sites)
+
+    g_tau = cgf.gw_invfouriertrans(g0iw, tau, wn, tail)
+    g_iomega = cgf.gt_fouriertrans(g_tau, tau, wn, tail)
+    assert np.allclose(g0iw, g_iomega)

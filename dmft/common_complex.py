@@ -14,7 +14,7 @@ from __future__ import absolute_import, division, print_function
 import math
 
 import numpy as np
-from numpy.fft import fft, ifft, ifftshift
+from numpy.fft import fft, ifft
 import dmft.common as gf
 
 greenF = gf.greenF
@@ -106,7 +106,8 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
     freq_tail, time_tail = gf.freq_tail_fourier(tail_coef, beta, tau, w_n)
 
     gtau = g_tau - time_tail
-    return beta * ifftshift(ifft(gtau * np.exp(1j * np.pi * tau / beta))) + freq_tail
+    return beta * np.roll(ifft(gtau * np.exp(1j * np.pi * tau / beta)),
+                          int(w_n.size / 2), axis=-1) + freq_tail
 
 
 def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
