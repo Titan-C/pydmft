@@ -44,19 +44,63 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
     return np.array(giw_s), np.array(sigma_iw), np.array(ekin), np.array(epot), w_n
 
-urange = np.linspace(2.8, 3.4, 300)
+urange = np.linspace(2.3, 2.45, 80)
 data = []
-for beta in [16., 18., 20., 22., 24., 26., 28.]:
+for beta in [21]:
     giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
-        urange, .3 * np.ones_like(urange), beta, 'met')
+        urange + .07, .0 * np.ones_like(urange), beta, 'met')
     data.append((giw_s, sigma_iw, ekin, epot, w_n, beta))
 
+# for sim in data:
+    #giw_s, sigma_iw, ekin, epot, w_n, beta = sim
+    #plt.plot(urange, 2 * epot / urange, '-', label=beta)
+
+from scipy.optimize import curve_fit
+
+
+def func(eta, Uc, p, h, k):
+    return Uc + p * (eta**3 + k * eta) / (h + eta)
+
+plt.figure()
 for sim in data:
     giw_s, sigma_iw, ekin, epot, w_n, beta = sim
-    plt.plot(urange, 2 * epot / urange, '-', label=beta)
+    dd = 2 * epot / urange - 0.003
+    #fi = np.polyfit(dd[::-1], urange[::-1], 3)
+    #uf = np.poly1d(fi)(dd[::-1])
+    ucl = 45
+    popt, pcov = curve_fit(func, dd[:ucl], urange[:ucl])
+    print(popt)
+    uf = func(dd[:ucl], *popt)
+    plt.plot(urange, dd, '+-')
+    plt.plot(uf, dd[:ucl], 'o:')
+    ucl = 46
+    popt, pcov = curve_fit(func, dd[ucl:], urange[ucl:])
+    print(popt)
+    uf = func(dd[ucl:], *popt)
+    plt.plot(uf, dd[ucl:], 'o:')
+    popt, pcov = curve_fit(func, dd, urange)
+    print(popt)
+    uf = func(dd, *popt)
+    plt.plot(uf, dd, 'o:')
 
 plt.title(r'Double occupation')
 plt.ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 plt.xlabel(r'$U/D$')
 plt.legend()
 plt.show()
+
+
+chi = np.gradient(dd, urange[1] - urange[0])
+plt.plot(urange, chi, '+-')
+
+
+def fitchi(urange, a, uc):
+    return a * np.abs(urange - uc)**(-2 / 3)
+popt, pcov = curve_fit(fitchi, urange, chi, p0=[-0.01, 2.391])
+ft = fitchi(urange, *popt)
+plt.plot(urange, ft)
+print(popt)
+
+
+def et(d, c1, c2, dc):
+    return
