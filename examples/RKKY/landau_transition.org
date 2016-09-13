@@ -88,7 +88,7 @@ the fit decreases. The second observation is that the fit to the
 metallic part is notably worse as it can not sustain a correct
 behavior throughout the coexistence region as the insulator fit does.
 
-#+caption: Fit of the order parameter to a Landau theory in the $T<T_c$ regime label:fig:dimer_landau_bTc
+#+caption: Fit of the order parameter to a Landau theory in the $T<T_c$ regime. Thick lines are the original data, thin lines the fit, and black crosses the places where the fit can be enforced. label:fig:dimer_landau_bTc
 [[./dimer_tp0.3_eta_landau_bTc.pdf]]
 
 bibliographystyle:unsrt

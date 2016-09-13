@@ -104,7 +104,7 @@ for dd, dc, bound, (beta, uc) in zip(data, d_c, bb, bet_uc):
     popt, pcov = curve_fit(
         fit_cube_lin, rd[bound:-bound], udelta[bound:-bound], p0=[4e4, 3, 3])
     ft = fit_cube_lin(rd, *popt)
-    plt.plot(ft, rd)
+    plt.plot(ft, rd, label=r'$\beta={}$'.format(beta))
     plt.plot(ft[bound:-bound], rd[bound:-bound], "k+")
     print(popt)
 
