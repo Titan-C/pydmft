@@ -10,15 +10,15 @@ spectral function are evaluated by means of the Lehmann representation
 # author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
-from itertools import product, combinations
 import numpy as np
 import scipy.linalg as LA
 import matplotlib.pyplot as plt
 
-from dmft.common import matsubara_freq, gw_invfouriertrans
 from dmft.plot import plot_band_dispersion
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
+
+from pyutils.latex_print import ket
 
 ###############################################################################
 # The Dimer alone
@@ -31,7 +31,7 @@ import slaveparticles.quantum.operators as op
 
 
 def plot_eigen_spectra(U, mu, tp):
-    h_at, oper = rt.dimer_hamiltonian_bond(U, mu, tp)
+    h_at, oper = rt.dimer_hamiltonian_diag(U, mu, tp)
     eig_e = []
     eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
     eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
@@ -69,7 +69,7 @@ def plot_A_ev_utp(beta, urange, mu, tprange):
     w = np.linspace(-2, 3.5, 1500) + 1j * 1e-2
     Aw = []
     for u_int, tp in zip(urange, tprange):
-        h_at, oper = rt.dimer_hamiltonian_bond(u_int, mu, tp)
+        h_at, oper = rt.dimer_hamiltonian_diag(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         aw = gf.imag / gf.imag.min()
@@ -97,7 +97,7 @@ plt.ylim([-2, 3.5])
 
 def exitation_ration(U, tp):
 
-    h_h2, oper = rt.dimer_hamiltonian_bond(U, 0, tp)
+    h_h2, oper = rt.dimer_hamiltonian_diag(U, 0, tp)
     _, eig_vecs = LA.eigh(h_h2.todense())
 
     basis_create = np.dot(eig_vecs.T, oper[0].T.dot(eig_vecs))
@@ -117,3 +117,65 @@ plt.colorbar()
 plt.xlabel(r'$t_\perp$')
 plt.ylabel(r'$U$')
 plt.title('Intensity ratio of peaks in the bonding basis')
+
+###############################################################################
+# Probability of each state
+# =========================
+#
+# In the next section I study the distribution of states in the
+# molecule. How they relate to the shape of the Hamiltonian and the
+# density matrix.
+#
+# First I start in the low temperature regime where the ground state
+# dominates the behavior of the system. Taking :math:`\beta=200` and
+# :math:`U=2.15,t_\perp=0.3` the Hamiltonian of the system and the
+# density matrix look as follow.
+
+
+basis_names = [r'AS\uparrow', r'S\uparrow', 'AS\downarrow',  'S\downarrow']
+ind = np.array([0, 1, 2, 4, 8, 5, 10, 6, 9, 12, 3, 7, 11, 13, 14, 15])
+chartlab = [r'$' + ket(i, basis_names) + r'$' for i in ind]
+
+beta = 5
+
+h_at, oper = rt.dimer_hamiltonian_diag(2.15, 0, .3)
+ev, evec = LA.eigh(h_at.todense())
+Z = np.sum(np.exp(-beta * (ev - ev[0])))
+wh_at = h_at.todense() - ev[0] * np.eye(16)
+
+plt.figure()
+plt.imshow(h_at.todense(), interpolation='none')
+plt.colorbar()
+plt.yticks(range(16), chartlab)
+plt.title('Hamiltonian')
+plt.tight_layout()
+
+rho = LA.expm(-beta * wh_at) / Z
+plt.figure()
+plt.imshow(rho, interpolation='none')
+plt.yticks(range(16), chartlab)
+plt.colorbar()
+plt.title('Density matrix')
+plt.tight_layout()
+
+###############################################################################
+# The weight of each state
+# ------------------------
+#
+# The diagonal elements of the density matrix give the weight of each
+# state the next plot signal in blue the weight of the basis states in
+# the recognizable quantum numbers and the green curve is the density
+# matrix in the diagonal basis where one can follow by decreasing
+# weight each state.
+
+plt.figure()
+plt.plot(np.diag(rho), range(16), 'o-')
+plt.yticks(range(16), chartlab, color='b')
+
+diagbas = ["".join(["{:+.2}{}".format(w, ke)
+                    for w, ke in zip(evec.T[i], chartlab) if abs(w) > .1]) for i in range(16)]
+ax2 = plt.twinx()
+ax2.plot(np.exp(-beta * (ev - ev[0])) / Z, range(16), 'sg-')
+ax2.set_yticks(range(16))
+ax2.set_yticklabels(diagbas, color='g')
+plt.tight_layout()
