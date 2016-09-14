@@ -136,7 +136,7 @@ basis_names = [r'AS\uparrow', r'S\uparrow', 'AS\downarrow',  'S\downarrow']
 ind = np.array([0, 1, 2, 4, 8, 5, 10, 6, 9, 12, 3, 7, 11, 13, 14, 15])
 chartlab = [r'$' + ket(i, basis_names) + r'$' for i in ind]
 
-beta = 5
+beta = 100
 
 h_at, oper = rt.dimer_hamiltonian_diag(2.15, 0, .3)
 ev, evec = LA.eigh(h_at.todense())
@@ -149,6 +149,47 @@ plt.colorbar()
 plt.yticks(range(16), chartlab)
 plt.title('Hamiltonian')
 plt.tight_layout()
+
+rho = LA.expm(-beta * wh_at) / Z
+plt.figure()
+plt.imshow(rho, interpolation='none')
+plt.yticks(range(16), chartlab)
+plt.colorbar()
+plt.title('Density matrix')
+plt.tight_layout()
+
+###############################################################################
+# The weight of each state
+# ------------------------
+#
+# The diagonal elements of the density matrix give the weight of each
+# state the next plot signal in blue the weight of the basis states in
+# the recognizable quantum numbers and the green curve is the density
+# matrix in the diagonal basis where one can follow by decreasing
+# weight each state.
+
+plt.figure()
+plt.plot(np.diag(rho), range(16), 'o-')
+plt.yticks(range(16), chartlab, color='b')
+
+diagbas = ["".join(["{:+.2}{}".format(w, ke)
+                    for w, ke in zip(evec.T[i], chartlab) if abs(w) > .1]) for i in range(16)]
+ax2 = plt.twinx()
+ax2.plot(np.exp(-beta * (ev - ev[0])) / Z, range(16), 'sg-')
+ax2.set_yticks(range(16))
+ax2.set_yticklabels(diagbas, color='g')
+plt.tight_layout()
+
+###############################################################################
+# The weight of each state at B=5
+#
+
+beta = 5
+
+h_at, oper = rt.dimer_hamiltonian_diag(2.15, 0, .3)
+ev, evec = LA.eigh(h_at.todense())
+Z = np.sum(np.exp(-beta * (ev - ev[0])))
+wh_at = h_at.todense() - ev[0] * np.eye(16)
 
 rho = LA.expm(-beta * wh_at) / Z
 plt.figure()
