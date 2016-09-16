@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-=====================================================================
-Study the behavior of the Dimer Bethe lattice in the Transition
-=====================================================================
+====================================
+Landau Theory of the Mott transition
+====================================
 
-Specific Regions of the phase diagram are reviewed to inspect the
-behavior of the insulating state """
+Perform a fit of the order parameter, linked to double occupation to
+match a Landau theory formulation in correspondence to Kotliar, G.,
+Lange, E., & Rozenberg, M. J. (2000). Landau Theory of the Finite
+Temperature Mott Transition. Phys. Rev. Lett., 84(22),
+5180–5183. http://dx.doi.org/10.1103/PhysRevLett.84.5180
+"""
 
 
 from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import axes3d
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.ipt_imag as ipt
@@ -98,11 +101,11 @@ for dd, dc, (beta, uc) in zip(data, d_c, bet_uc):
     plt.plot(udelta, dd - dc, lw=2)
 
 plt.gca().set_color_cycle(None)
-bb = [30, 30, 35, 42, 45, 48, 50]
+bb = [10, 30, 35, 42, 45, 48, 50]
 for dd, dc, bound, (beta, uc) in zip(data, d_c, bb, bet_uc):
     rd = dd - dc
     popt, pcov = curve_fit(
-        fit_cube_lin, rd[bound:-bound], udelta[bound:-bound], p0=[4e4, 3, 3])
+        fit_cube_lin, rd[bound:-bound], udelta[bound:-bound], p0=[-4e4, 3, 3])
     ft = fit_cube_lin(rd, *popt)
     plt.plot(ft, rd, label=r'$\beta={}$'.format(beta))
     plt.plot(ft[bound:-bound], rd[bound:-bound], "k+")

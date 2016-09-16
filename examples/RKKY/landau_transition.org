@@ -10,6 +10,7 @@
 #+OPTIONS: toc:nil num:nil
 
 * Above the critical point
+# done in [[file:plot_docc_transition.py][file:~/dev/dmft-learn/examples/RKKY/plot_docc_transition.py]]
 Starting from the reference cite:Kotliar2000 I try to do a fit on the
 observable of the double occupation from the IPT data for the dimer
 lattice above the critical point. Results are presented in figure
@@ -33,7 +34,7 @@ describing the critical behavior.
 In this first iteration of this study the I'll link the order
 parameter to the observable of the double occupation by a
 proportionality constant and express it in terms of a reduced
-quantity, that mean
+quantity, that means
 
 \begin{equation}
 \label{eq:eta_docc}
