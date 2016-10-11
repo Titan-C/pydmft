@@ -185,6 +185,16 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
         G_iw['low_dw'] << G_iw['low_up']
 
 
+def _ekin(gf_iw):
+    hop_gf_iw = gf_iw.copy()
+    for name, g0block in hop_gf_iw:
+        shift = 1. if 'asym' or 'high' in name else -1
+        hop_gf_iw[name] << shift * tp * gf_iw[name]
+
+    hop_gf_iw << hop_gf_iw + 0.25 * gf_iw * gf_iw
+    return hop_gf_iw.total_density()
+
+
 def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
     """Kinetic Energy per molecule"""
     T = []
@@ -194,16 +204,17 @@ def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             gf_iw = averager(results[u_str], 'G_iw', lastit)
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
-            hop_gf_iw = gf_iw.copy()
-            for name, g0block in hop_gf_iw:
-                shift = 1. if 'asym' or 'high' in name else -1
-                hop_gf_iw[name] << shift * tp * gf_iw[name]
-
-            gf_iw << hop_gf_iw + 0.25 * gf_iw * gf_iw
-            T.append(gf_iw.total_density())
+            T.append(_ekin(gf_iw))
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(T), ur
+
+
+def _epot(gf_iw, u_int):
+    for _, sbgf_iw in gf_iw:
+        sbgf_iw << 0.5 * (iOmega_n + u_int / 2) * sbgf_iw
+
+    return gf_iw.total_density() - _ekin(gf_iw) / 2
 
 
 def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
@@ -213,17 +224,10 @@ def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
         for u_str in results:
             lastit = results[u_str].keys()[-3:]
             gf_iw = averager(results[u_str], 'G_iw', lastit)
-            sig_iw = gf_iw.copy()
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
 
-            for name, g0block in gf_iw:
-                shift = 1. if 'asym' or 'high' in name else -1
-                sig_iw[name] << iOmega_n + u_int / 2. + shift * \
-                    tp - 0.25 * gf_iw[name] - inverse(gf_iw[name])
-
-            gf_iw << 0.5 * sig_iw * gf_iw
-            V.append(gf_iw.total_density())
+            V.append(_epot(gf_iw, u_int))
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(V), ur
