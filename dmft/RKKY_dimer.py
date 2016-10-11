@@ -78,14 +78,15 @@ def dimer_hamiltonian(u_int, mu, tp, basis_fermions=None):
 
 
 def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
-    r"""Generate an isolated bi-atomic Hamiltonian in particle-hole
-    symmetry at mu=0. Include chemical potential for grand Canonical calculations
+    r"""Generate an isolated bi-atomic Hamiltonian in particle-hole symmetry at
+    mu=0. Include chemical potential for grand Canonical calculations
 
     This in the diagonal basis [as_up, s_up, as_dw, s_dw]
 
     See also
     --------
     dimer_hamiltonian
+
     """
     if basis_fermions is None:
         basis_fermions = sorted_basis()
@@ -107,8 +108,8 @@ def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
 
 
 def gf_met(omega, mu, tp, t, tn):
-    """Double semi-circular density of states to represent the
-    non-interacting dimer """
+    """Double semi-circular density of states to represent the non-interacting
+    dimer """
 
     g_1 = gf.greenF(omega, mu=mu - tp, D=2 * (t + tn))
     g_2 = gf.greenF(omega, mu=mu + tp, D=2 * abs(t - tn))
@@ -204,31 +205,27 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12, t=.5):
 
 
 def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
-    """Calculates the kinetic energy per spin from its Green Function"""
+    r"""Calculates the total kinetic energy of the dimer
+
+.. math:: \langle T \rangle = \frac{8}{\beta} \sum_{n>0}
+    \left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
+           + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
+   - (t_\perp^2+t^2)\beta
+"""
+
     return (tp * giw_o.real + t_sqr * (-giw_d.imag**2 + giw_o.real**2) +
-            (t_sqr + tp**2) / w_n**2).sum() / beta * 2 - \
-        beta / 4 * (t_sqr + tp**2)
+            (t_sqr + tp**2) / w_n**2).sum() / beta * 8 - beta * (t_sqr + tp**2)
 
 
-# TODO Use Sigma tail expansions out of derivatives of Sigma(tau)
-def epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta):
-    """Calculates the potential energy per spin
+def epot(giw_d, w_n, beta, M_3, e_kin, muN):
+    r"""Calculates the total potential energy of the dimer
 
-    Using the Green Function and self-energy as in
-    :ref:`potential_energy`, which in this case have a matrix
-    structure in their product but one is only interested in the
-    diagonal terms of such product. Also for symmetry reason. A-B and
-    paramagnetism, only the first diagonal term is calculated, as one
-    is interested in the per spin energy. To get the per unit cell
-    multiply by 4. That is 2 sites times 2 spins, a total of 4
-    flavors.
+.. math:: \langle V \rangle = \frac{4}{\beta} \sum_{n>0}
+    i\omega_n(G_{11}(i\omega_n) -\frac{1}{i\omega_n} - \frac{M_3}{(i\omega_n)^3})
+    - \frac{M_3\beta}{2}+ \frac{\mu}{2}\langle N \rangle - \frac{\langle T \rangle}{2}
 
-    Tail expansion is only taken relevant up to second order in the
-    product from the known moments of the Green function and
-    Self-Energy. In the case it ends up being the same as single band
     """
-    return (-siw_d.imag * giw_d.imag + siw_o.real * giw_o.real +
-            u_int**2 / 4 / w_n**2).sum() / beta - beta * u_int**2 / 32 + u_int / 8
+    return (-w_n * (giw_d.imag + 1 / w_n - M_3 / w_n**3)).sum() * 4 / beta - M_3 * beta / 2 + muN / 2 - e_kin / 2
 
 ###############################################################################
 # The Symmetric Anti-Symmetric Basis
