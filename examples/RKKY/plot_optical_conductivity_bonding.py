@@ -110,3 +110,8 @@ ax[0].set_ylim([0, 0.7])
 ax[1].set_xlabel(r'$\omega$')
 ax[0].set_ylabel(r'Metal $\sigma(\omega)$')
 ax[1].set_ylabel(r'Insulator $\sigma(\omega)$')
+
+ax[0].annotate(r"MIR $\omega \approx 0.22$ eV",
+               xy=(0.23, 0.62), arrowprops=dict(arrowstyle='->'), xytext=(0.42, 0.6))
+plt.savefig('fig_optcond_decomp.pdf', format='pdf',
+            transparent=False, bbox_inches='tight', pad_inches=0.05)
