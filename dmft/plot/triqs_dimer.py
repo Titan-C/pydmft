@@ -200,7 +200,7 @@ def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
     T = []
     with HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
         for u_str in results:
-            lastit = results[u_str].keys()[-3:]
+            lastit = list(results[u_str].keys())[-3:]
             gf_iw = averager(results[u_str], 'G_iw', lastit)
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
@@ -222,7 +222,7 @@ def epot(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
     V = []
     with HDFArchive(filestr.format(BETA=BETA, tp=tp), 'r') as results:
         for u_str in results:
-            lastit = results[u_str].keys()[-3:]
+            lastit = list(results[u_str].keys())[-3:]
             gf_iw = averager(results[u_str], 'G_iw', lastit)
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
