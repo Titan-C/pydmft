@@ -71,3 +71,4 @@ fort.*
 *.sum
 *.ipynb
 *.pdf
+DIMER_*
