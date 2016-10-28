@@ -165,14 +165,14 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     enforce paramagnetism"""
 
     try:
-        G_iw['asym_up'] << 0.5 * (G_iw['asym_up'] + G_iw['asym_dw'])
-        tail_clean(G_iw['asym_up'], u_int, tp)
-
-        G_iw['sym_up'] << 0.5 * (G_iw['sym_up'] + G_iw['sym_dw'])
+        G_iw['sym_up'] << 0.25 * \
+            (G_iw['sym_up'] + G_iw['sym_dw'] -
+             G_iw['asym_up'].conj() + G_iw['asym_dw'].conj())
         tail_clean(G_iw['sym_up'], u_int, -tp)
 
-        G_iw['asym_dw'] << G_iw['asym_up']
         G_iw['sym_dw'] << G_iw['sym_up']
+        G_iw['asym_dw'] << -1 * G_iw['asym_up'].conj()
+        G_iw['asym_dw'] << -1 * G_iw['asym_up'].conj()
 
     except:
         G_iw['high_up'] << 0.5 * (G_iw['high_up'] + G_iw['high_dw'])
