@@ -164,25 +164,15 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     """Performs the average over up & dw of the green functions to
     enforce paramagnetism"""
 
-    try:
-        G_iw['sym_up'] << 0.25 * \
-            (G_iw['sym_up'] + G_iw['sym_dw'] -
-             G_iw['asym_up'].conj() + G_iw['asym_dw'].conj())
-        tail_clean(G_iw['sym_up'], u_int, -tp)
+    g_avg = 0.25 * (G_iw['sym_up'].data + G_iw['sym_dw'].data -
+                    G_iw['asym_up'].data.conj() - G_iw['asym_dw'].data.conj())
 
-        G_iw['sym_dw'] << G_iw['sym_up']
-        G_iw['asym_dw'] << -1 * G_iw['asym_up'].conj()
-        G_iw['asym_dw'] << -1 * G_iw['asym_up'].conj()
+    G_iw['sym_up'].data[:] = g_avg
+    tail_clean(G_iw['sym_up'], u_int, -tp)
 
-    except:
-        G_iw['high_up'] << 0.5 * (G_iw['high_up'] + G_iw['high_dw'])
-        tail_clean(G_iw['high_up'], u_int, tp)
-
-        G_iw['low_up'] << 0.5 * (G_iw['low_up'] + G_iw['low_dw'])
-        tail_clean(G_iw['low_up'], u_int, -tp)
-
-        G_iw['high_dw'] << G_iw['high_up']
-        G_iw['low_dw'] << G_iw['low_up']
+    G_iw['sym_dw'] << G_iw['sym_up']
+    G_iw['asym_up'].data[:] = -1 * G_iw['asym_up'].data.conj()
+    G_iw['asym_dw'] << G_iw['asym_up']
 
 
 def _ekin(gf_iw):
