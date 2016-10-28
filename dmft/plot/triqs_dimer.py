@@ -416,6 +416,7 @@ def extract_flat_gf_iter(filename, u_int, last):
     -------
     List of ndarrays of length 4*last
     """
+    u_int = 'U' + str(u_int)
 
     with HDFArchive(filename, 'r') as datarecord:
         dat = []
