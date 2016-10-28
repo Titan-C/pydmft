@@ -389,3 +389,41 @@ def plot_cor(ldensity_cor, u_int):
     axe[2].set_ylabel(r'$\langle m_A m_B \rangle$')
     axe[2].set_xlabel('U/D')
     fig.subplots_adjust(hspace=0)
+
+
+def extract_flat_gf_iter(filename, u_int, last):
+    """Returns a flat list with Green functions of last iterations
+
+    At each iteration there are 4 Green functions sym_up, sym_dw,
+    asym_up, asym_dw. Each one of them is extracted individually and
+    is an element of the list. Because at half-filling there is
+    particle-hole symmetry the sym=-conj(asym). Taking advantage of
+    this asym functions are thus transformed to be like sym. Thus the
+    output list will have only sym functions simplifying later on the
+    statistical processing of means and averages as its all the same
+    function.
+
+    Parameters
+    ----------
+    filename : str
+        path to hdf5 file
+    u_int : float
+        local interaction value
+    last : int
+        counts the last iterations to extract
+
+    Returns
+    -------
+    List of ndarrays of length 4*last
+    """
+
+    with HDFArchive(filename, 'r') as datarecord:
+        dat = []
+        for iteration in list(datarecord[u_int])[-last:]:
+            for name in ['sym_up', 'sym_dw']:
+                dat.append(np.squeeze(datarecord[u_int][
+                           iteration]['G_iw'][name].data))
+            for name in ['asym_up', 'asym_dw']:
+                dat.append(-np.squeeze(datarecord[u_int]
+                                       [iteration]['G_iw'][name].data.conj()))
+    return dat
