@@ -172,25 +172,19 @@ def dmft_loop(setup, u_int, G_iw):
 
         if mpi.is_master_node():
             with HDFArchive(setup['ofile'].format(**setup)) as last_run:
+                u_it = 'U{}/it{:03}/'.format(u_int, loop)
+                last_run[u_it + 'G_iw'] = imp_sol.G_iw
+                last_run[u_it + 'setup'] = setup
                 last_run[
-                    '/U{}/it{:03}/G_iw'.format(u_int, loop)] = imp_sol.G_iw
-                last_run['/U{}/it{:03}/setup'.format(u_int, loop)] = setup
-                last_run[
-                    '/U{}/it{:03}/density'.format(u_int, loop)] = density_correlators(imp_sol, operators)
-                last_run[
-                    '/U{}/it{:03}/occup'.format(u_int, loop)] = density_occup(imp_sol, operators)
-                last_run[
-                    '/U{}/it{:03}/density_matrix'.format(u_int, loop)] = imp_sol.density_matrix
-                last_run[
-                    '/U{}/it{:03}/h_loc'.format(u_int, loop)] = imp_sol.h_loc_diagonalization
-                last_run[
-                    '/U{}/it{:03}/pertord'.format(u_int, loop)] = imp_sol.perturbation_order_total
-                last_run[
-                    '/U{}/it{:03}/pertord_ind'.format(u_int, loop)] = imp_sol.perturbation_order
+                    u_it + 'density'] = density_correlators(imp_sol, operators)
+                last_run[u_it + 'occup'] = density_occup(imp_sol, operators)
+                last_run[u_it + 'density_matrix'] = imp_sol.density_matrix
+                last_run[u_it + 'h_loc'] = imp_sol.h_loc_diagonalization
+                last_run[u_it + 'pertord'] = imp_sol.perturbation_order_total
+                last_run[u_it + 'pertord_ind'] = imp_sol.perturbation_order
 
                 if setup['save_gtau']:
-                    last_run[
-                        '/U{}/it{:03}/G_tau'.format(u_int, loop)] = imp_sol.G_tau
+                    last_run[u_it + 'G_tau'] = imp_sol.G_tau
 
     return imp_sol.G_iw
 
