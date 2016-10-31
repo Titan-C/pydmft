@@ -171,7 +171,7 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     tail_clean(G_iw['sym_up'], u_int, -tp)
 
     G_iw['sym_dw'] << G_iw['sym_up']
-    G_iw['asym_up'].data[:] = -1 * G_iw['asym_up'].data.conj()
+    G_iw['asym_up'] << -1 * G_iw['sym_up'].conjugate()
     G_iw['asym_dw'] << G_iw['asym_up']
 
 
