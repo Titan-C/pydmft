@@ -139,6 +139,7 @@ def dmft_loop(setup, u_int, G_iw):
                 gblock.data[:] = g_iw_seed[name].data[
                     int(src_pt - work_pt):int(src_pt + work_pt)]
     except (KeyError, IOError):
+        raise
         last_loop = 0
         freqs = int(3 * setup['BETA'])
         tau, w_n = gf.tau_wn_setup(dict(BETA=setup['BETA'], N_MATSUBARA=freqs))
