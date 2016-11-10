@@ -14,7 +14,7 @@ from itertools import product, combinations
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as LA
-from dmft.common import matsubara_freq, gw_invfouriertrans, plot_band_dispersion
+from dmft.common import matsubara_freq, gw_invfouriertrans
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
 
@@ -83,11 +83,14 @@ plt.legend(loc=0)
 
 
 def plot_A_ev_rtp(beta, u_int, mu, tprange):
-    w = np.linspace(0, 4, 500) + 1j * 5e-3
+    w = np.linspace(-4, 4, 5500) + 1j * 5e-3
     for tp in tprange:
         h_at, oper = rt.dimer_hamiltonian(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
-        gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
+        gfd = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
+        gfo = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w, oper[1])
+        gf = gfd + gfo
+
         plt.plot(w.real, tp + gf.imag / gf.imag.min())
     plt.title('Molecule exitation spectral function')
     plt.xlabel(r'$\omega$')
@@ -135,7 +138,7 @@ def plot_A_ev_utp(beta, urange, mu, tprange):
     w = np.linspace(-2, 3.5, 1500) + 1j * 1e-2
     Aw = []
     for u_int, tp in zip(urange, tprange):
-        h_at, oper = rt.dimer_hamiltonian_bond(u_int, mu, tp)
+        h_at, oper = rt.dimer_hamiltonian_diag(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         aw = gf.imag / gf.imag.min()
@@ -146,8 +149,7 @@ beta = 100.
 A = plot_A_ev_utp(beta, np.linspace(0, 1, 51), 0, np.linspace(0, 1, 51)[::-1])
 
 w = np.linspace(-2, 3.5, 1500)
-plot_band_dispersion(w, A, r'Molecule exitation spectral function, $\beta={}$, $t_\perp+U=1$'.format(
-    beta), np.linspace(0, 1, 51))
+#plot_band_dispersion(w, A, r'Molecule exitation spectral function, $\beta={}$, $t_\perp+U=1$'.format(beta), np.linspace(0, 1, 51))
 plt.figure(1)
 plt.ylabel(r'$U+A(\omega)$')
 plt.xlim([-2, 3.5])

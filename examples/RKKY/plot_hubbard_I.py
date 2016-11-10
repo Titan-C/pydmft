@@ -12,10 +12,10 @@ Green's function to see the behavior of the insulating state.
 
 from __future__ import division, absolute_import, print_function
 
-from itertools import product
 import matplotlib.pyplot as plt
 import numpy as np
-from dmft.common import matsubara_freq, gw_invfouriertrans, plot_band_dispersion
+from dmft.common import gw_invfouriertrans
+from dmft.plot import plot_band_dispersion
 import dmft.RKKY_dimer as rt
 import slaveparticles.quantum.operators as op
 

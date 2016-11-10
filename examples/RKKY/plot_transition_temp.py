@@ -42,11 +42,11 @@ def loop_u_tp(u_int, tp, betarange, seed='mott gap'):
 
         ekin.append(rt.ekin(giw_d, giw_o, w_n, tp, beta))
 
-        epot.append(rt.epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta))
-
+        epot.append(rt.epot(giw_d, w_n, beta,
+                            u_int ** 2 / 4 + tp**2, ekin[-1], u_int))
     print(np.array(iterations))
-
-    return np.array(giw_s), np.array(sigma_iw), np.array(ekin), np.array(epot), np.array(lwn)
+    # last division in energies because I want per spin epot
+    return np.array(giw_s), np.array(sigma_iw), np.array(ekin) / 4, np.array(epot) / 4, w_n
 
 urange = np.arange(2.8, 3.4, .1)
 data = []

@@ -129,7 +129,7 @@ plot_greenfunctions(64, 1, 0, 0.5)
 # ======================================
 #
 
-#h_at, oper = rt.dimer_hamiltonian_bond(U, mu, tp)
+#h_at, oper = rt.dimer_hamiltonian_diag(U, mu, tp)
 #eig_e, eig_v = op.diagonalize(h_at.todense())
 #
 #oper_pair = product([oper[0], oper[1]], repeat=2)

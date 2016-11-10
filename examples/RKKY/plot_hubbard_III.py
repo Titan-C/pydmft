@@ -29,7 +29,7 @@ import slaveparticles.quantum.operators as op
 def molecule_sigma_d(omega, U, mu, tp, beta):
     """Return molecule self-energy in the given frequency axis"""
 
-    h_at, oper = rt.dimer_hamiltonian_bond(U, mu, tp)
+    h_at, oper = rt.dimer_hamiltonian_diag(U, mu, tp)
     oper_pair = [[oper[0], oper[0]], [oper[1], oper[1]]]
 
     eig_e, eig_v = op.diagonalize(h_at.todense())

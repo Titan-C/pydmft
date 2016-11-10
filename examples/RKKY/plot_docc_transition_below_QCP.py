@@ -94,6 +94,7 @@ for dd, (beta, uc) in zip(databm, bet_ucm):
     plt.plot(uc + udelta, dd, '+-', label=r'$\beta={}$'.format(beta))
 
 plt.gca().set_color_cycle(None)
+d_c = [dc[int(len(udelta) / 2)] for dc in databi]
 for dd, dc, (beta, uc) in zip(databi, d_c, bet_uci):
     plt.plot(uc - udelta, dd, '+-')  # , label=r'$\beta={}$'.format(beta))
 

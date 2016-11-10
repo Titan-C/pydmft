@@ -38,7 +38,8 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 
         ekin.append(rt.ekin(giw_d, giw_o, w_n, tp, beta))
 
-        epot.append(rt.epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta))
+        epot.append(rt.epot(giw_d, w_n, beta, u_int **
+                            2 / 4 + tp**2, ekin[-1], u_int) / 4)  # last division because I want per spin epot
 
     print(np.array(iterations))
 
