@@ -23,7 +23,11 @@ def show_conv(beta, u_str, tp=0.25, filestr='DIMER_PM_B{BETA}_tp{tp}.h5',
             labels = [name for name in datarecord[u_str][step]['G_iw'].indices]
             gf_iw = datarecord[u_str][step]['G_iw']
             u_int = float(u_str[1:])
-            paramagnetic_hf_clean(gf_iw, float(u_str[1:]), tp)
+            try:
+                paramagnetic_hf_clean(gf_iw, float(u_str[1:]), tp)
+            except IndexError as err:
+                pass
+
             gf_iw = gf_iw[labels[block]]
             if sig:
                 shift = 1. if 'asym' in labels[block] else -1
@@ -142,16 +146,6 @@ def get_giw(h5parent, iteration_slice):
     return averager(h5parent, 'G_iw', iterations[iteration_slice])
 
 
-def get_last_table(filename, u_str, islice, name):
-    g_out = []
-    with tdp.HDFArchive(filename, 'r') as data:
-        iterations = list(data[u_str].keys())[islice]
-        for step in iterations:
-            g_out.append(np.squeeze(data[u_str][step]['G_iw'][name].data))
-
-    return np.array(g_out)
-
-
 def tail_clean(gf_iw, U, tp):
     fixed = TailGf(1, 1, 3, 1)
     fixed[1] = np.array([[1]])
@@ -175,7 +169,7 @@ def paramagnetic_hf_clean(G_iw, u_int, tp):
     G_iw['asym_dw'] << G_iw['asym_up']
 
 
-def _ekin(gf_iw):
+def _ekin(gf_iw, tp):
     hop_gf_iw = gf_iw.copy()
     for name, g0block in hop_gf_iw:
         shift = 1. if 'asym' or 'high' in name else -1
@@ -194,7 +188,7 @@ def ekin(BETA, tp, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
             gf_iw = averager(results[u_str], 'G_iw', lastit)
             u_int = float(u_str[1:])
             paramagnetic_hf_clean(gf_iw, u_int, tp)
-            T.append(_ekin(gf_iw))
+            T.append(_ekin(gf_iw, tp))
         ur = np.array([float(u_str[1:]) for u_str in results])
 
     return np.array(T), ur
@@ -386,12 +380,10 @@ def extract_flat_gf_iter(filename, u_int, last):
 
     At each iteration there are 4 Green functions sym_up, sym_dw,
     asym_up, asym_dw. Each one of them is extracted individually and
-    is an element of the list. Because at half-filling there is
-    particle-hole symmetry the sym=-conj(asym). Taking advantage of
-    this asym functions are thus transformed to be like sym. Thus the
-    output list will have only sym functions simplifying later on the
-    statistical processing of means and averages as its all the same
-    function.
+    is an element of the list.
+
+    N.B. Because at half-filling there is particle-hole symmetry the
+    sym=-conj(asym).
 
     Parameters
     ----------
@@ -411,10 +403,37 @@ def extract_flat_gf_iter(filename, u_int, last):
     with HDFArchive(filename, 'r') as datarecord:
         dat = []
         for iteration in list(datarecord[u_int])[-last:]:
-            for name in ['sym_up', 'sym_dw']:
+            for name in ['sym_up', 'sym_dw', 'asym_up', 'asym_dw']:
                 dat.append(np.squeeze(datarecord[u_int][
                            iteration]['G_iw'][name].data))
-            for name in ['asym_up', 'asym_dw']:
-                dat.append(-np.squeeze(datarecord[u_int]
-                                       [iteration]['G_iw'][name].data.conj()))
-    return dat
+    return np.array(dat)
+
+
+def show_conv_file(filename, obs_name, cl_func=lambda x: x):
+    """Show the convergence of the static observables in a hdf5 file
+
+    Parameters
+    ----------
+    filename : str the file to study
+    observable : str static observable ['density', 'occup']
+    cl_func : function to clean data of observable
+    """
+
+    plt.figure()
+    with HDFArchive(filename, 'r') as data:
+        print('present data sources', data.keys())
+        for u_int in data:
+            observable = []
+            listit = []
+            for it in data[u_int]:
+                try:
+                    observable.append(data[u_int][it][obs_name])
+                    listit.append(int(it[2:]))
+                except KeyError:
+                    pass
+            plt.plot(listit, cl_func(observable), '*:', label=u_int)
+
+    plt.legend(loc=0)
+    plt.xlabel('iteration')
+    plt.ylabel(obs_name)
+    plt.title(filename)
