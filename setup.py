@@ -48,7 +48,6 @@ setup(
     setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest, 'build_ext': build_ext},
-    scripts=['bin/dimer_extract.py'],
     ext_modules=[Extension('dmft.hffast', ['dmft/hirschfye_cy.pyx',
                                            'dmft/hfc.cpp'],
                            include_dirs=[np.get_include()],
