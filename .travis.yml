@@ -25,9 +25,6 @@ addons:
 env:
     - PYTHON_VERSION="2.7"
     - PYTHON_VERSION="3.4"
-matrix:
-  allow_failures:
-    - env: PYTHON_VERSION="3.4"
 
 before_install:
     - export CXX="g++-5" CC="gcc-5"
@@ -40,7 +37,7 @@ before_install:
       matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
       joblib pandas numba
     - source activate testenv
-    - pip install slaveparticles sphinx-gallery mako mpi4py
+    - pip install slaveparticles sphinx-gallery mako mpi4py cmocean
     - wget https://s3-us-west-2.amazonaws.com/buildbin/triqs_$CC.tar.bz2
     - tar -C / -jvxf triqs_$CC.tar.bz2
     - export LD_LIBRARY_PATH=$HOME/lib/lib:$LD_LIBRARY_PATH

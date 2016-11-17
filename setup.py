@@ -44,7 +44,7 @@ setup(
     license="GNU General Public License v3 (GPLv3)",
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles',
-                      'joblib', 'pandas', 'numba'],
+                      'joblib', 'pandas', 'numba', 'cmocean'],
     setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest, 'build_ext': build_ext},
