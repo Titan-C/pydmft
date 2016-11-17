@@ -5,6 +5,7 @@ from pytriqs.gf.local import GfImFreq, iOmega_n, inverse, TailGf
 from pytriqs.gf.local import GfReFreq
 from pytriqs.plot.mpl_interface import oplot
 from pytriqs.archive import HDFArchive
+from pytriqs.statistics.histograms import Histogram
 from dmft.plot.hf_single_site import label_convergence
 import dmft.common as gf
 import matplotlib.pyplot as plt
@@ -75,12 +76,12 @@ def phase_diag(BETA, tp_range, filestr='DIMER_PM_B{BETA}_tp{tp}.h5'):
                 labels = [name for name in results[
                     u_str][lastit]['G_iw'].indices]
                 gfB_iw = results[u_str][lastit]['G_iw']
-                #mesl = len(gfB_iw.mesh)/2.
+                # mesl = len(gfB_iw.mesh)/2.
                 paramagnetic_hf_clean(gfB_iw, float(u_str[1:]), tp)
 #
                 # afmtest = np.allclose(gfB_iw['asym_up'].data[mesl:mesl+1].real,
                 # gfB_iw['asym_dw'].data[mesl:mesl+1].real, 0.2)
-                #afm.append(60 if afmtest else 280)
+                # afm.append(60 if afmtest else 280)
 
                 gf_iw = np.squeeze([gfB_iw[labels[2]](i) for i in range(3)])
                 fl_dos.append(gf.fit_gf(w_n[:3], gf_iw.imag)(0.))
@@ -437,3 +438,34 @@ def show_conv_file(filename, obs_name, cl_func=lambda x: x):
     plt.xlabel('iteration')
     plt.ylabel(obs_name)
     plt.title(filename)
+
+
+def list_availible_data(filename, u_int, last):
+    """Prints the execution measurements of the selected iterations
+
+    Parameters
+    ----------
+    filename : str
+        path to hdf5 file
+    u_int : float
+        local interaction value
+    last : int
+        counts the last iterations to extract
+
+    """
+    u_int = 'U' + str(u_int)
+
+    print(filename, u_int)
+    with HDFArchive(filename, 'r') as datarecord:
+        for iteration in list(datarecord[u_int])[-last:]:
+            it_info = iteration + ': sweeps\t' + \
+                str(datarecord[u_int][iteration]['setup']['sweeps'] / 1e6)
+            it_info += '\t meas\t' + \
+                str(datarecord[u_int][iteration]['setup']['meas'])
+            try:
+                it_info += '\t samples\t' + \
+                    str(datarecord[u_int][iteration]
+                        ['pertord'].n_data_pts / 1e6)
+            except KeyError:
+                pass
+            print(it_info)
