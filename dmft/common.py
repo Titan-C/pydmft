@@ -264,7 +264,7 @@ def lin_tail_fit(w_n, inp_gf, x, span=30, negative_freq=False):
     patgf = inp_gf.copy()
     patgf[-x:] = f_tail[-x:]
     if negative_freq:
-        patgf[:x] = f_tail[:x].conj()
+        patgf[:x] = f_tail[:x]
 
     return patgf, np.array([im_c[0], re_c[0], im_c[1]])
 
