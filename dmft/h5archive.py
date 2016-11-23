@@ -43,7 +43,8 @@ def _make_npy(name, obj):
         if not os.path.exists(name):
             os.makedirs(name)
         setup = get_attributes(obj)
-        setup = {str(a): v for a, v in setup.items() if not isinstance(v, np.bool_)}
+        setup = {str(a): v for a, v in setup.items()
+                 if not isinstance(v, np.bool_)}
         if setup:
             with open(os.path.dirname(name) + '/setup', 'w') as fname:
                 json.dump(setup, fname, indent=2,
@@ -62,3 +63,25 @@ def h5_2_npy(h5file):
             source.visititems(_make_npy)
     finally:
         os.chdir(cwd)
+
+
+def make_gf(h5data):
+    """Take Green function data from h5 group and complete negative frequencies"""
+    pos_giw = np.squeeze(h5data.view(np.complex128))
+    return np.concatenate((pos_giw[::-1].conjugate(), pos_giw))
+
+
+def dimer_gf(filename, u_int, iteration):
+    """Extract specific iteration greenfunction of h5 dimer data
+
+    Dimer greenF has 4 blocks 'sym_up', 'sym_dw', 'asym_up',
+    'asym_dw', output is in that order.
+
+    example: giw=dimer_gf("DIMER.h5", "U2.15", -1)
+    """
+
+    with File(filename, 'r') as datarecord:
+        iteration = list(datarecord[u_int])[iteration]
+        dat = [make_gf(datarecord[u_int][iteration]['G_iw'][name]['data'].value)
+               for name in ['sym_up', 'sym_dw', 'asym_up', 'asym_dw']]
+    return np.array(dat)
