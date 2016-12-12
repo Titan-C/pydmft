@@ -30,8 +30,8 @@ The single band Hubbard Hamiltonian reads:
     + U  \sum_{i\sigma} n_{i\uparrow}n_{i\downarrow}
 
 The is hopping only between nearest neighbors. For a paramagnetic, spatially
-homogeneous phase the on-site Green Function :math:`G(\omega) = \braket{c_{i\sigma}
-c_{i\sigma^\dagger}}` is give by
+homogeneous phase the on-site Green Function :math:`G(\omega) = \langle c_{i\sigma}
+c_{i\sigma^\dagger}\rangle` is give by
 
 .. math::
    G(\omega) = \int_{-\infty}^{\infty} dx
@@ -55,8 +55,8 @@ The Hamiltonian reads:
    + \sum_{\sigma,k} V_k(d^\dagger_\sigma c_{k\sigma} + h.c.)
    :label: SIAM
 
-The impurity Green function :math:`G_{imp}(\omega) = \braket{d_{\sigma}d_{\sigma^\dagger}}`
-is given by
+The impurity Green function :math:`G_{imp}(\omega) = \langle
+d_{\sigma}d_{\sigma^\dagger}\rangle` is given by
 
 .. math:: G_{imp}(\omega) =
     [ \omega + \mu - \epsilon_d - \Delta(\omega) - \Sigma_{imp}(\omega) ]^{-1}
@@ -124,7 +124,7 @@ In the limit of high frequencies the exact self-energy of the impurity problem
 
 where :math:`n_d\equiv n_{d\sigma}` is the spin specific average occupancy of the impurity orbital:
 
-.. math:: n_d = \braket{d^\dagger_\sigma d_\sigma} = - \frac{1}{\pi}
+.. math:: n_d = \langle d^\dagger_\sigma d_\sigma \rangle = - \frac{1}{\pi}
    \int_{-\infty}^0 \Im m G_{imp}(\omega+ i0^+) d\omega
 
 Inserting the expansion :eq:`High_w_sigma_expan` into equation :eq:`Site_GF_H_Trans`
@@ -203,7 +203,7 @@ Using the two self-consistency conditions :eq:`occupancy_match` and :eq:`hybridi
 the bath parameters can be fixed and calculated self-consistently. One starts with
 the model parameters :math:`\epsilon_d=0, t, U, \mu, \rho_0(x)` and takes a guess
 for :math:`\epsilon_c, V^2`. That defines the two-site impurity model and can be
-solved to find de average occupancy of the impurity :math:`n_{imp}=\braket{n_\uparrow}+\braket{n_\downarrow}`
+solved to find de average occupancy of the impurity :math:`n_{imp}=\langle n_\uparrow\rangle+\langle n_\downarrow \rangle`
 and using the Lehmann representation one finds :math:`G_{imp}`, through the Dyson
 equation one can extract the self-energy.
 
