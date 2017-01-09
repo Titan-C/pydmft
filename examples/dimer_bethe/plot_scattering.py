@@ -12,16 +12,15 @@ scattering rate in the metal and the renormalized intra site hopping
 # Author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
-import dmft.plot.triqs_dimer as tdp
+import os
 import matplotlib.pyplot as plt
+import numpy as np
+import dmft.common as gf
+import py3qs.triqs_dimer as tdp
+
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'xtick.labelsize': 18, 'ytick.labelsize': 18,
                                 'axes.titlesize': 22})
-import numpy as np
-import dmft.common as gf
-import dmft.RKKY_dimer as rt
-import dmft.ipt_imag as ipt
-import os
 os.chdir('/home/oscar/orlando/dev/dmft-learn/examples/dimer_bethe/tp03f/')
 
 

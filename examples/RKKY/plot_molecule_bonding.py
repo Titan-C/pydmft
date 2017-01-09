@@ -45,7 +45,7 @@ def plot_eigen_spectra(U, mu, tp):
 
     plt.axvline(x=3.5)
     plt.axvline(x=9.5)
-plot_eigen_spectra(1., 0, 0.5)
+plot_eigen_spectra(1., -1 / 2, 0.5)
 
 ###############################################################################
 # From the next Spectral functions we see that exitations go from

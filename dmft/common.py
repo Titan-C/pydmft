@@ -102,7 +102,7 @@ def semi_circle_hiltrans(zeta, D=1):
     return 2 * (zeta - sqr) / D**2
 
 
-def gt_fouriertrans(g_tau, tau, w_n, tail_coef=[1., 0., 0.]):
+def gt_fouriertrans(g_tau, tau, w_n, tail_coef=(1., 0., 0.)):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta)` is required and output given
     into positive fermionic matsubara frequencies up to the given cutoff.
@@ -175,7 +175,7 @@ def freq_tail_fourier(tail_coef, beta, tau, w_n):
     return freq_tail, time_tail
 
 
-def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=[1., 0., 0.]):
+def gw_invfouriertrans(g_iwn, tau, w_n, tail_coef=(1., 0., 0.)):
     r"""Performs an inverse fourier transform of the green Function in which
     only the imaginary positive matsubara frequencies
     :math:`\omega_n= \pi(2n+1)/\beta` with :math:`n \in \mathbb{N}` are used.
