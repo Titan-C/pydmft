@@ -1,5 +1,5 @@
 
-.. _exaples_IPT
+.. _examples_IPT:
 
 Simple IPT solver
 =================

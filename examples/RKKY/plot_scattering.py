@@ -10,17 +10,16 @@ Scattering rates
 
 from __future__ import division, absolute_import, print_function
 
-import itertools
 from math import log, ceil
 import numpy as np
 import matplotlib.pyplot as plt
-plt.matplotlib.rcParams.update({'axes.labelsize': 22,
-                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
-                                'axes.titlesize': 22})
 from joblib import Parallel, delayed
 import dmft.RKKY_dimer as rt
 import dmft.common as gf
 import dmft.ipt_imag as ipt
+plt.matplotlib.rcParams.update({'axes.labelsize': 22,
+                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
+                                'axes.titlesize': 22})
 
 
 def loop_beta(u_int, tp, betarange, seed='ins'):

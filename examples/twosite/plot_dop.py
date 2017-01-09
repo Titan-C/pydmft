@@ -25,20 +25,19 @@ def doping_config(res, u, name):
         ax.plot(fill, feat, label=lab)
         ax.set_ylabel(lab)
     axes[0].set_title('Two site DMFT parameters at U={}'.format(u))
-    fig.savefig(name+'_bathparam.png', format='png',
+    fig.savefig(name + '_bathparam.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
 
 
 def plot_doping_param(axis='real', beta=1e3, u_int=[4.]):
     for u in u_int:
-        out_file = axis+'_dop_b{}_U{}'.format(beta, u)
+        out_file = axis + '_dop_b{}_U{}'.format(beta, u)
         try:
-            res = np.load(out_file+'.npy')
+            res = np.load(out_file + '.npy')
         except IOError:
             res = dmft_loop_dop(u)
             np.save(out_file, res)
 
         doping_config(res, u, out_file)
 
-if __name__ == "gallery":
-    plot_doping_param(u_int=[2., 4., 5.85, 6., 8., 10., 100.])
+plot_doping_param(u_int=[2., 4., 5.85, 6., 8., 10., 100.])

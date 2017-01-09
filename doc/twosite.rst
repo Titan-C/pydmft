@@ -243,18 +243,47 @@ One then follows to calculate the state of the system as the local Coulomb inter
 is raised and one shows in the next figure the change of the quasiparticle
 weight at different temperatures.
 
-.. plot:: ../examples/twosite/plot_halffill_z.py plot_z_real
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_halffill_z_001.png
+   :target: /auto_examples/twosite/plot_halffill_z.html
 
 Following the system state as the metallic behavior is lost. Higher temperatures
 are less capable of sustaining the metal solution and the system just drops into
 the insulating state.
 
-The evolution of the spectral function is demonstrated in the next figures,
-accompanied by the plot of the self energy and the impurity Green function. It
-can be clearly seen that the self-energy has in general only 2 poles and the
+The evolution of the spectral function is demonstrated in the next
+figures from example
+:ref:`sphx_glr_auto_examples_twosite_plot_halffill.py`, accompanied by
+the plot of the self energy and the impurity Green function. It can be
+clearly seen that the self-energy has in general only 2 poles and the
 local Green function is in general a 4 poled function.
 
-.. plot:: ../examples/twosite/plot_halffill.py
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_001.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_002.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_003.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_004.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_005.png
+            :scale: 47
 
 The structure of the spectral function is not as rich as a full DMFT calculation
 would provide. Nevertheless the transfer of spectral weight for low to high
@@ -275,7 +304,8 @@ for different values of the local interaction. In the empty band limit
 :math:`Z\rightarrow 1` for an arbitrary :math:`U`. As
 long as the system is away from half-filling it has a metallic behavior.
 
-.. plot:: ../examples/twosite/plot_dop_z.py plot_z
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_dop_z_001.png
+   :target: /auto_examples/twosite/plot_dop_z.html
 
 The next plot show the expected value of the double occupation in the impurity.
 At low lattice filling, attibuted to the low electron population, double occupancy
@@ -284,7 +314,8 @@ the double occupancy increases as the system approaches the half-filling regime
 and remains finite. When :math:`U<U_c` there is no double occupancy any more
 at half-filling.
 
-.. plot:: ../examples/twosite/plot_dop_d.py plot_d
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_dop_d_001.png
+   :target: /auto_examples/twosite/plot_dop_d.html
 
 The next figure shows
 this parameters as a function of filling for the case :math:`U/t=4`. In this
@@ -292,7 +323,8 @@ case :math:`U<U_c` the hybridization strength is finite for :math:`n=1` and the
 system becomes less correlated for decreasing filling. Consequently :math:`V` has
 to increase until :math:`V\rightarrow M_2^{(0)}` for (:math:`n=0`).
 
-.. plot:: ../examples/twosite/plot_dop.py plot_doping_param
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_dop_002.png
+   :target: /auto_examples/twosite/plot_dop.html
 
 As for :math:`\epsilon_c=U/2` at half-filling and it decreases with decreasing
 filling until it diverges on appraching the empty band limit where
@@ -307,7 +339,8 @@ only the visualization of the 3 "peaks" which always present a disconnected
 structure. The quasiparticle peak never joins the lower Hubbard band at low
 fillings.
 
-.. plot:: ../examples/twosite/plot_dop_A.py
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_dop_A_001.png
+   :target: /auto_examples/twosite/plot_dop_A.html
 
 When analyzing the double occupancy of the impurity site
 
@@ -341,15 +374,41 @@ in the 2 site DMFT approximation as one only uses equation :eq:`hybridization_ma
 to update the bath hybridization and starting from the insulating solution with
 :math:`z=0` does not allow the system to escape the insulating case.
 
-.. plot:: ../examples/twosite/plot_halffill_z.py plot_z
+.. figure:: /auto_examples/twosite/images/sphx_glr_plot_halffill_z_002.png
+   :target: /auto_examples/twosite/plot_halffill_z.html
 
-The behavior of the Green function and the self-energy is much more abstract than
-in the real case. Here there are no poles to be seen. The next figure shows the
-imaginary parts of the Green function and self-energy at different local interaction
-strength. In the case of the self-energy the behavior is the same know from my
-previous training with IPT. For the Green function there was the behavior it should
-go to the bandwidth value at at zero frequency, this know condition is not met
-neither was it enforced. In the case of the 2 site DMFT the Green Function always
-"goes" through zero although there is no zero frequency in the fermionic case.
+The behavior of the Green function and the self-energy is much more
+abstract than in the real case. Here there are no poles to be
+seen. The next figures from example
+:ref:`sphx_glr_auto_examples_twosite_plot_halffill_matsubara.py` show
+the imaginary parts of the Green function and self-energy at different
+local interaction strength. In the case of the self-energy the
+behavior is the same know from my previous training with IPT. For the
+Green function there was the behavior it should go to the bandwidth
+value at at zero frequency, this know condition is not met neither was
+it enforced. In the case of the 2 site DMFT the Green Function always
+"goes" through zero although there is no zero frequency in the
+fermionic case.
 
-.. plot:: ../examples/twosite/plot_halffill_matsubara.py
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_matsubara_001.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_matsubara_002.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_matsubara_003.png
+            :scale: 47
+
+    *
+
+      .. image:: /auto_examples/twosite/images/sphx_glr_plot_halffill_matsubara_004.png
+            :scale: 47

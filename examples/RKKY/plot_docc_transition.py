@@ -57,7 +57,6 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
 fac = np.arctan(.55 * np.sqrt(3) / .15)
 udelta = np.tan(np.linspace(-fac, fac, 121)) * .15 / np.sqrt(3)
 dudelta = np.diff(udelta)
-data = []
 bet_uc = [(18, 3.312),
           (19, 3.258),
           (20, 3.214),
@@ -66,11 +65,12 @@ bet_uc = [(18, 3.312),
           (21.5, 3.1467),
           (21.7, 3.138)]
 
-for beta, uc in bet_uc:
-    urange = udelta + uc + .07
-    giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
-        urange, .3 * np.ones_like(urange), beta, 'met')
-    data.append(2 * epot / urange - 0.003)
+#data = []
+# for beta, uc in bet_uc:
+#urange = udelta + uc + .07
+# giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+# urange, .3 * np.ones_like(urange), beta, 'met')
+#data.append(2 * epot / urange - 0.003)
 
 plt.figure()
 bc = [b for b, _ in bet_uc]
@@ -94,21 +94,23 @@ plt.savefig("dimer_tp0.3_docc.pdf",
 
 # effective scaling
 # cubic + linear over constant + linear
+
+
+def fit_cube_lin(eta, c, p, q, s):
+    return (c * eta**3 + p * eta + s) / (1 + q * eta)
+
 plt.figure()
-
-
-def fit_cube_lin(eta, c, p, q):
-    return (c * eta**3 + p * eta) / (1 + q * eta)
-
 for dd, dc, (beta, uc) in zip(data, d_c, bet_uc):
     plt.plot(udelta, dd - dc, lw=2)
 
 plt.gca().set_color_cycle(None)
 bb = [10, 30, 35, 42, 45, 48, 50]
+fits = []
 for dd, dc, bound, (beta, uc) in zip(data, d_c, bb, bet_uc):
     rd = dd - dc
     popt, pcov = curve_fit(
-        fit_cube_lin, rd[bound:-bound], udelta[bound:-bound], p0=[-4e4, 3, 3])
+        fit_cube_lin, rd[bound:-bound], udelta[bound:-bound], p0=[-4e4, -3, 3, 1])
+    fits.append((popt, pcov))
     ft = fit_cube_lin(rd, *popt)
     plt.plot(ft, rd, label=r'$\beta={}$'.format(beta))
     plt.plot(ft[bound:-bound], rd[bound:-bound], "k+")
