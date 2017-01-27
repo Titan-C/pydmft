@@ -16,7 +16,7 @@ from math import log, ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 
 
@@ -37,7 +37,7 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
 
         for i, u_int in enumerate(u_range):
             giw_d, giw_o = 1j * gfs[i][0], gfs[i][1]
-            g0iw_d, g0iw_o = rt.self_consistency(
+            g0iw_d, g0iw_o = dimer.self_consistency(
                 1j * w_n, giw_d, giw_o, 0., tp, 0.25)
             siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
             sd_zew.append(np.polyfit(w_n[:2], siw_d[:2].imag, 1))
@@ -88,7 +88,7 @@ def estimate_zero_w_sigma_T_vs_U(tp, u_range, temp, phase):
 
         for i, u_int in enumerate(u_range):
             giw_d, giw_o = 1j * gfs[i][0], gfs[i][1]
-            g0iw_d, g0iw_o = rt.self_consistency(
+            g0iw_d, g0iw_o = dimer.self_consistency(
                 1j * w_n, giw_d, giw_o, 0., tp, 0.25)
             siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
             sd_zew.append(np.polyfit(w_n[:2], siw_d[:2].imag, 1))

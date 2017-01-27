@@ -14,14 +14,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 from dmft.plot import plot_band_dispersion
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
-    giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'mott gap':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
@@ -29,11 +29,11 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     sigma_iw = []
     iterations = []
     for u_int, tp in zip(u_range, tprange):
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(
+        giw_d, giw_o, loops = dimer.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n)
         giw_s.append((giw_d, giw_o))
         iterations.append(loops)
-        g0iw_d, g0iw_o = rt.self_consistency(
+        g0iw_d, g0iw_o = dimer.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
@@ -69,8 +69,8 @@ def plot_pole_eq(w, gf, sig, title):
 def plot_dispersions(giw_s, sigma_iw, ur, tp, w_n, w, w_set):
 
     for U, (giw_d, giw_o), (sig_d, sig_o) in zip(ur, giw_s, sigma_iw):
-        gs, ga = rt.pade_diag(giw_d, giw_o, w_n, w_set, w)
-        ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
+        gs, ga = dimer.pade_diag(giw_d, giw_o, w_n, w_set, w)
+        ss, sa = dimer.pade_diag(sig_d, sig_o, w_n, w_set, w)
         gst = gf.semi_circle_hiltrans(
             w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
@@ -161,11 +161,11 @@ plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)
 #
 #tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
 #tp = 0.2
-# g0iw_d, g0iw_o = rt.self_consistency(
+# g0iw_d, g0iw_o = dimer.self_consistency(
 # 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)
 #siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)
-#giw_d, giw_o = rt.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
-# g0iw_d, g0iw_o = rt.self_consistency(
+#giw_d, giw_o = dimer.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)
+# g0iw_d, g0iw_o = dimer.self_consistency(
 # 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)
 #siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)
 # ss, gs = plot_dispersions(

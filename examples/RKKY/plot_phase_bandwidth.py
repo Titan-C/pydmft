@@ -14,7 +14,7 @@ from math import log, ceil
 import numpy as np
 import matplotlib.pyplot as plt
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 
 

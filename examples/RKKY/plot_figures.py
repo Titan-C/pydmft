@@ -14,19 +14,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=1024))
-    giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'ins':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
-    giw_d, giw_o, loops = rt.ipt_dmft_loop(
+    giw_d, giw_o, loops = dimer.ipt_dmft_loop(
         beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-13)
-    g0iw_d, g0iw_o = rt.self_consistency(
+    g0iw_d, g0iw_o = dimer.self_consistency(
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
@@ -52,7 +52,7 @@ def plot_pole_eq(w, gf, sig, pole, sty, ax):
 def plot_spectral(u_int, tp, BETA, seed, w, w_set, pole, sty, ax):
 
     siw_d, siw_o, w_n = ipt_u_tp(u_int, tp, BETA, seed)
-    ss, _ = rt.pade_diag(siw_d, siw_o, w_n, w_set, w)
+    ss, _ = dimer.pade_diag(siw_d, siw_o, w_n, w_set, w)
     gst = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
     plot_pole_eq(w, gst, ss, pole, sty, ax)

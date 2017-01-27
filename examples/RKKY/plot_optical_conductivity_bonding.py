@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 from dmft.utils import optical_conductivity
 from slaveparticles.quantum.operators import fermi_dist
@@ -22,15 +22,15 @@ from slaveparticles.quantum.operators import fermi_dist
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))
-    giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'mott gap':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
     sigma_iw = []
     for u_int, tp in zip(u_range, tprange):
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(
+        giw_d, giw_o, loops = dimer.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n)
-        g0iw_d, g0iw_o = rt.self_consistency(
+        g0iw_d, g0iw_o = dimer.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
@@ -51,7 +51,7 @@ def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     eta = 0.8
 
     for U, (sig_d, sig_o) in zip(ur, sigma_iw):
-        ss, sa = rt.pade_diag(sig_d, sig_o, w_n, w_set, w)
+        ss, sa = dimer.pade_diag(sig_d, sig_o, w_n, w_set, w)
 
         lat_Aa = (-1 / np.add.outer(-E, w + tp + 4e-2j - sa)).imag / np.pi
         lat_As = (-1 / np.add.outer(-E, w - tp + 4e-2j - ss)).imag / np.pi

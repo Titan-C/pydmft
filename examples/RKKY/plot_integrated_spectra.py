@@ -17,19 +17,19 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'axes.titlesize': 22})
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=2**12))
-    giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'ins':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 
-    giw_d, giw_o, loops = rt.ipt_dmft_loop(
+    giw_d, giw_o, loops = dimer.ipt_dmft_loop(
         beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-13)
-    g0iw_d, g0iw_o = rt.self_consistency(
+    g0iw_d, g0iw_o = dimer.self_consistency(
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
@@ -37,7 +37,7 @@ def ipt_u_tp(u_int, tp, beta, seed='ins'):
 
 
 def calculate_Aw(sig_d, sig_o, w_n, w_set, w, eps_k, tp):
-    ss, sa = rt.pade_diag(1j * sig_d.imag, sig_o.real, w_n, w_set, w)
+    ss, sa = dimer.pade_diag(1j * sig_d.imag, sig_o.real, w_n, w_set, w)
 
     lat_gfs = 1 / np.add.outer(-eps_k, w - tp + 7e-3j - ss)
     lat_gfa = 1 / np.add.outer(-eps_k, w + tp + 7e-3j - sa)

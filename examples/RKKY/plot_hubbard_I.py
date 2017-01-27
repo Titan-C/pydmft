@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dmft.common import gw_invfouriertrans
 from dmft.plot import plot_band_dispersion
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import slaveparticles.quantum.operators as op
 
 
@@ -29,16 +29,16 @@ import slaveparticles.quantum.operators as op
 def molecule_sigma(omega, U, mu, tp, beta):
     """Return molecule self-energy in the given frequency axis"""
 
-    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
+    h_at, oper = dimer.hamiltonian(U, mu, tp)
     oper_pair = [[oper[0], oper[0]], [oper[0], oper[1]]]
 
     eig_e, eig_v = op.diagonalize(h_at.todense())
     gfsU = np.array([op.gf_lehmann(eig_e, eig_v, c.T, beta, omega, d)
                      for c, d in oper_pair])
 
-    invg = rt.mat_inv(gfsU[0], gfsU[1])
+    invg = dimer.mat_inv(gfsU[0], gfsU[1])
     plt.plot(omega.real, -gfsU[0].imag, label='Interacting')
-    plt.plot(omega.real, -rt.mat_inv(omega, -tp)[0].imag, label='Free')
+    plt.plot(omega.real, -dimer.mat_inv(omega, -tp)[0].imag, label='Free')
     plt.xlabel(r'$\omega$')
     plt.ylabel(r'$A(\omega)$')
     plt.title(r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
@@ -74,7 +74,7 @@ plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
 # -------------------------
 
 eps_k = np.linspace(-1, 1, 61)
-lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+lat_gf = dimer.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
 Aw = -lat_gf[0].imag / np.pi
 
 plot_band_dispersion(
@@ -94,7 +94,7 @@ plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
 # -------------------------
 
 eps_k = np.linspace(-1, 1, 61)
-lat_gf = rt.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+lat_gf = dimer.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
 Aw = -lat_gf[0].imag / np.pi
 plot_band_dispersion(
     w, Aw, r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta), eps_k)

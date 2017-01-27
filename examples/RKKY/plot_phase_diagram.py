@@ -11,7 +11,7 @@ from scipy.integrate import simps
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
 from joblib import Memory
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 
@@ -65,7 +65,7 @@ ax[1].plot([.2] * 4, [2, 2.65, 3.5, 4.3], 'ro', ms=10)
 ###############################################################################
 
 memory = Memory(cachedir='disk', verbose=0)
-ipt_solve = memory.cache(rt.ipt_dmft_loop)
+ipt_solve = memory.cache(dimer.ipt_dmft_loop)
 
 
 def loop_beta(u_int, tp, betarange, seed='mott gap'):
@@ -76,7 +76,7 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
     for beta in betarange:
         tau, w_n = gf.tau_wn_setup(
             dict(BETA=beta, N_MATSUBARA=max(8 * beta, 128)))
-        giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+        giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
         if seed == 'I':
             giw_d, giw_o = 1 / (1j * w_n - 4j / w_n), np.zeros_like(w_n) + 0j
 
@@ -84,14 +84,15 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
             beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-4)
         giw_s.append((giw_d, giw_o))
         iterations.append(loops)
-        g0iw_d, g0iw_o = rt.self_consistency(
+        g0iw_d, g0iw_o = dimer.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.copy(), siw_o.copy()))
 
-        ekin.append(rt.ekin(giw_d, giw_o, w_n, tp, beta))
+        ekin.append(dimer.ekin(giw_d, giw_o, w_n, tp, beta))
 
-        epot.append(rt.epot(giw_d, giw_o, siw_d, siw_o, w_n, tp, u_int, beta))
+        epot.append(dimer.epot(giw_d, giw_o, siw_d,
+                               siw_o, w_n, tp, u_int, beta))
 
     # print(np.array(iterations))
 

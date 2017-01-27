@@ -16,7 +16,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import dmft.plot.triqs_dimer as tdp
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.common as gf
 from dmft.plot import plot_band_dispersion
 import dmft.plot.hf_single_site

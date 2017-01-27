@@ -14,16 +14,18 @@ from mpi4py import MPI
 import dmft.h5archive as h5
 import dmft.common as gf
 import dmft.hirschfye as hf
-import dmft.RKKY_dimer as dimer
+import dmft.dimer as dimer
 import dmft.plot.hf_dimer as pd
 import numpy as np
 import sys
 
 comm = MPI.COMM_WORLD
 
+
 def mat_2_inv(A):
-    det = A[0, 0]*A[1, 1]-A[1, 0]*A[0, 1]
-    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]])/det
+    det = A[0, 0] * A[1, 1] - A[1, 0] * A[0, 1]
+    return np.asarray([[A[1, 1], -A[0, 1]],  [-A[1, 0],  A[0, 0]]]) / det
+
 
 def dmft_loop_pm(simulation):
     """Implementation of the solver"""
@@ -39,8 +41,8 @@ def dmft_loop_pm(simulation):
         return
 
     setup.update(simulation)
-    setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
-    current_u = 'U'+str(setup['U'])
+    setup['dtau_mc'] = setup['BETA'] / 2. / setup['N_MATSUBARA']
+    current_u = 'U' + str(setup['U'])
 
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
@@ -49,14 +51,14 @@ def dmft_loop_pm(simulation):
 
     giw_d_up, giw_o_up = dimer.gf_met(w_n, 1e-3, tp, 0.5, 0.)
     giw_d_dw, giw_o_dw = dimer.gf_met(w_n, -1e-3, tp, 0.5, 0.)
-    gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
-                       [-tp*np.ones_like(w_n), 1j*w_n]])
+    gmix = np.array([[1j * w_n, -tp * np.ones_like(w_n)],
+                     [-tp * np.ones_like(w_n), 1j * w_n]])
     g0tail = [np.eye(2).reshape(2, 2, 1),
-              tp*np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
+              tp * np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
               np.array([[tp**2, 0], [0, tp**2]]).reshape(2, 2, 1)]
     gtail = [np.eye(2).reshape(2, 2, 1),
-             tp*np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
-             np.array([[tp**2+U**2/4, 0], [0, tp**2 + U**2/4]]).reshape(2, 2, 1)]
+             tp * np.array([[0, 1], [1, 0]]).reshape(2, 2, 1),
+             np.array([[tp**2 + U**2 / 4, 0], [0, tp**2 + U**2 / 4]]).reshape(2, 2, 1)]
 
     giw_up = np.array([[giw_d_up, giw_o_up], [giw_o_dw, giw_d_dw]])
     giw_dw = np.array([[giw_d_dw, giw_o_dw], [giw_o_up, giw_d_up]])
@@ -64,20 +66,19 @@ def dmft_loop_pm(simulation):
     try:  # try reloading data from disk
         with h5.File(setup['ofile'].format(**setup), 'r') as last_run:
             last_loop = len(last_run[current_u].keys())
-            last_it = 'it{:03}'.format(last_loop-1)
+            last_it = 'it{:03}'.format(last_loop - 1)
             giw_d, giw_o = pd.get_giw(last_run[current_u], last_it,
                                       tau, w_n)
     except (IOError, KeyError):  # if no data clean start
         last_loop = 0
 
     V_field = hf.ising_v(setup['dtau_mc'], setup['U'],
-                         L=setup['SITES']*setup['n_tau_mc'],
+                         L=setup['SITES'] * setup['n_tau_mc'],
                          polar=setup['spin_polarization'])
-
 
     for loop_count in range(last_loop, last_loop + setup['Niter']):
         # For saving in the h5 file
-        dest_group = current_u+'/it{:03}/'.format(loop_count)
+        dest_group = current_u + '/it{:03}/'.format(loop_count)
         setup['group'] = dest_group
 
         if comm.rank == 0:
@@ -85,8 +86,8 @@ def dmft_loop_pm(simulation):
                   'U', U, 'tp', tp)
 
         # Bethe lattice bath
-        g0iw_up = mat_2_inv(gmix - 0.25*giw_up)
-        g0iw_dw = mat_2_inv(gmix - 0.25*giw_dw)
+        g0iw_up = mat_2_inv(gmix - 0.25 * giw_up)
+        g0iw_dw = mat_2_inv(gmix - 0.25 * giw_dw)
 
         g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, g0tail)
         g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, g0tail)

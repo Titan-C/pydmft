@@ -20,7 +20,7 @@ import json
 import os
 import numpy as np
 from joblib import Parallel, delayed
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 
@@ -45,13 +45,13 @@ def loop_tp_u(tprange, u_range, beta, filestr, seed='mott gap'):
 
     tau, w_n = gf.tau_wn_setup(
         dict(BETA=beta, N_MATSUBARA=max(2**ceil(log(6 * beta) / log(2)), 256)))
-    giw_d, giw_o = rt.gf_met(w_n, 0., tprange[0], 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., tprange[0], 0.5, 0.)
     if seed == 'mott gap':
         giw_d, giw_o = 1 / (1j * w_n - 4j / w_n), np.zeros_like(w_n) + 0j
 
     giw_s = []
     for tp, u_int in zip(tprange, u_range):
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(
+        giw_d, giw_o, loops = dimer.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n, 1 / 5 / beta)
         giw_s.append((giw_d.imag, giw_o.real))
     np.save(save_dir + '/giw', np.array(giw_s))

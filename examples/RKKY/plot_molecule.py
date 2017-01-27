@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as LA
 from dmft.common import matsubara_freq, gw_invfouriertrans
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import slaveparticles.quantum.operators as op
 
 ###############################################################################
@@ -39,7 +39,7 @@ def plot_real_gf(eig_e, eig_v, oper_pair, c_v, names, beta):
 
 
 def plot_eigen_spectra(U, mu, tp):
-    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
+    h_at, oper = dimer.hamiltonian(U, mu, tp)
     eig_e = []
     eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
     eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
@@ -91,7 +91,7 @@ def plot_greenfunctions(beta, U, mu, tp):
     names = [r'a\uparrow', r'a\downarrow', r'b\uparrow', r'b\downarrow']
     plot_eigen_spectra(U, mu, tp)
 
-    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
+    h_at, oper = dimer.hamiltonian(U, mu, tp)
     oper_pair = list(product([oper[0], oper[1]], repeat=2))
     names = list(product('AB', repeat=2))
 
@@ -129,7 +129,7 @@ plot_greenfunctions(64, 1, 0, 0.5)
 # ======================================
 #
 
-#h_at, oper = rt.dimer_hamiltonian_diag(U, mu, tp)
+#h_at, oper = dimer.hamiltonian_diag(U, mu, tp)
 #eig_e, eig_v = op.diagonalize(h_at.todense())
 #
 #oper_pair = product([oper[0], oper[1]], repeat=2)

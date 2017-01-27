@@ -19,7 +19,7 @@ import numpy as np
 from mpi4py import MPI
 import dmft.common as gf
 import dmft.hirschfye as hf
-import dmft.RKKY_dimer as dimer
+import dmft.dimer as dimer
 import dmft.plot.hf_dimer as pd
 comm = MPI.COMM_WORLD
 

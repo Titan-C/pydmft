@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dmft.common import gw_invfouriertrans
 from dmft.plot import plot_band_dispersion
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import slaveparticles.quantum.operators as op
 
 
@@ -30,7 +30,7 @@ import slaveparticles.quantum.operators as op
 def molecule_sigma(omega, U, mu, tp, beta):
     """Return molecule self-energy in the given frequency axis"""
 
-    h_at, oper = rt.dimer_hamiltonian_diag(U, mu, tp)
+    h_at, oper = dimer.hamiltonian_diag(U, mu, tp)
     oper_pair = [[oper[1], oper[1]], [oper[0], oper[0]]]
 
     eig_e, eig_v = op.diagonalize(h_at.todense())

@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.linalg as LA
 from dmft.common import matsubara_freq, gw_invfouriertrans
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import slaveparticles.quantum.operators as op
 
 ###############################################################################
@@ -29,7 +29,7 @@ import slaveparticles.quantum.operators as op
 
 
 def plot_eigen_spectra(U, mu, tp):
-    h_at, oper = rt.dimer_hamiltonian(U, mu, tp)
+    h_at, oper = dimer.hamiltonian(U, mu, tp)
     eig_e = []
     eig_e.append(LA.eigvalsh(h_at[1:5, 1:5].todense()))
     eig_e.append(LA.eigvalsh(h_at[5:11, 5:11].todense()))
@@ -61,7 +61,7 @@ plot_eigen_spectra(1., 0, 0.2)
 def plot_A_ev_ru(beta, urange, mu, tp):
     w = np.linspace(0, 2, 500) + 1j * 5e-3
     for u_int in urange:
-        h_at, oper = rt.dimer_hamiltonian(u_int, mu, tp)
+        h_at, oper = dimer.hamiltonian(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         plt.plot(w.real, u_int + gf.imag / gf.imag.min())
@@ -85,7 +85,7 @@ plt.legend(loc=0)
 def plot_A_ev_rtp(beta, u_int, mu, tprange):
     w = np.linspace(-4, 4, 5500) + 1j * 5e-3
     for tp in tprange:
-        h_at, oper = rt.dimer_hamiltonian(u_int, mu, tp)
+        h_at, oper = dimer.hamiltonian(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gfd = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         gfo = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w, oper[1])
@@ -114,7 +114,7 @@ plt.legend(loc=0)
 def plot_A_ev_utp(beta, urange, mu, tprange):
     w = np.linspace(-2, 2, 1500) + 1j * 5e-3
     for u_int, tp in zip(urange, tprange):
-        h_at, oper = rt.dimer_hamiltonian(u_int, mu, tp)
+        h_at, oper = dimer.hamiltonian(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         plt.plot(w.real, u_int + gf.imag / gf.imag.min(), 'k-')
@@ -138,7 +138,7 @@ def plot_A_ev_utp(beta, urange, mu, tprange):
     w = np.linspace(-2, 3.5, 1500) + 1j * 1e-2
     Aw = []
     for u_int, tp in zip(urange, tprange):
-        h_at, oper = rt.dimer_hamiltonian_diag(u_int, mu, tp)
+        h_at, oper = dimer.hamiltonian_diag(u_int, mu, tp)
         eig_e, eig_v = op.diagonalize(h_at.todense())
         gf = op.gf_lehmann(eig_e, eig_v, oper[0].T, beta, w)
         aw = gf.imag / gf.imag.min()

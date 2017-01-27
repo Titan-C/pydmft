@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 from dmft.plot.hf_single_site import label_convergence, interpol
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.h5archive as h5
 plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
@@ -96,7 +96,7 @@ def get_sigmaiw(giw, tau, w_n, setup):
 
     gmix = np.array([[1j * w_n, -tp * np.ones_like(w_n)],
                      [-tp * np.ones_like(w_n), 1j * w_n]])
-    sigmaiw = gmix - t**2 * giw - rt.mat_2_inv(giw)
+    sigmaiw = gmix - t**2 * giw - dimer.mat_2_inv(giw)
 
     return sigmaiw
 
@@ -253,9 +253,9 @@ def report_docc_acc(BETA, u_str, tp, filestr):
 
 
 def ekin(BETA, tp=0.25, filestr='tp{tp}_B{BETA}.h5',):
-    e_mean = rt.free_ekin(tp, BETA)
+    e_mean = dimer.free_ekin(tp, BETA)
     tau, w_n = gf.tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=BETA))
-    giw_free_d, _ = rt.gf_met(w_n, 0., tp, 0.5, 0.)
+    giw_free_d, _ = dimer.gf_met(w_n, 0., tp, 0.5, 0.)
     T = []
 
     with h5.File(filestr.format(tp=tp, BETA=BETA), 'r') as results:

@@ -17,7 +17,7 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
 import numpy as np
 
 import dmft.common as gf
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 from slaveparticles.quantum.operators import fermi_dist
 
@@ -36,14 +36,14 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
         tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=2**12))
         lw_n.append(w_n)
 
-        giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+        giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
         if seed == 'mott gap':
             giw_d, giw_o = 1 / (1j * w_n - 4j / w_n), np.zeros_like(w_n) + 0j
 
-        giw_d, giw_o, loops = rt.ipt_dmft_loop(
+        giw_d, giw_o, loops = dimer.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-13)
         g_iw.append((giw_d.imag, giw_o.real))
-        g0iw_d, g0iw_o = rt.self_consistency(
+        g0iw_d, g0iw_o = dimer.self_consistency(
             1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
         siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
         sigma_iw.append((siw_d.imag, siw_o.real))
@@ -139,7 +139,7 @@ for (siw_d, siw_o), wn, beta in zip(sigmam_iw, lw_n, betarange):
         w_set = np.arange(150).astype(int)
     else:
         w_set = np.arange(0, 2 * beta, 2 * beta / 150).astype(int)
-    sig_ss, sig_sa = rt.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
+    sig_ss, sig_sa = dimer.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
     plt.plot(w, 70 / beta + np.abs(sig_ss.imag))
 
 for (siw_d, siw_o), wn, beta in list(zip(sigmai_iw, lw_n, betarange)):
@@ -148,7 +148,7 @@ for (siw_d, siw_o), wn, beta in list(zip(sigmai_iw, lw_n, betarange)):
         w_set = np.arange(150).astype(int)
     else:
         w_set = np.arange(0, 2 * beta, 2 * beta / 150).astype(int)
-    sig_ss, sig_sa = rt.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
+    sig_ss, sig_sa = dimer.pade_diag(1j * siw_d, siw_o, wn, w_set, w)
 
     plt.figure('si')
     plt.plot(w, 100 / beta + np.abs(sig_ss.imag))

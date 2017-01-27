@@ -17,7 +17,7 @@ Study above the critical point
 from scipy.optimize import curve_fit
 import numpy as np
 import matplotlib.pyplot as plt
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 
@@ -26,23 +26,23 @@ plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
 
 
 def dmft_solve(giw_d, giw_o, u_int, tp, beta, tau, w_n):
-    giw_d, giw_o, loops = rt.ipt_dmft_loop(
+    giw_d, giw_o, loops = dimer.ipt_dmft_loop(
         beta, u_int, tp, giw_d, giw_o, tau, w_n)
-    g0iw_d, g0iw_o = rt.self_consistency(
+    g0iw_d, g0iw_o = dimer.self_consistency(
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
 
-    ekin = rt.ekin(giw_d, giw_o, w_n, tp, beta)
+    ekin = dimer.ekin(giw_d, giw_o, w_n, tp, beta)
 
     # last division because I want per spin epot
-    epot = rt.epot(giw_d, w_n, beta, u_int ** 2 /
-                   4 + tp**2, ekin, u_int) / 4
+    epot = dimer.epot(giw_d, w_n, beta, u_int ** 2 /
+                      4 + tp**2, ekin, u_int) / 4
     return (giw_d, giw_o), (siw_d, siw_o), ekin, epot, loops
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=256))
-    giw_d, giw_o = rt.gf_met(w_n, 0., 0., 0.5, 0.)
+    giw_d, giw_o = dimer.gf_met(w_n, 0., 0., 0.5, 0.)
     if seed == 'ins':
         giw_d, giw_o = 1 / (1j * w_n + 4j / w_n), np.zeros_like(w_n) + 0j
 

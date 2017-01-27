@@ -17,7 +17,7 @@ Modules Reference API
 .. automodule:: dmft.hirschfye
     :members:
 
-.. automodule:: dmft.RKKY_dimer
+.. automodule:: dmft.dimer
     :members:
 
 .. automodule:: dmft.plot.hf_single_site

@@ -6,18 +6,13 @@ Dimer Bethe lattice
 Non interacting dimer of a Bethe lattice
 Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 """
-
 from __future__ import division, print_function, absolute_import
-from dmft.twosite import matsubara_Z
-from scipy.integrate import quad
-from scipy.optimize import fsolve
-import dmft.common as gf
-import dmft.h5archive as h5
-import dmft.ipt_imag as ipt
-import matplotlib.pyplot as plt
+
 import numpy as np
-import slaveparticles.quantum.dos as dos
 from slaveparticles.quantum import fermion
+
+import dmft.common as gf
+import dmft.ipt_imag as ipt
 
 
 # Molecule
@@ -30,7 +25,7 @@ def sorted_basis():
     return basis
 
 
-def dimer_hamiltonian(u_int, mu, tp, basis_fermions=None):
+def hamiltonian(u_int, mu, tp, basis_fermions=None):
     r"""Generate an isolated bi-atomic Hamiltonian in particle-hole
     symmetry at mu=0. Include chemical potential for grand Canonical calculations
 
@@ -77,7 +72,7 @@ def dimer_hamiltonian(u_int, mu, tp, basis_fermions=None):
     return h_loc, [a_up, b_up, a_dw,  b_dw]
 
 
-def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
+def hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
     r"""Generate an isolated bi-atomic Hamiltonian in particle-hole symmetry at
     mu=0. Include chemical potential for grand Canonical calculations
 
@@ -85,7 +80,7 @@ def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
 
     See also
     --------
-    dimer_hamiltonian
+    hamiltonian
 
     """
     if basis_fermions is None:
@@ -99,7 +94,7 @@ def dimer_hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
     a_dw = (-as_dw + s_dw) / sqrt(2)
     b_dw = (as_dw + s_dw) / sqrt(2)
 
-    return dimer_hamiltonian(u_int, mu, tp, [a_up, b_up, a_dw, b_dw])[0],\
+    return hamiltonian(u_int, mu, tp, [a_up, b_up, a_dw, b_dw])[0],\
         basis_fermions
 
 

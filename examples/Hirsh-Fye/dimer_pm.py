@@ -17,7 +17,7 @@ import json
 from mpi4py import MPI
 import dmft.common as gf
 import dmft.hirschfye as hf
-import dmft.RKKY_dimer as dimer
+import dmft.dimer as dimer
 import dmft.plot.hf_dimer as pd
 comm = MPI.COMM_WORLD
 
@@ -30,12 +30,12 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
              }
 
     setup.update(simulation)
-    setup['dtau_mc'] = setup['BETA']/2./setup['N_MATSUBARA']
-    current_u = 'U'+str(U)
+    setup['dtau_mc'] = setup['BETA'] / 2. / setup['N_MATSUBARA']
+    current_u = 'U' + str(U)
     setup['U'] = U
-    setup['simt'] = 'PM' # simulation type ParaMagnetic
+    setup['simt'] = 'PM'  # simulation type ParaMagnetic
     if setup['AFM']:
-        setup['simt'] = 'AFM' # simulation type AntiFerroMagnetic
+        setup['simt'] = 'AFM'  # simulation type AntiFerroMagnetic
 
     tau, w_n = gf.tau_wn_setup(setup)
     intm = hf.interaction_matrix(setup['BANDS'])
@@ -43,11 +43,11 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
     mu, tp = setup['MU'], setup['tp']
     giw_d, giw_o = dimer.gf_met(w_n, mu, tp, 0.5, 0.)
 
-    gmix = np.array([[1j*w_n, -tp*np.ones_like(w_n)],
-                       [-tp*np.ones_like(w_n), 1j*w_n]])
+    gmix = np.array([[1j * w_n, -tp * np.ones_like(w_n)],
+                     [-tp * np.ones_like(w_n), 1j * w_n]])
 
     giw = np.array([[giw_d, giw_o], [giw_o, giw_d]])
-    g0tau0 = -0.5*np.eye(2).reshape(2, 2, 1)
+    g0tau0 = -0.5 * np.eye(2).reshape(2, 2, 1)
     gtu = gf.gw_invfouriertrans(giw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
     gtd = np.copy(gtu)
 
@@ -71,18 +71,17 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         last_loop = 0
 
     V_field = hf.ising_v(setup['dtau_mc'], U,
-                            L=setup['SITES']*setup['n_tau_mc'],
-                            polar=setup['spin_polarization'])
-
+                         L=setup['SITES'] * setup['n_tau_mc'],
+                         polar=setup['spin_polarization'])
 
     for iter_count in range(last_loop, last_loop + setup['Niter']):
         work_dir = os.path.join(save_dir, 'it{:03}'.format(iter_count))
         setup['work_dir'] = work_dir
 
-        if not setup['AFM']: # Paramagnetic averaging
-            gtu = .5*(gtu + gtd)
-            gt_diag = .5*(gtu[0,0] + gtu[1, 1])
-            gt_offd = .5*(gtu[0,1] + gtu[1, 0])
+        if not setup['AFM']:  # Paramagnetic averaging
+            gtu = .5 * (gtu + gtd)
+            gt_diag = .5 * (gtu[0, 0] + gtu[1, 1])
+            gt_offd = .5 * (gtu[0, 1] + gtu[1, 0])
             gtu = np.array([[gt_diag, gt_offd], [gt_offd, gt_diag]])
             gtd = gtu
 
@@ -93,7 +92,7 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
         giw_up = gf.gt_fouriertrans(gtu, tau, w_n, pd.gf_tail(gtu, U, mu, tp))
         giw_dw = gf.gt_fouriertrans(gtd, tau, w_n, pd.gf_tail(gtd, U, mu, tp))
 
-        if not setup['AFM']: # Paramagnetic cleaning
+        if not setup['AFM']:  # Paramagnetic cleaning
             giw_up[0, 0].real = 0
             giw_up[1, 1].real = 0
             giw_up[0, 1].imag = 0
@@ -101,22 +100,22 @@ def dmft_loop_pm(simulation, U, g_iw_start=None):
             giw_dw = giw_up
 
         # Bethe lattice bath
-        g0iw_up = dimer.mat_2_inv(gmix - 0.25*giw_up)
-        g0iw_dw = dimer.mat_2_inv(gmix - 0.25*giw_dw)
+        g0iw_up = dimer.mat_2_inv(gmix - 0.25 * giw_up)
+        g0iw_dw = dimer.mat_2_inv(gmix - 0.25 * giw_dw)
 
-        g0tau_up = gf.gw_invfouriertrans(g0iw_up, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
-        g0tau_dw = gf.gw_invfouriertrans(g0iw_dw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
+        g0tau_up = gf.gw_invfouriertrans(
+            g0iw_up, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
+        g0tau_dw = gf.gw_invfouriertrans(
+            g0iw_dw, tau, w_n, pd.gf_tail(g0tau0, 0., mu, tp))
 
         # Impurity solver
 
         gtu, gtd = hf.imp_solver([g0tau_dw, g0tau_up], V_field, intm, setup)
 
-
-
         # Save output
         if comm.rank == 0:
-            np.save(work_dir+'/gtau_up', gtu.reshape(4, -1))
-            np.save(work_dir+'/gtau_dw', gtd.reshape(4, -1))
+            np.save(work_dir + '/gtau_up', gtu.reshape(4, -1))
+            np.save(work_dir + '/gtau_dw', gtd.reshape(4, -1))
             with open(save_dir + '/setup', 'w') as conf:
                 setup['last_loop'] = iter_count
                 json.dump(setup, conf, indent=2)
@@ -130,7 +129,7 @@ if __name__ == "__main__":
     parser.add_argument('-df', '--double_flip_prob', type=float, default=0.,
                         help='Probability for double spin flip on equal sites')
     parser.add_argument('-afm', '--AFM', action='store_true',
-                       help='Use the self-consistency for Antiferromagnetism')
+                        help='Use the self-consistency for Antiferromagnetism')
     parser.set_defaults(ofile='DIMER_{simt}_B{BETA}_tp{tp}')
 
     SETUP = vars(parser.parse_args())

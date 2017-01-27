@@ -15,7 +15,7 @@ import numpy as np
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 from dmft.ipt_real import dimer_dmft as dimer_dmft_real
-import dmft.RKKY_dimer as rt
+import dmft.dimer as dimer
 from slaveparticles.quantum import dos
 
 
@@ -32,9 +32,9 @@ def plot_gf(gw, sw, axes):
 
 
 def dmft_solve(giw_d, giw_o, beta, u_int, tp, tau, w_n):
-    giw_d, giw_o, loops = rt.ipt_dmft_loop(
+    giw_d, giw_o, loops = dimer.ipt_dmft_loop(
         BETA, u_int, tp, giw_d, giw_o, tau, w_n, 1e-12)
-    g0iw_d, g0iw_o = rt.self_consistency(
+    g0iw_d, g0iw_o = dimer.self_consistency(
         1j * w_n, 1j * giw_d.imag, giw_o.real, 0., tp, 0.25)
     siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
     return giw_d, giw_o, siw_d, siw_o
