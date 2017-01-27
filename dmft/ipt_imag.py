@@ -176,9 +176,10 @@ def dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n):
     The Fourier transforms uses an empirically established tail expansion
 
     .. math:: \Sigma(i\omega_n\rightarrow \infty)_{AA} =
-        \frac{U^2}{4i\omega_n} + \frac{U^2/4 + 4t_\perp}{(i\omega_n)^3}
-    .. math:: \Sigma(i\omega_n\rightarrow \infty)_{AB} = \frac{-U^2
-        t_\perp}{2(i\omega_n)^2}
+        \frac{U^2}{4i\omega_n} + \frac{M_3}{(i\omega_n)^3}
+    .. math:: \Sigma(i\omega_n\rightarrow \infty)_{AB} = \frac{M_2}{2(i\omega_n)^2}
+
+    where :math:`M_3,M_2` are calculated from the derivatives of the :math:`\Sigma(\tau)`
 
     Parameters
     ----------

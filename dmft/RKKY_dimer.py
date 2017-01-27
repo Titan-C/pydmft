@@ -207,11 +207,16 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12, t=.5):
 def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
     r"""Calculates the total kinetic energy of the dimer
 
-.. math:: \langle T \rangle = \frac{8}{\beta} \sum_{n>0}
-    \left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
-           + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
-   - (t_\perp^2+t^2)\beta
-"""
+    .. math:: \langle T \rangle = \frac{8}{\beta} \sum_{n>0}
+        \left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
+            + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
+    - (t_\perp^2+t^2)\beta
+
+    See Also
+    --------
+    :ref:`kinetic_energy`
+
+    """
 
     return (tp * giw_o.real + t_sqr * (-giw_d.imag**2 + giw_o.real**2) +
             (t_sqr + tp**2) / w_n**2).sum() / beta * 8 - beta * (t_sqr + tp**2)
@@ -220,9 +225,13 @@ def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
 def epot(giw_d, w_n, beta, M_3, e_kin, muN):
     r"""Calculates the total potential energy of the dimer
 
-.. math:: \langle V \rangle = \frac{4}{\beta} \sum_{n>0}
-    i\omega_n(G_{11}(i\omega_n) -\frac{1}{i\omega_n} - \frac{M_3}{(i\omega_n)^3})
-    - \frac{M_3\beta}{2}+ \frac{\mu}{2}\langle N \rangle - \frac{\langle T \rangle}{2}
+    .. math:: \langle V \rangle = \frac{4}{\beta} \sum_{n>0}
+        i\omega_n(G_{11}(i\omega_n) -\frac{1}{i\omega_n} - \frac{M_3}{(i\omega_n)^3})
+        - \frac{M_3\beta}{2}+ \frac{\mu}{2}\langle N \rangle - \frac{\langle T \rangle}{2}
+
+    See Also
+    --------
+    :ref:`potential_energy`
 
     """
     return (-w_n * (giw_d.imag + 1 / w_n - M_3 / w_n**3)).sum() * 4 / beta - M_3 * beta / 2 + muN / 2 - e_kin / 2

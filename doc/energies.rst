@@ -37,12 +37,12 @@ the frequecy sum, with a constant factor. In this case one takes from
 
 But the local self-energy can be expresed by
 
-.. math:: \Sigma(i\omega_n) = \mathcal{G}^{0, -1} - G(i\omega_n)^{-1} =  i\omega_n - h_{loc} + \Delta(i\omega_n) - G(i\omega_n)^{-1}
+.. math:: \Sigma(i\omega_n) = \mathcal{G}^{0, -1} - G(i\omega_n)^{-1} =  i\omega_n - h_{loc} - \Delta(i\omega_n) - G(i\omega_n)^{-1}
 
 Where :math:`h_{loc}` is the momentum independent part of the
 hamiltonian. Then the expression transforms into.
 
-.. math:: \langle T \rangle = Tr \frac{1}{\beta} \sum_{k,n} \left(h_{loc} - \Delta(i\omega_n)\right) G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \left(h_{loc} - \Delta(i\omega_n)\right) G(i\omega_n)
+.. math:: \langle T \rangle = Tr \frac{1}{\beta} \sum_{k,n} \left(h_{loc} + \Delta(i\omega_n)\right) G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \left(h_{loc} + \Delta(i\omega_n)\right) G(i\omega_n)
 
 
 .. _potential_energy:
