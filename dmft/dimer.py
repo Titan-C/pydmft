@@ -72,6 +72,20 @@ def hamiltonian(u_int, mu, tp, basis_fermions=None):
     return h_loc, [a_up, b_up, a_dw,  b_dw]
 
 
+def diag_loc_fermions(basis_fermions):
+    """Rotate diagonal Fermion matrix operators from diagonal to local basis"""
+
+    from math import sqrt
+
+    as_up, s_up, as_dw, s_dw = basis_fermions
+    a_up = (-as_up + s_up) / sqrt(2)
+    b_up = (as_up + s_up) / sqrt(2)
+    a_dw = (-as_dw + s_dw) / sqrt(2)
+    b_dw = (as_dw + s_dw) / sqrt(2)
+
+    return [a_up, b_up, a_dw,  b_dw]
+
+
 def hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
     r"""Generate an isolated bi-atomic Hamiltonian in particle-hole symmetry at
     mu=0. Include chemical potential for grand Canonical calculations
@@ -86,16 +100,8 @@ def hamiltonian_diag(u_int, mu, tp, basis_fermions=None):
     if basis_fermions is None:
         basis_fermions = sorted_basis()
 
-    from math import sqrt
-    as_up, s_up, as_dw, s_dw = basis_fermions
-
-    a_up = (-as_up + s_up) / sqrt(2)
-    b_up = (as_up + s_up) / sqrt(2)
-    a_dw = (-as_dw + s_dw) / sqrt(2)
-    b_dw = (as_dw + s_dw) / sqrt(2)
-
-    return hamiltonian(u_int, mu, tp, [a_up, b_up, a_dw, b_dw])[0],\
-        basis_fermions
+    return hamiltonian(u_int, mu, tp,
+                       diag_loc_fermions(basis_fermions))[0], basis_fermions
 
 
 ###############################################################################
