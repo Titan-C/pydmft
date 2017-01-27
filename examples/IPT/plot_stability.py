@@ -12,9 +12,9 @@ the transition.
 
 from __future__ import division, absolute_import, print_function
 from math import ceil, log
+from functools import partial
 import numpy as np
 import matplotlib.pylab as plt
-from joblib import Parallel, delayed
 from dmft.ipt_imag import dmft_loop
 from dmft.common import greenF, tau_wn_setup, fit_gf
 
@@ -31,7 +31,7 @@ def hysteresis(beta, u_range):
     return log_g, dos
 
 
-def point_stability(g_met, g_ins, c, U, w_n, tau):
+def point_stability(g_met, g_ins, U, w_n, tau, c):
     mixture = (1 - c) * g_ins + c * g_met
     g_iwn_end, _ = dmft_loop(U, 0.5, mixture, w_n, tau, conv=1e-4)
     return np.dot(g_iwn_end - mixture, mixture)
@@ -42,8 +42,8 @@ def stability(beta, metal_g, insulator_g, urange):
     tau, w_n = tau_wn_setup(
         dict(BETA=beta, N_MATSUBARA=max(2**ceil(log(2 * beta) / log(2)), 256)))
     for g_met, g_ins, U in zip(metal_g, insulator_g, urange):
-        shift.append(np.sum(Parallel(n_jobs=-1)(delayed(point_stability)(g_met, g_ins, c, U, w_n, tau)
-                                                for c in np.arange(0, 1, .1))) * 0.1)
+        stab = partial(point_stability, g_met, g_ins, U, w_n, tau)
+        shift.append(0.1 * np.sum([stab(c) for c in np.arange(0, 1, .1)]))
 
     return np.array(shift)
 
