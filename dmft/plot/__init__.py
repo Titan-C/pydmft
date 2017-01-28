@@ -8,7 +8,6 @@ Ploting utilities
 from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
-import cmocean
 
 
 def plot_band_dispersion(omega, spec_eps_w, title, eps_k, style='both'):
@@ -41,7 +40,7 @@ def plot_band_dispersion(omega, spec_eps_w, title, eps_k, style='both'):
         plt.figure()
         eps_axis, omega_axis = np.meshgrid(eps_k, omega)
         plt.pcolormesh(eps_axis, omega_axis, spec_eps_w.T,
-                       cmap=cmocean.cm.amp)
+                       cmap=plt.get_cmap(r'viridis'))
         plt.title(title)
         plt.xlabel(r'$\epsilon$')
         plt.ylabel(r'$\omega$')

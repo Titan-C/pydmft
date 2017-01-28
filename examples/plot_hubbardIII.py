@@ -59,6 +59,7 @@ plt.ylim([-1.5, 1])
 plt.figure()
 plt.plot(w, (1 / (w - U**2 / 4 / g0_1)).real, label=r"Real")
 plt.plot(w, (1 / (w - U**2 / 4 / g0_1)).imag, label=r"Imag")
+plt.plot(w, (gf.semi_circle_hiltrans(w - U**2 / 4 / g0_1)).imag, label=r"Imag")
 
 plt.ylabel(r'$G(\omega)$')
 plt.xlabel(r'$\omega$')

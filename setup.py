@@ -44,7 +44,7 @@ setup(
     license="GNU General Public License v3 (GPLv3)",
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles',
-                      'joblib', 'pandas', 'numba', 'cmocean'],
+                      'joblib', 'pandas', 'numba'],
     setup_requires=['Sphinx', 'cython'],
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest, 'build_ext': build_ext},
@@ -55,4 +55,11 @@ setup(
                            extra_compile_args=["-std=c++11"],
                            libraries=['gsl', 'openblas']),
                  ],
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Programming Language :: Python",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development",
+    ]
 )
