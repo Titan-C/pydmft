@@ -16,11 +16,14 @@ import dmft.ipt_imag as ipt
 
 
 # Molecule
-def sorted_basis():
+def sorted_basis(basis_numbering=False):
     """Sorts the basis of states for the electrons in the molecule
     Enforces ordering in particle number an Sz projection"""
 
     ind = np.array([0, 1, 2, 4, 8, 5, 10, 6, 9, 12, 3, 7, 11, 13, 14, 15])
+    if basis_numbering:
+        ind = basis_numbering
+
     basis = [fermion.destruct(4, sigma)[ind][:, ind] for sigma in range(4)]
     return basis
 
