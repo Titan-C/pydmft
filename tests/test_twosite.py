@@ -23,7 +23,7 @@ def test_mit(axis, atol):
     zet = dmft_loop(u_int=[0, 1, 1.5, 2, 2.5, 2.9, 3.05], axis=axis,
                     beta=1e5, hop=0.5)[:, 1]
     zet = np.array(zet, dtype=np.float)
-    print(np.abs(zet-z_ref))
+    print(np.abs(zet - z_ref))
     assert np.allclose(zet, z_ref, atol=atol)
 
 
@@ -38,5 +38,5 @@ def test_doping():
     n = [sim.ocupations().sum() for sim in res[:, 1]]
 
     for ref, test in zip([e_c_ref, V_ref, n_ref], [e_c, V, n]):
-        print(np.abs(ref-test))
-        assert np.allclose(ref, test, atol=5e-5)
+        print(np.abs(ref - test))
+        assert np.allclose(ref, test, atol=1e-4)
