@@ -9,6 +9,7 @@ Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)
 from __future__ import division, print_function, absolute_import
 
 import numpy as np
+import h5py
 from slaveparticles.quantum import fermion
 
 import dmft.common as gf
@@ -267,3 +268,51 @@ The Symmetric sum (Anti-bonding) returned first, Asymmetric is returned second
     gr_a = gf.pade_rec(pc, w, w_n[w_set])
 
     return gr_s, gr_a
+
+
+def _make_gf(h5data):
+    """From a dimer Green's Function data entry on hdf5 return a numpy array"""
+    pos_giw = np.squeeze(h5data.view(np.complex128))
+    return np.concatenate((pos_giw[::-1].conjugate(), pos_giw))
+
+
+def symdata(gfs_array):
+    """Assuming the gfs_array has shape (n_freqs, 4)
+conjugate the last 2 columns to make the complete array be SYM"""
+    gfs_array[2:] = -gfs_array[2:].conjugate()
+    return gfs_array
+
+
+def extract_flat_gf_iter(filename, u_int, last):
+    """Returns a list with Green functions of last iterations
+
+    At each iteration there are 4 Green functions sym_up, sym_dw,
+    asym_up, asym_dw. Each one of them is extracted individually and
+    is an element of the list.
+
+    N.B. Because at half-filling there is particle-hole symmetry the
+    sym=-conj(asym).
+
+    Parameters
+    ----------
+    filename : str
+        path to hdf5 file
+    u_int : float
+        local interaction value
+    last : int
+        counts the last iterations to extract
+
+    Returns
+    -------
+    List of ndarrays of length last x 4 x nfreq
+    """
+    u_str = 'U' + str(u_int)
+    block_names = ['sym_up', 'sym_dw', 'asym_up', 'asym_dw']
+
+    with h5py.File(filename, 'r') as datarecord:
+        dat = []
+        for iteration in list(datarecord[u_str])[-last:]:
+            blockgf = datarecord[u_str][iteration]['G_iw']
+            dat.append([_make_gf(blockgf[name]['data'].value)
+                        for name in block_names])
+    return np.array(dat)
