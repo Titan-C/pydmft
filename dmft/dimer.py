@@ -277,7 +277,7 @@ def _make_gf(h5data):
 
 
 def symdata(gfs_array):
-    """Assuming the gfs_array has shape (n_freqs, 4)
+    """Assuming the gfs_array has shape (4, n_freqs)
 conjugate the last 2 columns to make the complete array be SYM"""
     gfs_array[2:] = -gfs_array[2:].conjugate()
     return gfs_array
@@ -304,7 +304,7 @@ def extract_flat_gf_iter(filename, u_int, last):
 
     Returns
     -------
-    List of ndarrays of length last x 4 x nfreq
+    ndarray of shape:  last x 4 x nfreq
     """
     u_str = 'U' + str(u_int)
     block_names = ['sym_up', 'sym_dw', 'asym_up', 'asym_dw']
