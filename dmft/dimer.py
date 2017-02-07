@@ -11,12 +11,15 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 import h5py
 from slaveparticles.quantum import fermion
+from slaveparticles.quantum.operators import fermi_dist
 
 import dmft.common as gf
 import dmft.ipt_imag as ipt
-
+from dmft.utils import optical_conductivity as opt_sig
 
 # Molecule
+
+
 def sorted_basis(basis_numbering=False):
     """Sorts the basis of states for the electrons in the molecule
     Enforces ordering in particle number an Sz projection"""
@@ -316,3 +319,44 @@ def extract_flat_gf_iter(filename, u_int, last):
             dat.append([_make_gf(blockgf[name]['data'].value)
                         for name in block_names])
     return np.array(dat)
+
+
+def optical_conductivity(beta, ss, sa, omega, tp, eps_k):
+    """Calculate the contributions to the optical_conductivity in the dimer
+
+    Parameters
+    ----------
+    beta : float - Inverse Temperature
+    ss : 1D complex ndarray - SYM real-freq self-energy
+    sa : 1D complex ndarray - ASYM real-freq self-energy
+    omega : 1D float ndarray - real frequency grid (equispaced)
+    tp : float - Dimer Hybridization
+    eps_k : 1D float ndarray - Energy level bandwidth (equispaced)
+
+    Returns
+    -------
+    intra_band : Intra band Optical response
+    inter_band : Inter band Optical response
+    """
+
+    nfp = fermi_dist(omega, beta)
+    pos_freq = omega > 0
+    rho = np.exp(-2 * eps_k**2) / np.sqrt(np.pi / 2)
+    de = eps_k[1] - eps_k[0]
+    rhode = (rho * de).reshape(-1, 1)
+
+    def lat_gf(eps_k, w_sig):
+        return 1 / np.add.outer(-eps_k, w_sig)
+
+    lat_As = -lat_gf(eps_k, omega - tp - ss + 4e-2j).imag / np.pi
+    lat_Aa = -lat_gf(eps_k, omega + tp - sa + 4e-2j).imag / np.pi
+
+    a = opt_sig(lat_Aa, lat_Aa, nfp, omega, rhode)
+    a += opt_sig(lat_As, lat_As, nfp, omega, rhode)
+    b = opt_sig(lat_Aa, lat_As, nfp, omega, rhode)
+    b += opt_sig(lat_As, lat_Aa, nfp, omega, rhode)
+
+    intra_band = a[pos_freq]
+    inter_band = b[pos_freq]
+
+    return intra_band, inter_band
