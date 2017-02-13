@@ -26,8 +26,11 @@ def sigma(Aw, nf, U):
 
 
 def ph_hf_sigma(Aw, nf, U):
-    # because of ph and half-fill in the Single band one can work with
-    # A^+ only
+    """Imaginary part of the second order diagram
+
+    because of particle-hole symmetry at half-fill in the Single band
+    one can work with A^+ only"""
+
     Ap = Aw * nf
     # convolution A^+ * A^+
     App = signal.fftconvolve(Ap, Ap, mode='same')
