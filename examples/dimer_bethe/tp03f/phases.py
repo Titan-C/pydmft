@@ -53,7 +53,7 @@ for filename in datafiles:
     try:
         nn, u = tdm.extract_density_correlators(filename, 'density')
         d = density_obs(nn)[0]
-        iu_list.append(u - 1e-5)
+        iu_list.append(u + 1e-5)
         iT_list.append(np.ones_like(u) / float(beta))
         id_list.append(d)
     except IOError:
@@ -75,8 +75,11 @@ plt.colorbar()  # draw colorbar
 boundaries = np.array([(1.91, 1e5), (1.91, 300.), (1.91, 200.), (1.93, 100.),
                        (1.99, 64.), (2.115, 44.23), (2.145, 41.56),
                        (2.18, 40.), (2.18, 64.), (2.18, 100.), (2.19, 200.),
-                       (2.21, 300.), (2.27, 1e5)]).T
+                       (2.205, 300.), (2.24, 1e5)]).T
+DH0 = np.array([(2.05, 1e5), (2.05, 300.), (2.05, 200.), (2.05, 100.),
+                (2.05, 64.), (2.07, 50.732), (2.12, 44.23), (2.18, 40.)]).T
 
+plt.plot(DH0[0], 1 / DH0[1], 'rx-', lw=3)
 plt.fill(boundaries[0], 1 / boundaries[1], 'k+-', alpha=0.5, lw=4)
 
 plt.scatter(np.concatenate(mu_list), np.concatenate(mT_list),
@@ -84,7 +87,7 @@ plt.scatter(np.concatenate(mu_list), np.concatenate(mT_list),
             cmap=plt.get_cmap('viridis'), marker='o', edgecolor='k')
 
 plt.scatter(np.concatenate(iu_list), np.concatenate(iT_list),
-            c=np.concatenate(id_list), s=70, vmin=0.036, vmax=0.12,
+            c=np.concatenate(id_list), s=30, vmin=0.036, vmax=0.12,
             cmap=plt.get_cmap('viridis'), marker='o', edgecolor='k')
 
 plt.xlim([1.7, 2.5])
