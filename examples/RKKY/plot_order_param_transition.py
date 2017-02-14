@@ -3,6 +3,18 @@ r"""
 The insulator transition order parameter
 ========================================
 
+The low energy expansion is used to define an order parameter for the
+Dimer-Mott transition.  Using the renormalized quantities for the
+Half-filling Particle-hole Symmetric case.
+
+.. math:: Z \equiv \left(1-\frac{\partial\Re e \Sigma_{11} (\omega)}{\partial \omega} \bigg |_{\omega=0}\right)^{-1} \\
+
+.. math:: \tilde{t}_\perp \equiv  Z\left[t_\perp + \Re e \Sigma_{12}(0) \right]
+
+The order parameter is defined as
+
+.. math:: \eta = Z - \tilde{t}_\perp
+
 """
 # Created Mon Mar  7 19:19:04 2016
 # Author: Óscar Nájera
@@ -17,6 +29,11 @@ import matplotlib.pyplot as plt
 import dmft.common as gf
 import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
+
+plt.matplotlib.rcParams.update({'axes.labelsize': 22,
+                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
+                                'axes.titlesize': 22, 'legend.fontsize': 14,
+                                'mathtext.fontset': 'cm'})
 
 
 def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
@@ -49,21 +66,22 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
     return sd_zew, so_zew
 
 
-def plot_z_diagram_U_vs_tp(tpr, ur, beta, ax):
-
-    x, y = np.meshgrid(tpr, ur)
-
-    sd_zew, so_zew = estimate_zero_w_sigma_U_vs_tp(tpr, ur, beta, 'met')
-    z = np.ma.masked_array(sd_zew[:, :, 0], sd_zew[:, :, 1] < -0.1)
-    ax.pcolormesh(x, y, 1 / (1 - z.T), cmap=plt.get_cmap(r'viridis'))
-
-    sd_zew, so_zew = estimate_zero_w_sigma_U_vs_tp(tpr, ur, beta, 'ins')
-    z = np.ma.masked_array(sd_zew[:, ::-1, 0], sd_zew[:, ::-1, 1] < -0.1)
-    ax.pcolormesh(x, y, 1 / (1 - z.T),
-                  cmap=plt.get_cmap(r'viridis'), alpha=0.2)
-    ax.axis([x.min(), x.max(), y.min(), y.max()])
-
 TPR = np.arange(0, 1.1, 0.02)
 UR = np.arange(0, 4.5, 0.1)
 f, ax = plt.subplots()
-plot_z_diagram_U_vs_tp(TPR, UR, 1000., ax)
+x, y = np.meshgrid(TPR, UR)
+
+sd_zew, so_zew = estimate_zero_w_sigma_U_vs_tp(TPR, UR, 1000., 'met')
+dw_sig11 = np.ma.masked_array(sd_zew[:, :, 0], sd_zew[:, :, 1] < -0.1)
+zet = 1 / (1 - dw_sig11.T)
+sig11_0 = np.ma.masked_array(so_zew[:, :, 1], sd_zew[:, :, 1] < -0.1)
+tpp = (TPR + so_zew[:, :, 1].T)
+
+order = zet - tpp * zet
+cs = plt.contourf(x, y, order, 31)
+plt.colorbar()
+cs = plt.contour(x, y, order, 3, colors='k')
+plt.clabel(cs, inline=1, fontsize=10, colors='k')
+plt.xlabel(r'$t_\perp/D$')
+plt.ylabel(r'$U/D$')
+plt.savefig('IPT_Uc2_orderparameter.png')
