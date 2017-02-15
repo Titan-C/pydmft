@@ -68,7 +68,7 @@ Model_gw.getAllSpecFs(alphamin=1, alphamax=2.5, numAlpha=25)
 gf_plot_study(omega, Model_gw)
 
 np.savez('AwmetB25tp0.3{}G_sym'.format(u_str),
-         Aw=Model_gw.aveSpecFs, w=Model_gw.w)
+         Aw=Model_gw.aveSpecFs, w=Model_gw.omega)
 
 ###############################################################################
 # How was the Green function fitted

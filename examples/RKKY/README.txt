@@ -1,4 +1,4 @@
-.. _exaples_RKKY
+.. _examples_RKKY:
 
 RKKY interactions Mott insulator
 ================================

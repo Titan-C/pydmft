@@ -16,48 +16,55 @@ from scipy.integrate import trapz
 
 
 def bubble(A1, A2, nf):
-    """Calculates the Polarization Bubble convolution given 2 Spectral functions
+    r"""Calculates the Polarization Bubble convolution given 2 Spectral functions
 
-It follows the formula
-Π(w') = ∫dw A1(w)*A2(w+w')*(nf(w)-nf(w+w'))
-      = ∫dw A1^+(w)*A2(w+w')-A1(w)*A2^+(w+w')
+    It follows the formula
 
-Parameters
-----------
-A1, A2 : 1D ndarrays, only information in w
-    Correspond to the spectral functions
-nf : ndarray
-    Fermi function
-"""
+    .. math::
+
+        \Pi(w') &= \int dw A_1(w) A_2(w+w') (n_f(w)-n_f(w+w')) \\
+            &= \int dw A_1^+(w) A_2(w+w')-A_1(w) A_2^+(w+w')
+
+    Parameters
+    ----------
+    A1 : 1D ndarrays, only information in w
+        Correspond to the spectral functions
+    A2 : 1D ndarrays, only information in w
+        Correspond to the spectral functions
+    nf : ndarray
+        Fermi function
+    """
 
     return signal.fftconvolve((A1 * nf)[::-1], A2, mode='same') - \
         signal.fftconvolve(A1[::-1], A2 * nf, mode='same')
 
 
 def optical_conductivity(lat_A1, lat_A2, nf, w, dosde):
-    """Calculates the optical conductivity from lattice spectral functions
+    r"""Calculates the optical conductivity from lattice spectral functions
 
-σ(w) = ∫dE ρ(E) Π(E,w) / w
+    .. math:: \sigma(w) = \int dE \rho(E) \Pi (E,w) / w
 
-Parameters
-----------
-    lat_A1, lat_A2 : 2D ndarrays
+    Parameters
+    ----------
+    lat_A1 : 2D ndarrays
+        lattice Spectral functions A(E,w)
+    lat_A2 : 2D ndarrays
         lattice Spectral functions A(E,w)
     nf : 1D ndarray
-    fermi function
+        fermi function
     w : 1D ndarray
-    real frequency array
+        real frequency array
     dosde : 1D ndarray
-    differentially weighted density of states dE ρ(E)
+        differentially weighted density of states dE ρ(E)
 
-Returns
--------
+    Returns
+    -------
     Re σ(w) : 1D ndarray
     Real part of optical conductivity. Posterior scaling required
 
-See also
---------
-bubble
+    See also
+    --------
+    bubble
 
 """
     dw = w[1] - w[0]

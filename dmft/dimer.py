@@ -218,7 +218,7 @@ def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
     .. math:: \langle T \rangle = \frac{8}{\beta} \sum_{n>0}
         \left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
             + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
-    - (t_\perp^2+t^2)\beta
+            - (t_\perp^2+t^2)\beta
 
     See Also
     --------
