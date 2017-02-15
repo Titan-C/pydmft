@@ -16,7 +16,6 @@ import numpy as np
 import scipy.signal as signal
 from scipy.integrate import trapz
 import matplotlib.pyplot as plt
-from joblib import Parallel, delayed
 
 import dmft.common as gf
 import dmft.ipt_real as ipt
@@ -173,8 +172,8 @@ sig_wei = 3
 betarange = np.concatenate((higb, 1 / temp, 1 / temp[::-1], higb[::-1]))
 
 gwi, swi, betarange = simulation(U, tp, betarange)
-resi = Parallel(n_jobs=-1, verbose=5)(delayed(optical_cond)
-                                      (ss, sa, tp, w, beta) for (ss, sa), beta in zip(swi, betarange))
+resi = [optical_cond(ss, sa, tp, w, beta)
+        for (ss, sa), beta in zip(swi, betarange)]
 
 ###############################################################################
 # Plots
