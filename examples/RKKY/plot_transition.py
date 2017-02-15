@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-=====================================================================
 Study the behavior of the Dimer Bethe lattice in the Transition
 =====================================================================
 
@@ -155,7 +154,8 @@ plt.plot(urange[:ulim], ft[:ulim], lw=2)
 print(popt)
 
 ulim += 4
-popt, pcov = curve_fit(fitchi, urange[ulim:], chi[ulim:], p0=[-0.01, 2.391, 0])
+popt, pcov = curve_fit(
+    fitchi, urange[ulim:-1], chi[ulim:], p0=[-0.01, 2.391, 0])
 ft = fitchi(urange, *popt)
 plt.plot(urange, ft)
 plt.plot(urange[ulim:], ft[ulim:], lw=2)

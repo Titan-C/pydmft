@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-====================================
 Landau Theory of the Mott transition
 ====================================
 
@@ -65,12 +64,12 @@ bet_uc = [(18, 3.312),
           (21.5, 3.1467),
           (21.7, 3.138)]
 
-#data = []
-# for beta, uc in bet_uc:
-#urange = udelta + uc + .07
-# giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
-# urange, .3 * np.ones_like(urange), beta, 'met')
-#data.append(2 * epot / urange - 0.003)
+data = []
+for beta, uc in bet_uc:
+    urange = udelta + uc + .07
+    giw_s, sigma_iw, ekin, epot, w_n = loop_u_tp(
+        urange, .3 * np.ones_like(urange), beta, 'met')
+    data.append(2 * epot / urange - 0.003)
 
 plt.figure()
 bc = [b for b, _ in bet_uc]
