@@ -1,14 +1,24 @@
+# -*- coding: utf-8 -*-
+r"""
+The Dimer phase diagram on temperature
+======================================
+
+Collect data on double occupation and plot the phase diagram
+"""
+# Author: Óscar Nájera
+
 from __future__ import division, absolute_import, print_function
 
+import argparse
 import re
 from glob import glob
 import numpy as np
-import numpy.ma as ma
 import matplotlib
-from matplotlib.mlab import griddata
 matplotlib.use('agg')
+from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
 import py3qs.triqs_dimer as tdm
+
 
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'xtick.labelsize': 14, 'ytick.labelsize': 14,
@@ -23,41 +33,42 @@ def density_obs(moments):
     return d, ma
 
 
+def extract_obs(filelist, u_shift=0):
+    u_list = []
+    T_list = []
+    d_list = []
+    for filename in filelist:
+        state, beta = re.findall(r'PM_(...)_B(\d+\.\d+)', filename)[0]
+        try:
+            nn, u = tdm.extract_density_correlators(filename, 'density')
+            d = density_obs(nn)[0]
+            u_list.append(u + u_shift)
+            T_list.append(np.ones_like(u) / float(beta))
+            d_list.append(d)
+        except IOError:
+            pass
+    return u_list, T_list, d_list
+
+
 workdir = "/home/oscar/orlando/dev/dmft-learn/examples/dimer_bethe/tp03f/"
 workdir = "/scratch/oscar/dimer_bethe/tp03f/"
 workdir = ""
 
-datafiles = glob(workdir + 'DIMER_PM_met*_B*h5')
+parser = argparse.ArgumentParser(description="Plot the phase diagram for a given tp",
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument('-tp', type=float, default=0.3,
+                    help="Dimer hybridization strength")
 
-mu_list = []
-mT_list = []
-md_list = []
-for filename in datafiles:
-    state, beta = re.findall(r'PM_(...)_B(\d+\.\d+)', filename)[0]
-    try:
-        nn, u = tdm.extract_density_correlators(filename, 'density')
-        d = density_obs(nn)[0]
-        mu_list.append(u)
-        mT_list.append(np.ones_like(u) / float(beta))
-        md_list.append(d)
-    except IOError:
-        pass
+args = parser.parse_args()
+tp = args.tp
 
-datafiles = glob(workdir + 'DIMER_PM_ins*_B*h5')
+datafiles = glob(workdir + 'DIMER_PM_met*_B*_tp{}*h5'.format(tp))
 
-iu_list = []
-iT_list = []
-id_list = []
-for filename in datafiles:
-    state, beta = re.findall(r'PM_(...)_B(\d+\.\d+)', filename)[0]
-    try:
-        nn, u = tdm.extract_density_correlators(filename, 'density')
-        d = density_obs(nn)[0]
-        iu_list.append(u + 1e-5)
-        iT_list.append(np.ones_like(u) / float(beta))
-        id_list.append(d)
-    except IOError:
-        pass
+mu_list, mT_list, md_list = extract_obs(datafiles)
+
+datafiles = glob(workdir + 'DIMER_PM_ins*_B*_tp{}*h5'.format(tp))
+
+iu_list, iT_list, id_list = extract_obs(datafiles, 1e-5)
 
 # Join double occupation results
 x = np.concatenate(mu_list + iu_list)
