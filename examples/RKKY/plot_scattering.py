@@ -18,9 +18,6 @@ import matplotlib.pyplot as plt
 import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.ipt_imag as ipt
-plt.matplotlib.rcParams.update({'axes.labelsize': 22,
-                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
-                                'axes.titlesize': 22})
 
 
 def loop_beta(u_int, tp, betarange, seed='ins'):
