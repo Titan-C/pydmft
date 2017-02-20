@@ -40,7 +40,7 @@ def plot_energy(beta, tp, urange, ax):
     ins = loop_urange(urange[::-1], tp, beta)
     ax.plot(urange, np.sum(met, 0))
     ax.plot(urange, np.sum(ins, 0)[::-1])
-    ax.set_ylabel(r'$\langle H \rangle$ @ $\beta={}$'.format(beta))
+    ax.set_ylabel(r'$\beta={}$'.format(beta))
 
 
 fig, ax = plt.subplots(3, 1, sharex=True, sharey=True)
