@@ -228,6 +228,7 @@ def retarded_weiss(g0tau):
 
     .. math:: \mathcal{G}^0_{\alpha\beta_{(ij)}} =
         -\mathcal{G}^0_{\alpha\beta}(i\Delta\tau - j\Delta\tau)
+
     Because of the Hirsch-Fye algorithm a minus sign is included into the
     matrix expresion. :math:`\alpha,\beta` block indices :math:`i,j` indices
     within the blocks

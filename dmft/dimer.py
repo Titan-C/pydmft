@@ -213,16 +213,36 @@ def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12, t=.5):
 
 
 def ekin(giw_d, giw_o, w_n, tp, beta, t_sqr=0.25):
-    r"""Calculates the total kinetic energy of the dimer
+    r"""Calculates the total kinetic energy of the dimer Bethe lattice
 
     .. math:: \langle T \rangle = \frac{8}{\beta} \sum_{n>0}
         \left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
             + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
             - (t_\perp^2+t^2)\beta
 
+    Parameters
+    ----------
+    giw_d : complex 1D ndarray
+        Diagonal entry of Green's function :math:`G_{11}`
+    giw_o : complex 1D ndarray
+        Off diagonal entry of Green's function :math:`G_{12}`
+    w_n : real 1D ndarray
+        Positive Matsubara frequencies
+    tp : float
+        Dimer hybridization strength
+    beta : float
+        Inverse temperature
+    t_sqr : float
+        :math:`t^2` squared hopping to lattice, represent they lattice
+        hybridization as :math:`\Delta=t^2G`
+
+    References
+    ----------
+    :ref:`kinetic_energy`
+
     See Also
     --------
-    :ref:`kinetic_energy`
+    epot
 
     """
 
@@ -237,9 +257,29 @@ def epot(giw_d, w_n, beta, M_3, e_kin, muN):
         i\omega_n(G_{11}(i\omega_n) -\frac{1}{i\omega_n} - \frac{M_3}{(i\omega_n)^3})
         - \frac{M_3\beta}{2}+ \frac{\mu}{2}\langle N \rangle - \frac{\langle T \rangle}{2}
 
+    Parameters
+    ----------
+    giw_d : complex 1D ndarray
+        Diagonal entry of Green's function :math:`G_{11}`
+    w_n : real 1D ndarray
+        Positive Matsubara frequencies
+    beta : float
+        Inverse temperature
+    M_3 : float
+        Third Moment in tail expansion of :math:`G_{11}`
+    e_kin : float
+        Kinetic energy of the dimer :math:`\langle T \rangle`
+    muN : float
+        Chemical potential weighted by occupation :math:`\mu\langle N \rangle`
+
+
+    References
+    ----------
+    :ref:`potential_energy`
+
     See Also
     --------
-    :ref:`potential_energy`
+    ekin
 
     """
     return (-w_n * (giw_d.imag + 1 / w_n - M_3 / w_n**3)).sum() * 4 / beta - M_3 * beta / 2 + muN / 2 - e_kin / 2
@@ -250,7 +290,7 @@ def epot(giw_d, w_n, beta, M_3, e_kin, muN):
 
 
 def pade_diag(gf_aa, gf_ab, w_n, w_set, w):
-    """Take diagonal and off diagonal Matsubara functions in the local
+    r"""Take diagonal and off diagonal Matsubara functions in the local
     basis and return real axis functions in the symmetric and
     anti-symmetric basis. Such that
 
