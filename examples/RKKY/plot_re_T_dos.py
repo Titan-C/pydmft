@@ -21,7 +21,7 @@ import dmft.common as gf
 import dmft.ipt_real as ipt
 from dmft.utils import optical_conductivity
 
-from slaveparticles.quantum.operators import fermi_dist
+
 import slaveparticles.quantum.dos as dos
 
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
@@ -87,7 +87,7 @@ def optical_cond(ss, sa, tp, w, beta):
     dos = np.exp(-2 * E**2) / np.sqrt(np.pi / 2)
     de = E[1] - E[0]
     dosde = (dos * de).reshape(-1, 1)
-    nf = fermi_dist(w, beta)
+    nf = gf.fermi_dist(w, beta)
 
     lat_Aa = (-1 / np.add.outer(-E, w + tp - sa)).imag / np.pi
     lat_As = (-1 / np.add.outer(-E, w - tp - ss)).imag / np.pi

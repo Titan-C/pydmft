@@ -11,7 +11,6 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 import h5py
 from slaveparticles.quantum import fermion
-from slaveparticles.quantum.operators import fermi_dist
 
 import dmft.common as gf
 import dmft.ipt_imag as ipt
@@ -379,7 +378,7 @@ def optical_conductivity(beta, ss, sa, omega, tp, eps_k):
     inter_band : Inter band Optical response
     """
 
-    nfp = fermi_dist(omega, beta)
+    nfp = gf.fermi_dist(omega, beta)
     pos_freq = omega > 0
     rho = np.exp(-2 * eps_k**2) / np.sqrt(np.pi / 2)
     de = eps_k[1] - eps_k[0]

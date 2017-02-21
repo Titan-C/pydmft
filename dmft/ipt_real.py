@@ -9,7 +9,6 @@ from __future__ import division, absolute_import, print_function
 import scipy.signal as signal
 import numpy as np
 import matplotlib.pyplot as plt
-from slaveparticles.quantum.operators import fermi_dist
 import dmft.common as gf
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'axes.titlesize': 22, 'figure.autolayout': True})
@@ -67,7 +66,7 @@ def ss_dmft_loop(gloc, w, u_int, beta, conv):
 
     dw = w[1] - w[0]
     eta = 2j * dw
-    nf = fermi_dist(w, beta)
+    nf = gf.fermi_dist(w, beta)
 
     converged = False
     while not converged:

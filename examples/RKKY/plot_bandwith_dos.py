@@ -22,9 +22,6 @@ import dmft.common as gf
 import dmft.ipt_real as ipt
 from dmft.utils import optical_conductivity
 
-from slaveparticles.quantum.operators import fermi_dist
-import slaveparticles.quantum.dos as dos
-
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'xtick.labelsize': 14, 'ytick.labelsize': 14,
                                 'axes.titlesize': 22})
@@ -42,7 +39,7 @@ def loop_bandwidth(drange, tp, beta, seed='mott gap'):
     dw = w[1] - w[0]
     gssi = gf.semi_circle_hiltrans(w + 5e-3j - tp - 1)
     gsai = gf.semi_circle_hiltrans(w + 5e-3j + tp + 1)
-    nfp = dos.fermi_dist(w, beta)
+    nfp = gf.fermi_dist(w, beta)
     for D in drange:
         print('D/U: ', D, 'tp/U: ', tp, 'Beta', beta)
         (gss, gsa), (ss, sa) = ipt.dimer_dmft(

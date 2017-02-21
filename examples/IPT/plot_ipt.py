@@ -17,7 +17,6 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pylab as plt
 
-from slaveparticles.quantum.operators import fermi_dist
 
 from dmft.ipt_imag import dmft_loop
 from dmft.common import greenF, tau_wn_setup, pade_continuation
@@ -31,7 +30,7 @@ eps_k = np.linspace(-1, 1, 61)
 dos = np.exp(-2 * eps_k**2) / np.sqrt(np.pi / 2)
 de = eps_k[1] - eps_k[0]
 dosde = (dos * de).reshape(-1, 1)
-nf = fermi_dist(omega, BETA)
+nf = gf.fermi_dist(omega, BETA)
 
 ###############################################################################
 # Insulator Calculations

@@ -17,7 +17,6 @@ import dmft.common as gf
 import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
 from dmft.utils import optical_conductivity
-from slaveparticles.quantum.operators import fermi_dist
 
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
@@ -47,7 +46,7 @@ def plot_optical_cond(sigma_iw, ur, tp, w_n, w, w_set, beta, seed):
     dos = np.exp(-2 * E**2) / np.sqrt(np.pi / 2)
     de = E[1] - E[0]
     dosde = (dos * de).reshape(-1, 1)
-    nf = fermi_dist(w, beta)
+    nf = gf.fermi_dist(w, beta)
     eta = 0.8
 
     for U, (sig_d, sig_o) in zip(ur, sigma_iw):

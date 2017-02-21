@@ -139,6 +139,12 @@ def gt_fouriertrans(g_tau, tau, w_n, tail_coef=(1., 0., 0.)):
     return beta * ifft(gtau * np.exp(1j * np.pi * tau / beta))[..., :len(w_n)] + freq_tail
 
 
+def fermi_dist(energy, beta):
+    """ Fermi Dirac distribution"""
+    exponent = np.asarray(beta * energy).clip(-600, 600)
+    return 1. / (np.exp(exponent) + 1)
+
+
 def freq_tail_fourier(tail_coef, beta, tau, w_n):
     r"""Fourier transforms analytically the slow decaying tail_coefs of
     the Greens functions [matsubara]_

@@ -22,8 +22,6 @@ import matplotlib.pyplot as plt
 import dmft.common as gf
 import dmft.ipt_real as ipt
 
-from slaveparticles.quantum.operators import fermi_dist
-
 plt.matplotlib.rcParams.update({'axes.labelsize': 22,
                                 'xtick.labelsize': 14, 'ytick.labelsize': 14,
                                 'axes.titlesize': 22,
@@ -33,7 +31,7 @@ w = np.linspace(-4, 4, 2**12)
 dw = w[1] - w[0]
 
 beta = 800.
-nfp = fermi_dist(w, beta)
+nfp = gf.fermi_dist(w, beta)
 
 tp = 0.3
 gss = gf.semi_circle_hiltrans(w + 5e-3j - tp)

@@ -19,7 +19,6 @@ import numpy as np
 import dmft.common as gf
 import dmft.dimer as dimer
 import dmft.ipt_imag as ipt
-from slaveparticles.quantum.operators import fermi_dist
 
 
 def loop_beta(u_int, tp, betarange, seed='mott gap'):
