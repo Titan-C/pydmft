@@ -54,8 +54,9 @@ avgH = [loop_beta(u_int, TP, BETARANGE, 'I') for u_int in U_int]
 # finds two energy plateaus
 
 plt.figure()
+temp_cut = sum(temp < 3)
 for u, sol in zip(U_int, avgH):
-    plt.plot(temp[temp < 3], sol[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], sol[:temp_cut], label='U={}'.format(u))
 
 plt.xlim(0, 2.5)
 plt.title('Internal Energy')
@@ -74,7 +75,7 @@ plt.legend(loc=0)
 plt.figure()
 CV = [np.ediff1d(H) / np.ediff1d(temp) for H in avgH]
 for u, cv in zip(U_int, CV):
-    plt.plot(temp[temp < 3], cv[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], cv[:temp_cut], label='U={}'.format(u))
 
 plt.xlim(-0.1, 2.)
 plt.ylim(-0.1, 8.5)
@@ -103,7 +104,7 @@ for cv in CV:
 
 plt.figure()
 for u, s in zip(U_int, ENDS):
-    plt.plot(temp[temp < 3], s[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], s[:temp_cut], label='U={}'.format(u))
 
 plt.title('Entropy')
 plt.xlabel('$T/D$')

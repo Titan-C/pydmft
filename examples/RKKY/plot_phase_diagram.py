@@ -59,11 +59,11 @@ for u_int in U_int:
 
 ax[1].plot([tpr[tpi]] * 4, U_int, 'ro', ms=10)
 
-
 ###############################################################################
 
-def loop_beta(u_int, tp, betarange, seed='mott gap'):
-    ekin, epot = [], []
+
+def loop_beta(u_int, tp, betarange, seed):
+    avgH = []
     for beta in betarange:
         tau, w_n = gf.tau_wn_setup(
             dict(BETA=beta, N_MATSUBARA=max(2**ceil(log(8 * beta) / log(2)), 256)))
@@ -74,121 +74,92 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
         giw_d, giw_o, _ = dimer.ipt_dmft_loop(
             beta, u_int, tp, giw_d, giw_o, tau, w_n, 1e-6)
 
-        ekin.append(dimer.ekin(giw_d[:int(8 * beta)], giw_o[:int(8 * beta)],
-                               w_n[:int(8 * beta)], tp, beta))
+        ekin = dimer.ekin(giw_d[:int(8 * beta)], giw_o[:int(8 * beta)],
+                          w_n[:int(8 * beta)], tp, beta)
 
-        epot.append(dimer.epot(giw_d[:int(8 * beta)], w_n[:int(8 * beta)],
-                               beta, u_int ** 2 / 4 + tp**2 + 0.25, ekin[-1], u_int))
+        epot = dimer.epot(giw_d[:int(8 * beta)], w_n[:int(8 * beta)],
+                          beta, u_int ** 2 / 4 + tp**2 + 0.25, ekin, u_int)
+        avgH.append(ekin + epot)
 
-    return np.array(ekin), np.array(epot)
+    return np.array(avgH)
 
 BETARANGE = np.around(np.hstack((1 / np.linspace(1e-3, 0.2, 100),
                                  np.logspace(2.3, -4.5, 42, base=2))),
                       decimals=3)
 
+
 temp = 1 / BETARANGE
 
 start = ['M', 'M', 'I', 'I']
-solutions = [loop_beta(u_int, tpr[tpi], BETARANGE, seed)
-             for u_int, seed in zip(U_int, start)]
+avgH = [loop_beta(u_int, tpr[tpi], BETARANGE, seed)
+        for u_int, seed in zip(U_int, start)]
 
 ###############################################################################
 # Internal Energy
 # ---------------
 #
-# It is very strange as :math:`U` grows into the insulator that there is an
-# increase in internal energy as the system is cooled down. It can
-# also be seen how the insulator has lower internal energy at :math:`U=3.5`
+# The internal energy decreases and upon cooling but in the insulator it
+# finds two energy plateaus
 
-fig, ax = plt.subplots(2)
-for i, sol in enumerate(solutions):
-    u = U_int[i]
-    ax[0].plot(temp, sol[0] + sol[1], label='U={} {}'.format(u, start[i]))
-    ax[1].plot(temp, sol[0] + sol[1])
-ax[0].set_xlim([0, 5])
-ax[0].set_ylim([-0.35, 1.5])
-ax[1].set_xlim([0, .2])
-ax[1].set_ylim([-.35, 0.0])
+plt.figure()
+temp_cut = sum(temp < 3)
+for u, sol in zip(U_int, avgH):
+    plt.plot(temp[:temp_cut], sol[:temp_cut], label='U={}'.format(u))
 
-ax[0].set_title('Internal Energy')
-ax[0].set_xlabel('$T/D$')
-ax[0].set_ylabel(r'$\langle  H \rangle$')
-ax[0].legend(loc=0)
-ax[1].set_xlabel('$T/D$')
-ax[1].set_ylabel(r'$\langle  H \rangle$')
-
+plt.xlim(0, 2.5)
+plt.title('Internal Energy')
+plt.xlabel('$T/D$')
+plt.ylabel(r'$\langle  H \rangle$')
+plt.legend(loc=0)
 
 ###############################################################################
-# Double occupation
-# -----------------
-
-fig, ax = plt.subplots(2)
-for i, sol in enumerate(solutions):
-    u = U_int[i]
-    ax[0].plot(temp, 2 * sol[1] / 4 / u,
-               label='U={} {}'.format(u, start[i]))
-    ax[1].plot(temp, 2 * sol[1] / 4 / u)
-ax[0].set_xlim([0, 5])
-ax[0].set_ylim([0.0, .25])
-ax[1].set_xlim([0, .2])
-ax[1].set_ylim([0.0, .15])
-
-ax[0].set_title('Double Occupation')
-ax[0].set_xlabel('$T/D$')
-ax[0].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
-ax[0].legend(loc=0)
-ax[1].set_xlabel('$T/D$')
-ax[1].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
-
-###############################################################################
-# Specific Heat and Entropy
-# -------------------------
+# Specific Heat
+# -------------
 #
+# In the heat capacity it is very noticeable how close one is to the
+# Quantum Critical Point as the Heat capacity is almost diverging for the
+# smallest :math:`U` insulator
 
-fig_cv, ax_cv = plt.subplots(2)
-fig_s, ax_s = plt.subplots(2)
+plt.figure()
+CV = [np.ediff1d(H) / np.ediff1d(temp) for H in avgH]
+for u, cv in zip(U_int, CV):
+    plt.plot(temp[:temp_cut], cv[:temp_cut], label='U={}'.format(u))
 
-for i, sol in enumerate(solutions):
-    u = U_int[i]
+plt.xlim(-0.1, 2.)
+plt.ylim(-0.1, 8.5)
+plt.title('Internal Energy')
+plt.title('Heat Capacity')
+plt.xlabel('$T/D$')
+plt.ylabel(r'$C_V$')
 
-    H = sol[0] + sol[1]
-    CV = np.ediff1d(H) / np.ediff1d(temp)
+###############################################################################
+# Entropy
+# -------
+#
+# Entropy again find two plateaus as first evidenced by the internal
+# energy, it is also noteworthy that entropy seems to remain finite for
+# this insulator and would seem that is the same value for all cases being
+# numerical uncertainties to blame for the curves not matching at zero
+# temperature. It still remains unknown what the finite entropy value
+# corresponds to. In this particula case is :math:`\sim \ln(1.6)`
 
-    ax_cv[0].plot(temp[:-1], CV, label='U={} {}'.format(u, start[i]))
-    ax_cv[1].plot(temp[:-1], CV)
+ENDS = []
+for cv in CV:
+    cv_temp = np.hstack((np.clip(cv, 0, 1) / temp[: -1], 0))
+    s_t = np.array([simps(cv_temp[i:], temp[i:], even='last')
+                    for i in range(len(temp))])
+    ENDS.append(log(16.) - s_t)
 
-    cv_temp = np.hstack((np.clip(CV, 0, 1) / temp[:-1], 0))
-    S = np.array([simps(cv_temp[i:], temp[i:], even='last')
-                  for i in range(len(temp))])
-    ax_s[0].plot(temp, log(16.) - S, label='U={} {}'.format(u, start[i]))
-    ax_s[1].plot(temp, log(16.) - S)
+plt.figure()
+for u, s in zip(U_int, ENDS):
+    plt.plot(temp[:temp_cut], s[:temp_cut], label='U={}'.format(u))
 
-ax_cv[0].set_xlim([0, 3])
-ax_cv[0].set_ylim([-0.02, .9])
-ax_cv[1].set_xlim([0, .3])
-ax_cv[1].set_ylim([-0.02, 0.9])
+plt.title('Entropy')
+plt.xlabel('$T/D$')
+plt.ylabel(r'$S$')
 
-ax_cv[0].set_title('Heat Capacity')
-ax_cv[0].set_xlabel('$T/D$')
-ax_cv[0].set_ylabel(r'$C_V$')
-ax_cv[1].set_xlabel('$T/D$')
-ax_cv[1].set_ylabel(r'$C_V$')
-ax_cv[0].legend(loc=0)
+plt.xlim(-0.01, 0.9)
+plt.yticks([0, log(2), log(2) * 2, log(2) * 4],
+           [0, r'$\ln 2$', r'$2\ln 2$', r'$4\ln 2$'])
 
-ax_s[0].set_title('Entropy')
-ax_s[0].set_xlabel('$T/D$')
-ax_s[0].set_ylabel(r'$S$')
-ax_s[1].set_xlabel('$T/D$')
-ax_s[1].set_ylabel(r'$S$')
-ax_s[0].legend(loc=0)
-
-ax_s[0].set_yticks([0, log(2), log(2) * 2, log(2) * 4])
-ax_s[0].set_yticklabels([0, r'$\ln 2$', r'$2\ln 2$', r'$4\ln 2$'])
-ax_s[1].set_yticks([0, log(2), log(2) * 2, log(2) * 4])
-ax_s[1].set_yticklabels([0, r'$\ln 2$', r'$2\ln 2$', r'$4\ln 2$'])
-
-ax_s[0].set_xlim([0, 3])
-ax_s[0].set_ylim([0.0, 4 * log(2)])
-ax_s[1].set_xlim([0, 0.17])
-ax_s[1].set_ylim([0., 3 * log(2)])
 plt.show()

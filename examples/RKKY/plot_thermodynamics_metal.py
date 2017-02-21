@@ -14,8 +14,7 @@ import dmft.common as gf
 
 
 ###############################################################################
-
-def loop_beta(u_int, tp, betarange, seed='mott gap'):
+def loop_beta(u_int, tp, betarange, seed):
     avgH = []
     for beta in betarange:
         tau, w_n = gf.tau_wn_setup(
@@ -42,21 +41,19 @@ BETARANGE = np.around(np.hstack((1 / np.linspace(1e-3, 0.2, 100),
 
 temp = 1 / BETARANGE
 
-U_int = [1.8, 2., 2.5, 2.8, 2.9]
+U_int = [1.5, 1.8, 2., 2.5, 2.8, 2.9]
 TP = 0.3
 avgH = [loop_beta(u_int, TP, BETARANGE, 'M') for u_int in U_int]
-avgH[-1] = loop_beta(2.9, TP, BETARANGE, 'M')
 
 ###############################################################################
 # Internal Energy
 # ---------------
 #
-# It is very strange as :math:`U` grows into the insulator that there is an
-# increase in internal energy as the system is cooled down. It can
-# also be seen how the insulator has lower internal energy at :math:`U=3.5`
 
+plt.figure()
+temp_cut = sum(temp < 3)
 for u, sol in zip(U_int, avgH):
-    plt.plot(temp[temp < 3], sol[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], sol[:temp_cut], label='U={}'.format(u))
 
 plt.xlim(0, 2.5)
 plt.title('Internal Energy')
@@ -68,13 +65,15 @@ plt.legend(loc=0)
 # Specific Heat
 # -------------
 #
+# The Specific heat behaves as expected from a metal being linear close to
+# zero temperature
 
-
+plt.figure()
 CV = [np.ediff1d(H) / np.ediff1d(temp) for H in avgH]
 for u, cv in zip(U_int, CV):
-    plt.plot(temp[temp < 3], cv[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], cv[:temp_cut], label='U={}'.format(u))
 
-plt.xlim(0, 2.5)
+plt.xlim(-0.1, 2.5)
 plt.title('Internal Energy')
 plt.title('Heat Capacity')
 plt.xlabel('$T/D$')
@@ -84,6 +83,8 @@ plt.ylabel(r'$C_V$')
 # Entropy
 # -------
 #
+# Entropy would seem to try to reach a zero value at zero temperature but
+# it does not achieve this goal for all values of :math:`U`
 
 ENDS = []
 for cv in CV:
@@ -92,8 +93,9 @@ for cv in CV:
                     for i in range(len(temp))])
     ENDS.append(log(16.) - s_t)
 
+plt.figure()
 for u, s in zip(U_int, ENDS):
-    plt.plot(temp[temp < 3], s[temp < 3], label='U={}'.format(u))
+    plt.plot(temp[:temp_cut], s[:temp_cut], label='U={}'.format(u))
 
 plt.title('Entropy')
 plt.xlabel('$T/D$')
