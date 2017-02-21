@@ -53,7 +53,7 @@ ax[1].set_ylabel('U/D')
 ax[1].set_title('Phase Diagram $\\beta={}$\n'
                 'color represents $-\\Im G_{{AA}}(0)$'.format(BETARANGE[1]))
 
-U_int = [1.8, 2.5, 3.5, 4.0]
+U_int = [1.8, 2.5, 3.5, 4.3]
 for u_int in U_int:
     ax[0].axvline(u_int, lw=2, color='r')
 
@@ -63,7 +63,6 @@ ax[1].plot([tpr[tpi]] * 4, U_int, 'ro', ms=10)
 ###############################################################################
 
 def loop_beta(u_int, tp, betarange, seed='mott gap'):
-    giw_s = []
     ekin, epot = [], []
     for beta in betarange:
         tau, w_n = gf.tau_wn_setup(
@@ -83,8 +82,9 @@ def loop_beta(u_int, tp, betarange, seed='mott gap'):
 
     return np.array(ekin), np.array(epot)
 
-BETARANGE = np.around(
-    np.hstack(([1024., 512.], np.logspace(8, -4.5, 78, base=2))), decimals=3)
+BETARANGE = np.around(np.hstack((1 / np.linspace(1e-3, 0.2, 100),
+                                 np.logspace(2.3, -4.5, 42, base=2))),
+                      decimals=3)
 
 temp = 1 / BETARANGE
 
@@ -101,22 +101,20 @@ solutions = [loop_beta(u_int, tpr[tpi], BETARANGE, seed)
 # also be seen how the insulator has lower internal energy at :math:`U=3.5`
 
 fig, ax = plt.subplots(2)
-colors = ['b', 'g', 'c', 'r', 'y', 'k']
 for i, sol in enumerate(solutions):
-    u, c = U_int[i], colors[i]
-    li = c + '--' if 'I' == start[i] else c + '-'
-    ax[0].plot(temp, sol[0] + sol[1], li, label='U={} {}'.format(u, start[i]))
-    ax[1].plot(temp, sol[0] + sol[1], li)
+    u = U_int[i]
+    ax[0].plot(temp, sol[0] + sol[1], label='U={} {}'.format(u, start[i]))
+    ax[1].plot(temp, sol[0] + sol[1])
 ax[0].set_xlim([0, 5])
 ax[0].set_ylim([-0.35, 1.5])
-ax[1].set_xlim([0, .12])
+ax[1].set_xlim([0, .2])
 ax[1].set_ylim([-.35, 0.0])
 
 ax[0].set_title('Internal Energy')
-ax[0].set_xlabel('T/D')
+ax[0].set_xlabel('$T/D$')
 ax[0].set_ylabel(r'$\langle  H \rangle$')
 ax[0].legend(loc=0)
-ax[1].set_xlabel('T/D')
+ax[1].set_xlabel('$T/D$')
 ax[1].set_ylabel(r'$\langle  H \rangle$')
 
 
@@ -126,21 +124,20 @@ ax[1].set_ylabel(r'$\langle  H \rangle$')
 
 fig, ax = plt.subplots(2)
 for i, sol in enumerate(solutions):
-    u, c = U_int[i], colors[i]
-    li = c + '--' if 'I' == start[i] else c + '-'
-    ax[0].plot(temp, 2 * sol[1] / 4 / u, li,
+    u = U_int[i]
+    ax[0].plot(temp, 2 * sol[1] / 4 / u,
                label='U={} {}'.format(u, start[i]))
-    ax[1].plot(temp, 2 * sol[1] / 4 / u, li)
+    ax[1].plot(temp, 2 * sol[1] / 4 / u)
 ax[0].set_xlim([0, 5])
 ax[0].set_ylim([0.0, .25])
 ax[1].set_xlim([0, .2])
 ax[1].set_ylim([0.0, .15])
 
 ax[0].set_title('Double Occupation')
-ax[0].set_xlabel('T/D')
+ax[0].set_xlabel('$T/D$')
 ax[0].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 ax[0].legend(loc=0)
-ax[1].set_xlabel('T/D')
+ax[1].set_xlabel('$T/D$')
 ax[1].set_ylabel(r'$\langle n_\uparrow n_\downarrow \rangle$')
 
 ###############################################################################
@@ -152,44 +149,46 @@ fig_cv, ax_cv = plt.subplots(2)
 fig_s, ax_s = plt.subplots(2)
 
 for i, sol in enumerate(solutions):
-    u, c = U_int[i], colors[i]
-    li = c + '--' if 'I' == start[i] else c + '-'
+    u = U_int[i]
 
     H = sol[0] + sol[1]
     CV = np.ediff1d(H) / np.ediff1d(temp)
 
-    ax_cv[0].plot(temp[:-1], CV, li, label='U={} {}'.format(u, start[i]))
-    ax_cv[1].plot(temp[:-1], CV, li)
+    ax_cv[0].plot(temp[:-1], CV, label='U={} {}'.format(u, start[i]))
+    ax_cv[1].plot(temp[:-1], CV)
 
     cv_temp = np.hstack((np.clip(CV, 0, 1) / temp[:-1], 0))
     S = np.array([simps(cv_temp[i:], temp[i:], even='last')
-                  for i in range(len(temp))]) / 4
-    ax_s[0].plot(temp, log(2.) - S, li, label='U={} {}'.format(u, start[i]))
-    ax_s[1].plot(temp, log(2.) - S, li)
+                  for i in range(len(temp))])
+    ax_s[0].plot(temp, log(16.) - S, label='U={} {}'.format(u, start[i]))
+    ax_s[1].plot(temp, log(16.) - S)
 
 ax_cv[0].set_xlim([0, 3])
-ax_cv[0].set_ylim([-0.08, .83])
-ax_cv[1].set_xlim([0, .125])
-ax_cv[1].set_ylim([-0.08, 0.83])
+ax_cv[0].set_ylim([-0.02, .9])
+ax_cv[1].set_xlim([0, .3])
+ax_cv[1].set_ylim([-0.02, 0.9])
 
 ax_cv[0].set_title('Heat Capacity')
-ax_cv[0].set_xlabel('T/D')
+ax_cv[0].set_xlabel('$T/D$')
 ax_cv[0].set_ylabel(r'$C_V$')
-ax_cv[1].set_xlabel('T/D')
+ax_cv[1].set_xlabel('$T/D$')
 ax_cv[1].set_ylabel(r'$C_V$')
 ax_cv[0].legend(loc=0)
 
-
-ax_s[0].set_xlim([0, 2])
-ax_s[0].set_ylim([0.0, log(2)])
-ax_s[1].set_xlim([0, .125])
-ax_s[1].set_ylim([0., 0.43])
-
 ax_s[0].set_title('Entropy')
-ax_s[0].set_xlabel('T/D')
+ax_s[0].set_xlabel('$T/D$')
 ax_s[0].set_ylabel(r'$S$')
-ax_s[1].set_xlabel('T/D')
+ax_s[1].set_xlabel('$T/D$')
 ax_s[1].set_ylabel(r'$S$')
 ax_s[0].legend(loc=0)
-ax_s[0].axhline(log(2) / 2, ls=":")
-ax_s[1].axhline(log(2) / 2, ls=":")
+
+ax_s[0].set_yticks([0, log(2), log(2) * 2, log(2) * 4])
+ax_s[0].set_yticklabels([0, r'$\ln 2$', r'$2\ln 2$', r'$4\ln 2$'])
+ax_s[1].set_yticks([0, log(2), log(2) * 2, log(2) * 4])
+ax_s[1].set_yticklabels([0, r'$\ln 2$', r'$2\ln 2$', r'$4\ln 2$'])
+
+ax_s[0].set_xlim([0, 3])
+ax_s[0].set_ylim([0.0, 4 * log(2)])
+ax_s[1].set_xlim([0, 0.17])
+ax_s[1].set_ylim([0., 3 * log(2)])
+plt.show()
