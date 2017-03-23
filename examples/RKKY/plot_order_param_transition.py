@@ -78,6 +78,7 @@ sig11_0 = np.ma.masked_array(so_zew[:, :, 1], sd_zew[:, :, 1] < -0.1)
 tpp = (TPR + so_zew[:, :, 1].T)
 
 order = zet - tpp * zet
+order = np.ma.masked_array(order, order < 0)
 cs = plt.contourf(x, y, order, 31)
 plt.colorbar()
 cs = plt.contour(x, y, order, 3, colors='k')
