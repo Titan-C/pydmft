@@ -78,7 +78,8 @@ sig11_0 = np.ma.masked_array(so_zew[:, :, 1], sd_zew[:, :, 1] < -0.1)
 tpp = (TPR + so_zew[:, :, 1].T)
 
 order = zet - tpp * zet
-order = np.ma.masked_array(order, order < 0)
+#order = np.abs(zet - tpp * zet)
+#order = np.ma.masked_array(order, order < -0.01)
 cs = plt.contourf(x, y, order, 31)
 plt.colorbar()
 cs = plt.contour(x, y, order, 3, colors='k')
@@ -86,3 +87,26 @@ plt.clabel(cs, inline=1, fontsize=10, colors='k')
 plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
 plt.savefig('IPT_Uc2_orderparameter.png')
+
+###############################################################################
+# Insulator
+# ---------
+
+sd_zew, so_zew = estimate_zero_w_sigma_U_vs_tp(TPR, UR, 1000., 'ins')
+dw_sig11 = np.ma.masked_array(sd_zew[:, :, 0], sd_zew[:, :, 1] < -0.1)
+zet = 1 / (1 - dw_sig11.T)
+sig11_0 = np.ma.masked_array(so_zew[:, :, 1], sd_zew[:, :, 1] < -0.1)
+tpp = (TPR + so_zew[:, :, 1].T)
+
+order = zet - tpp * zet
+#order = np.abs(zet - tpp * zet)
+#order = np.ma.masked_array(order, order < -0.01)
+order = order[::-1]
+plt.figure()
+cs = plt.contourf(x, y, order, 31)
+plt.colorbar()
+cs = plt.contour(x, y, order, 7, colors='k')
+plt.clabel(cs, inline=1, fontsize=10, colors='k')
+plt.xlabel(r'$t_\perp/D$')
+plt.ylabel(r'$U/D$')
+plt.savefig('IPT_Uc2_orderparameter_ins.png')
