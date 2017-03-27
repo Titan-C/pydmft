@@ -23,7 +23,7 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
 
 
 def measure_gap(gloc, rw):
-    gapped = gloc.imag[rw] > -0.015
+    gapped = gloc.imag[rw] > -0.15
     try:
         lb = w[rw][gapped][0]
         ub = w[rw][gapped][-1]
@@ -72,14 +72,16 @@ rw = np.abs(w) < 1.5
 dw = w[1] - w[0]
 
 
-gaps = estimate_gap_U_vs_tp(TPR, UR, 1000., 'ins')
+gaps = estimate_gap_U_vs_tp(TPR, UR, 1000., 'ins') / 2
 
 plt.figure()
 #gaps = np.ma.masked_array(gaps, gaps <= 0)
-cs = plt.contourf(x, y, gaps, 31)
-plt.colorbar()
-cs = plt.contour(x, y, gaps, 7, colors='k')
+plt.pcolormesh(x, y, gaps)
+# plt.colorbar()
+cs = plt.contour(x, y, gaps, 15, colors='k')
 plt.clabel(cs, inline=1, fontsize=10, colors='k')
 plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
+plt.grid()
+plt.xlim(0, 1.0801)
 plt.savefig('IPT_Uc1_gap.png')
