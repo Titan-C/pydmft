@@ -11,6 +11,7 @@ from scipy.integrate import simps
 import matplotlib.pyplot as plt
 import dmft.dimer as dimer
 import dmft.common as gf
+from dmft.utils import differential_weight
 
 
 ###############################################################################
@@ -36,13 +37,11 @@ def loop_beta(u_int, tp, betarange, seed):
 
     return np.array(avgH)
 
-BETARANGE = np.around(np.hstack((1 / np.linspace(1e-3, 0.2, 140),
-                                 np.logspace(2.3, -4.5, 42, base=2))),
-                      decimals=3)
+fac = np.arctan(25 * np.sqrt(3) / 0.4)
+temp = np.tan(np.linspace(5e-3, fac, 195)) * 0.4 / np.sqrt(3)
+BETARANGE = 1 / temp
 
-temp = 1 / BETARANGE
-
-U_int = [3.3, 3.7, 4.7, 5.2]
+U_int = [3.4, 3.7, 4.7, 5.2]
 TP = 0.3
 avgH = [loop_beta(u_int, TP, BETARANGE, 'I') for u_int in U_int]
 
@@ -73,16 +72,17 @@ plt.legend(loc=0)
 # smallest :math:`U` insulator
 
 plt.figure()
-CV = [np.ediff1d(H) / np.ediff1d(temp) for H in avgH]
-for u, cv in zip(U_int, CV):
-    plt.plot(temp[:temp_cut], cv[:temp_cut], label='U={}'.format(u))
+CV = [differential_weight(H) / differential_weight(temp) for H in avgH]
+for u, cv, h in zip(U_int, CV, avgH):
+    plt.plot(temp[: temp_cut], cv[: temp_cut], lw=1, label='U={}'.format(u))
 
 plt.xlim(-0.1, 2.)
-plt.ylim(-0.1, 8.5)
+plt.ylim(-0.1, 5)
 plt.title('Internal Energy')
 plt.title('Heat Capacity')
 plt.xlabel('$T/D$')
 plt.ylabel(r'$C_V$')
+plt.legend(loc=0)
 
 ###############################################################################
 # Entropy
@@ -97,18 +97,21 @@ plt.ylabel(r'$C_V$')
 
 ENDS = []
 for cv in CV:
-    cv_temp = np.hstack((np.clip(cv, 0, 1) / temp[: -1], 0))
+    cv_temp = np.clip(cv, 0, 1) / temp
     s_t = np.array([simps(cv_temp[i:], temp[i:], even='last')
                     for i in range(len(temp))])
+    #cv_t_dt = cv_temp * differential_weight(temp)
+    #s_t = np.array([sum(cv_t_dt[:i + 1]) for i in range(len(temp))])[::-1]
     ENDS.append(log(16.) - s_t)
 
 plt.figure()
 for u, s in zip(U_int, ENDS):
-    plt.plot(temp[:temp_cut], s[:temp_cut], label='U={}'.format(u))
+    plt.plot(temp[: temp_cut], s[: temp_cut], label='U={}'.format(u))
 
 plt.title('Entropy')
 plt.xlabel('$T/D$')
 plt.ylabel(r'$S$')
+plt.legend(loc=0)
 
 plt.xlim(-0.01, 0.9)
 plt.yticks([0, log(2), log(2) * 2, log(2) * 4],

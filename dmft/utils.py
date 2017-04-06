@@ -80,3 +80,10 @@ def dc_conductivity(lat_A1, lat_A2, dnf, w, dosde):
                         for A1, A2 in zip(lat_A1, lat_A2)])
     resig = (dosde * lat_sig).sum(axis=0)
     return resig
+
+
+def differential_weight(grid):
+    r"""For the grid array calculate the half-way differentials"""
+
+    mw = (grid[1:] - grid[:-1]) / 2
+    return np.concatenate((mw, [0])) + np.concatenate(([0], mw))
