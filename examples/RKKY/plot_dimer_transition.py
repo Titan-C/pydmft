@@ -12,7 +12,7 @@ phenomenon of the quasiparticles opening a band gap.
     :ref:`sphx_glr_auto_examples_RKKY_plot_order_param_transition.py`
 """
 
-# Created Wed Feb 15 19:19:47 2017
+# author: Óscar Nájera
 
 from __future__ import division, absolute_import, print_function
 
