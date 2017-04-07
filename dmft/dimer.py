@@ -180,6 +180,26 @@ def get_sigmaiw(giw_d, giw_o, w_n, tp):
 
 
 def ipt_dmft_loop(BETA, u_int, tp, giw_d, giw_o, tau, w_n, conv=1e-12, t=.5):
+    """Self-consistently solve dimer DMFT problem with ipt solver
+
+    Parameters
+    ----------
+    BETA : float - inverse temperature
+    u_int : float - onsite interaction
+    tp : float - dimer hybridization
+    giw_d : 1D ndarray complex - diagonal Green function G_11
+    giw_o : 1D ndarray complex - off-diagonal Green function G_12
+    tau : 1D ndarray real - imaginary time array
+    w_n : 1D ndarray real - matsubara frequency points
+    conv : float - convergence criteria
+    t : float - renormalized lattice hopping
+
+    Returns
+    -------
+    giw_d : 1D ndarray complex - diagonal Green function G_11
+    giw_o : 1D ndarray complex - off-diagonal Green function G_12
+    loops : int - iterations for converge
+"""
 
     converged = False
     loops = 0
