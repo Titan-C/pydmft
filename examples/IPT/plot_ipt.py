@@ -19,7 +19,7 @@ import matplotlib.pylab as plt
 
 
 from dmft.ipt_imag import dmft_loop
-from dmft.common import greenF, tau_wn_setup, pade_continuation
+from dmft.common import greenF, tau_wn_setup, pade_continuation, fermi_dist
 from dmft.utils import optical_conductivity
 
 U = 2.7
@@ -30,7 +30,7 @@ eps_k = np.linspace(-1, 1, 61)
 dos = np.exp(-2 * eps_k**2) / np.sqrt(np.pi / 2)
 de = eps_k[1] - eps_k[0]
 dosde = (dos * de).reshape(-1, 1)
-nf = gf.fermi_dist(omega, BETA)
+nf = fermi_dist(omega, BETA)
 
 ###############################################################################
 # Insulator Calculations

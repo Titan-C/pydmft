@@ -63,9 +63,7 @@ def estimate_gap_U_vs_tp(tpr, u_range, beta, phase):
 
     return gaps
 
-
-TPR = np.arange(0, 1.1, 0.05)
-#TPR = [1.05]
+TPR = np.arange(0, 1.1, 0.02)
 UR = np.arange(0, 4.5, 0.1)[::-1]
 x, y = np.meshgrid(TPR, UR)
 
