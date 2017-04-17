@@ -380,7 +380,7 @@ def extract_flat_gf_iter(filename, u_int, last):
     return np.array(dat)
 
 
-def optical_conductivity(beta, ss, sa, omega, tp, eps_k):
+def optical_conductivity(beta, ss, sa, omega, tp, eps_k, eta=4e-2, crop=True):
     """Calculate the contributions to the optical_conductivity in the dimer
 
     Parameters
@@ -391,6 +391,8 @@ def optical_conductivity(beta, ss, sa, omega, tp, eps_k):
     omega : 1D float ndarray - real frequency grid (equispaced)
     tp : float - Dimer Hybridization
     eps_k : 1D float ndarray - Energy level bandwidth (equispaced)
+    eta : float - broadening for A(eps_k, w)
+    crop : bool - Return only positive frequencies
 
     Returns
     -------
@@ -407,15 +409,16 @@ def optical_conductivity(beta, ss, sa, omega, tp, eps_k):
     def lat_gf(eps_k, w_sig):
         return 1 / np.add.outer(-eps_k, w_sig)
 
-    lat_As = -lat_gf(eps_k, omega - tp - ss + 4e-2j).imag / np.pi
-    lat_Aa = -lat_gf(eps_k, omega + tp - sa + 4e-2j).imag / np.pi
+    lat_As = -lat_gf(eps_k, omega - tp - ss + eta * 1j).imag / np.pi
+    lat_Aa = -lat_gf(eps_k, omega + tp - sa + eta * 1j).imag / np.pi
 
-    a = opt_sig(lat_Aa, lat_Aa, nfp, omega, rhode)
-    a += opt_sig(lat_As, lat_As, nfp, omega, rhode)
-    b = opt_sig(lat_Aa, lat_As, nfp, omega, rhode)
-    b += opt_sig(lat_As, lat_Aa, nfp, omega, rhode)
+    intra_band = opt_sig(lat_Aa, lat_Aa, nfp, omega, rhode)
+    intra_band += opt_sig(lat_As, lat_As, nfp, omega, rhode)
+    inter_band = opt_sig(lat_Aa, lat_As, nfp, omega, rhode)
+    inter_band += opt_sig(lat_As, lat_Aa, nfp, omega, rhode)
 
-    intra_band = a[pos_freq]
-    inter_band = b[pos_freq]
+    if crop:
+        intra_band = a[pos_freq]
+        inter_band = b[pos_freq]
 
     return intra_band, inter_band
