@@ -112,4 +112,11 @@ plt.clabel(cs, inline=1, fontsize=10, colors='k')
 plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
 plt.grid()
+
+merge_band = np.array([(0.45, 1.9), (0.5, 2.3), (0.55, 3), (0.58, 3.2)]).T
+plt.plot(merge_band[0], merge_band[1], 'C1o--')
+
+selfenergy = np.array([(0.45, 1.9), (0.55, 2.3), (0.9, 3), (1.08, 3.65)]).T
+plt.plot(selfenergy[0], selfenergy[1], 'C3s--')
+
 plt.savefig('IPT_Uc1_orderparameter_ins.png')
