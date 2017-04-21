@@ -9,30 +9,27 @@ Transition on free energy
 
 from __future__ import division, absolute_import, print_function
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import trapz
 import matplotlib.pylab as plt
 
 
 from dmft.ipt_imag import dmft_loop, single_band_ipt_solver
-from dmft.common import greenF, tau_wn_setup, pade_continuation, fermi_dist
+from dmft.common import greenF, tau_wn_setup
 
-U = 3.
-BETA = 100.
-tau, w_n = tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=2**9))
+U = 3
+BETA = 1 / 0.01
+tau, w_n = tau_wn_setup(dict(BETA=BETA, N_MATSUBARA=2**11))
 
 ig_iwn, is_iwn = dmft_loop(
-    U, 0.5, -1.j / (w_n - 1 / w_n), w_n, tau, conv=1e-12)
+    U, 0.5, -1.j / (w_n - 1 / w_n), w_n, tau, conv=1e-10)
 
 mg_iwn, s_iwn = dmft_loop(U, 0.5, greenF(w_n), w_n, tau, conv=1e-10)
-plt.plot(w_n, ig_iwn.imag, 's:')
-plt.plot(w_n, mg_iwn.imag, 's:')
 solution_diff = mg_iwn - ig_iwn  # zdelta
-plt.plot(w_n, solution_diff.imag, 'o:')
-plt.show()
+#plt.plot(w_n, ig_iwn.imag, '+')
 
 
 def mix(gmet, gins, l):
-    return (1 - l) * gmet + l * gins
+    return (1 - l) * gins + l * gmet
 
 
 def one_loop(giw, t, u_int):
@@ -43,18 +40,15 @@ def one_loop(giw, t, u_int):
 
 
 integrand = []
-mix_range = np.linspace(0, 1, 101)
+mix_range = np.linspace(0, 1, 201)
 for l in mix_range:
     g_in = mix(mg_iwn, ig_iwn, l)
     g_grad = one_loop(g_in, 0.5, U) - g_in
-    integrand.append(np.dot(g_grad, solution_diff))
+    integrand.append(np.dot(g_grad, solution_diff) / BETA)
 
 
-plt.plot(np.real(integrand))
-plt.plot(np.imag(integrand))
+fe = [0] + [trapz(np.real(integrand[:i]), mix_range[:i])
+            for i in range(2, 202)]
+plt.plot(mix_range, np.array(fe), label='T={:.3}'.format(1 / BETA))
 plt.show()
-
-fe = [0] + [simps(np.real(integrand[:i]), mix_range[:i])
-            for i in range(1, 101)]
-plt.plot(mix_range, fe)
-plt.show()
+plt.legend(loc=0)
