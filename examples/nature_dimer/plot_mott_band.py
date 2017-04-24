@@ -15,11 +15,7 @@ import matplotlib.pyplot as plt
 
 import dmft.common as gf
 import dmft.dimer as dimer
-
-plt.matplotlib.rcParams.update({'axes.labelsize': 22,
-                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
-                                'axes.titlesize': 22,
-                                'mathtext.fontset': 'cm'})
+from dmft.ipt_imag import dimer_sigma
 
 
 def measure_gap(gloc, rw):
@@ -78,7 +74,7 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
             giw_d, giw_o = 1j * gfs[i][0], gfs[i][1]
             g0iw_d, g0iw_o = dimer.self_consistency(
                 1j * w_n, giw_d, giw_o, 0., tp, 0.25)
-            siw_d, siw_o = ipt.dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
+            siw_d, siw_o = dimer_sigma(u_int, tp, g0iw_d, g0iw_o, tau, w_n)
             sd_zew.append(np.polyfit(w_n[:2], siw_d[:2].imag, 1))
             so_zew.append(np.polyfit(w_n[:2], siw_o[:2].real, 1))
 
@@ -87,7 +83,8 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
 
     return sd_zew, so_zew
 
-TPR = np.arange(0, 1.11, 0.05)
+
+TPR = np.arange(0, 1.1, 0.02)
 #TPR = [1.05]
 UR = np.arange(0, 4.5, 0.1)[::-1]
 x, y = np.meshgrid(TPR, UR)
@@ -106,10 +103,10 @@ w = np.linspace(-5, 5, 2**10)
 rw = np.abs(w) < 1.5
 dw = w[1] - w[0]
 
-#gaps = estimate_gap_U_vs_tp(TPR, UR, 1000., 'ins') / 2
+gaps = estimate_gap_U_vs_tp(TPR, UR, 1000., 'ins') / 2
 
 plt.figure()
-#gaps = np.ma.masked_array(gaps, gaps <= 0)
+gaps = np.ma.masked_array(gaps, gaps <= 0)
 eta_plus_gap = order + gaps
 plt.pcolormesh(x, y, eta_plus_gap)
 cs = plt.contour(x, y, eta_plus_gap, 15, colors='k')
