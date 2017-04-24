@@ -20,9 +20,6 @@ import dmft.dimer as dimer
 import dmft.common as gf
 import dmft.ipt_imag as ipt
 
-plt.matplotlib.rcParams.update({'figure.figsize': (8, 8), 'axes.labelsize': 22,
-                                'axes.titlesize': 22, 'figure.autolayout': True})
-
 
 def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=256))
@@ -51,6 +48,7 @@ def loop_u_tp(u_range, tprange, beta, seed='mott gap'):
     print(np.array(iterations))
     # last division in energies because I want per spin epot
     return np.array(giw_s), np.array(sigma_iw), np.array(ekin) / 4, np.array(epot) / 4, w_n
+
 
 # calculating multiple regions
 fac = np.arctan(.55 * np.sqrt(3) / .15)
@@ -97,6 +95,7 @@ plt.savefig("dimer_tp0.3_docc.pdf",
 
 def fit_cube_lin(eta, c, p, q, s):
     return (c * eta**3 + p * eta + s) / (1 + q * eta)
+
 
 plt.figure()
 for dd, dc, (beta, uc) in zip(data, d_c, bet_uc):
