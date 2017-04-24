@@ -20,11 +20,6 @@ from dmft import ipt_real
 from dmft import ipt_imag
 import dmft.dimer as dimer
 
-from slaveparticles.quantum.operators import fermi_dist
-
-# When True, automatically adjust subplot
-plt.rcParams['figure.autolayout'] = True
-
 
 def ipt_u_tp(u_int, tp, beta, seed='ins'):
 
@@ -91,7 +86,7 @@ w = np.linspace(-4, 4, 2**12)
 dw = w[1] - w[0]
 
 BETA = 512.
-nfp = fermi_dist(w, BETA)
+nfp = gf.fermi_dist(w, BETA)
 
 plt.close('all')
 fig_g, axg = plt.subplots(2, 2, sharex=True, sharey=True)
