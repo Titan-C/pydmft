@@ -1,27 +1,18 @@
+
+.. _dmft_api:
+
 Modules Reference API
 =====================
 
+.. autosummary::
+   :toctree: gen_modules/
+   :template: module.rst
 
-.. automodule:: dmft.common
-    :members:
-
-.. automodule:: dmft.twosite
-    :members:
-
-.. automodule:: dmft.ipt_imag
-    :members:
-
-.. automodule:: dmft.ipt_real
-    :members:
-
-.. automodule:: dmft.hirschfye
-    :members:
-
-.. automodule:: dmft.dimer
-    :members:
-
-.. automodule:: dmft.plot.hf_single_site
-    :members:
-
-.. automodule:: dmft.utils
-    :members:
+   dmft.common
+   dmft.twosite
+   dmft.ipt_imag
+   dmft.ipt_real
+   dmft.hirschfye
+   dmft.dimer
+   dmft.utils
+   dmft.plot.hf_single_site

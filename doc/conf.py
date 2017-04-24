@@ -44,6 +44,9 @@ extensions = [
     'sphinx_gallery.gen_gallery',
 ]
 
+# generate autosummary even if no references
+autosummary_generate = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -276,6 +279,7 @@ texinfo_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 sphinx_gallery_conf = {
+    'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': 'dmft',
     'reference_url': {
         'dmft': None,
