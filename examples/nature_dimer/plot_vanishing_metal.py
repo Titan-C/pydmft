@@ -18,11 +18,6 @@ import dmft.dimer as dimer
 
 BETA = 756.
 
-plt.rcParams['ytick.labelsize'] = 'medium'
-plt.rcParams['xtick.labelsize'] = 'medium'
-# When True, automatically adjust subplot
-plt.rcParams['figure.autolayout'] = False
-
 
 def zero_f_meas(giw_d, giw_o, murange, tp, u_cut):
     sd_zew, so_zew = [], []
