@@ -19,6 +19,7 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.interpolate import splrep, splev
 
 import dmft.common as gf
 import dmft.ipt_real as ipt
@@ -31,7 +32,7 @@ plt.matplotlib.rcParams.update({'axes.labelsize': 22,
 w = np.linspace(-4, 4, 2**12)
 dw = w[1] - w[0]
 
-beta = 800.
+beta = 400.
 nfp = gf.fermi_dist(w, beta)
 
 
@@ -100,10 +101,10 @@ for i, U in enumerate(urange):
         U, tp, nfp, w, dw, gss, gsa, conv=1e-4)
     shift = plot_row(gss, gsa, ss, ax, i)
 
-plt.xlabel(r'$\omega$')
+plt.xlabel(r'$\omega/ZD$')
 plt.xlim([-4, 4])
 plt.ylim([shift, 2.1])
 plt.yticks(0.5 - 2.1 * np.arange(len(urange)), ['U=' + str(u) for u in urange])
 
 # plt.savefig('dimer_transition_spectra_tp0.8_scaling.pdf')
-plt.close('all')
+# plt.close('all')
