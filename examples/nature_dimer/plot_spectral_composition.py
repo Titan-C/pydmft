@@ -93,12 +93,29 @@ def plot_spectral(omega, tp, gss, ss, axes, xlim):
 BETA = 512.
 
 w = np.linspace(-4, 4, 2**12)
+###############################################################################
+# Along :math:`U_{c_1}`
+# ---------------------
 
 for i, (U, tp, xlim) in enumerate([
     (2.2, 0.3, (-4, 3)),
     (1.67, 0.55, (-1.52, 1)),
     (1.42, 0.8, (-1, 0.5)),
 ]):
+
+    fig, ax = plt.subplots(1, 3, sharey=True, gridspec_kw=dict(
+        wspace=0.05, hspace=0.1, width_ratios=[1, 1, 2.4]))
+    gss, ss, w = ipt_g_s(U, tp, BETA, 'ins', w)
+    plot_spectral(w, tp, gss, ss, ax, xlim)
+    ax[2].set_title(r'$U/D={}$ ; $t_\perp/D={}$'.format(U, tp))
+
+###############################################################################
+# Along the Mott insulator
+# ------------------------
+for i, (U, tp, xlim) in enumerate([
+    (2.3, 0.3, (-4, 2.7)),
+    (2.3, 0.48, (-4, 2.7)),
+        (2.3, 0.85, (-2.2, 2.2))]):
 
     fig, ax = plt.subplots(1, 3, sharey=True, gridspec_kw=dict(
         wspace=0.05, hspace=0.1, width_ratios=[1, 1, 2.4]))

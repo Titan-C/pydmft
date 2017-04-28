@@ -64,6 +64,9 @@ plt.yticks(0.5 - 2.1 * np.arange(len(urange)), ['U=' + str(u) for u in urange])
 # The :math:`t_\perp/D=0.8` scenario
 # ==================================
 #
+w = np.linspace(-8, 8, 2**14)
+dw = w[1] - w[0]
+nfp = gf.fermi_dist(w, beta)
 tp = 0.8
 gss = gf.semi_circle_hiltrans(w + 5e-3j - tp)
 gsa = gf.semi_circle_hiltrans(w + 5e-3j + tp)
