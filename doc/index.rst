@@ -9,6 +9,7 @@ Welcome to Learn DMFT's documentation!
 Contents:
 
 .. toctree::
+   :maxdepth: 2
 
    energies
    twosite
