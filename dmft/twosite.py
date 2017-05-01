@@ -2,6 +2,7 @@
 """
 Two Site Dynamical Mean Field Theory
 ====================================
+
 The two site DMFT approach given by M. Potthoff [Potthoff2001]_ on how to
 treat the impurity bath as a sigle site of the DMFT. Work is around a single
 impurity Anderson model.
@@ -23,9 +24,9 @@ from dmft.common import matsubara_freq, gw_invfouriertrans
 def m2_weight(t):
     """Calculates the :math:`M_2^{(0)}=\\int  x^2 \\rho_0(x)dx` which is the
        variance of the non-interacting density of states of a Bethe Lattice"""
-    second_moment = lambda x: x*x*dos.bethe_lattice(x, t)
+    def second_moment(x): return x * x * dos.bethe_lattice(x, t)
 
-    return quad(second_moment, -2*t, 2*t)[0]
+    return quad(second_moment, -2 * t, 2 * t)[0]
 
 
 class TwoSite(object):
@@ -73,19 +74,19 @@ class TwoSite(object):
 
         d_up, d_dw, c_up, c_dw = self.oper
 
-        H = {'impurity': d_up.T*d_up + d_dw.T*d_dw,
-             'bath': c_up.T*c_up + c_dw.T*c_dw,
-             'u_int': d_up.T*d_up*d_dw.T*d_dw,
-             'hyb': d_up.T*c_up + d_dw.T*c_dw + c_up.T*d_up + c_dw.T*d_dw}
+        H = {'impurity': d_up.T * d_up + d_dw.T * d_dw,
+             'bath': c_up.T * c_up + c_dw.T * c_dw,
+             'u_int': d_up.T * d_up * d_dw.T * d_dw,
+             'hyb': d_up.T * c_up + d_dw.T * c_dw + c_up.T * d_up + c_dw.T * d_dw}
 
         return H
 
     def update_H(self, e_c, u_int, hyb):
         """Updates impurity hamiltonian and diagonalizes it"""
-        H = - self.mu*self.H_operators['impurity'] + \
-            (e_c - self.mu)*self.H_operators['bath'] + \
-            u_int*self.H_operators['u_int'] + \
-            hyb*self.H_operators['hyb']
+        H = - self.mu * self.H_operators['impurity'] + \
+            (e_c - self.mu) * self.H_operators['bath'] + \
+            u_int * self.H_operators['u_int'] + \
+            hyb * self.H_operators['hyb']
 
         self.eig_energies, self.eig_states = diagonalize(H.todense())
 
@@ -100,7 +101,7 @@ class TwoSite(object):
         hyb2 = hyb**2
         omega = self.omega
         return (omega - e_c + self.mu) / \
-               ((omega + self.mu)*(omega - e_c + self.mu) - hyb2)
+               ((omega + self.mu) * (omega - e_c + self.mu) - hyb2)
 
     def solve(self, e_c, u_int, hyb):
         """Solves the impurity problem"""
@@ -109,21 +110,21 @@ class TwoSite(object):
         self.GF['Imp G'] = gf_lehmann(self.eig_energies, self.eig_states,
                                       d_up_dag, self.beta, self.omega)
         self.GF['Imp G$_0$'] = self.imp_free_gf(e_c, hyb)
-        self.GF[r'$\Sigma$'] = 1/self.GF['Imp G$_0$'] - 1/self.GF['Imp G']
+        self.GF[r'$\Sigma$'] = 1 / self.GF['Imp G$_0$'] - 1 / self.GF['Imp G']
 
     def hyb_V(self):
         """Returns the hybridization parameter :math:`V=\\sqrt{zM_2}`"""
-        return np.sqrt(self.imp_z()*self.m2)
+        return np.sqrt(self.imp_z() * self.m2)
 
     def ocupations(self, top=2):
         """gets the ocupation of the impurity"""
-        return np.asarray([self.expected((f.T*f).todense())
-                            for f in self.oper[:top]])
+        return np.asarray([self.expected((f.T * f).todense())
+                           for f in self.oper[:top]])
 
     def double_ocupation(self):
         """Calculates the double ocupation of the impurity"""
         d_up, d_dw = self.oper[:2]
-        return self.expected((d_up.T*d_up*d_dw.T*d_dw).todense())
+        return self.expected((d_up.T * d_up * d_dw.T * d_dw).todense())
 
 
 class TwoSite_Real(TwoSite):
@@ -142,12 +143,12 @@ class TwoSite_Real(TwoSite):
         """Calculates the impurity quasiparticle weight from the real part
            of the self energy"""
         w = self.omega
-        dw = w[1]-w[0]
+        dw = w[1] - w[0]
         interval = (-dw <= w) * (w <= dw)
 
         sigma = self.GF[r'$\Sigma$'].real[interval]
         dsigma = np.polyfit(w[interval], sigma, 1)[0]
-        zet = 1/(1 - dsigma)
+        zet = 1 / (1 - dsigma)
 
         if zet < 1e-3:
             return 0.
@@ -156,15 +157,14 @@ class TwoSite_Real(TwoSite):
 
 
 def matsubara_Z(im_sigma, beta):
-
     """Calculates the impurity quasiparticle weight from the imaginary
     part of the self energy in the matsubara frequencies"""
 
     if im_sigma[1] > im_sigma[0]:
         return 0.
 
-    dw = np.pi/beta
-    zet = 1/(1 - im_sigma[0]/dw)
+    dw = np.pi / beta
+    zet = 1 / (1 - im_sigma[0] / dw)
     return zet
 
 
@@ -174,7 +174,7 @@ class TwoSite_Matsubara(TwoSite):
     def __init__(self, beta=100, t=1, nfreq=20):
         super(TwoSite_Matsubara, self).__init__(beta, t)
 
-        self.omega = 1j*matsubara_freq(beta, nfreq)
+        self.omega = 1j * matsubara_freq(beta, nfreq)
         self.solve(0, 0, 0)
 
     def imp_z(self):
@@ -188,9 +188,9 @@ def refine_mat_solution(end_solver, u_int):
 
     beta = end_solver.beta
     sim = TwoSite_Matsubara(beta, end_solver.t, beta)
-    sim.omega = 1j*matsubara_freq(beta)
+    sim.omega = 1j * matsubara_freq(beta)
     sim.mu = end_solver.mu
-    sim.solve(u_int/2, u_int, end_solver.hyb_V())
+    sim.solve(u_int / 2, u_int, end_solver.hyb_V())
 
     return sim
 
@@ -207,28 +207,30 @@ def dmft_loop(u_int=np.arange(0, 3.2, 0.05), axis='real',
 
     for U in u_int:
         sim = solver(beta, hop)
-        sim.mu = U/2
+        sim.mu = U / 2
         convergence = False
         while not convergence:
             old = hyb
-            sim.solve(U/2, U, old)
+            sim.solve(U / 2, U, old)
             hyb = sim.hyb_V()
-            hyb = (hyb + old)/2
+            hyb = (hyb + old) / 2
             convergence = np.abs(old - hyb) < 1e-5
 
         print(U, hyb, sim.ocupations())
-        sim.solve(U/2, U, hyb)
+        sim.solve(U / 2, U, hyb)
         hyb = sim.hyb_V()
         res.append((U, sim.imp_z(), sim))
     return np.asarray(res)
 
+
 if __name__ == "__main__":
-    u = [0.1, 1, 2, 2.7, 3.3] # np.arange(0, 3.2, 0.1)
+    u = [0.1, 1, 2, 2.7, 3.3]  # np.arange(0, 3.2, 0.1)
     sim = dmft_loop(u, beta=50, axis='matsubara')
     for s in sim:
         out = refine_mat_solution(s[2], s[0])
-        plt.plot(out.omega.imag, out.GF[r'$\Sigma$'].imag,'+-', label='U={}'.format(s[0]))
-    plt.xlim([-5,5])
+        plt.plot(out.omega.imag,
+                 out.GF[r'$\Sigma$'].imag, '+-', label='U={}'.format(s[0]))
+    plt.xlim([-5, 5])
     plt.figure()
 
     tau = np.linspace(0, 50, 1001)
