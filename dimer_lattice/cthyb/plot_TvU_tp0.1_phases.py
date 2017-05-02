@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
-The Dimer phase diagram on temperature
-======================================
+The Dimer :math:`t_\perp/D=0.1` phase diagram on temperature
+============================================================
 
-Collect data on double occupation and plot the phase diagram
+Collect data on double occupation and plot the phase diagram.
+
+.. seealso::
+     :ref:`sphx_glr_dimer_lattice_cthyb_extract_docc_tp.py`
 """
 # Author: Óscar Nájera
 
@@ -15,10 +18,6 @@ from glob import glob
 import numpy as np
 from matplotlib.mlab import griddata
 import matplotlib.pyplot as plt
-
-###############################################################################
-# Dimer :math:`t_\perp/D=0.1` Phase diagram
-# -----------------------------------------
 
 data = np.load('met_tp0.1_UTd.npz', encoding='bytes')
 md_list, mtemp_list, mu_list = data['docc'], data['temp'], data['u_int']

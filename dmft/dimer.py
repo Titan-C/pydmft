@@ -418,7 +418,7 @@ def optical_conductivity(beta, ss, sa, omega, tp, eps_k, eta=4e-2, crop=True):
     inter_band += opt_sig(lat_As, lat_Aa, nfp, omega, rhode)
 
     if crop:
-        intra_band = a[pos_freq]
-        inter_band = b[pos_freq]
+        intra_band = intra_band[pos_freq]
+        inter_band = inter_band[pos_freq]
 
     return intra_band, inter_band

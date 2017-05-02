@@ -41,7 +41,7 @@ def estimate_gap_U_vs_tp(tpr, u_range, beta, phase):
 
     gaps = []
     for tp in tpr:
-        filestr = '/home/oscar/dev/dmft-learn/examples/RKKY/disk/phase_Dimer_ipt_{}_B{}/tp{:.3}/giw.npy'.format(
+        filestr = 'disk/phase_Dimer_ipt_{}_B{}/tp{:.3}/giw.npy'.format(
             phase, beta, tp)
         gfs = np.load(filestr)
 
@@ -66,7 +66,7 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
         dict(BETA=beta, N_MATSUBARA=max(2**ceil(log(8 * beta) / log(2)), 256)))
 
     for tp in tpr:
-        filestr = '/home/oscar/dev/dmft-learn/examples/RKKY/disk/phase_Dimer_ipt_{}_B{}/tp{:.3}/giw.npy'.format(
+        filestr = 'disk/phase_Dimer_ipt_{}_B{}/tp{:.3}/giw.npy'.format(
             phase, beta, tp)
         gfs = np.load(filestr)
 
@@ -115,4 +115,4 @@ plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
 plt.grid()
 plt.xlim(0, 1.0801)
-plt.savefig('IPT_eta_plus_half_gap.png')
+# plt.savefig('IPT_eta_plus_half_gap.png')

@@ -12,8 +12,8 @@ the insulator to metal transition occurs around :math:`\beta D \sim
 50`
 
 .. seealso::
-    :ref:`sphx_glr_auto_examples_RKKY_plot_dimer_transition.py`
-    :ref:`sphx_glr_auto_examples_RKKY_plot_order_param_transition.py`
+    :ref:`sphx_glr_dimer_lattice_nature_dimer_plot_dimer_transition.py`
+    :ref:`sphx_glr_dimer_lattice_nature_dimer_plot_order_param_transition.py`
 """
 
 # author: Óscar Nájera
