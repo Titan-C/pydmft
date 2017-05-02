@@ -279,6 +279,8 @@ texinfo_documents = [
 intersphinx_mapping = {'http://docs.python.org/': None}
 
 sphinx_gallery_conf = {
+    'examples_dirs': ["../examples", "../dimer_lattice"],
+    'gallery_dirs': ["auto_examples", "dimer_lattice"],
     'backreferences_dir': 'gen_modules/backreferences',
     'doc_module': 'dmft',
     'reference_url': {

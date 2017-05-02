@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Learn DMFT's documentation!
-======================================
+Welcome to PyDMFT's documentation!
+==================================
+
+PyDMFT is a library to study under the framework of Dynamical Mean Field Theory (DMFT) the behavior of interacting electrons.
 
 Contents:
 
@@ -15,6 +17,7 @@ Contents:
    twosite
    reference
    auto_examples/index
+   dimer_lattice/index
 
 
 Indices and tables
