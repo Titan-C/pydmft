@@ -2,6 +2,14 @@
 Two site Dynamical Mean-Field Theory
 ====================================
 
+This document is about the work presented in the following publication:
+
+- Potthoff, M. (2001). Two-site dynamical mean-field theory. Physical
+  Review B, 64(16),
+  165114. http://dx.doi.org/10.1103/PhysRevB.64.165114
+
+The code to generate this figures can be found inside :ref:`twosite_examples`.
+
 The Dynamical mean field theory has become a valuable method to investigate the physics
 of strongly correlated electrons in a lattice. It consist of a procedure in
 which the original lattice problem is mapped into an effective impurity model
