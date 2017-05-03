@@ -65,7 +65,24 @@ def estimate_zero_w_sigma_U_vs_tp(tpr, u_range, beta, phase):
 
     return sd_zew, so_zew
 
+###############################################################################
+# Metal
+# -----
 
+
+Uc1 = np.array([(0.0, 2.6), (0.05, 2.58), (0.07, 2.55),
+                (0.1, 2.5), (0.12, 2.47), (0.15, 2.42), (0.17, 2.39),
+                (0.2, 2.34), (0.23, 2.29), (0.25, 2.25), (0.27, 2.19),
+                (0.3, 2.135), (0.32, 2.115), (0.35, 2.03),
+                (0.4, 1.93), (0.45, 1.82), (0.47, 1.785),
+                (0.5, 1.73), (0.55, 1.65),
+                (0.6, 1.6), (0.7, 1.5)]).T
+Uc = np.array([(0.7, 1.5), (0.75, 1.45),
+               (0.8, 1.32), (0.86, 1.16),
+               (0.9, 1), (0.98, 0.6), (0.99, 0.37), (1, 0)]).T
+Uc2 = np.array([(0, 3.41), (0.02, 4), (0.04, 4.2), (0.08, 4.2),
+                (0.12, 4.1), (0.18, 4), (0.3, 3.5), (0.37, 3.15),
+                (0.42, 2.8), (0.61, 1.87), (0.71, 1.52)]).T
 TPR = np.arange(0, 1.1, 0.02)
 UR = np.arange(0, 4.5, 0.1)
 f, ax = plt.subplots()
@@ -88,6 +105,9 @@ plt.clabel(cs, inline=1, fontsize=10, colors='k')
 plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
 plt.grid()
+plt.plot(Uc1[0], Uc1[1] + 0.03, lw=4, color='C6')
+plt.plot(Uc2[0], Uc2[1], lw=4, color='C2')
+plt.plot(Uc[0], Uc[1] + 0.03, lw=4, color='C7')
 plt.savefig('IPT_Uc2_orderparameter.png')
 
 ###############################################################################
@@ -113,10 +133,26 @@ plt.xlabel(r'$t_\perp/D$')
 plt.ylabel(r'$U/D$')
 plt.grid()
 
+plt.plot(Uc1[0], Uc1[1] + 0.03, lw=4, color='C6')
+plt.plot(Uc2[0], Uc2[1], lw=4, color='C2')
+plt.plot(Uc[0], Uc[1] + 0.03, lw=4, color='C7')
+
 merge_band = np.array([(0.45, 1.9), (0.5, 2.3), (0.55, 3), (0.58, 3.2)]).T
 plt.plot(merge_band[0], merge_band[1], 'C1o--')
 
 selfenergy = np.array([(0.45, 1.9), (0.55, 2.3), (0.9, 3), (1.08, 3.65)]).T
 plt.plot(selfenergy[0], selfenergy[1], 'C3s--')
 
+W_vanish = np.array([(0.5, 1.73), (0.9, 2.03), (1.08, 2.64)]).T
+plt.plot(W_vanish[0], W_vanish[1], 'C8d--')
+
 plt.savefig('IPT_Uc1_orderparameter_ins.png')
+
+
+###############################################################################
+# The green thick line is :math:`U_{c_2}`. The purple line is
+# :math:`U_{c_1}` and the grey line is :math:`U_c` The orange dashed line
+# marks when the Hubbard band breaks/joins. The
+# dashed red when the pole of the self-energy is visible inside the gap.
+# The dashed yellow when the Hubbard band has the W resonance which can
+# not be parametrized from the Fermi Liquid theory at :math:`\omega=0`.
