@@ -58,43 +58,36 @@ w = np.linspace(-4, 4, 2**12)
 #
 BETA = 512.
 tp = 0.3
-urange = [0.2, 1., 2., 3., 3.45, 3.5]
-imgss = ipt_u_tp(urange, tp, BETA, w)
-plt.close('all')
-for i, (U, gss) in enumerate(zip(urange, imgss)):
-    imgss = -gss.imag
-    imgsa = imgss[::-1]
-    shift = -2.1 * i
-    plt.plot(w, shift + imgss, 'C0', lw=0.5)
-    plt.plot(w, shift + imgsa, 'C1', lw=0.5)
-    plt.plot(w, shift + (imgss + imgsa) / 2, 'k', lw=2.5)
-    plt.axhline(shift, color='k', lw=0.5)
-    plt.text(-2.8, 1.45 + shift, r"$U/D={}$".format(U), size=16)
-plt.xlabel(r'$\omega$')
-plt.xlim([-3, 3])
-plt.ylim([shift, 2.1])
-plt.yticks([])
-# plt.savefig('dimer_transition_spectra.pdf')
+uranget3 = [0.2, 1., 2., 3., 3.45, 3.5]
+imgsst3 = ipt_u_tp(uranget3, tp, BETA, w)
 
-###############################################################################
-# The :math:`t_\perp/D=0.8` scenario
-# ==================================
-#
 tp = 0.8
-urange = [0.2, 1., 1.2, 1.35, 2., 3.]
-imgsst8 = ipt_u_tp(urange, tp, BETA, w)
-plt.close('all')
-for i, (U, gss) in enumerate(zip(urange, imgsst8)):
-    imgss = -gss.imag
-    imgsa = imgss[::-1]
-    shift = -2.1 * i
-    plt.plot(w, shift + imgss, 'C0', lw=0.5)
-    plt.plot(w, shift + imgsa, 'C1', lw=0.5)
-    plt.plot(w, shift + (imgss + imgsa) / 2, 'k', lw=2.5)
-    plt.axhline(shift, color='k', lw=0.5)
-    plt.text(1.8, 1.45 + shift, r"$U/D={}$".format(U), size=16)
-plt.xlabel(r'$\omega$')
-plt.xlim([-3, 3])
-plt.ylim([shift, 2.1])
-plt.yticks([])
-# plt.savefig('dimer_transition_spectra_tp0.8.pdf')
+uranget8 = [0.2, 1., 1.2, 1.35, 2., 3.]
+imgsst8 = ipt_u_tp(uranget8, tp, BETA, w)
+
+
+def plot_dos(urange, imgss, ax, labelx):
+    for i, (U, gss) in enumerate(zip(urange, imgss)):
+        imgss = -gss.imag
+        imgsa = imgss[::-1]
+        shift = -2.1 * i
+        ax.plot(w, shift + imgss, 'C0', lw=0.5)
+        ax.plot(w, shift + imgsa, 'C1', lw=0.5)
+        ax.plot(w, shift + (imgss + imgsa) / 2, 'k', lw=2.5)
+        ax.axhline(shift, color='k', lw=0.5)
+        ax.text(labelx, 1.35 + shift, r"$U={}$".format(U), size=15)
+    ax.set_xlabel(r'$\omega$')
+    ax.set_xlim([-3.1, 3.1])
+    ax.set_ylim([shift, 2.1])
+    ax.set_yticks([])
+
+
+plt.rcParams['figure.autolayout'] = False
+fig, (at3, at8) = plt.subplots(1, 2, sharex=True, sharey=True)
+plot_dos(uranget3, imgsst3, at3, -3)
+plot_dos(uranget8, imgsst8, at8, 1.)
+at3.set_title(r'$t_\perp=0.3$')
+at8.set_title(r'$t_\perp=0.8$')
+plt.subplots_adjust(wspace=0.02)
+plt.savefig('dimer_transition_spectra.pdf')
+plt.close()
