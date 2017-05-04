@@ -51,17 +51,6 @@ zet03, tpp03 = zero_f_meas(giw_d, giw_o, murange03, TP, 3.47)
 plt.plot(murange03, zet03, '-', lw=2, label=r'$Z$')
 plt.show()
 
-# TP 0.5
-TP = 0.5
-giw_d, giw_o = dimer.gf_met(w_n, 0., TP, 0.5, 0.)
-murange05 = np.array(sorted(list(np.arange(1.2, 2.35, .1)) +
-                            list(np.arange(2.327, 2.33, 0.00051))))
-zet05, tpp05 = zero_f_meas(giw_d, giw_o, murange05, TP, 3.47)
-# plt.plot(murange05, zet05, '-', lw=2, label=r'$Z$')
-# plt.plot(murange05, np.abs(zet05 * (1 - tpp05)), '*-',
-# lw=2, label=r'$|\eta|$')
-# plt.show()
-
 # TP 0.8
 TP = 0.8
 giw_d, giw_o = dimer.gf_met(w_n, 0., TP, 0.5, 0.)
@@ -69,29 +58,27 @@ murange08 = np.arange(0.1, 2.5, 0.1)
 zet08, tpp08 = zero_f_meas(giw_d, giw_o, murange08, TP, 8)
 
 plt.close('all')
-f, (ax3, ax5, ax8) = plt.subplots(3, 1, sharex=True, sharey=True)
-ax3.plot(murange03 - 3.465, zet03, '-', lw=2, label=r'$Z$')
-ax3.plot(murange03 - 3.465, np.abs(zet03 * (1 - tpp03)), '-',
+f, (ax3, ax8) = plt.subplots(1, 2, sharey=True,
+                             figsize=(8, 4))
+ax3.plot(3.465 - murange03, zet03, '-', lw=2, label=r'$Z$')
+ax3.plot(3.465 - murange03, np.abs(zet03 * (1 - tpp03)), '-',
          lw=2, label=r'$|\eta|$')
 ax3.legend(loc=0)
+ax3.invert_xaxis()
+ax3.set_xlim(1, 0)
+ax3.set_xlabel(r'$(U_{c_2}-U)/D$')
 
-ax5.plot(murange05 - 2.3295, zet05, '-', lw=2, label=r'$Z$')
-ax5.plot(murange05 - 2.3295, np.abs(zet05 * (1 - tpp05)), '-',
-         lw=2, label=r'$|\eta|$')
-ax5.legend(loc=0)
-
-
-ax8.plot(murange08 - 1.3, zet08, '-', lw=2, label=r'$Z$')
-ax8.plot(murange08 - 1.3, np.abs((1 - tpp08) * zet08), '-',
+ax8.plot(1.3 - murange08, zet08, '-', lw=2, label=r'$Z$')
+ax8.plot(1.3 - murange08, np.abs((1 - tpp08) * zet08), '-',
          lw=2, label=r'$|\eta|$')
 ax8.legend(loc=0)
+ax8.invert_xaxis()
+ax8.set_xlim(1, 0)
+ax8.set_xlabel(r'$(U_c-U)/D$')
 
 ax8.set_ylim(0., 1.)
-
-plt.xlim(-1, 0)
-for ax, tp in zip((ax3, ax5, ax8), [0.3, 0.5, 0.8]):
+for ax, tp in zip((ax3, ax8), [0.3, 0.5, 0.8]):
     ax.set_ylabel(r'$t_\perp/D={}$'.format(tp))
-plt.xlabel(r'$(U-U_c)/D$')
 # plt.subplots_adjust(hspace=0.08)
 plt.savefig('IPT_transition_Uc2.pdf')
 plt.show()
