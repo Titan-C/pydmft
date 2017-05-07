@@ -66,24 +66,31 @@ def plot_dos(urange, imgss, ax, labelx):
     for i, (U, gss) in enumerate(zip(urange, imgss)):
         imgss = -gss.imag
         imgsa = imgss[::-1]
-        shift = -2.1 * i
-        ax.plot(w, shift + imgss, 'C0', lw=0.5)
-        ax.plot(w, shift + imgsa, 'C1', lw=0.5)
-        ax.plot(w, shift + (imgss + imgsa) / 2, 'k', lw=2.5)
-        ax.axhline(shift, color='k', lw=0.5)
-        ax.text(labelx, 1.35 + shift, r"$U={}$".format(U), size=15)
-    ax.set_xlabel(r'$\omega$')
-    ax.set_xlim([-3.1, 3.1])
-    ax.set_ylim([shift, 2.1])
-    ax.set_yticks([])
+        ax[i].plot(w, imgss, 'C0', lw=0.5)
+        ax[i].plot(w, imgsa, 'C1', lw=0.5)
+        ax[i].plot(w, (imgss + imgsa) / 2, 'k', lw=2.5)
+        ax[i].text(labelx, 1.7, r"$U={}$".format(U), size=16)
+        ax[i].set_yticks(np.arange(3))
+        ax[i].set_xticks(np.arange(-3, 4))
+
+    ax[i].set_xlabel(r'$\omega$')
+    ax[i].set_xlim([-3.2, 3.2])
+    ax[i].set_ylim([0, 2.4])
 
 
 plt.rcParams['figure.autolayout'] = False
-fig, (at3, at8) = plt.subplots(1, 2, sharex=True, sharey=True)
-plot_dos(uranget3, imgsst3, at3, -3)
-plot_dos(uranget8, imgsst8, at8, 1.)
-at3.set_title(r'$t_\perp=0.3$')
-at8.set_title(r'$t_\perp=0.8$')
-plt.subplots_adjust(wspace=0.02)
+plt.rcParams['axes.labelsize'] = 'medium'
+plt.rcParams["axes.grid"] = False
+plt.rcParams["ytick.labelsize"] = 'x-small'
+plt.rcParams["xtick.labelsize"] = 'x-small'
+plt.close()
+fig, axes = plt.subplots(6, 2, sharex=True, sharey=True)
+plot_dos(uranget3, imgsst3, axes[:, 0], -3)
+plot_dos(uranget8, imgsst8, axes[:, 1], 1.)
+axes[0, 0].set_title(r'$t_\perp=0.3$')
+for ax in axes:
+    ax[0].set_ylabel(r'$A(\omega)$')
+axes[0, 1].set_title(r'$t_\perp=0.8$')
+plt.subplots_adjust(wspace=0.04, hspace=0.09)
 plt.savefig('dimer_transition_spectra.pdf')
 plt.close()
