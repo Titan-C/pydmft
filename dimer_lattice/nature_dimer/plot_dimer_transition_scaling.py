@@ -66,10 +66,6 @@ tp = 0.3
 uranget3 = [0.2, 1., 2., 3., 3.45]
 lsst3 = ipt_u_tp(uranget3, tp, BETA, w)
 
-tp = 0.8
-uranget8 = [0.2, 1., 1.2, 1.35, 2.]
-lsst8 = ipt_u_tp(uranget8, tp, BETA, w)
-
 
 def plot_row(urange, tp, lss, ax, labelx):
     for i, (U, ss) in enumerate(zip(urange, lss)):
@@ -80,27 +76,25 @@ def plot_row(urange, tp, lss, ax, labelx):
         tpp = (tp + sig_0) * quas_z
         llg = gf.semi_circle_hiltrans(w + 1e-8j - tpp, quas_z) * quas_z
 
-        shift = -2.1 * i
-        ax.plot(w / quas_z, shift + imgss, 'C0', lw=2)
-        ax.plot(w / quas_z, shift + imgsa, 'C1', lw=2)
-        ax.plot(w / quas_z, shift + (imgss + imgsa) / 2, 'k', lw=0.5)
-        ax.plot(w / quas_z, shift - llg.imag, "C3--", lw=1.5)
-        ax.axhline(shift, color='k', lw=0.5)
-        ax.text(labelx, 0.8 + shift,
-                "$U={}$\n$Z={:.3}$".format(U, quas_z), size=15)
-    ax.set_xlabel(r'$\omega/ZD$')
-    ax.set_xlim([-2.5, 2.5])
-    ax.set_ylim([shift, 2.1])
-    ax.set_yticks([])
-    return shift
+        ax[i].plot(w / quas_z,  imgss, 'C0', lw=2)
+        ax[i].plot(w / quas_z, imgsa, 'C1', lw=2)
+        ax[i].plot(w / quas_z, (imgss + imgsa) / 2, 'k', lw=0.5)
+        ax[i].plot(w / quas_z, - llg.imag, "C3--", lw=1.5)
+        ax[i].text(labelx, 1.7,
+                   "$Z={:.3}$".format(quas_z), size=16)
+        ax[i].text(1.5, 1.7,
+                   "$U={}$".format(U), size=16)
+        ax[i].set_yticks(np.arange(3))
+        ax[i].set_xticks(np.arange(-3, 4))
+    ax[i].set_xlabel(r'$\omega/ZD$')
+    ax[i].set_xlim([-2.5, 2.5])
+    ax[i].set_ylim([0, 2.4])
 
 
 plt.rcParams['figure.autolayout'] = False
-fig, (at3, at8) = plt.subplots(1, 2, sharex=True, sharey=True)
-shift = plot_row(uranget3, 0.3, lsst3, at3, -2.4)
-shift = plot_row(uranget8, 0.8, lsst8, at8, -2.4)
-at3.set_title(r'$t_\perp=0.3$')
-at8.set_title(r'$t_\perp=0.8$')
-plt.subplots_adjust(wspace=0.02)
+fig, ax = plt.subplots(5, 1, sharex=True, sharey=True)
+shift = plot_row(uranget3, 0.3, lsst3, ax, -2.4)
+ax.set_title(r'$t_\perp=0.3$')
+plt.subplots_adjust(hspace=0.09)
 plt.savefig('dimer_transition_spectra_scaling.pdf')
 plt.close()
