@@ -66,8 +66,8 @@ def plot_dos(urange, imgss, ax, labelx):
     for i, (U, gss) in enumerate(zip(urange, imgss)):
         imgss = -gss.imag
         imgsa = imgss[::-1]
-        ax[i].plot(w, imgss, 'C0', lw=0.5)
-        ax[i].plot(w, imgsa, 'C1', lw=0.5)
+        ax[i].plot(w, imgsa, 'C0:', lw=0.5)
+        ax[i].plot(w, imgss, 'C1-.', lw=0.5)
         ax[i].plot(w, (imgss + imgsa) / 2, 'k', lw=2.5)
         ax[i].text(labelx, 1.7, r"$U={}$".format(U), size=16)
         ax[i].set_yticks(np.arange(3))
@@ -92,5 +92,5 @@ for ax in axes:
     ax[0].set_ylabel(r'$A(\omega)$')
 axes[0, 1].set_title(r'$t_\perp=0.8$')
 plt.subplots_adjust(wspace=0.04, hspace=0.09)
-plt.savefig('dimer_transition_spectra.pdf')
-plt.close()
+# plt.savefig('dimer_transition_spectra.pdf')
+# plt.close()

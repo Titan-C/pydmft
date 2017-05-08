@@ -28,10 +28,11 @@ import dmft.dimer as dimer
 
 def ipt_u_tp(urange, tp, beta, w):
 
-    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=2**11))
+    tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=2**12))
     giw_d, giw_o = dimer.gf_met(w_n, 0., tp, 0.5, 0.)
 
-    w_set = list(np.arange(0, 120, 2))
+    w_set = list(np.arange(0, 20, 1))
+    w_set = w_set + list(np.arange(20, 120, 2))
     w_set = w_set + list(np.arange(120, 512, 8))
     lss = []
 
@@ -76,9 +77,9 @@ def plot_row(urange, tp, lss, ax, labelx):
         tpp = (tp + sig_0) * quas_z
         llg = gf.semi_circle_hiltrans(w + 1e-8j - tpp, quas_z) * quas_z
 
-        ax[i].plot(w / quas_z,  imgss, 'C0', lw=2)
-        ax[i].plot(w / quas_z, imgsa, 'C1', lw=2)
-        ax[i].plot(w / quas_z, (imgss + imgsa) / 2, 'k', lw=0.5)
+        ax[i].plot(w / quas_z, imgsa, 'C0', lw=2)
+        ax[i].plot(w / quas_z,  imgss, 'C1-.', lw=2)
+        ax[i].plot(w / quas_z, (imgss + imgsa) / 2, 'k:', lw=0.5)
         ax[i].plot(w / quas_z, - llg.imag, "C3--", lw=1.5)
         ax[i].text(labelx, 1.7,
                    "$Z={:.3}$".format(quas_z), size=16)
@@ -92,9 +93,12 @@ def plot_row(urange, tp, lss, ax, labelx):
 
 
 plt.rcParams['figure.autolayout'] = False
+plt.rcParams["axes.grid"] = False
 fig, ax = plt.subplots(5, 1, sharex=True, sharey=True)
-shift = plot_row(uranget3, 0.3, lsst3, ax, -2.4)
-ax.set_title(r'$t_\perp=0.3$')
+plot_row(uranget3, 0.3, lsst3, ax, -2.4)
+ax[0].set_title(r'$t_\perp=0.3$')
+for a in ax:
+    a.set_ylabel(r'$A(\omega)$')
 plt.subplots_adjust(hspace=0.09)
-plt.savefig('dimer_transition_spectra_scaling.pdf')
-plt.close()
+# plt.savefig('dimer_transition_spectra_scaling.pdf')
+# plt.close()
