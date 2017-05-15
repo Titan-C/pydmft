@@ -26,8 +26,8 @@ setup(
 
     install_requires=['numpy', 'scipy', 'matplotlib', 'slaveparticles',
                       'joblib', 'pandas', 'numba', 'h5py', 'mpi4py'],
-    setup_requires=['Sphinx', 'cython', 'pytest-runner'],
-    tests_require=['pytest', 'pytest-cov'],
+    setup_requires=['sphinx', 'cython', 'pytest-runner'],
+    tests_require=['pytest-cov', 'pytest'],  # Somehow this order is relevant
     cmdclass={'build_ext': build_ext},
     ext_modules=[Extension('dmft.hffast', ['dmft/hirschfye_cy.pyx',
                                            'dmft/hfc.cpp'],

@@ -25,6 +25,7 @@ addons:
 env:
     - PYTHON_VERSION="2.7"
     - PYTHON_VERSION="3.4"
+    - PYTHON_VERSION="3.6"
 
 before_install:
     - export CXX="g++-5" CC="gcc-5"
@@ -34,7 +35,7 @@ before_install:
     - export PATH=$HOME/miniconda3/bin:$PATH
     - conda update --yes --quiet conda
     - conda create --yes --quiet -n testenv python=$PYTHON_VERSION nomkl openblas pip scipy numpy
-      matplotlib pytest coverage sphinx setuptools cython tornado pyzmq h5py
+      matplotlib sphinx setuptools cython tornado pyzmq h5py
       joblib pandas numba
     - source activate testenv
     - pip install slaveparticles sphinx-gallery mako mpi4py cmocean
