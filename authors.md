@@ -1,2 +1,0 @@
-Óscar Nájera
-Marcelo Rozenberg
