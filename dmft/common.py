@@ -102,6 +102,12 @@ def semi_circle_hiltrans(zeta, D=1):
     return 2 * (zeta - sqr) / D**2
 
 
+def semi_circle(energy, hopping):
+    """Bethe lattice in inf dim density of states"""
+    energy = np.asarray(energy).clip(-2 * hopping, 2 * hopping)
+    return np.sqrt(4 * hopping**2 - energy**2) / (2 * np.pi * hopping**2)
+
+
 def gt_fouriertrans(g_tau, tau, w_n, tail_coef=(1., 0., 0.)):
     r"""Performs a forward fourier transform for the interacting Green function
     in which only the interval :math:`[0,\beta)` is required and output given
@@ -170,7 +176,7 @@ def freq_tail_fourier(tail_coef, beta, tau, w_n):
 
     """
 
-    freq_tail =   tail_coef[0] / (1.j * w_n)\
+    freq_tail = tail_coef[0] / (1.j * w_n)\
         + tail_coef[1] / (1.j * w_n)**2\
         + tail_coef[2] / (1.j * w_n)**3
 
