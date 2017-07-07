@@ -4,6 +4,16 @@ r"""
 Dispersion of the spectral function
 ===================================
 
+Comparison of the energy resolved spectral functions in the Dimer Hubbard
+Model in the coexistence region. For the metallic and insulating
+solution. Figure is discussed in reference [Najera2017]_
+
+
+.. [Najera2017] O. Nájera, Civelli, M., V. Dobrosavljevic, & Rozenberg,
+  M. J. (2017). Resolving the VO_2 controversy: Mott mechanism dominates
+  the insulator-to-metal transition. Physical Review B, 95(3),
+  035113. http://dx.doi.org/10.1103/physrevb.95.035113
+
 """
 # Author: Óscar Nájera
 
@@ -12,9 +22,6 @@ from __future__ import (absolute_import, division, print_function,
 
 import matplotlib.pyplot as plt
 import numpy as np
-plt.matplotlib.rcParams.update({'axes.labelsize': 22,
-                                'xtick.labelsize': 14, 'ytick.labelsize': 14,
-                                'axes.titlesize': 22})
 
 import dmft.common as gf
 import dmft.dimer as dimer
@@ -71,6 +78,7 @@ def plot_spectra(u_int, tp, beta, w, w_set, eps_k, axes):
 
 
 def write_labels_e_struct(axes):
+    axes[0].set_xticklabels([])
     axes[0].set_yticks(np.linspace(-2.5, 2.5, 5))
     axes[1].set_yticks(np.linspace(-2.5, 2.5, 5))
     axes[1].set_yticklabels([])
@@ -83,6 +91,7 @@ def write_labels_e_struct(axes):
     axes[2].set_ylabel(r'$\omega$')
     axes[2].set_xlabel(r'$\epsilon$')
     axes[3].set_xlabel(r'$A(\omega)$')
+
 
 w = np.linspace(-3, 3, 1000)
 eps_k = np.linspace(-1., 1., 61)

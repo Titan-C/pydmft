@@ -5,7 +5,16 @@ Scattering rates change in Temperature
 ======================================
 
 Explore the low energy expansion of the Matsubara self-energy. The
-zero frequency value being the scattering rate."""
+zero frequency value being the scattering rate.
+Figure is discussed in reference [Najera2017]_
+
+
+.. [Najera2017] O. Nájera, Civelli, M., V. Dobrosavljevic, & Rozenberg,
+  M. J. (2017). Resolving the VO_2 controversy: Mott mechanism dominates
+  the insulator-to-metal transition. Physical Review B, 95(3),
+  035113. http://dx.doi.org/10.1103/physrevb.95.035113
+
+"""
 
 # Created Mon Mar  7 01:14:02 2016
 # Author: Óscar Nájera
@@ -50,6 +59,7 @@ def loop_beta(u_int, tp, betarange, seed='ins'):
 # Calculate the dimer solution for Metals up to Uc2 in the in the given
 # temperature range. Include the behavior of 2 insulators inside the
 # coexistence region.
+
 
 temp = np.arange(1 / 500., .05, .001)
 BETARANGE = 1 / temp
@@ -148,6 +158,7 @@ def plot_der_zero_w(function_array, iter_range, betarange, entry, label_head, ax
                 [:, 1], label=label_head + str(u))
         dx.plot(1 / BETARANGE, -np.array(dat)
                 [:, 0], label=label_head + str(u))
+
 
 f, (si, ds) = plt.subplots(2, 2, sharex=True)
 plot_der_zero_w(sigmasI_U, U_inti, BETARANGE, 0, 'INS U=', si[0], ds[0])
