@@ -1,5 +1,4 @@
 # PyDMFT
-#+AUTHOR: Óscar Nájera
 
 A python library to work on quantum interacting systems. It is focused for
 research using the Dynamical Mean Field Theory (DMFT)[dmft-rmp](#dmft-rmp)
@@ -12,7 +11,18 @@ which I have developed the scripts to reproduce known results in this field
 and also provide with my personal research work, showing how it was done
 and referencing the publication it appeared.
 
-## Footnotes
+If you find problems with it, open an issue or even better a pull
+request. If you use it cite it.
+
+## Similar Projects
+
+There are other projects to work on this. PyDMFT is just mine and focuses
+on using python and providing examples.
+
+- [TRIQS](https://triqs.ipht.cnrs.fr)
+- [ALPSCore](http://alpscore.org/)
+
+## References
 
 <b id="dmft-rmp">dmft-rmp</b> Georges, A., Kotliar, G., Krauth, W., & Rozenberg, M. J.,
 Dynamical mean-field theory of strongly correlated fermion systems and the
