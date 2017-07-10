@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>IPT Solver Existence of Metalic and insulating solution &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Landau Theory of the Mott transition" href="plot_transition.html" />
+    <link rel="prev" title="Stability of the solutions in the coexistence region" href="plot_stability.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_transition.html" title="Landau Theory of the Mott transition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_stability.html" title="Stability of the solutions in the coexistence region"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ipt-solver-existence-of-metalic-and-insulating-solution">
+<span id="sphx-glr-auto-examples-ipt-plot-ipt-py"></span><h1>IPT Solver Existence of Metalic and insulating solution<a class="headerlink" href="#ipt-solver-existence-of-metalic-and-insulating-solution" title="Permalink to this headline">¶</a></h1>
+<p>Within the iterative perturbative theory (IPT) the aim is to express the
+self-energy of the impurity problem as</p>
+<div class="math">
+<p><img src="../../_images/math/6b6bdf24fca115a70af33ed320720985fa33d65a.png" alt="\Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3"/></p>
+</div><p>the contribution of the Hartree-term is not included here as it is cancelled</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+
+<span class="kn">from</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">pade_continuation</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fermi_dist" title="View documentation for dmft.common.fermi_dist"><span class="n">fermi_dist</span></a>
+<span class="kn">from</span> <span class="nn">dmft.utils</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.utils.html#dmft.utils.optical_conductivity" title="View documentation for dmft.utils.optical_conductivity"><span class="n">optical_conductivity</span></a>
+
+<span class="n">U</span> <span class="o">=</span> <span class="mf">2.7</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">9</span><span class="p">))</span>
+<span class="n">omega</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">dos</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.exp.html#numpy.exp" title="View documentation for numpy.exp"><span class="n">np</span><span class="o">.</span><span class="n">exp</span></a><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">eps_k</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.sqrt.html#numpy.sqrt" title="View documentation for numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">de</span> <span class="o">=</span> <span class="n">eps_k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">eps_k</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">dosde</span> <span class="o">=</span> <span class="p">(</span><span class="n">dos</span> <span class="o">*</span> <span class="n">de</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">nf</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fermi_dist" title="View documentation for dmft.common.fermi_dist"><span class="n">fermi_dist</span></a><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">BETA</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="insulator-calculations">
+<h2>Insulator Calculations<a class="headerlink" href="#insulator-calculations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ig_iwn</span><span class="p">,</span> <span class="n">is_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span>
+    <span class="n">U</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.j</span> <span class="o">/</span> <span class="p">(</span><span class="n">w_n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">),</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-12</span><span class="p">)</span>
+<span class="n">igw</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">ig_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">isigma_w</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">is_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">lat_gf</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">omega</span> <span class="o">+</span> <span class="mf">4e-2j</span><span class="p">)</span> <span class="o">-</span> <span class="n">isigma_w</span><span class="p">)</span>
+<span class="n">lat_Aw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gf</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">icond</span> <span class="o">=</span> <a href="../../gen_modules/dmft.utils.html#dmft.utils.optical_conductivity" title="View documentation for dmft.utils.optical_conductivity"><span class="n">optical_conductivity</span></a><span class="p">(</span><span class="n">lat_Aw</span><span class="p">,</span> <span class="n">lat_Aw</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">dosde</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="metal-calculations">
+<h2>Metal Calculations<a class="headerlink" href="#metal-calculations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mg_iwn</span><span class="p">,</span> <span class="n">s_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">),</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+<span class="n">mgw</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">mg_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">msigma_w</span> <span class="o">=</span> <span class="n">omega</span> <span class="o">-</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">mgw</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mgw</span>
+<span class="n">lat_gf</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">omega</span> <span class="o">+</span> <span class="mf">4e-2j</span><span class="p">)</span> <span class="o">-</span> <span class="n">msigma_w</span><span class="p">)</span>
+<span class="n">lat_Aw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gf</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">mcond</span> <span class="o">=</span> <a href="../../gen_modules/dmft.utils.html#dmft.utils.optical_conductivity" title="View documentation for dmft.utils.optical_conductivity"><span class="n">optical_conductivity</span></a><span class="p">(</span><span class="n">lat_Aw</span><span class="p">,</span> <span class="n">lat_Aw</span><span class="p">,</span> <span class="n">nf</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">dosde</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="plots">
+<h2>Plots<a class="headerlink" href="#plots" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fig_giw</span><span class="p">,</span> <span class="n">giw_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">fig_gw</span><span class="p">,</span> <span class="n">gw_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">fig_sw</span><span class="p">,</span> <span class="n">sw_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">fig_cond</span><span class="p">,</span> <span class="n">cond_ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">ig_iwn</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;s-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Insulator Solution&#39;</span><span class="p">)</span>
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="o">-</span><span class="n">igw</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Insulator Solution&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">isigma_w</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Insulator Solution&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">isigma_w</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Insulator Solution&#39;</span><span class="p">)</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">icond</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Insulator Solution&#39;</span><span class="p">)</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mg_iwn</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;s-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Metal Solution&#39;</span><span class="p">)</span>
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="o">-</span><span class="n">mgw</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Metal Solution&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">msigma_w</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Metal Solution&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">msigma_w</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Metal Solution&#39;</span><span class="p">)</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">mcond</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Metal Solution&#39;</span><span class="p">)</span>
+
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$1/w$ tail&#39;</span><span class="p">)</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">w_n</span> <span class="o">+</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$w^{-1} + M_3 w^{-3}$ tail&#39;</span><span class="p">)</span>
+
+<span class="n">cut</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">6.5</span> <span class="o">*</span> <span class="n">BETA</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">])</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="n">mg_iwn</span><span class="o">.</span><span class="n">imag</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">*</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(i\omega_n)$&#39;</span><span class="p">)</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$i\omega_n$&#39;</span><span class="p">)</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(i\omega_n)$ at $\beta= {}$, $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">))</span>
+<span class="n">giw_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(\omega)$&#39;</span><span class="p">)</span>
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Spectral function at $\beta= {}$, $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">))</span>
+<span class="n">gw_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Re e \Sigma(\omega)$&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">])</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Im m \Sigma(\omega)$&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Self-Energy at $\beta= {}$, $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">))</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">sw_ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\nu$&#39;</span><span class="p">)</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\sigma(\nu)$&#39;</span><span class="p">)</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">cond_ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_ipt_001.png"><img alt="../../_images/sphx_glr_plot_ipt_001.png" src="../../_images/sphx_glr_plot_ipt_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_ipt_002.png"><img alt="../../_images/sphx_glr_plot_ipt_002.png" src="../../_images/sphx_glr_plot_ipt_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_ipt_003.png"><img alt="../../_images/sphx_glr_plot_ipt_003.png" src="../../_images/sphx_glr_plot_ipt_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_ipt_004.png"><img alt="../../_images/sphx_glr_plot_ipt_004.png" src="../../_images/sphx_glr_plot_ipt_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.593 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_ipt.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_ipt.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_ipt.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_ipt.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">IPT Solver Existence of Metalic and insulating solution</a><ul>
+<li><a class="reference internal" href="#insulator-calculations">Insulator Calculations</a></li>
+<li><a class="reference internal" href="#metal-calculations">Metal Calculations</a></li>
+<li><a class="reference internal" href="#plots">Plots</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_stability.html"
+                        title="previous chapter">Stability of the solutions in the coexistence region</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_transition.html"
+                        title="next chapter">Landau Theory of the Mott transition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/IPT/plot_ipt.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_transition.html" title="Landau Theory of the Mott transition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_stability.html" title="Stability of the solutions in the coexistence region"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

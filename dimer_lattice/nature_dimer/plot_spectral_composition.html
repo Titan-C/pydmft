@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Spectral composition &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spectral-composition">
+<span id="sphx-glr-dimer-lattice-nature-dimer-plot-spectral-composition-py"></span><h1>Spectral composition<a class="headerlink" href="#spectral-composition" title="Permalink to this headline">¶</a></h1>
+<p>The energy resolved spectral function is plotted to view the quality of
+the Fermi Liquid approximation</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.interpolate.splrep.html#scipy.interpolate.splrep" title="View documentation for scipy.interpolate.splrep"><span class="n">splrep</span></a><span class="p">,</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.interpolate.splev.html#scipy.interpolate.splev" title="View documentation for scipy.interpolate.splev"><span class="n">splev</span></a>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">as</span> <span class="nn">ipt</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+
+
+<span class="k">def</span> <span class="nf">ipt_u_tp</span><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="s1">&#39;ins&#39;</span><span class="p">):</span>
+
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">11</span><span class="p">))</span>
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <a href="../../gen_modules/dmft.dimer.html#dmft.dimer.gf_met" title="View documentation for dmft.dimer.gf_met"><span class="n">dimer</span><span class="o">.</span><span class="n">gf_met</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;ins&#39;</span> <span class="ow">in</span> <span class="n">seed</span><span class="p">:</span>
+        <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">+</span> <span class="mi">4j</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.zeros_like.html#numpy.zeros_like" title="View documentation for numpy.zeros_like"><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0j</span>
+
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">loops</span> <span class="o">=</span> <a href="../../gen_modules/dmft.dimer.html#dmft.dimer.ipt_dmft_loop" title="View documentation for dmft.dimer.ipt_dmft_loop"><span class="n">dimer</span><span class="o">.</span><span class="n">ipt_dmft_loop</span></a><span class="p">(</span>
+        <span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">)</span>
+    <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+        <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">giw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">giw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span><span class="p">,</span> <span class="n">w_n</span>
+
+
+<span class="k">def</span> <span class="nf">ipt_g_s</span><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">ipt_u_tp</span><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">w_set</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">541</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">ss</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span>
+        <span class="mi">1j</span> <span class="o">*</span> <span class="n">siw_d</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">0.0005j</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>  <span class="c1"># A-bond</span>
+
+    <span class="n">gst</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">imag</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">gst</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">w</span>
+
+
+<span class="k">def</span> <span class="nf">low_en_qp</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
+    <span class="n">glp</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">0.</span><span class="p">])</span>
+    <span class="n">sigtck</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.interpolate.splrep.html#scipy.interpolate.splrep" title="View documentation for scipy.interpolate.splrep"><span class="n">splrep</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">ss</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">sig_0</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.interpolate.splev.html#scipy.interpolate.splev" title="View documentation for scipy.interpolate.splev"><span class="n">splev</span></a><span class="p">(</span><span class="n">glp</span><span class="p">,</span> <span class="n">sigtck</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dw_sig0</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.interpolate.splev.html#scipy.interpolate.splev" title="View documentation for scipy.interpolate.splev"><span class="n">splev</span></a><span class="p">(</span><span class="n">glp</span><span class="p">,</span> <span class="n">sigtck</span><span class="p">,</span> <span class="n">der</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">quas_z</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">dw_sig0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quas_z</span><span class="p">,</span> <span class="n">sig_0</span><span class="p">,</span> <span class="n">dw_sig0</span>
+
+
+<span class="k">def</span> <span class="nf">plot_spectral</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span> <span class="n">xlim</span><span class="p">):</span>
+
+    <span class="p">(</span><span class="n">axsg</span><span class="p">,</span> <span class="n">axgf</span><span class="p">,</span> <span class="n">axsd</span><span class="p">)</span> <span class="o">=</span> <span class="n">axes</span>
+    <span class="n">quas_z</span><span class="p">,</span> <span class="n">sig_0</span><span class="p">,</span> <span class="n">dw_sig0</span> <span class="o">=</span> <span class="n">low_en_qp</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="n">tpp</span> <span class="o">=</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">sig_0</span><span class="p">)</span> <span class="o">*</span> <span class="n">quas_z</span>
+    <span class="n">axgf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="n">gss</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="s1">&#39;C0&#39;</span><span class="p">)</span>
+    <span class="n">llg</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">omega</span> <span class="o">+</span> <span class="mf">1e-8j</span> <span class="o">-</span> <span class="n">tpp</span><span class="p">,</span> <span class="n">quas_z</span><span class="p">)</span> <span class="o">*</span> <span class="n">quas_z</span>
+    <span class="n">axgf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="n">llg</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="s2">&quot;C3--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">axgf</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+    <span class="n">axgf</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A_{AB}(\omega)$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xticks" title="View documentation for matplotlib.pyplot.xticks"><span class="n">plt</span><span class="o">.</span><span class="n">xticks</span></a><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+
+    <span class="c1"># plt.plot(omega, gst.real)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="s1">&#39;C4&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Re e$&#39;</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="s1">&#39;C2&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Im m$&#39;</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sig_0</span> <span class="o">+</span> <span class="n">dw_sig0</span> <span class="o">*</span> <span class="n">omega</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="s1">&#39;k:&#39;</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>
+
+    <span class="n">axsg</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{AB}(\omega)$&#39;</span><span class="p">)</span>
+    <span class="n">axsg</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="o">*</span><span class="n">xlim</span><span class="p">)</span>
+
+    <span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+    <span class="n">lat_gfs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">omega</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="n">ss</span> <span class="o">+</span> <span class="mf">0.007j</span><span class="p">)</span>
+    <span class="n">Aw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gfs</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+    <span class="n">axsd</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Aw</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">axsd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">eps_k</span> <span class="o">*</span> <span class="n">quas_z</span> <span class="o">+</span> <span class="n">tpp</span><span class="p">,</span> <span class="s2">&quot;C3--&quot;</span><span class="p">)</span>
+    <span class="n">axsd</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mf">2.3</span><span class="p">,</span>  <span class="mf">2.3</span><span class="p">])</span>
+
+    <span class="n">axsd</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\epsilon$&#39;</span><span class="p">)</span>
+
+
+<span class="n">BETA</span> <span class="o">=</span> <span class="mf">512.</span>
+
+<span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="along">
+<h2>Along <img class="math" src="../../_images/math/0dc4d72fe623e41683f73fb9b6aa5df260fba377.png" alt="U_{c_1}"/><a class="headerlink" href="#along" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">xlim</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span>
+    <span class="p">(</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">)),</span>
+    <span class="p">(</span><span class="mf">1.67</span><span class="p">,</span> <span class="mf">0.55</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mf">1.52</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="p">(</span><span class="mf">1.42</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)),</span>
+<span class="p">]):</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">]))</span>
+    <span class="n">gss</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">ipt_g_s</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">plot_spectral</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlim</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D={}$ ; $t_\perp/D={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">))</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_001.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_001.png" src="../../_images/sphx_glr_plot_spectral_composition_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_002.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_002.png" src="../../_images/sphx_glr_plot_spectral_composition_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_003.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_003.png" src="../../_images/sphx_glr_plot_spectral_composition_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="along-the-mott-insulator">
+<h2>Along the Mott insulator<a class="headerlink" href="#along-the-mott-insulator" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">xlim</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span>
+    <span class="p">(</span><span class="mf">2.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">)),</span>
+    <span class="p">(</span><span class="mf">2.3</span><span class="p">,</span> <span class="mf">0.48</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">)),</span>
+        <span class="p">(</span><span class="mf">2.3</span><span class="p">,</span> <span class="mf">0.85</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">2.2</span><span class="p">))]):</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">width_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.4</span><span class="p">]))</span>
+    <span class="n">gss</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">w</span> <span class="o">=</span> <span class="n">ipt_g_s</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">plot_spectral</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">xlim</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D={}$ ; $t_\perp/D={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">))</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_004.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_004.png" src="../../_images/sphx_glr_plot_spectral_composition_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_005.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_005.png" src="../../_images/sphx_glr_plot_spectral_composition_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_spectral_composition_006.png"><img alt="../../_images/sphx_glr_plot_spectral_composition_006.png" src="../../_images/sphx_glr_plot_spectral_composition_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  2.706 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_spectral_composition.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_spectral_composition.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_spectral_composition.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_spectral_composition.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Spectral composition</a><ul>
+<li><a class="reference internal" href="#along">Along <img class="math" src="../../_images/math/0dc4d72fe623e41683f73fb9b6aa5df260fba377.png" alt="U_{c_1}"/></a></li>
+<li><a class="reference internal" href="#along-the-mott-insulator">Along the Mott insulator</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/nature_dimer/plot_spectral_composition.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

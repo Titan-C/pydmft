@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hubbard III approximation &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Hubbard I solver" href="plot_hubbardI.html" />
+    <link rel="prev" title="Hubbard I solver Bethe lattice" href="plot_hubbardI_bethe.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardI.html" title="Hubbard I solver"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardI_bethe.html" title="Hubbard I solver Bethe lattice"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hubbard-iii-approximation">
+<span id="sphx-glr-auto-examples-plot-hubbardiii-py"></span><h1>Hubbard III approximation<a class="headerlink" href="#hubbard-iii-approximation" title="Permalink to this headline">¶</a></h1>
+<p>In this approach the aim is to find the band dispersion of the
+insulating system but including the effects of the bath. For this one
+approximates the local Green&#8217;s function by</p>
+<p>And the using the self consistency equation of the Bethe lattice</p>
+<dl class="docutils">
+<dt>Here this equation can be solved analytically but for current purposes</dt>
+<dd>here it will be solved by fixed point iteration.</dd>
+</dl>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Fri Apr  1 14:44:59 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">from</span> <span class="nn">dmft.plot</span> <span class="kn">import</span> <span class="n">plot_band_dispersion</span>
+
+
+<span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">800</span><span class="p">)</span>
+<span class="n">g0_1</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">1e-6j</span>
+<span class="n">U</span> <span class="o">=</span> <span class="mf">2.</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="n">g0_1</span> <span class="o">=</span> <span class="n">w</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span> <span class="o">/</span> <span class="p">(</span><span class="n">g0_1</span> <span class="o">-</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">4.</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="the-self-energy">
+<h2>The Self-Energy<a class="headerlink" href="#the-self-energy" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Imag&quot;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma(\omega)$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma(\omega)$ at $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_hubbardIII_001.png" class="align-center" src="../_images/sphx_glr_plot_hubbardIII_001.png" />
+</div>
+<div class="section" id="the-green-function">
+<h2>The Green Function<a class="headerlink" href="#the-green-function" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">))</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Real&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Imag&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><a href="../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Imag&quot;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\omega)$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\omega)$ at $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_hubbardIII_002.png" class="align-center" src="../_images/sphx_glr_plot_hubbardIII_002.png" />
+</div>
+<div class="section" id="the-band-dispersion">
+<h2>The Band Dispersion<a class="headerlink" href="#the-band-dispersion" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">lat_gf</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">8e-2j</span><span class="p">)</span> <span class="o">-</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">4</span> <span class="o">/</span> <span class="n">g0_1</span><span class="p">)</span>
+<span class="n">Aw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gf</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+<span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="s1">&#39;Hubbard III band dispersion&#39;</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardIII_003.png"><img alt="../_images/sphx_glr_plot_hubbardIII_003.png" src="../_images/sphx_glr_plot_hubbardIII_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardIII_004.png"><img alt="../_images/sphx_glr_plot_hubbardIII_004.png" src="../_images/sphx_glr_plot_hubbardIII_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.586 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbardIII.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_hubbardIII.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbardIII.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_hubbardIII.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Hubbard III approximation</a><ul>
+<li><a class="reference internal" href="#the-self-energy">The Self-Energy</a></li>
+<li><a class="reference internal" href="#the-green-function">The Green Function</a></li>
+<li><a class="reference internal" href="#the-band-dispersion">The Band Dispersion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_hubbardI_bethe.html"
+                        title="previous chapter">Hubbard I solver Bethe lattice</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_hubbardI.html"
+                        title="next chapter">Hubbard I solver</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_examples/plot_hubbardIII.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardI.html" title="Hubbard I solver"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardI_bethe.html" title="Hubbard I solver Bethe lattice"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

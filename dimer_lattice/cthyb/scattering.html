@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Studying the scattering rate in the dimer &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="studying-the-scattering-rate-in-the-dimer">
+<span id="sphx-glr-dimer-lattice-cthyb-scattering-py"></span><h1>Studying the scattering rate in the dimer<a class="headerlink" href="#studying-the-scattering-rate-in-the-dimer" title="Permalink to this headline">¶</a></h1>
+<p>Do the zero frequency extrapolation of the Self-Energy to find the
+scattering rate in the metal and the renormalized intra site hopping</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon May  9 11:30:14 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">py3qs.triqs_dimer</span> <span class="kn">as</span> <span class="nn">tdp</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+                                <span class="s1">&#39;xtick.labelsize&#39;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span> <span class="s1">&#39;ytick.labelsize&#39;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>
+                                <span class="s1">&#39;axes.titlesize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">})</span>
+<span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="s1">&#39;/home/oscar/orlando/dev/dmft-learn/examples/dimer_bethe/tp03f/&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">processing</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tdp</span><span class="o">.</span><span class="n">HDFArchive</span><span class="p">(</span><span class="s1">&#39;DIMER_PM_B{}_tp0.3.h5&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">))</span> <span class="k">as</span> <span class="n">data</span><span class="p">:</span>
+        <span class="c1"># print(data)</span>
+        <span class="n">giw</span> <span class="o">=</span> <span class="n">tdp</span><span class="o">.</span><span class="n">get_giw</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;U&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">)],</span> <span class="nb">slice</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">giw_s</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.squeeze.html#numpy.squeeze" title="View documentation for numpy.squeeze"><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span></a><span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">giw</span><span class="p">[</span><span class="s1">&#39;sym_up&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">giw</span><span class="p">[</span><span class="s1">&#39;sym_dw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">giw_s</span> <span class="o">=</span> <span class="n">giw_s</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">giw_s</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">giw_s</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">300</span><span class="p">]</span>
+    <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">gf</span><span class="o">.</span><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">giw_s</span><span class="p">))</span>
+
+    <span class="n">giw_a</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.squeeze.html#numpy.squeeze" title="View documentation for numpy.squeeze"><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span></a><span class="p">(</span><span class="o">.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">giw</span><span class="p">[</span><span class="s1">&#39;asym_up&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span> <span class="o">+</span> <span class="n">giw</span><span class="p">[</span><span class="s1">&#39;asym_dw&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">giw_a</span> <span class="o">=</span> <span class="n">giw_a</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">giw_a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">giw_a</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">300</span><span class="p">]</span>
+
+    <span class="c1"># more Avgs</span>
+    <span class="n">giw_s</span> <span class="o">=</span> <span class="mf">0.5j</span> <span class="o">*</span> <span class="p">(</span><span class="n">giw_s</span> <span class="o">+</span> <span class="n">giw_a</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">giw_s</span> <span class="o">-</span> <span class="n">giw_a</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="o">.</span><span class="mi">9</span> <span class="o">*</span> <span class="n">BETA</span><span class="p">)</span>
+    <span class="n">der1</span> <span class="o">=</span> <span class="p">(</span><span class="n">giw_s</span><span class="o">.</span><span class="n">real</span> <span class="o">*</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">2</span><span class="p">)[</span><span class="n">x</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="mf">1.2</span> <span class="o">*</span> <span class="n">BETA</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">der2</span> <span class="o">=</span> <span class="p">((</span><span class="n">giw_s</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">)</span> <span class="o">*</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">3</span><span class="p">)[</span><span class="n">x</span><span class="p">:</span><span class="nb">int</span><span class="p">(</span><span class="mf">1.2</span> <span class="o">*</span> <span class="n">BETA</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">tails</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1j</span> <span class="o">/</span> <span class="n">w_n</span> <span class="o">+</span> <span class="n">der1</span> <span class="o">/</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">der2</span> <span class="o">*</span> <span class="mi">1j</span> <span class="o">/</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">3</span>
+    <span class="n">giw_s</span><span class="p">[</span><span class="n">x</span><span class="p">:]</span> <span class="o">=</span> <span class="n">tails</span><span class="p">[</span><span class="n">x</span><span class="p">:]</span>
+
+    <span class="n">sidab</span> <span class="o">=</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="n">giw_s</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">giw_s</span>
+    <span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">40</span><span class="p">)</span>
+    <span class="n">swa</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">sidab</span><span class="p">,</span> <span class="n">w_n</span><span class="p">[:</span><span class="nb">int</span><span class="p">(</span><span class="mf">1.8</span> <span class="o">*</span> <span class="n">BETA</span><span class="p">)],</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">sidab</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">swa</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s2">&quot;k:&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">sidab</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">swa</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="s2">&quot;k:&quot;</span><span class="p">)</span>
+
+    <span class="n">sig_11_0</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">sidab</span><span class="o">.</span><span class="n">imag</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">rtp</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">sidab</span><span class="o">.</span><span class="n">real</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">swa</span><span class="o">.</span><span class="n">imag</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">swa</span><span class="o">.</span><span class="n">real</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sig_11_0</span><span class="p">,</span> <span class="n">rtp</span>
+</pre></div>
+</div>
+<p>Fit of the Self-Energy by Padé and linear fit from the first 2 frequencies
+Work on metallic case at U=2.5, tp=0.3</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">BETARANGE</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">20.</span><span class="p">,</span> <span class="mf">24.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">,</span> <span class="mf">40.</span><span class="p">,</span> <span class="mf">50.</span><span class="p">,</span> <span class="mf">62.</span><span class="p">,</span> <span class="mf">75.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">150.</span><span class="p">])</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">si</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">zero_wp</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">processing</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="mf">2.15</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="n">si</span><span class="p">)</span> <span class="k">for</span> <span class="n">BETA</span> <span class="ow">in</span> <span class="n">BETARANGE</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Im m \Sigma_{11}$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Re e\Sigma_{12}$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$i\omega_n$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.26</span><span class="p">])</span>
+<span class="c1">#fig.savefig(&#39;CT_QMC-Sigma_zero_w.pdf&#39;, format=&#39;pdf&#39;, transparent=False, bbox_inches=&#39;tight&#39;, pad_inches=0.05)</span>
+</pre></div>
+</div>
+<p>Blues are by Padé, Greens are linear. Not to much difference</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">si</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="o">-</span> <span class="n">zero_wp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="o">-</span> <span class="n">zero_wp</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span> <span class="o">+</span> <span class="n">zero_wp</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span> <span class="o">+</span> <span class="n">zero_wp</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$-\Im m \Sigma_{11}(w=0)$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$t_\perp + \Re e\Sigma_{12}(w=0)$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$T/D$&#39;</span><span class="p">)</span>
+<span class="n">si</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+<span class="c1">#fig.savefig(&#39;CT_QMC-Sigma_scattering.pdf&#39;, format=&#39;pdf&#39;, transparent=False, bbox_inches=&#39;tight&#39;, pad_inches=0.05)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/scattering.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">scattering.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/scattering.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">scattering.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/cthyb/scattering.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

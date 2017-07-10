@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Energy formulas &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Two site Dynamical Mean-Field Theory" href="twosite.html" />
+    <link rel="prev" title="Welcome to PyDMFT’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="twosite.html" title="Two site Dynamical Mean-Field Theory"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyDMFT’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="energy-formulas">
+<h1>Energy formulas<a class="headerlink" href="#energy-formulas" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="kinetic-energy">
+<span id="id1"></span><h2>Kinetic Energy<a class="headerlink" href="#kinetic-energy" title="Permalink to this headline">¶</a></h2>
+<p>This energy is the weigthed average of non-interacting kinetic
+energy. Assuming a non-interacting Hamiltonian in momentum space the
+kinetic average is.</p>
+<div class="math">
+<p><img src="_images/math/9fcb5db7d7bbf4bcf187080a9735cc836672548b.png" alt="\langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \epsilon_k^0 G(k, i\omega_n)"/></p>
+</div><p>It can be transformed into a treatable form relying on local quantities</p>
+<div class="math">
+<p><img src="_images/math/6054560b85ddff5d43b527fbe2266423f03f0dac.png" alt="\langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + G(k, i\omega_n)^{-1}G(k, i\omega_n) - G^{free}(k, i\omega_n)^{-1}G^{free}(k, i\omega_n) \right)"/></p>
+</div><div class="math">
+<p><img src="_images/math/5954bdcee07d177ea8fe084409126e12e55cefa1.png" alt="= Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + (i\omega_n - \epsilon_k^0 - \Sigma(i\omega_n))G(k, i\omega_n) - (i\omega_n - \epsilon_k^0)G^{free}(k, i\omega_n) \right)"/></p>
+</div><div class="math">
+<p><img src="_images/math/fcd1740b8d630e6ecab6e040db11869c56c85938.png" alt="= Tr \frac{1}{\beta} \sum_{k,n} \left( i\omega_n \left( G(k, i\omega_n)- G(k, i\omega_n)^{free} \right) - \Sigma(i\omega_n) G(k, i\omega_n) + \epsilon_k^0G^{free}(k, i\omega_n) \right)"/></p>
+</div><p>The first two terms can be summed in reciprocal space to yield a
+local the quantities that come out of the DMFT self-consistency and
+the last term as it belongs to the non-interacting system is
+trivially solvable</p>
+<div class="math">
+<p><img src="_images/math/76ee799ab3b2c5e8cb9af2b8348611ba525af169.png" alt="\langle T \rangle = Tr \frac{1}{\beta} \sum_n \left( i\omega_n \left( G(i\omega_n)- G(i\omega_n)^{free} \right) - \Sigma(i\omega_n)G(i\omega_n) \right) + \int_{-\infty}^\infty \epsilon\rho(\epsilon)n_F(\epsilon-\mu) d\epsilon"/></p>
+</div><p>It is also possible to take a simpler approac by introducing a zero to
+the frequecy sum, with a constant factor. In this case one takes from</p>
+<div class="math">
+<p><img src="_images/math/849c05ffa6f61f8cfe8ed3e933f181346d10ef41.png" alt="\langle T \rangle  = Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + G(k, i\omega_n)^{-1}G(k, i\omega_n) \right)"/></p>
+</div><div class="math">
+<p><img src="_images/math/40b8a8c6dc88ae5c9eb4c29354c8f6669cf875d1.png" alt="= Tr \frac{1}{\beta} \sum_{k,n} \left( \epsilon_k^0 G(k, i\omega_n) + (i\omega_n - \epsilon_k^0 - \Sigma(i\omega_n))G(k, i\omega_n) \right)"/></p>
+</div><p>But the local self-energy can be expresed by</p>
+<div class="math">
+<p><img src="_images/math/754df40788b60ab0a436a3b88b6a76c9effdf340.png" alt="\Sigma(i\omega_n) = \mathcal{G}^{0, -1} - G(i\omega_n)^{-1} =  i\omega_n - h_{loc} - \Delta(i\omega_n) - G(i\omega_n)^{-1}"/></p>
+</div><p>Where <img class="math" src="_images/math/8365e98b163786f8c964e588a09c71eca56be6b4.png" alt="h_{loc}"/> is the momentum independent part of the
+hamiltonian. Then the expression transforms into.</p>
+<div class="math">
+<p><img src="_images/math/4f827b5cad80f9a643b5b3459386cfa255194256.png" alt="\langle T \rangle = Tr \frac{1}{\beta} \sum_{k,n} \left(h_{loc} + \Delta(i\omega_n)\right) G(k, i\omega_n) = Tr \frac{1}{\beta} \sum_n \left(h_{loc} + \Delta(i\omega_n)\right) G(i\omega_n)"/></p>
+</div></div>
+<div class="section" id="potential-energy">
+<span id="id2"></span><h2>Potential energy<a class="headerlink" href="#potential-energy" title="Permalink to this headline">¶</a></h2>
+<p>According to <a class="reference internal" href="#fetter-walecka" id="id3">[Fetter-Walecka]</a> in equation 23.14 then transformed to Matsubara frequencies the potential energy can be described by:</p>
+<div class="math">
+<p><img src="_images/math/eff92ea4ed6f7fd7f7e21bbdd34a77857abdd89c.png" alt="\langle V \rangle = \frac{1}{\beta} \sum_{k,n} \frac{1}{2}\left(
+i\omega_n - \epsilon_k^0 \right)Tr G(k, i\omega_n)"/></p>
+</div><p>And expressing it in local quantities with the DMFT approximation that the Self-Energy is local</p>
+<div class="math" id="equation-local_potential_energy">
+<p><span class="eqno">(1)<a class="headerlink" href="#equation-local_potential_energy" title="Permalink to this equation">¶</a></span><img src="_images/math/67f3ca01dc3a385e9c545f61411d84d071c21bce.png" alt="\langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2}
+Tr(\Sigma(i\omega_n)G(i\omega_n))"/></p>
+</div><div class="section" id="references">
+<h3>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h3>
+<table class="docutils citation" frame="void" id="fetter-walecka" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[Fetter-Walecka]</a></td><td>Fetter, Walecka, Quantum Theory of many-particle systems</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Energy formulas</a><ul>
+<li><a class="reference internal" href="#kinetic-energy">Kinetic Energy</a></li>
+<li><a class="reference internal" href="#potential-energy">Potential energy</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to PyDMFT&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="twosite.html"
+                        title="next chapter">Two site Dynamical Mean-Field Theory</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/energies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="twosite.html" title="Two site Dynamical Mean-Field Theory"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyDMFT’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

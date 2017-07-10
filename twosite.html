@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Two site Dynamical Mean-Field Theory &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules Reference API" href="reference.html" />
+    <link rel="prev" title="Energy formulas" href="energies.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Modules Reference API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="energies.html" title="Energy formulas"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="two-site-dynamical-mean-field-theory">
+<h1>Two site Dynamical Mean-Field Theory<a class="headerlink" href="#two-site-dynamical-mean-field-theory" title="Permalink to this headline">¶</a></h1>
+<p>This document is about the work presented in the following publication:</p>
+<ul class="simple">
+<li>Potthoff, M. (2001). Two-site dynamical mean-field theory. Physical
+Review B, 64(16),
+165114. <a class="reference external" href="http://dx.doi.org/10.1103/PhysRevB.64.165114">http://dx.doi.org/10.1103/PhysRevB.64.165114</a></li>
+</ul>
+<p>The code to generate this figures can be found inside <a class="reference internal" href="auto_examples/index.html#twosite-examples"><span class="std std-ref">Two Site DMFT examples</span></a>.</p>
+<p>The Dynamical mean field theory has become a valuable method to investigate the physics
+of strongly correlated electrons in a lattice. It consist of a procedure in
+which the original lattice problem is mapped into an effective impurity model
+that describes a single correlated impurity orbital embedded in an uncorrelated
+bath of conduction-band states. This mapping is a self-consistent one, where
+the bath parameters depend on the on-site impurity Green&#8217;s function.</p>
+<p>The impurity model is crucial in the DMFT as it poses a highly non-trivial
+many-body problem that must be solved repeatedly, incrementing the cost
+of solving the problem computationally and limiting the applicability of
+the method.</p>
+<p>There is no problem to treat the single-impurity Anderson model with a small
+number of lattice sites <img class="math" src="_images/math/d199132dcb19f0f36399dc29e10254152ab2ebbb.png" alt="n_s"/> numerically exact. But for a finite number of
+sites, the self-consistent mapping between the Hubbard model into the impurity
+model is approximate. The exact solution of the effective impurity model is
+thus achieved at the expense of an approximate self-consistency.</p>
+<div class="section" id="single-band-hubbard-model-in-the-bethe-lattice">
+<h2>Single band Hubbard model in the Bethe lattice<a class="headerlink" href="#single-band-hubbard-model-in-the-bethe-lattice" title="Permalink to this headline">¶</a></h2>
+<p>The single band Hubbard Hamiltonian reads:</p>
+<div class="math">
+<p><img src="_images/math/33390e396e1f8c2b10fbebfcb94d568183ada561.png" alt="\mathcal{H} = - t \sum_{&lt;i,j&gt;, \sigma} (c^\dagger_{i\sigma}c_{j\sigma} +h.c.)
+ + U  \sum_{i\sigma} n_{i\uparrow}n_{i\downarrow}"/></p>
+</div><p>The is hopping only between nearest neighbors. For a paramagnetic, spatially
+homogeneous phase the on-site Green Function <img class="math" src="_images/math/8e98699ddfdd72d2e0085314beaf8955158a9313.png" alt="G(\omega) = \langle c_{i\sigma}
+c_{i\sigma^\dagger}\rangle"/> is give by</p>
+<div class="math" id="equation-Site_GF_H_Trans">
+<p><span class="eqno">(1)<a class="headerlink" href="#equation-Site_GF_H_Trans" title="Permalink to this equation">¶</a></span><img src="_images/math/d177b0b3b56b422c7bcae0d26ff3ebba6d3f802c.png" alt="G(\omega) = \int_{-\infty}^{\infty} dx
+\frac{\rho_0(x)}{\omega + \mu - x - \Sigma(\omega)}"/></p>
+</div><p>In this case of the Bethe lattice, the self-energy is local in the limit of
+infinite coordination. The free density of states is</p>
+<div class="math" id="equation-Bethe_dos">
+<p><span class="eqno">(2)<a class="headerlink" href="#equation-Bethe_dos" title="Permalink to this equation">¶</a></span><img src="_images/math/b26df793444c84c105ca702314eed028dde3d852.png" alt="\rho_0(x) = \frac{\sqrt{4t^2 - x^2}}{2\pi t^2}"/></p>
+</div></div>
+<div class="section" id="single-impurity-anderson-model-siam">
+<h2>Single impurity Anderson model(SIAM)<a class="headerlink" href="#single-impurity-anderson-model-siam" title="Permalink to this headline">¶</a></h2>
+<p>The Hamiltonian reads:</p>
+<div class="math" id="equation-SIAM">
+<p><span class="eqno">(3)<a class="headerlink" href="#equation-SIAM" title="Permalink to this equation">¶</a></span><img src="_images/math/dbdd860dc2b0ca919da3dcf7cdae808624ec8e6a.png" alt="\mathcal{H} =&amp;\sum_\sigma(\epsilon_d -\mu) d^\dagger_\sigma d_\sigma +
+U d^\dagger_\uparrow d_\uparrow d^\dagger_\downarrow d_\downarrow \\
+&amp; + \sum_{\sigma,k} (\epsilon_k - \mu) a^\dagger_{k\sigma}a_{k\sigma}
++ \sum_{\sigma,k} V_k(d^\dagger_\sigma c_{k\sigma} + h.c.)"/></p>
+</div><p>The impurity Green function <img class="math" src="_images/math/e6c94ca9375b1f488334cc066a41ae0a3d8420cc.png" alt="G_{imp}(\omega) = \langle
+d_{\sigma}d_{\sigma^\dagger}\rangle"/> is given by</p>
+<div class="math" id="equation-ImpGF_gen">
+<p><span class="eqno">(4)<a class="headerlink" href="#equation-ImpGF_gen" title="Permalink to this equation">¶</a></span><img src="_images/math/3381b94da440ced797e86ea6baf6df3b80ca727f.png" alt="G_{imp}(\omega) =
+[ \omega + \mu - \epsilon_d - \Delta(\omega) - \Sigma_{imp}(\omega) ]^{-1}"/></p>
+</div><p>where the hybridization function is <img class="math" src="_images/math/e68864f620407775dc0703e58ea2d9ebdaf7ccb7.png" alt="\Delta(\omega) = \sum_k |V_k|^2 /
+(\omega + \mu - \epsilon_k)"/>.</p>
+<p>The DMFT self-consistency requires that</p>
+<div class="math" id="equation-DMFT_selfconsistency">
+<p><span class="eqno">(5)<a class="headerlink" href="#equation-DMFT_selfconsistency" title="Permalink to this equation">¶</a></span><img src="_images/math/8951877e24590023cb396a9c7e5177743db0bafa.png" alt="G_{imp}(\omega) = G(\omega)"/></p>
+</div><p>as the self-energy is required to be the same</p>
+<div class="math">
+<p><img src="_images/math/678e4a2e3a7b0c8a03bc36f22bef4c14cb85b224.png" alt="\Sigma_{imp}(\omega) = \Sigma(\omega)"/></p>
+</div><p>In this fashion the original lattice problem is mapped onto the SIAM and can be
+solved by the iterative process that: Starts with a Guess of the Self-Energy,
+that allows to calculate through equation <a class="reference internal" href="#equation-Site_GF_H_Trans">(1)</a> the on-site
+lattice Greens Function. The DMFT Self-consistency <a class="reference internal" href="#equation-DMFT_selfconsistency">(5)</a>
+allows to use this Green function to determine a new hybridization function
+<img class="math" src="_images/math/741f8024101fc4ca49d97c71c8707ce590ce8b5c.png" alt="\Delta(\omega)"/> and thus the parameters of the effective SIAM. Then the
+impurity problem is solved to get a new estimate of the impurity self-energy that
+is used into a new cycle until self-consistency is achieved.</p>
+<div class="section" id="the-two-site-single-impurity-model">
+<h3>The two site single impurity model<a class="headerlink" href="#the-two-site-single-impurity-model" title="Permalink to this headline">¶</a></h3>
+<p>The self-consistency condition <a class="reference internal" href="#equation-DMFT_selfconsistency">(5)</a> can be fulfilled only
+for <img class="math" src="_images/math/ca09f67e3fdee0efa1267ba6ec929aaaf3f5cdb8.png" alt="n_s \rightarrow \infty"/> that is a bath with an infinite number of degrees
+of freedom. This poses the SIAM as a many-body problem. The simplification now
+is to construct a two site DMFT, where there is only an impurity and one bath site.
+As such the only parameters left from the impurity model <a class="reference internal" href="#equation-SIAM">(3)</a> are the one particle energy level of the bath
+site <img class="math" src="_images/math/f9f32361c84e217a462501e7bd9f9246ddd64157.png" alt="\epsilon_c"/> and the hybridization strength <img class="math" src="_images/math/fae0e7a73748991e5540d874416000583f64f58e.png" alt="V"/>.</p>
+<p>Thus the hybridization function reduces to <img class="math" src="_images/math/4f5bc41cced00e36b8fec49dd6c5baa8f89bd6ee.png" alt="\Delta(\omega)=V^2/(\omega+ \mu -\epsilon_c)"/></p>
+<p>and the free <img class="math" src="_images/math/9be5d84bbc079703eb92f456ebfe18c719b79de9.png" alt="(U=0)"/> impurity Green function is a two pole function</p>
+<div class="math" id="equation-ImpGF_free">
+<p><span class="eqno">(6)<a class="headerlink" href="#equation-ImpGF_free" title="Permalink to this equation">¶</a></span><img src="_images/math/82d72a9488916bb19f623c05991abfcc4dc36bb9.png" alt="G^{(0)}_{imp} =&amp; \frac{\omega - \epsilon_c + \mu}{(\omega + \mu - \epsilon_d)(\omega + \mu - \epsilon_c) - V^2} \\
+ =&amp; \frac{1}{2r} \left( \frac{r-\delta\epsilon}{\omega + \mu - \bar{\epsilon} +r}
+ + \frac{r + \delta\epsilon}{\omega + \mu - \bar{\epsilon} - r} \right)"/></p>
+</div><p>where <img class="math" src="_images/math/72b81c1a80ac3b121b25d1ac103581075968b3a9.png" alt="\bar{\epsilon}=(\epsilon_d+\epsilon_c)/2"/>, <img class="math" src="_images/math/ac4a6ca78852563d470f3916d63b038ee14eee8b.png" alt="\delta{\epsilon}
+=(\epsilon_d-\epsilon_c)/2"/> and <img class="math" src="_images/math/97e83e92f951baf431ef03ff01bfd9440859f767.png" alt="r=\sqrt{\delta \epsilon^2 + V^2}"/>. The
+interacting Green function has four poles and the self-energy two poles.</p>
+<div class="section" id="self-consistency">
+<h4>Self-consistency<a class="headerlink" href="#self-consistency" title="Permalink to this headline">¶</a></h4>
+<p>In the Two site DMFT original self-consistency equations need to be reformulated
+to be able to capture the desired physical behavior of the system in a such
+simplified model. This mean to find two physically motivated conditions to fix
+the bath parameters <img class="math" src="_images/math/f9f32361c84e217a462501e7bd9f9246ddd64157.png" alt="\epsilon_c"/> and <img class="math" src="_images/math/fae0e7a73748991e5540d874416000583f64f58e.png" alt="V"/>.</p>
+<p>In the limit of high frequencies the exact self-energy of the impurity problem
+<a class="reference internal" href="#equation-SIAM">(3)</a> can be expanded in powers of <img class="math" src="_images/math/6f31a1774b855a58653e95cb109740dac376708f.png" alt="1/\omega"/>:</p>
+<div class="math" id="equation-High_w_sigma_expan">
+<p><span class="eqno">(7)<a class="headerlink" href="#equation-High_w_sigma_expan" title="Permalink to this equation">¶</a></span><img src="_images/math/3e9e9dbe4f5ed22a18ada5cbbad97adb88b19870.png" alt="\Sigma(\omega) = Un_d + \frac{U^2 n_d (1 - n_d)}{\omega}
+        + \mathcal{O}(1/\omega^2)"/></p>
+</div><p>where <img class="math" src="_images/math/903e9c8388f44c7a73f3f9f316c1ef69fc519d51.png" alt="n_d\equiv n_{d\sigma}"/> is the spin specific average occupancy of the impurity orbital:</p>
+<div class="math">
+<p><img src="_images/math/05108e97a69965120ba77bd9b880db87ae4d0e21.png" alt="n_d = \langle d^\dagger_\sigma d_\sigma \rangle = - \frac{1}{\pi}
+\int_{-\infty}^0 \Im m G_{imp}(\omega+ i0^+) d\omega"/></p>
+</div><p>Inserting the expansion <a class="reference internal" href="#equation-High_w_sigma_expan">(7)</a> into equation <a class="reference internal" href="#equation-Site_GF_H_Trans">(1)</a>
+allows to find the high-frequency expansion of the on-site lattice Green function</p>
+<div class="math" id="equation-High_w_sigma_expan_High_G">
+<p><span class="eqno">(8)<a class="headerlink" href="#equation-High_w_sigma_expan_High_G" title="Permalink to this equation">¶</a></span><img src="_images/math/c7d8511f98638206000ccf7025dc02b8ebed1035.png" alt="G(\omega) =&amp;
+\frac{1}{\omega} + \frac{\epsilon_d - \mu + U n_d}{\omega^2} \\
+&amp; + \frac{M_2^{(0)} + (\epsilon_d - \mu)^2 + 2(\epsilon_d -\mu)U n_d
+         + U^2 n_d}{\omega^3} + \mathcal{O}(1/\omega^4)"/></p>
+</div><p>where <img class="math" src="_images/math/329049ca76bb4e19a529cc3de5397bd89a20cdab.png" alt="M_2^{(0)}=\int  x^2 \rho_0(x)dx"/> is the variance of the non-
+interacting density of states <a class="reference internal" href="#equation-Bethe_dos">(2)</a>. This expansion has to relate the
+fillings of the impurity <img class="math" src="_images/math/3fe74991fd3ef13180c54f0326ce972036db2d22.png" alt="n_{imp} \equiv 2 n_d"/> model with the lattice model as such it is required that the fillings
+in both models match.</p>
+<div class="math" id="equation-occupancy_match">
+<p><span class="eqno">(9)<a class="headerlink" href="#equation-occupancy_match" title="Permalink to this equation">¶</a></span><img src="_images/math/b8edd283f2ae6f3bf60c2f96ee176d2129ff3860.png" alt="n_{lattice} = n_{imp}"/></p>
+</div><p>where the band filling is calculated via</p>
+<div class="math" id="equation-lattice_ocupation">
+<p><span class="eqno">(10)<a class="headerlink" href="#equation-lattice_ocupation" title="Permalink to this equation">¶</a></span><img src="_images/math/82496d549e42b13eac3a1b9ce216b323ea42bada.png" alt="n_{lattice} = - \frac{2}{\pi} \int_{-\infty}^0 \Im m G(\omega+ i0^+) d\omega"/></p>
+</div><p>Equation <a class="reference internal" href="#equation-occupancy_match">(9)</a> can be seen as an integral for of the original
+self-consistency condition <a class="reference internal" href="#equation-DMFT_selfconsistency">(5)</a> and the paramagnetic
+solution is enforced as the spin species are dealt equivalent.</p>
+<p>The low-frequency limit of the self-energy can be expanded in powers of <img class="math" src="_images/math/b51aa99e0bc8cc8c3d17c0b9cf822db73e13293e.png" alt="\omega"/></p>
+<div class="math" id="equation-Low_w_sigma_expan">
+<p><span class="eqno">(11)<a class="headerlink" href="#equation-Low_w_sigma_expan" title="Permalink to this equation">¶</a></span><img src="_images/math/b25e7f68d52a7068425089d31049313ad91fd021.png" alt="\Sigma(\omega) = a + b\omega +\mathcal{O}(\omega^2)"/></p>
+</div><p>The definition <img class="math" src="_images/math/993771fdc0a578c9a89cb211adae3933dfc21b14.png" alt="z=1/(1-b)"/> of the quasiparticle weight for the metal behavior
+of the system is convenient <img class="math" src="_images/math/f1ced1cfe367dcaea3f9ddfa450053ddb5a1f28e.png" alt="z=1/(1-d\Sigma(0)/d\omega)"/>. Inserting the
+expansion <a class="reference internal" href="#equation-Low_w_sigma_expan">(11)</a> with the definition of the quasiparticle
+weigh one obtains the coherent part of the on-site Green function:</p>
+<div class="math" id="equation-G_coh">
+<p><span class="eqno">(12)<a class="headerlink" href="#equation-G_coh" title="Permalink to this equation">¶</a></span><img src="_images/math/c76ca416cca9bf322d921c68fa32f4f00a82d909.png" alt="G^{coh}(\omega) = z \int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{\omega -z(x-\mu+a)}"/></p>
+</div><p>On the other hand the coherent part of the impurity Green function is</p>
+<div class="math">
+<p><img src="_images/math/b18c1fad690dbcb17e53027796e7a116073a9660.png" alt="G^{coh}_{imp}(\omega) = \frac{z}{\omega - z(\epsilon_d - \mu + a + \Delta(\omega))}"/></p>
+</div><p>If one where to compare the low frequency expansion of these coherent Green functions
+one obtains</p>
+<div class="math">
+<p><img src="_images/math/f912766d2837c9e70e8dc6e584029e25577637af.png" alt="G^{coh}(\omega)= &amp; \int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{x - \mu + a}
+- \frac{\omega}{z}\int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{(x - \mu + a)^2}
++ \frac{\omega^2}{z^2}\int_{-\infty}^{\infty} \frac{\rho_0(x)dx}{(x - \mu + a)^3} +\mathcal{O}(\omega^3) \\
+G^{coh}_{imp}(\omega)= &amp; \frac{\mu -\epsilon_c}{k-V^2}  + \left(\frac{\mu -\epsilon_c}{k-V^2}
+- \frac{(\mu - \epsilon_c)(k' + k -  V^2)}{(k-V^2)^2}\right) \omega +\mathcal{O}(\omega^2)"/></p>
+</div><p>where <img class="math" src="_images/math/8314b87de88aa815cba7c26f900da9d98397e10a.png" alt="k'=2\mu - \epsilon_c - \epsilon_d + b"/> and
+<img class="math" src="_images/math/c148c86386b52db860e41698832b8cfb913dd85e.png" alt="k=\mu^2 -2\mu(\epsilon_c + \epsilon_d) + \epsilon_c\epsilon_d -a"/>. Since
+it becomes to complicated to find a link in these low frequency expansions, one
+performs the high-frequency expansion of the coherent Green functions to obtains</p>
+<div class="math">
+<p><img src="_images/math/787fb1a3d921a908ed079631cc113b8c218dba71.png" alt="G^{coh}(\omega) =&amp; \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
++\frac{z^3(M_2^{(0)} + (\epsilon_d - \mu +a)^2)}{\omega^3} \\
+G^{coh}_{imp}(\omega)= &amp; \frac{z}{\omega} + \frac{z^2(\epsilon_d - \mu +a)}{\omega^2}
++\frac{z^2V^2 + z^3(\epsilon_d - \mu +a)^2}{\omega^3} \\"/></p>
+</div><p>leading to the second self-consistency condition</p>
+<div class="math" id="equation-hybridization_match">
+<p><span class="eqno">(13)<a class="headerlink" href="#equation-hybridization_match" title="Permalink to this equation">¶</a></span><img src="_images/math/7a02a0cf605aef991ffbd083909cc9c6d85a427e.png" alt="V^2 = z M_2^{(0)}"/></p>
+</div></div>
+<div class="section" id="algorithm-implementation">
+<h4>Algorithm implementation<a class="headerlink" href="#algorithm-implementation" title="Permalink to this headline">¶</a></h4>
+<p>Using the two self-consistency conditions <a class="reference internal" href="#equation-occupancy_match">(9)</a> and <a class="reference internal" href="#equation-hybridization_match">(13)</a>
+the bath parameters can be fixed and calculated self-consistently. One starts with
+the model parameters <img class="math" src="_images/math/32f51790e696ed9861b22afecebbf4b84e5c5a29.png" alt="\epsilon_d=0, t, U, \mu, \rho_0(x)"/> and takes a guess
+for <img class="math" src="_images/math/5048efe7d9d70202c907aa2357b235ecd829af6a.png" alt="\epsilon_c, V^2"/>. That defines the two-site impurity model and can be
+solved to find de average occupancy of the impurity <img class="math" src="_images/math/a5e2a99247f8302570c9bdb58b65a37adfe682a4.png" alt="n_{imp}=\langle n_\uparrow\rangle+\langle n_\downarrow \rangle"/>
+and using the Lehmann representation one finds <img class="math" src="_images/math/15789ec6af132907a32e823845f2e2c499bc69ca.png" alt="G_{imp}"/>, through the Dyson
+equation one can extract the self-energy.</p>
+<p>The self-energy yields the quasiparticle weight and through <a class="reference internal" href="#equation-hybridization_match">(13)</a>
+a new value for the hybridization strength <img class="math" src="_images/math/fae0e7a73748991e5540d874416000583f64f58e.png" alt="V"/>. The self-energy is used
+again in <a class="reference internal" href="#equation-Site_GF_H_Trans">(1)</a> to obtain the lattice Green function, which via
+<a class="reference internal" href="#equation-lattice_ocupation">(10)</a> yields the filling of the lattice sites and has to be
+compared to the impurity occupancy. Then a new value for <img class="math" src="_images/math/f9f32361c84e217a462501e7bd9f9246ddd64157.png" alt="\epsilon_c"/> is
+chosen to reduce the difference in occupancies between lattice and impurity models.
+This cycle is performed until the self-consistency conditions are full-filled.</p>
+<p>It is inconvenient to calculate the lattice Green function on each iteration to
+calculate later the lattice occupancy with <a class="reference internal" href="#equation-lattice_ocupation">(10)</a>, as the numerical
+pole broadening <img class="math" src="_images/math/d381bd3b57a8ee787638a0a1f5067b3b684924ed.png" alt="i0^+"/> introduces a lot of numerical variation. Instead, given
+that the self-energy is a real two poled function, and on the Bethe lattice is
+purely local and momentum independent, the lattice filling can be directly calculated
+by</p>
+<div class="math">
+<p><img src="_images/math/8304cc8744daf225076dd5c5b4ed1c6ad82e58f6.png" alt="n= 2 \int_{-\infty}^0 d\omega \rho_0(\omega + \mu - \Sigma(\omega))"/></p>
+</div><p>where <img class="math" src="_images/math/9083dd22fe5a727fdaafda559e9be40b760516a9.png" alt="\rho(\omega)=\rho_0(\omega + \mu - \Sigma(\omega))"/> becomes the
+interacting density of states. This becomes much more favorable as only this real
+integral has to be calculated instead of the much more expensive hilbert transform
+of <a class="reference internal" href="#equation-Site_GF_H_Trans">(1)</a> and one does not need to include the line broadening at
+all.</p>
+</div>
+</div>
+<div class="section" id="results">
+<h3>Results<a class="headerlink" href="#results" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="the-mott-transition-at-half-filling">
+<h4>The Mott transition at half-filling<a class="headerlink" href="#the-mott-transition-at-half-filling" title="Permalink to this headline">¶</a></h4>
+<p>For the symmetric case of half-filling particle-hole symmetry requires
+<img class="math" src="_images/math/6b5b051c03ca1fa5d0726b5d0fe49dbe93f37a67.png" alt="\epsilon_c=\mu=U/2"/> to ensure the first self-consistency equation <a class="reference internal" href="#equation-occupancy_match">(9)</a>.
+One then follows to calculate the state of the system as the local Coulomb interaction
+is raised and one shows in the next figure the change of the quasiparticle
+weight at different temperatures.</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_halffill_z.html"><img alt="_images/sphx_glr_plot_halffill_z_001.png" src="_images/sphx_glr_plot_halffill_z_001.png" /></a>
+</div>
+<p>Following the system state as the metallic behavior is lost. Higher temperatures
+are less capable of sustaining the metal solution and the system just drops into
+the insulating state.</p>
+<p>The evolution of the spectral function is demonstrated in the next
+figures from example
+<a class="reference internal" href="auto_examples/twosite/plot_halffill.html#sphx-glr-auto-examples-twosite-plot-halffill-py"><span class="std std-ref">Following the Metal to Mott insulator Transition</span></a>, accompanied by
+the plot of the self energy and the impurity Green function. It can be
+clearly seen that the self-energy has in general only 2 poles and the
+local Green function is in general a 4 poled function.</p>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_001.png"><img alt="_images/sphx_glr_plot_halffill_001.png" src="_images/sphx_glr_plot_halffill_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_002.png"><img alt="_images/sphx_glr_plot_halffill_002.png" src="_images/sphx_glr_plot_halffill_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_003.png"><img alt="_images/sphx_glr_plot_halffill_003.png" src="_images/sphx_glr_plot_halffill_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_004.png"><img alt="_images/sphx_glr_plot_halffill_004.png" src="_images/sphx_glr_plot_halffill_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_005.png"><img alt="_images/sphx_glr_plot_halffill_005.png" src="_images/sphx_glr_plot_halffill_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p>The structure of the spectral function is not as rich as a full DMFT calculation
+would provide. Nevertheless the transfer of spectral weight for low to high
+energy is clearly demonstrated with the formation of the upper an lower Hubbard
+bands as the remaining quasiparticle peak. There is the clear evidence of the
+3 peak structure. The two site DMFT reduces the lattice Green function at very
+low temperatures to a function of 4 poles, 2 poles coming from the self-energy
+and the other 2 from the free impurity Green function <a class="reference internal" href="#equation-ImpGF_free">(6)</a>.</p>
+</div>
+<div class="section" id="away-of-half-filling">
+<h4>Away of Half-filling<a class="headerlink" href="#away-of-half-filling" title="Permalink to this headline">¶</a></h4>
+<p>The self-consistency equations become more complicated to fulfill, as now one
+has to search for the parameters <img class="math" src="_images/math/a0a0a1067f7aa3d961bbf17d658efc0a22c02ea9.png" alt="\epsilon_c,V"/> at the same time for
+a given target population and for a given local interaction. In the next figure
+it is shown the quasiparticle weight decay as a function of increasing filling
+for different values of the local interaction. In the empty band limit
+<img class="math" src="_images/math/8d28faf5c1c2373f3f1b7e8e32a655ad4d4d5d0a.png" alt="Z\rightarrow 1"/> for an arbitrary <img class="math" src="_images/math/169c982b5e649cd1bd6445df5583affe427ea269.png" alt="U"/>. As
+long as the system is away from half-filling it has a metallic behavior.</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_dop_z.html"><img alt="_images/sphx_glr_plot_dop_z_001.png" src="_images/sphx_glr_plot_dop_z_001.png" /></a>
+</div>
+<p>The next plot show the expected value of the double occupation in the impurity.
+At low lattice filling, attibuted to the low electron population, double occupancy
+is low. When the system is subject to a local Coulomb interaction <img class="math" src="_images/math/2b0c77a39f98158da9137f0115c092e5970cd35d.png" alt="U&lt;U_c"/>
+the double occupancy increases as the system approaches the half-filling regime
+and remains finite. When <img class="math" src="_images/math/2b0c77a39f98158da9137f0115c092e5970cd35d.png" alt="U&lt;U_c"/> there is no double occupancy any more
+at half-filling.</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_dop_d.html"><img alt="_images/sphx_glr_plot_dop_d_001.png" src="_images/sphx_glr_plot_dop_d_001.png" /></a>
+</div>
+<p>The next figure shows
+this parameters as a function of filling for the case <img class="math" src="_images/math/bb652c43f44ab226357778a975814416fe0a8c0c.png" alt="U/t=4"/>. In this
+case <img class="math" src="_images/math/2b0c77a39f98158da9137f0115c092e5970cd35d.png" alt="U&lt;U_c"/> the hybridization strength is finite for <img class="math" src="_images/math/7c6c00f3db95b4cf2a535be3c79f63a8f71ff512.png" alt="n=1"/> and the
+system becomes less correlated for decreasing filling. Consequently <img class="math" src="_images/math/fae0e7a73748991e5540d874416000583f64f58e.png" alt="V"/> has
+to increase until <img class="math" src="_images/math/1f1aaca7f55b06f942788252139b4daa0051b68d.png" alt="V\rightarrow M_2^{(0)}"/> for (<img class="math" src="_images/math/2f178a6f25494f1a5a9b0e3c6f9b01f0fd234ffa.png" alt="n=0"/>).</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_dop.html"><img alt="_images/sphx_glr_plot_dop_002.png" src="_images/sphx_glr_plot_dop_002.png" /></a>
+</div>
+<p>As for <img class="math" src="_images/math/af389861ae2adbb670d29a8ac0f22ceb5a9ccc93.png" alt="\epsilon_c=U/2"/> at half-filling and it decreases with decreasing
+filling until it diverges on appraching the empty band limit where
+<img class="math" src="_images/math/8bcc19d36af2985f96bb029ab0f09ff554bcbc23.png" alt="\epsilon_c \rightarrow -\infty"/>, as is necessary to ensure a vanishing
+occupancy of the impurity orbital for finite <img class="math" src="_images/math/fae0e7a73748991e5540d874416000583f64f58e.png" alt="V"/>. For the usable chemical
+potential to dope the system it is only spanned in the range of bandwidth of the
+non interacting density of states.</p>
+<p>The structure of the spectral function change under doping is presented in the
+next figure. The strong simplification of the two site DMFT approximation allows
+only the visualization of the 3 &#8220;peaks&#8221; which always present a disconnected
+structure. The quasiparticle peak never joins the lower Hubbard band at low
+fillings.</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_dop_A.html"><img alt="_images/sphx_glr_plot_dop_A_001.png" src="_images/sphx_glr_plot_dop_A_001.png" /></a>
+</div>
+<p>When analyzing the double occupancy of the impurity site</p>
+</div>
+<div class="section" id="in-matsubara-frequencies">
+<h4>In Matsubara frequencies<a class="headerlink" href="#in-matsubara-frequencies" title="Permalink to this headline">¶</a></h4>
+<p>The twosite DMFT can also be treated in the imaginary axis using the Matsubara
+frequencies. Since one is only treating the analytic continuation into the
+imaginary axis, all equations are kept the same one only needs to change
+<img class="math" src="_images/math/421d7eaae1497ba752dcbe1cfbd4c0fb2f726c66.png" alt="\omega \rightarrow i\omega_n"/>, where <img class="math" src="_images/math/0bc80d20b757493c9ee3b7475c11163fbe6d2b62.png" alt="\omega_n = \pi(2n+1)/\beta"/>.
+The most substantial change comes from the
+definition of the quasiparticle weight were it becomes</p>
+<div class="math">
+<p><img src="_images/math/329ad03d0afaba2a4b2c2b27064a23f469a901e5.png" alt="z = [1 - \Im m \Sigma(\omega_0)/\omega_0) ]^{-1}"/></p>
+</div><p>Until now only the treatment at half-filling is handled, because in this situation
+the particle-hole symmetry requires <img class="math" src="_images/math/6b5b051c03ca1fa5d0726b5d0fe49dbe93f37a67.png" alt="\epsilon_c=\mu=U/2"/> and <a class="reference internal" href="#equation-occupancy_match">(9)</a>
+is automatically fulfilled. The next figure shows the drop in the quasiparticle
+weight as the local interaction is raised. It is very similar to the one presented
+for the real frequencies. First an most noticeable if that a <img class="math" src="_images/math/0bf88eecd0496959e6a72465a7bfff046a43188d.png" alt="\beta = 6"/>
+the quasiparticle weight doesn&#8217;t drop completely to zero at <img class="math" src="_images/math/d2deb7f686bef2c67d5af94e9963d30679f34fe6.png" alt="U/D=1.6"/>, but
+that the metallic solution is sustained up to <img class="math" src="_images/math/864f4563025d36b9ea54c7f28012d68e9ffa8f8e.png" alt="U/D=2"/>. In general the metallic
+solutions are sustained for larger interaction values(although not directly noticeable)
+that the calculations performed in the real frequency axis.</p>
+<p>The search for the
+coexistence region of the metallic and insulating solutions is not possible
+in the 2 site DMFT approximation as one only uses equation <a class="reference internal" href="#equation-hybridization_match">(13)</a>
+to update the bath hybridization and starting from the insulating solution with
+<img class="math" src="_images/math/b4a88b332e9885e000f4ad02238b759cf4b179b3.png" alt="z=0"/> does not allow the system to escape the insulating case.</p>
+<div class="figure">
+<a class="reference external image-reference" href="/auto_examples/twosite/plot_halffill_z.html"><img alt="_images/sphx_glr_plot_halffill_z_002.png" src="_images/sphx_glr_plot_halffill_z_002.png" /></a>
+</div>
+<p>The behavior of the Green function and the self-energy is much more
+abstract than in the real case. Here there are no poles to be
+seen. The next figures from example
+<a class="reference internal" href="auto_examples/twosite/plot_halffill_matsubara.html#sphx-glr-auto-examples-twosite-plot-halffill-matsubara-py"><span class="std std-ref">Following the Metal to Mott insulator Transition</span></a> show
+the imaginary parts of the Green function and self-energy at different
+local interaction strength. In the case of the self-energy the
+behavior is the same know from my previous training with IPT. For the
+Green function there was the behavior it should go to the bandwidth
+value at at zero frequency, this know condition is not met neither was
+it enforced. In the case of the 2 site DMFT the Green Function always
+&#8220;goes&#8221; through zero although there is no zero frequency in the
+fermionic case.</p>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_matsubara_001.png"><img alt="_images/sphx_glr_plot_halffill_matsubara_001.png" src="_images/sphx_glr_plot_halffill_matsubara_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_matsubara_002.png"><img alt="_images/sphx_glr_plot_halffill_matsubara_002.png" src="_images/sphx_glr_plot_halffill_matsubara_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_matsubara_003.png"><img alt="_images/sphx_glr_plot_halffill_matsubara_003.png" src="_images/sphx_glr_plot_halffill_matsubara_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="_images/sphx_glr_plot_halffill_matsubara_004.png"><img alt="_images/sphx_glr_plot_halffill_matsubara_004.png" src="_images/sphx_glr_plot_halffill_matsubara_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Two site Dynamical Mean-Field Theory</a><ul>
+<li><a class="reference internal" href="#single-band-hubbard-model-in-the-bethe-lattice">Single band Hubbard model in the Bethe lattice</a></li>
+<li><a class="reference internal" href="#single-impurity-anderson-model-siam">Single impurity Anderson model(SIAM)</a><ul>
+<li><a class="reference internal" href="#the-two-site-single-impurity-model">The two site single impurity model</a><ul>
+<li><a class="reference internal" href="#self-consistency">Self-consistency</a></li>
+<li><a class="reference internal" href="#algorithm-implementation">Algorithm implementation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#results">Results</a><ul>
+<li><a class="reference internal" href="#the-mott-transition-at-half-filling">The Mott transition at half-filling</a></li>
+<li><a class="reference internal" href="#away-of-half-filling">Away of Half-filling</a></li>
+<li><a class="reference internal" href="#in-matsubara-frequencies">In Matsubara frequencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="energies.html"
+                        title="previous chapter">Energy formulas</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="reference.html"
+                        title="next chapter">Modules Reference API</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/twosite.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="reference.html" title="Modules Reference API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="energies.html" title="Energy formulas"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

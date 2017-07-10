@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.ipt_real &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="dmft.ipt_imag" href="dmft.ipt_imag.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.ipt_imag.html" title="dmft.ipt_imag"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.ipt_real">
+<span id="dmft-ipt-real"></span><h1>dmft.ipt_real<a class="headerlink" href="#module-dmft.ipt_real" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ipt-in-real-frequencies">
+<h2>IPT in real frequencies<a class="headerlink" href="#ipt-in-real-frequencies" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="dmft.ipt_real.dimer_dmft">
+<code class="descclassname">dmft.ipt_real.</code><code class="descname">dimer_dmft</code><span class="sig-paren">(</span><em>U</em>, <em>tp</em>, <em>nfp</em>, <em>w</em>, <em>dw</em>, <em>gss</em>, <em>gsa</em>, <em>conv=1e-07</em>, <em>t=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_real.dimer_dmft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve DMFT equations in real frequencies for the dimer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>U</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Couloumb interaction</li>
+<li><strong>tp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Dimerization</li>
+<li><strong>npf</strong> (<em>1D real ndarray</em>) &#8211; Thermal Fermi function</li>
+<li><strong>w</strong> (<em>1D real ndarray</em>) &#8211; frequency grid. Has to be equispaced and symmetric</li>
+<li><strong>dw</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; frequency separation</li>
+<li><strong>gss</strong> (<em>1D complex ndarray</em>) &#8211; Starting guess for the symmetric Green function</li>
+<li><strong>gsa</strong> (<em>1D complex ndarray</em>) &#8211; Starting guess for the asymmetric Green function</li>
+<li><strong>conv</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; convergence criteria</li>
+<li><strong>t</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; hopping</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>(gss, gsa)</strong> (<em>tuple of 1D complex ndarray, Green Functions</em>)</li>
+<li><strong>(ss, sa)</strong> (<em>tuple of 1D complex ndarray, Self-Energy</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="examples-using-dmft-ipt-real-dimer-dmft">
+<h3>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_real.dimer_dmft</span></code><a class="headerlink" href="#examples-using-dmft-ipt-real-dimer-dmft" title="Permalink to this headline">¶</a></h3>
+<div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id1">
+<img alt="../_images/sphx_glr_plot_bandwith_dos_thumb.png" src="../_images/sphx_glr_plot_bandwith_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwith_dos.html#sphx-glr-dimer-lattice-plot-bandwith-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id2">
+<img alt="../_images/sphx_glr_plot_dos_transition_thumb.png" src="../_images/sphx_glr_plot_dos_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_transition.html#sphx-glr-dimer-lattice-plot-dos-transition-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id3">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id4">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity of the correlated metal as the system is warmed up. Temperature ..."><div class="figure" id="id5">
+<img alt="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" src="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_track_on_temp.html#sphx-glr-dimer-lattice-plot-optical-track-on-temp-py"><span class="std std-ref">Dimer Mott transition Optical response with temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity from the correlated metal up to the transition point. The lost o..."><div class="figure" id="id6">
+<img alt="../_images/sphx_glr_plot_optical_transition_thumb.png" src="../_images/sphx_glr_plot_optical_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_transition.html#sphx-glr-dimer-lattice-plot-optical-transition-py"><span class="std std-ref">Dimer Mott transition Optical response</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id7">
+<img alt="../_images/sphx_glr_plot_re_T_dos_thumb.png" src="../_images/sphx_glr_plot_re_T_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_re_T_dos.html#sphx-glr-dimer-lattice-plot-re-t-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id8">
+<img alt="../_images/sphx_glr_plot_shift_thumb.png" src="../_images/sphx_glr_plot_shift_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shift.html#sphx-glr-dimer-lattice-plot-shift-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_real.dimer_solver">
+<code class="descclassname">dmft.ipt_real.</code><code class="descname">dimer_solver</code><span class="sig-paren">(</span><em>w</em>, <em>dw</em>, <em>tp</em>, <em>U</em>, <em>nfp</em>, <em>gss</em>, <em>gsa</em>, <em>t=0.5</em>, <em>eta=0.003j</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_real.dimer_solver" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_real.ph_hf_sigma">
+<code class="descclassname">dmft.ipt_real.</code><code class="descname">ph_hf_sigma</code><span class="sig-paren">(</span><em>Aw</em>, <em>nf</em>, <em>U</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_real.ph_hf_sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Imaginary part of the second order diagram</p>
+<p>because of particle-hole symmetry at half-fill in the Single band
+one can work with A^+ only</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_real.sigma">
+<code class="descclassname">dmft.ipt_real.</code><code class="descname">sigma</code><span class="sig-paren">(</span><em>Aw</em>, <em>nf</em>, <em>U</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_real.sigma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_real.ss_dmft_loop">
+<code class="descclassname">dmft.ipt_real.</code><code class="descname">ss_dmft_loop</code><span class="sig-paren">(</span><em>gloc</em>, <em>w</em>, <em>u_int</em>, <em>beta</em>, <em>conv</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_real.ss_dmft_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>DMFT Loop for the single band Hubbard Model at Half-Filling</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gloc</strong> (<em>complex 1D ndarray</em>) &#8211; local Green&#8217;s function to use as seed</li>
+<li><strong>w</strong> (<em>real 1D ndarray</em>) &#8211; real frequency points</li>
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; On site interaction, Hubbard U</li>
+<li><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Inverse temperature</li>
+<li><strong>conv</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; convergence criteria</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>gloc</strong> (<em>complex 1D ndarray</em>) &#8211; DMFT iterated local Green&#8217;s function</li>
+<li><strong>sigma</strong> (<em>complex 1D ndarray</em>) &#8211; DMFT iterated self-energy</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-real-ss-dmft-loop">
+<h3>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_real.ss_dmft_loop</span></code><a class="headerlink" href="#examples-using-dmft-ipt-real-ss-dmft-loop" title="Permalink to this headline">¶</a></h3>
+<div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency IPT solver follow the spectral function along the metal to insulator tra..."><div class="figure" id="id9">
+<img alt="../_images/sphx_glr_plot_mit_thumb.png" src="../_images/sphx_glr_plot_mit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_mit.html#sphx-glr-auto-examples-ipt-plot-mit-py"><span class="std std-ref">The Metal Mott Insulator transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.ipt_real</a><ul>
+<li><a class="reference internal" href="#ipt-in-real-frequencies">IPT in real frequencies</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-real-dimer-dmft">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_real.dimer_dmft</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-real-ss-dmft-loop">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_real.ss_dmft_loop</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dmft.ipt_imag.html"
+                        title="previous chapter">dmft.ipt_imag</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.ipt_real.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.ipt_imag.html" title="dmft.ipt_imag"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Dimer phase diagram on temperature &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-dimer-phase-diagram-on-temperature">
+<span id="sphx-glr-dimer-lattice-cthyb-plot-tvu-tp0-1-phases-py"></span><h1>The Dimer <img class="math" src="../../_images/math/a1e9cff9b1ef572558c2e35f15209c5c2aa63327.png" alt="t_\perp/D=0.1"/> phase diagram on temperature<a class="headerlink" href="#the-dimer-phase-diagram-on-temperature" title="Permalink to this headline">¶</a></h1>
+<p>Collect data on double occupation and plot the phase diagram.</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="extract_docc_tp.html#sphx-glr-dimer-lattice-cthyb-extract-docc-tp-py"><span class="std std-ref">Extract the double occupation from dimer data files</span></a></p>
+</div>
+<div class="highlight-pytb"><div class="highlight"><pre><span></span><span class="gt">Traceback (most recent call last):</span>
+  File <span class="nb">&quot;/home/oscar/dev/sphinx-gallery/sphinx_gallery/gen_rst.py&quot;</span>, line <span class="m">453</span>, in <span class="n">execute_code_block</span>
+    <span class="k">exec</span><span class="p">(</span><span class="n">code_block</span><span class="p">,</span> <span class="n">example_globals</span><span class="p">)</span>
+  File <span class="nb">&quot;&lt;string&gt;&quot;</span>, line <span class="m">12</span>, in <span class="n">&lt;module&gt;</span>
+  File <span class="nb">&quot;/home/oscar/.virtualenvs/dev3/lib/python3.6/site-packages/numpy-1.13.0-py3.6-linux-x86_64.egg/numpy/lib/npyio.py&quot;</span>, line <span class="m">370</span>, in <span class="n">load</span>
+    <span class="n">fid</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+<span class="gr">FileNotFoundError</span>: <span class="n">[Errno 2] No such file or directory: &#39;met_tp0.1_UTd.npz&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.mlab</span> <span class="kn">import</span> <a href="http://matplotlib.org/api/mlab_api.html#matplotlib.mlab.griddata" title="View documentation for matplotlib.mlab.griddata"><span class="n">griddata</span></a>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="n">data</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="s1">&#39;met_tp0.1_UTd.npz&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="p">)</span>
+<span class="n">md_list</span><span class="p">,</span> <span class="n">mtemp_list</span><span class="p">,</span> <span class="n">mu_list</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;docc&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_int&#39;</span><span class="p">]</span>
+
+<span class="n">data</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="s1">&#39;ins_tp0.1_UTd.npz&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;bytes&#39;</span><span class="p">)</span>
+<span class="n">id_list</span><span class="p">,</span> <span class="n">itemp_list</span><span class="p">,</span> <span class="n">iu_list</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;docc&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;u_int&#39;</span><span class="p">]</span>
+
+<span class="c1"># Join double occupation results</span>
+<span class="n">x</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mu_list</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">iu_list</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mtemp_list</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">itemp_list</span><span class="p">))</span>
+<span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">md_list</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">id_list</span><span class="p">))</span>
+<span class="c1"># define plot grid.</span>
+<span class="n">xi</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">2.1</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+<span class="n">yi</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mi">150</span><span class="p">)</span>
+<span class="c1"># Grid the data</span>
+<span class="n">zi</span> <span class="o">=</span> <a href="http://matplotlib.org/api/mlab_api.html#matplotlib.mlab.griddata" title="View documentation for matplotlib.mlab.griddata"><span class="n">griddata</span></a><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">interp</span><span class="o">=</span><span class="s1">&#39;nn&#39;</span><span class="p">)</span>
+<span class="n">CS</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.contourf" title="View documentation for matplotlib.pyplot.contourf"><span class="n">plt</span><span class="o">.</span><span class="n">contourf</span></a><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">,</span> <span class="n">zi</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/colorbar_api.html#matplotlib.colorbar" title="View documentation for matplotlib.pyplot.colorbar"><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span></a><span class="p">()</span>  <span class="c1"># draw colorbar</span>
+
+<span class="c1"># plot data points.</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.scatter" title="View documentation for matplotlib.pyplot.scatter"><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">mu_list</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">mtemp_list</span><span class="p">),</span>
+            <span class="n">c</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">md_list</span><span class="p">),</span> <span class="n">s</span><span class="o">=</span><span class="mi">70</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.036</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.scatter" title="View documentation for matplotlib.pyplot.scatter"><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">iu_list</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">itemp_list</span><span class="p">),</span>
+            <span class="n">c</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">id_list</span><span class="p">),</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.036</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlim" title="View documentation for matplotlib.pyplot.xlim"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">xi</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">xi</span><span class="p">)])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">yi</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">yi</span><span class="p">)])</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$T/D$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_TvU_tp0.1_phases.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_TvU_tp0.1_phases.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_TvU_tp0.1_phases.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_TvU_tp0.1_phases.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/cthyb/plot_TvU_tp0.1_phases.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

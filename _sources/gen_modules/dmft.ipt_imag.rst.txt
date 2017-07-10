@@ -1,0 +1,135 @@
+
+dmft.ipt_imag
+=============
+
+.. automodule:: dmft.ipt_imag
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: dimer_sigma
+
+   .. include:: backreferences/dmft.ipt_imag.dimer_sigma.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: dmft_loop
+
+   .. include:: backreferences/dmft.ipt_imag.dmft_loop.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: e_mean
+
+   .. include:: backreferences/dmft.ipt_imag.e_mean.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ekin
+
+   .. include:: backreferences/dmft.ipt_imag.ekin.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ekin_tau
+
+   .. include:: backreferences/dmft.ipt_imag.ekin_tau.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: epot
+
+   .. include:: backreferences/dmft.ipt_imag.epot.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: fsolve
+
+   .. include:: backreferences/dmft.ipt_imag.fsolve.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gt_fouriertrans
+
+   .. include:: backreferences/dmft.ipt_imag.gt_fouriertrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gw_invfouriertrans
+
+   .. include:: backreferences/dmft.ipt_imag.gw_invfouriertrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: jit
+
+   .. include:: backreferences/dmft.ipt_imag.jit.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: n_half
+
+   .. include:: backreferences/dmft.ipt_imag.n_half.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: quad
+
+   .. include:: backreferences/dmft.ipt_imag.quad.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: simps
+
+   .. include:: backreferences/dmft.ipt_imag.simps.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: single_band_ipt_solver
+
+   .. include:: backreferences/dmft.ipt_imag.single_band_ipt_solver.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+   
+
+   
+   
+   

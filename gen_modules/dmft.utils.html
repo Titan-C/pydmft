@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.utils &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmft.plot.hf_single_site" href="dmft.plot.hf_single_site.html" />
+    <link rel="prev" title="dmft.dimer" href="dmft.dimer.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.plot.hf_single_site.html" title="dmft.plot.hf_single_site"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dmft.dimer.html" title="dmft.dimer"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.utils">
+<span id="dmft-utils"></span><h1>dmft.utils<a class="headerlink" href="#module-dmft.utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tools-to-calculate-quantities-out-of-spectral-functions">
+<h2>Tools to calculate quantities out of spectral functions<a class="headerlink" href="#tools-to-calculate-quantities-out-of-spectral-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="dmft.utils.bubble">
+<code class="descclassname">dmft.utils.</code><code class="descname">bubble</code><span class="sig-paren">(</span><em>A1</em>, <em>A2</em>, <em>nf</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.utils.bubble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the Polarization Bubble convolution given 2 Spectral functions</p>
+<p>It follows the formula</p>
+<div class="math">
+<p><img src="../_images/math/0ec49bec3d61a3b03f42956095fe7dfb77a63c28.png" alt="\Pi(w') &amp;= \int dw A_1(w) A_2(w+w') (n_f(w)-n_f(w+w')) \\
+    &amp;= \int dw A_1^+(w) A_2(w+w')-A_1(w) A_2^+(w+w')"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>A1</strong> (<em>1D ndarrays</em><em>, </em><em>only information in w</em>) &#8211; Correspond to the spectral functions</li>
+<li><strong>A2</strong> (<em>1D ndarrays</em><em>, </em><em>only information in w</em>) &#8211; Correspond to the spectral functions</li>
+<li><strong>nf</strong> (<em>ndarray</em>) &#8211; Fermi function</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.utils.dc_conductivity">
+<code class="descclassname">dmft.utils.</code><code class="descname">dc_conductivity</code><span class="sig-paren">(</span><em>lat_A1</em>, <em>lat_A2</em>, <em>dnf</em>, <em>w</em>, <em>dosde</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.utils.dc_conductivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.utils.differential_weight">
+<code class="descclassname">dmft.utils.</code><code class="descname">differential_weight</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.utils.differential_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the grid array calculate the half-way differentials</p>
+</dd></dl>
+
+<div class="section" id="examples-using-dmft-utils-differential-weight">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.utils.differential_weight</span></code><a class="headerlink" href="#examples-using-dmft-utils-differential-weight" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id4">
+<img alt="../_images/sphx_glr_plot_transition_thumb.png" src="../_images/sphx_glr_plot_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_transition.html#sphx-glr-auto-examples-ipt-plot-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id5">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id6">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id7">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.utils.optical_conductivity">
+<code class="descclassname">dmft.utils.</code><code class="descname">optical_conductivity</code><span class="sig-paren">(</span><em>lat_A1</em>, <em>lat_A2</em>, <em>nf</em>, <em>w</em>, <em>dosde</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.utils.optical_conductivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the optical conductivity from lattice spectral functions</p>
+<div class="math">
+<p><img src="../_images/math/fd08210344cc8a6dac19807b215d82e99617cf7d.png" alt="\sigma(w) = \int dE \rho(E) \Pi (E,w) / w"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lat_A1</strong> (<em>2D ndarrays</em>) &#8211; lattice Spectral functions A(E,w)</li>
+<li><strong>lat_A2</strong> (<em>2D ndarrays</em>) &#8211; lattice Spectral functions A(E,w)</li>
+<li><strong>nf</strong> (<em>1D ndarray</em>) &#8211; fermi function</li>
+<li><strong>w</strong> (<em>1D ndarray</em>) &#8211; real frequency array</li>
+<li><strong>dosde</strong> (<em>1D ndarray</em>) &#8211; differentially weighted density of states dE ρ(E)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Re σ(w)</strong> (<em>1D ndarray</em>)</li>
+<li><em>Real part of optical conductivity. Posterior scaling required</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.utils.bubble" title="dmft.utils.bubble"><code class="xref py py-func docutils literal"><span class="pre">bubble()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-utils-optical-conductivity">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.utils.optical_conductivity</span></code><a class="headerlink" href="#examples-using-dmft-utils-optical-conductivity" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id8">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id9">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id10">
+<img alt="../_images/sphx_glr_plot_re_T_dos_thumb.png" src="../_images/sphx_glr_plot_re_T_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_re_T_dos.html#sphx-glr-dimer-lattice-plot-re-t-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.utils.trapz">
+<code class="descclassname">dmft.utils.</code><code class="descname">trapz</code><span class="sig-paren">(</span><em>y</em>, <em>x=None</em>, <em>dx=1.0</em>, <em>axis=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.utils.trapz" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate along the given axis using the composite trapezoidal rule.</p>
+<p>Integrate <cite>y</cite> (<cite>x</cite>) along given axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>y</strong> (<em>array_like</em>) &#8211; Input array to integrate.</li>
+<li><strong>x</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; The sample points corresponding to the <cite>y</cite> values. If <cite>x</cite> is None,
+the sample points are assumed to be evenly spaced <cite>dx</cite> apart. The
+default is None.</li>
+<li><strong>dx</strong> (<em>scalar</em><em>, </em><em>optional</em>) &#8211; The spacing between sample points when <cite>x</cite> is None. The default is 1.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; The axis along which to integrate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>trapz</strong> &#8211; Definite integral as approximated by trapezoidal rule.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="https://docs.python.org/2/library/functions.html#sum" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">sum()</span></code></a>, <code class="xref py py-func docutils literal"><span class="pre">cumsum()</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<p>Image <a class="footnote-reference" href="#id3" id="id1">[2]</a> illustrates trapezoidal rule &#8211; y-axis locations of points
+will be taken from <cite>y</cite> array, by default x-axis distances between
+points will be 1.0, alternatively they can be provided with <cite>x</cite> array
+or with <cite>dx</cite> scalar.  Return value will be equal to combined area under
+the red lines.</p>
+<p class="rubric">References</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Wikipedia page: <a class="reference external" href="http://en.wikipedia.org/wiki/Trapezoidal_rule">http://en.wikipedia.org/wiki/Trapezoidal_rule</a></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[2]</a></td><td>Illustration image:
+<a class="reference external" href="http://en.wikipedia.org/wiki/File:Composite_trapezoidal_rule_illustration.png">http://en.wikipedia.org/wiki/File:Composite_trapezoidal_rule_illustration.png</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="go">4.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">])</span>
+<span class="go">8.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="n">dx</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">8.0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>
+<span class="go">array([[0, 1, 2],</span>
+<span class="go">       [3, 4, 5]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="go">array([ 1.5,  2.5,  3.5])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">trapz</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">array([ 2.,  8.])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.utils</a><ul>
+<li><a class="reference internal" href="#tools-to-calculate-quantities-out-of-spectral-functions">Tools to calculate quantities out of spectral functions</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#examples-using-dmft-utils-differential-weight">Examples using <code class="docutils literal"><span class="pre">dmft.utils.differential_weight</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-utils-optical-conductivity">Examples using <code class="docutils literal"><span class="pre">dmft.utils.optical_conductivity</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dmft.dimer.html"
+                        title="previous chapter">dmft.dimer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dmft.plot.hf_single_site.html"
+                        title="next chapter">dmft.plot.hf_single_site</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.utils.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.plot.hf_single_site.html" title="dmft.plot.hf_single_site"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dmft.dimer.html" title="dmft.dimer"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

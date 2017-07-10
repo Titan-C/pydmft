@@ -1,0 +1,63 @@
+
+dmft.ipt_real
+=============
+
+.. automodule:: dmft.ipt_real
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: dimer_dmft
+
+   .. include:: backreferences/dmft.ipt_real.dimer_dmft.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: dimer_solver
+
+   .. include:: backreferences/dmft.ipt_real.dimer_solver.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ph_hf_sigma
+
+   .. include:: backreferences/dmft.ipt_real.ph_hf_sigma.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: sigma
+
+   .. include:: backreferences/dmft.ipt_real.sigma.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ss_dmft_loop
+
+   .. include:: backreferences/dmft.ipt_real.ss_dmft_loop.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+   
+
+   
+   
+   

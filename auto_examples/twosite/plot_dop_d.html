@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Double occupation of the Impurity &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Following the Metal to Mott insulator Transition" href="plot_dop_A.html" />
+    <link rel="prev" title="Following the Metal to Mott insulator Transition" href="plot_halffill_z.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_A.html" title="Following the Metal to Mott insulator Transition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill_z.html" title="Following the Metal to Mott insulator Transition"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="double-occupation-of-the-impurity">
+<span id="sphx-glr-auto-examples-twosite-plot-dop-d-py"></span><h1>Double occupation of the Impurity<a class="headerlink" href="#double-occupation-of-the-impurity" title="Permalink to this headline">¶</a></h1>
+<p>Plot of the double occupation average on the Impurity site as a function
+of the lattice doping and at diffent local interaction strenghs</p>
+<img alt="../../_images/sphx_glr_plot_dop_d_001.png" class="align-center" src="../../_images/sphx_glr_plot_dop_d_001.png" />
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Code source: Óscar Nájera</span>
+<span class="c1"># License: BSD 3 clause</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dmft.twosite_dop</span> <span class="kn">import</span> <span class="n">dmft_loop_dop</span>
+
+
+<span class="k">def</span> <span class="nf">plot_d</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">u_int</span><span class="o">=</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">2.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.85</span><span class="p">,</span> <span class="mf">6.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">])):</span>
+    <span class="n">fig</span> <span class="o">=</span> <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">u_int</span><span class="p">:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">+</span> <span class="s1">&#39;_dop_b{}_U{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">out_file</span> <span class="o">+</span> <span class="s1">&#39;.npy&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">dmft_loop_dop</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+            <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">sim</span><span class="o">.</span><span class="n">double_ocupation</span><span class="p">()</span> <span class="k">for</span> <span class="n">sim</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]]</span>
+        <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">d</span><span class="p">,</span> <span class="s1">&#39;+-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$U/t= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="s1">&#39;Impurity double occupation at $</span><span class="se">\\</span><span class="s1">beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">langle n_</span><span class="se">\\</span><span class="s1">uparrow n_</span><span class="se">\\</span><span class="s1">downarrow </span><span class="se">\\</span><span class="s1">rangle$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlim" title="View documentation for matplotlib.pyplot.xlim"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_file</span> <span class="o">+</span> <span class="s1">&#39;_b.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="n">plot_d</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  1.812 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dop_d.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dop_d.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dop_d.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dop_d.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_halffill_z.html"
+                        title="previous chapter">Following the Metal to Mott insulator Transition</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_dop_A.html"
+                        title="next chapter">Following the Metal to Mott insulator Transition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/twosite/plot_dop_d.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_A.html" title="Following the Metal to Mott insulator Transition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill_z.html" title="Following the Metal to Mott insulator Transition"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

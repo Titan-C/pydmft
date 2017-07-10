@@ -1,0 +1,580 @@
+:orphan:
+
+.. _general_examples:
+
+=============
+DMFT examples
+=============
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The Bethe lattice has a simple form of the self-consistency. This is solved by iteration where ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_bethe_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_bethe.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_bethe
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Atomic limit expression of the self-energy is described by">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_hubbardI_bethe_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_hubbardI_bethe.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_hubbardI_bethe
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this approach the aim is to find the band dispersion of the insulating system but including ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_hubbardIII_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_hubbardIII.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_hubbardIII
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Atomic limit expression of the self-energy is described by">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_hubbardI_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_hubbardI.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_hubbardI
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="An Isolated atom with non-interacting electrons is set under the influence of an external magne...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_atom_field_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_atom_field.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_atom_field
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the single orbital case the atomic Green function as giv...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_atom_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_atom.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_atom
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Transforming the non-interacting Green&#x27;s Function for the Bethe lattice.  Using the analytical ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/images/thumb/sphx_glr_plot_fourier_thumb.png
+
+        :ref:`sphx_glr_auto_examples_plot_fourier.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/plot_fourier
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+.. _examples_IPT:
+
+Simple IPT solver
+=================
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency IPT solver follow the spectral function along the metal to insulator tra...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_mit_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_mit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_mit
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Study the end of the crossover region ">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_crossover_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_crossover.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_crossover
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Have a look at the coexistence region and the metal insulator transition from the point of view...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_bandwidth_transition_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_bandwidth_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_bandwidth_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using the formalism presented in [1]_ I calculate the stability of the IPT solution within the ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_free_transition_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_free_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_free_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to find the coexistance regions.">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_ipt_coex_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_ipt_coex.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_ipt_coex
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_analytical_structure_gf_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_analytical_structure_gf.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_analytical_structure_gf
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="As the Energy calculations from IPT source is not reliable enough another methods is also teste...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_stability_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_stability.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_stability
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_ipt_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_ipt.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_ipt
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_transition_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region">
+
+.. only:: html
+
+    .. figure:: /auto_examples/IPT/images/thumb/sphx_glr_plot_energies_thumb.png
+
+        :ref:`sphx_glr_auto_examples_IPT_plot_energies.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/IPT/plot_energies
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+.. _twosite_examples:
+
+Two Site DMFT examples
+======================
+
+This section reproduces the concepts presented in:
+
+
+- Potthoff, M. (2001). Two-site dynamical mean-field theory. Physical
+  Review B, 64(16),
+  165114. http://dx.doi.org/10.1103/PhysRevB.64.165114
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Ploting the Quasiparticle weight at different local interaction strenghts at different doping a...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_dop_z_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_dop_z.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_dop_z
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot of the Quasiparticle weigth decay for the Hubbard Model in the Bethe Lattice as the local ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_halffill_z_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_halffill_z.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_halffill_z
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Plot of the double occupation average on the Impurity site as a function of the lattice doping ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_dop_d_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_dop_d.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_dop_d
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sequence of plots showing the transfer of spectral weight for a Hubbard Model in the Bethe Latt...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_dop_A_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_dop_A.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_dop_A
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sequence of plots showing the transfer of spectral weight for a Hubbard Model in the Bethe Latt...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_halffill_matsubara_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_halffill_matsubara.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_halffill_matsubara
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Sequence of plots showing the transfer of spectral weight for a Hubbard Model in the Bethe Latt...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_halffill_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_halffill.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_halffill
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="What does the insulator show for Hubbard bands. They are sharp as in the Hubbard I approximatio...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_dispersion_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_dispersion.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_dispersion
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this case one solves the two site problem for all doping cases at various local interaction ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_plot_dop_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_plot_dop.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/plot_dop
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /auto_examples/twosite/images/thumb/sphx_glr_twosite_halffill_thumb.png
+
+        :ref:`sphx_glr_auto_examples_twosite_twosite_halffill.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/twosite/twosite_halffill
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+
+.. container:: sphx-glr-footer
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Python source code: auto_examples_python.zip <//home/oscar/dev/dmft-learn/doc/auto_examples/auto_examples_python.zip>`
+
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip <//home/oscar/dev/dmft-learn/doc/auto_examples/auto_examples_jupyter.zip>`
+
+.. rst-class:: sphx-glr-signature
+
+    `Generated by Sphinx-Gallery <https://sphinx-gallery.readthedocs.io>`_

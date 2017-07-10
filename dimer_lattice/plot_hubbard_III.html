@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hubbard III for dimer &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Landau Theory of the Mott transition" href="plot_landau_2ndfit.html" />
+    <link rel="prev" title="Evolution of DOS as function of temperature" href="plot_shift.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_landau_2ndfit.html" title="Landau Theory of the Mott transition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_shift.html" title="Evolution of DOS as function of temperature"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hubbard-iii-for-dimer">
+<span id="sphx-glr-dimer-lattice-plot-hubbard-iii-py"></span><h1>Hubbard III for dimer<a class="headerlink" href="#hubbard-iii-for-dimer" title="Permalink to this headline">¶</a></h1>
+<p>Describing the position of the Self-Energy pole in the diagonal basis</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Mar 14 13:56:37 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">from</span> <span class="nn">dmft.plot</span> <span class="kn">import</span> <span class="n">plot_band_dispersion</span>
+<span class="kn">import</span> <span class="nn">slaveparticles.quantum.operators</span> <span class="kn">as</span> <span class="nn">op</span>
+</pre></div>
+</div>
+<div class="section" id="the-dimer-limit">
+<h2>The Dimer limit<a class="headerlink" href="#the-dimer-limit" title="Permalink to this headline">¶</a></h2>
+<p>Here I study the shape of spectral function and the origin of its
+poles looking for the zeros of the self energy</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">molecule_sigma_d</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return molecule self-energy in the given frequency axis&quot;&quot;&quot;</span>
+
+    <span class="n">h_at</span><span class="p">,</span> <span class="n">oper</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.hamiltonian_diag" title="View documentation for dmft.dimer.hamiltonian_diag"><span class="n">dimer</span><span class="o">.</span><span class="n">hamiltonian_diag</span></a><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+    <span class="n">oper_pair</span> <span class="o">=</span> <span class="p">[[</span><span class="n">oper</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">oper</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">oper</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">oper</span><span class="p">[</span><span class="mi">1</span><span class="p">]]]</span>
+
+    <span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">diagonalize</span><span class="p">(</span><span class="n">h_at</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+    <span class="n">gfsU</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">op</span><span class="o">.</span><span class="n">gf_lehmann</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">oper_pair</span><span class="p">])</span>
+
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">omega</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">gfsU</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Anti-Bond&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">omega</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="o">-</span><span class="p">(</span><span class="n">gfsU</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bond&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(\omega)$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">omega</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">gfsU</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">omega</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">gfsU</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+
+<span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">800</span><span class="p">)</span>
+<span class="n">U</span> <span class="o">=</span> <span class="mf">2.5</span>
+<span class="n">tp</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">sig_b</span><span class="p">,</span> <span class="n">sig_a</span> <span class="o">=</span> <span class="n">molecule_sigma_d</span><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="mf">5e-2j</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sig_a</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{A} - w + t_\perp$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sig_b</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{B} - w - t_\perp$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_hubbard_III_001.png" class="align-center" src="../_images/sphx_glr_plot_hubbard_III_001.png" />
+</div>
+<div class="section" id="hubbard-iii-approximation">
+<h2>Hubbard III approximation<a class="headerlink" href="#hubbard-iii-approximation" title="Permalink to this headline">¶</a></h2>
+<p>Taking advantage of the rotated basis which is diagonal I can
+independently treat each system on its own and solve 2 decoupled
+system equations.</p>
+<p>In this case the poles of the green function are equally weighted,
+only its position is correct, in comparison to the isolated dimer
+green function</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">sp_2</span> <span class="o">=</span> <span class="p">(</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">tp</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">4.</span>
+<span class="n">g0_1_a</span> <span class="o">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-2j</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tp</span>  <span class="c1"># The excitation out of the singlet has</span>
+<span class="n">g0_1_b</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-2j</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">tp</span>  <span class="c1"># this extra contribution of 2tp</span>
+
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">x</span> <span class="o">=</span> <span class="o">.</span><span class="mi">60</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">)</span> <span class="o">/</span>
+              <span class="p">(</span><span class="n">g0_1_a</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Anti-bond&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">)</span> <span class="o">/</span>
+              <span class="p">(</span><span class="n">g0_1_b</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">))</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Bond&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(\omega)$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Isolated dimer approximation $U={}$, $t_\perp={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+    <span class="n">g0_1_a</span> <span class="o">=</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span>
+                             <span class="n">g0_1_a</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">g0_1_a</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">)</span>
+    <span class="n">g0_1_b</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span>
+                             <span class="n">g0_1_b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">g0_1_b</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_hubbard_III_002.png" class="align-center" src="../_images/sphx_glr_plot_hubbard_III_002.png" />
+</div>
+<div class="section" id="the-self-energy">
+<h2>The Self-Energy<a class="headerlink" href="#the-self-energy" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">sb</span> <span class="o">=</span> <span class="n">sp_2</span> <span class="o">*</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sb</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Re Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sb</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Im Bond&quot;</span><span class="p">)</span>
+
+<span class="n">sa</span> <span class="o">=</span> <span class="n">sp_2</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Re Anti-Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sa</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Im Anti-Bond&quot;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma(\omega)$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma(\omega)$ at $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_hubbard_III_003.png" class="align-center" src="../_images/sphx_glr_plot_hubbard_III_003.png" />
+</div>
+<div class="section" id="the-green-function">
+<h2>The Green Function<a class="headerlink" href="#the-green-function" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">g_b</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">-</span> <span class="n">sb</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">g_b</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Re Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">g_b</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Im Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">g_b</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">sb</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+<span class="n">zeta</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">-</span> <span class="n">sb</span>
+<span class="n">g_b</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">zeta</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.sqrt.html#numpy.sqrt" title="View documentation for numpy.sqrt"><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">zeta</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">g_b</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">g0_1_b</span> <span class="o">-</span> <span class="n">sb</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">g_b</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Re Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">g_b</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s2">&quot;Im Bond&quot;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sb</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{S} - w + t_\perp$&#39;</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\omega)$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\omega)$ at $U= {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="o">-</span><span class="mf">3.5</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbard_III_004.png"><img alt="../_images/sphx_glr_plot_hubbard_III_004.png" src="../_images/sphx_glr_plot_hubbard_III_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbard_III_005.png"><img alt="../_images/sphx_glr_plot_hubbard_III_005.png" src="../_images/sphx_glr_plot_hubbard_III_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="the-band-dispersion">
+<h2>The Band Dispersion<a class="headerlink" href="#the-band-dispersion" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">lat_gf</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">8e-2j</span><span class="p">)</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_b</span><span class="p">)</span> <span class="o">+</span> \
+    <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">8e-2j</span><span class="p">)</span> <span class="o">-</span> <span class="n">sp_2</span> <span class="o">/</span> <span class="n">g0_1_a</span><span class="p">)</span>
+<span class="n">Aw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gf</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
+
+
+<span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="s1">&#39;Hubbard III band dispersion&#39;</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbard_III_006.png"><img alt="../_images/sphx_glr_plot_hubbard_III_006.png" src="../_images/sphx_glr_plot_hubbard_III_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbard_III_007.png"><img alt="../_images/sphx_glr_plot_hubbard_III_007.png" src="../_images/sphx_glr_plot_hubbard_III_007.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  1.026 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbard_III.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_hubbard_III.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbard_III.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_hubbard_III.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Hubbard III for dimer</a><ul>
+<li><a class="reference internal" href="#the-dimer-limit">The Dimer limit</a></li>
+<li><a class="reference internal" href="#hubbard-iii-approximation">Hubbard III approximation</a></li>
+<li><a class="reference internal" href="#the-self-energy">The Self-Energy</a></li>
+<li><a class="reference internal" href="#the-green-function">The Green Function</a></li>
+<li><a class="reference internal" href="#the-band-dispersion">The Band Dispersion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_shift.html"
+                        title="previous chapter">Evolution of DOS as function of temperature</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_landau_2ndfit.html"
+                        title="next chapter">Landau Theory of the Mott transition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_hubbard_III.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_landau_2ndfit.html" title="Landau Theory of the Mott transition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_shift.html" title="Evolution of DOS as function of temperature"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

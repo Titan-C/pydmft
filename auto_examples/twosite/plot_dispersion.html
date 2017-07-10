@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Spectral dispersion of insulator &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Parameter space result for the doped case" href="plot_dop.html" />
+    <link rel="prev" title="Following the Metal to Mott insulator Transition" href="plot_halffill.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop.html" title="Parameter space result for the doped case"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill.html" title="Following the Metal to Mott insulator Transition"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="spectral-dispersion-of-insulator">
+<span id="sphx-glr-auto-examples-twosite-plot-dispersion-py"></span><h1>Spectral dispersion of insulator<a class="headerlink" href="#spectral-dispersion-of-insulator" title="Permalink to this headline">¶</a></h1>
+<p>What does the insulator show for Hubbard bands. They are sharp as in
+the Hubbard I approximation.</p>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_dispersion_001.png"><img alt="../../_images/sphx_glr_plot_dispersion_001.png" src="../../_images/sphx_glr_plot_dispersion_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_dispersion_002.png"><img alt="../../_images/sphx_glr_plot_dispersion_002.png" src="../../_images/sphx_glr_plot_dispersion_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="mi">4</span> <span class="mf">9.2695705889e-06</span> <span class="p">[</span> <span class="mf">0.5</span>  <span class="mf">0.5</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+<span class="c1"># License: BSD 3 clause</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dmft.twosite</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.twosite.html#dmft.twosite.TwoSite_Real" title="View documentation for dmft.twosite.TwoSite_Real"><span class="n">TwoSite_Real</span></a>
+<span class="kn">from</span> <span class="nn">slaveparticles.quantum</span> <span class="kn">import</span> <span class="n">dos</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+
+<span class="n">fig</span> <span class="o">=</span> <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+
+<span class="n">solver</span> <span class="o">=</span> <a href="../../gen_modules/dmft.twosite.html#dmft.twosite.TwoSite_Real" title="View documentation for dmft.twosite.TwoSite_Real"><span class="n">TwoSite_Real</span></a>
+<span class="n">U</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">1e5</span>
+<span class="n">sim</span> <span class="o">=</span> <span class="n">solver</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">mu</span> <span class="o">=</span> <span class="n">U</span> <span class="o">/</span> <span class="mi">2</span>
+<span class="n">convergence</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">hyb</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">convergence</span><span class="p">:</span>
+    <span class="n">old</span> <span class="o">=</span> <span class="n">hyb</span>
+    <span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">U</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">old</span><span class="p">)</span>
+    <span class="n">hyb</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">hyb_V</span><span class="p">()</span>
+    <span class="n">hyb</span> <span class="o">=</span> <span class="p">(</span><span class="n">hyb</span> <span class="o">+</span> <span class="n">old</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">convergence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">old</span> <span class="o">-</span> <span class="n">hyb</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-5</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">hyb</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">ocupations</span><span class="p">())</span>
+<span class="n">sim</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">U</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">hyb</span><span class="p">)</span>
+<span class="n">hyb</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">hyb_V</span><span class="p">()</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">omega</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">GF</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\Sigma$&#39;</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">omega</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">GF</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;Imp G&#39;</span><span class="p">])</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">omega</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">GF</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\Sigma$&#39;</span><span class="p">]</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">GF</span><span class="p">[</span><span class="s1">&#39;Imp G&#39;</span><span class="p">]</span>
+<span class="n">ra</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">sim</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="n">s</span>
+<span class="n">rho</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">bethe_lattice</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">rho</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">ra</span> <span class="o">+</span> <span class="mf">0.01j</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">lat_gfs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">ra</span> <span class="o">+</span> <span class="mf">0.01j</span><span class="p">)</span>
+<span class="n">Aw</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="o">-</span><span class="n">lat_gfs</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,)</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.pcolormesh" title="View documentation for matplotlib.pyplot.pcolormesh"><span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span></a><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">Aw</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.292 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dispersion.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dispersion.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dispersion.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dispersion.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_halffill.html"
+                        title="previous chapter">Following the Metal to Mott insulator Transition</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_dop.html"
+                        title="next chapter">Parameter space result for the doped case</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/twosite/plot_dispersion.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop.html" title="Parameter space result for the doped case"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill.html" title="Following the Metal to Mott insulator Transition"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

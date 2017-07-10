@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Saving high temp gf &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="saving-high-temp-gf">
+<span id="sphx-glr-dimer-lattice-cthyb-save-triqsgf-py"></span><h1>Saving high temp gf<a class="headerlink" href="#saving-high-temp-gf" title="Permalink to this headline">¶</a></h1>
+<p>Using a spectral function create the higher temperature versions</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Jan 30 19:17:19 2017</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">pytriqs.gf.local</span> <span class="kn">import</span> <span class="n">GfImFreq</span><span class="p">,</span> <span class="n">BlockGf</span>
+<span class="kn">from</span> <span class="nn">pytriqs.archive</span> <span class="kn">import</span> <span class="n">HDFArchive</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">py3qs.dimer_lattice</span> <span class="kn">as</span> <span class="nn">dlat</span>
+<span class="kn">from</span> <span class="nn">pymaxent.tools</span> <span class="kn">import</span> <span class="n">hilbert_trans</span><span class="p">,</span> <span class="n">differential_weight</span>
+
+<span class="n">tp</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">u_int</span> <span class="o">=</span> <span class="mf">1.8</span>
+<span class="c1"># u_int = 2.01</span>
+<span class="c1"># u_int = 2.15</span>
+
+<span class="n">data</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="s1">&#39;AwmetB25tp0.3U{}G_sym.npz&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+<span class="n">Aw</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Aw&#39;</span><span class="p">]</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Aw</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<div class="section" id="high-temperature-seeds">
+<h2>High temperature seeds<a class="headerlink" href="#high-temperature-seeds" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">hot_beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">25</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.44e-3</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">gfsiw</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">wnli</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="n">hot_beta</span><span class="p">:</span>
+    <span class="n">freq</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">wnh</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">gf</span><span class="o">.</span><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">freq</span><span class="p">)</span>
+    <span class="n">wnli</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wnh</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+    <span class="n">gfsiw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hilbert_trans</span><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">wnh</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">differential_weight</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="n">Aw</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">wnh</span><span class="p">,</span> <span class="n">gfsiw</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;o:&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">wnh</span><span class="p">,</span> <span class="n">gfsiw</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="s1">&#39;o:&#39;</span><span class="p">)</span>
+
+    <span class="c1"># triqs blocks</span>
+    <span class="n">gfarr</span> <span class="o">=</span> <span class="n">GfImFreq</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">beta</span> <span class="o">*</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">G_iw</span> <span class="o">=</span> <span class="n">BlockGf</span><span class="p">(</span><span class="n">name_list</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;asym_dw&#39;</span><span class="p">,</span> <span class="s1">&#39;asym_up&#39;</span><span class="p">,</span> <span class="s1">&#39;sym_dw&#39;</span><span class="p">,</span> <span class="s1">&#39;sym_up&#39;</span><span class="p">],</span>
+                   <span class="n">block_list</span><span class="o">=</span><span class="p">(</span><span class="n">gfarr</span><span class="p">,</span> <span class="n">gfarr</span><span class="p">,</span> <span class="n">gfarr</span><span class="p">,</span> <span class="n">gfarr</span><span class="p">),</span> <span class="n">make_copies</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">dlat</span><span class="o">.</span><span class="n">gf_sym_2_triqs_blockgf</span><span class="p">(</span><span class="n">gfsiw</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">G_iw</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">HDFArchive</span><span class="p">(</span><span class="s1">&#39;DIMER_PM_met_B{}_tp0.3.h5&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">dest</span><span class="p">:</span>
+        <span class="n">dest</span><span class="p">[</span><span class="s1">&#39;/U{}/it000/G_iw&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">)]</span> <span class="o">=</span> <span class="n">G_iw</span>
+
+<span class="c1"># block_names = [&#39;sym_up&#39;, &#39;sym_dw&#39;, &#39;asym_up&#39;, &#39;asym_dw&#39;]</span>
+<span class="c1"># gref = np.squeeze([G_iw[name].data for name in block_names])</span>
+<span class="c1"># plt.plot(wnh, gref.T.real)</span>
+<span class="c1"># plt.plot(wnh, gref.T.imag)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/save_triqsgf.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">save_triqsgf.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/save_triqsgf.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">save_triqsgf.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Saving high temp gf</a><ul>
+<li><a class="reference internal" href="#high-temperature-seeds">High temperature seeds</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/cthyb/save_triqsgf.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

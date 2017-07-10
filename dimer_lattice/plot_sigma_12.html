@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The change of Sigma_12 &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Form of the Greens Functions" href="plot_shape_gf.html" />
+    <link rel="prev" title="Internal Energy in dimer solutions" href="plot_energy.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_shape_gf.html" title="Form of the Greens Functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_energy.html" title="Internal Energy in dimer solutions"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-change-of-sigma-12">
+<span id="sphx-glr-dimer-lattice-plot-sigma-12-py"></span><h1>The change of Sigma_12<a class="headerlink" href="#the-change-of-sigma-12" title="Permalink to this headline">¶</a></h1>
+<img alt="../_images/sphx_glr_plot_sigma_12_001.png" class="align-center" src="../_images/sphx_glr_plot_sigma_12_001.png" />
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Mar  7 01:14:02 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">from</span> <span class="nn">dmft</span> <span class="kn">import</span> <span class="n">ipt_imag</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+
+
+<span class="k">def</span> <span class="nf">ipt_u_tp</span><span class="p">(</span><span class="n">tprange</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">11</span><span class="p">))</span>
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.gf_met" title="View documentation for dmft.dimer.gf_met"><span class="n">dimer</span><span class="o">.</span><span class="n">gf_met</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tprange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">loops</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.ipt_dmft_loop" title="View documentation for dmft.dimer.ipt_dmft_loop"><span class="n">dimer</span><span class="o">.</span><span class="n">ipt_dmft_loop</span></a><span class="p">(</span>
+        <span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">tprange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tprange</span><span class="p">:</span>
+        <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">loops</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.ipt_dmft_loop" title="View documentation for dmft.dimer.ipt_dmft_loop"><span class="n">dimer</span><span class="o">.</span><span class="n">ipt_dmft_loop</span></a><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="mf">1e-10</span><span class="p">)</span>
+        <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+            <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">giw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">giw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+        <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt_imag</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span>
+            <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+        <span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+
+    <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+
+<span class="n">tprange</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mf">512.</span>
+<span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">11</span><span class="p">))</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="n">ipt_u_tp</span><span class="p">(</span><span class="n">tprange</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">BETA</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">sigma</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+<span class="n">le</span> <span class="o">=</span> <span class="p">[</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sigma</span><span class="p">]</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">tprange</span><span class="p">,</span> <span class="n">sigma</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">tprange</span><span class="p">,</span> <span class="n">le</span> <span class="o">+</span> <span class="n">tprange</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.709 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_sigma_12.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_sigma_12.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_sigma_12.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_sigma_12.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_energy.html"
+                        title="previous chapter">Internal Energy in dimer solutions</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_shape_gf.html"
+                        title="next chapter">Form of the Greens Functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_sigma_12.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_shape_gf.html" title="Form of the Greens Functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_energy.html" title="Internal Energy in dimer solutions"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

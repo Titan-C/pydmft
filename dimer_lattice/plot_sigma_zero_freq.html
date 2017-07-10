@@ -1,0 +1,556 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Zero frequency behavior of Sigma &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Evolution of DOS as function of temperature" href="plot_re_T_dos.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_re_T_dos.html" title="Evolution of DOS as function of temperature"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="zero-frequency-behavior-of-sigma">
+<span id="sphx-glr-dimer-lattice-plot-sigma-zero-freq-py"></span><h1>Zero frequency behavior of Sigma<a class="headerlink" href="#zero-frequency-behavior-of-sigma" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Mar  7 19:19:04 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">as</span> <span class="nn">ipt</span>
+
+
+<span class="k">def</span> <span class="nf">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">u_range</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">ceil</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="mi">256</span><span class="p">)))</span>
+    <span class="n">u_range</span> <span class="o">=</span> <span class="n">u_range</span> <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;met&#39;</span> <span class="k">else</span> <span class="n">u_range</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">save_file</span> <span class="o">=</span> <span class="s1">&#39;dimer_ipt_{}_Z_B{}.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_file</span><span class="p">):</span>
+        <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="n">tpr</span><span class="p">:</span>
+        <span class="n">filestr</span> <span class="o">=</span> <span class="s1">&#39;disk/phase_Dimer_ipt_{}_B{}/tp{:.3}/giw.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">phase</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+        <span class="n">gfs</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">filestr</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">u_range</span><span class="p">):</span>
+            <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+                <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+            <span class="n">sd_zew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">siw_d</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">so_zew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">siw_o</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">sd_zew</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpr</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_range</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">so_zew</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">so_zew</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tpr</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_range</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="p">(</span><span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span>
+
+
+<span class="k">def</span> <span class="nf">plot_z_diagram_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">)</span>
+
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">))</span>
+
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                  <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+<span class="n">TPR</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">UR</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+<span class="n">plot_z_diagram_U_vs_tp</span><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="mf">1000.</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">estimate_zero_w_sigma_T_vs_U</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">u_range</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">u_range</span> <span class="o">=</span> <span class="n">u_range</span> <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="s1">&#39;met&#39;</span> <span class="k">else</span> <span class="n">u_range</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">save_file</span> <span class="o">=</span> <span class="s1">&#39;dimer_ipt_{}_Z_tp{:.2}.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phase</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_file</span><span class="p">):</span>
+        <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">:</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span>
+        <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">ceil</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="mi">256</span><span class="p">)))</span>
+        <span class="n">filestr</span> <span class="o">=</span> <span class="s1">&#39;disk/phase_Dimer_ipt_{}_tp{:.2}/B{:.5}/giw.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">phase</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="n">gfs</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">filestr</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">u_range</span><span class="p">):</span>
+            <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+                <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+            <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+            <span class="n">sd_zew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">siw_d</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">so_zew</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.polyfit.html#numpy.polyfit" title="View documentation for numpy.polyfit"><span class="n">np</span><span class="o">.</span><span class="n">polyfit</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">siw_o</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">sd_zew</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_range</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">so_zew</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">so_zew</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">u_range</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="p">(</span><span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span>
+
+
+<span class="k">def</span> <span class="nf">plot_z_diagram_T_vs_U</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
+
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_T_vs_U</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">70</span><span class="p">)</span>
+    <span class="c1">#z = sd_zew[:, :, 0]</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/colorbar_api.html#matplotlib.colorbar" title="View documentation for matplotlib.pyplot.colorbar"><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span></a><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">CS</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="o">-.</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">1</span><span class="p">,</span> <span class="o">-.</span><span class="mo">005</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">CS</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">CS</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="o">-.</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">CS</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1">#    sd_zew, so_zew = estimate_zero_w_sigma_T_vs_U(tp, ur, temp, &#39;ins&#39;)</span>
+<span class="c1">#    z = np.ma.masked_array(sd_zew[:, ::-1, 0], sd_zew[:, ::-1, 0] &gt; 2)</span>
+<span class="c1">#    #z = sd_zew[:, ::-1, 0]</span>
+<span class="c1">#    ax.pcolormesh(x, y, - z, cmap=plt.get_cmap(r&#39;viridis&#39;), alpha=0.5)</span>
+<span class="c1">#    CS = ax.contour(x, y, sd_zew[:, ::-1, 1],</span>
+<span class="c1">#                    levels=-np.arange(.1, 5, .5)[::-1])</span>
+<span class="c1">#    ax.clabel(CS, inline=1, fontsize=10)</span>
+<span class="c1">#    CS = ax.contour(x, y, sd_zew[:, ::-1, 0],</span>
+<span class="c1">#                    levels=np.arange(-.1, 10, .5))</span>
+<span class="c1">#    ax.clabel(CS, inline=1, fontsize=10)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+<span class="n">TEMP</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">500.</span><span class="p">,</span> <span class="o">.</span><span class="mi">14</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">400.</span><span class="p">)</span>
+<span class="n">plot_z_diagram_T_vs_U</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+<span class="n">plot_z_diagram_T_vs_U</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_001.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_001.png" src="../_images/sphx_glr_plot_sigma_zero_freq_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_002.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_002.png" src="../_images/sphx_glr_plot_sigma_zero_freq_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_003.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_003.png" src="../_images/sphx_glr_plot_sigma_zero_freq_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_z_diagram_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">)</span>
+
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+    <span class="n">sd_zew</span><span class="p">,</span> <span class="n">so_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">tpr</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sd_zew</span><span class="p">[:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">T</span><span class="p">),</span>
+                     <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+<span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">beta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mf">1000.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">]):</span>
+    <span class="n">plot_z_diagram_U_vs_tp</span><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s1">&#39;Phase diagram $</span><span class="se">\\</span><span class="s1">beta={}$,</span><span class="se">\n</span><span class="s1"> color represents $Z$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$t_\perp/D$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_sigma_zero_freq_004.png" class="align-center" src="../_images/sphx_glr_plot_sigma_zero_freq_004.png" />
+<div class="section" id="plots-over-the-shapes-of-sigma-at-zero-frequency">
+<h2>Plots over the shapes of Sigma at zero frequency<a class="headerlink" href="#plots-over-the-shapes-of-sigma-at-zero-frequency" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">sdm_zew</span><span class="p">,</span> <span class="n">som_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">)</span>
+<span class="n">sdi_zew</span><span class="p">,</span> <span class="n">soi_zew</span> <span class="o">=</span> <span class="n">estimate_zero_w_sigma_U_vs_tp</span><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">UR</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">TPR</span><span class="p">))[:</span><span class="mi">20</span><span class="p">:</span><span class="mi">2</span><span class="p">]:</span>
+    <span class="c1"># \Alpha</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="n">sdm_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="n">sdi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <span class="n">min_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">((</span><span class="n">sdm_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sdi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])))</span>
+    <span class="c1">#plt.ylim([min_y, 0])</span>
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ tp{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;SIGMA_AA_alpha_tp{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+
+<span class="c1"># \Sigma AB</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="n">som_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="n">soi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{{AB}}(w=0)$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{{AB}}(w=0)$ tp{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;SIGMA_AB_cut_tp{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">UR</span><span class="p">))[</span><span class="mi">20</span><span class="p">::</span><span class="mi">3</span><span class="p">]:</span>
+    <span class="c1"># Alpha</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">sdm_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">sdi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <span class="n">min_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">((</span><span class="n">sdm_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sdi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="n">min_y</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;tp/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\alpha$ U{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;SIGMA_AA_alpha_U{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+
+<span class="c1"># \Sigma AB</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">som_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="n">soi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{{AB}}(w=0)$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;tp/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Sigma_{{AB}}(w=0)$ U{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;SIGMA_AB_cut_U{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_005.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_005.png" src="../_images/sphx_glr_plot_sigma_zero_freq_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_006.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_006.png" src="../_images/sphx_glr_plot_sigma_zero_freq_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_007.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_007.png" src="../_images/sphx_glr_plot_sigma_zero_freq_007.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_008.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_008.png" src="../_images/sphx_glr_plot_sigma_zero_freq_008.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_009.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_009.png" src="../_images/sphx_glr_plot_sigma_zero_freq_009.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_010.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_010.png" src="../_images/sphx_glr_plot_sigma_zero_freq_010.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_011.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_011.png" src="../_images/sphx_glr_plot_sigma_zero_freq_011.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_012.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_012.png" src="../_images/sphx_glr_plot_sigma_zero_freq_012.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_013.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_013.png" src="../_images/sphx_glr_plot_sigma_zero_freq_013.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_014.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_014.png" src="../_images/sphx_glr_plot_sigma_zero_freq_014.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_015.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_015.png" src="../_images/sphx_glr_plot_sigma_zero_freq_015.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_016.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_016.png" src="../_images/sphx_glr_plot_sigma_zero_freq_016.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_017.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_017.png" src="../_images/sphx_glr_plot_sigma_zero_freq_017.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_018.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_018.png" src="../_images/sphx_glr_plot_sigma_zero_freq_018.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_019.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_019.png" src="../_images/sphx_glr_plot_sigma_zero_freq_019.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_020.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_020.png" src="../_images/sphx_glr_plot_sigma_zero_freq_020.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_021.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_021.png" src="../_images/sphx_glr_plot_sigma_zero_freq_021.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_022.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_022.png" src="../_images/sphx_glr_plot_sigma_zero_freq_022.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_023.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_023.png" src="../_images/sphx_glr_plot_sigma_zero_freq_023.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_024.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_024.png" src="../_images/sphx_glr_plot_sigma_zero_freq_024.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_025.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_025.png" src="../_images/sphx_glr_plot_sigma_zero_freq_025.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_026.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_026.png" src="../_images/sphx_glr_plot_sigma_zero_freq_026.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_027.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_027.png" src="../_images/sphx_glr_plot_sigma_zero_freq_027.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_028.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_028.png" src="../_images/sphx_glr_plot_sigma_zero_freq_028.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_029.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_029.png" src="../_images/sphx_glr_plot_sigma_zero_freq_029.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_030.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_030.png" src="../_images/sphx_glr_plot_sigma_zero_freq_030.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_031.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_031.png" src="../_images/sphx_glr_plot_sigma_zero_freq_031.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_032.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_032.png" src="../_images/sphx_glr_plot_sigma_zero_freq_032.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_033.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_033.png" src="../_images/sphx_glr_plot_sigma_zero_freq_033.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_034.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_034.png" src="../_images/sphx_glr_plot_sigma_zero_freq_034.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_035.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_035.png" src="../_images/sphx_glr_plot_sigma_zero_freq_035.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_036.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_036.png" src="../_images/sphx_glr_plot_sigma_zero_freq_036.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_037.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_037.png" src="../_images/sphx_glr_plot_sigma_zero_freq_037.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_038.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_038.png" src="../_images/sphx_glr_plot_sigma_zero_freq_038.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_039.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_039.png" src="../_images/sphx_glr_plot_sigma_zero_freq_039.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_040.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_040.png" src="../_images/sphx_glr_plot_sigma_zero_freq_040.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_041.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_041.png" src="../_images/sphx_glr_plot_sigma_zero_freq_041.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_042.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_042.png" src="../_images/sphx_glr_plot_sigma_zero_freq_042.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="quasiparticle-observables">
+<h2>Quasiparticle observables<a class="headerlink" href="#quasiparticle-observables" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">TPR</span><span class="p">))[::</span><span class="mi">10</span><span class="p">]:</span>
+    <span class="c1"># Z</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdm_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z$ tp{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;Z_tp{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+<span class="c1"># Z \Sigma AB</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">som_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span>
+                                                   <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdm_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">UR</span><span class="p">,</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">soi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span>
+                                                      <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdi_zew</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z(t_\perp + \Sigma_{{AB}}(w=0))$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z(t_\perp + \Sigma_{{AB}}(w=0))$ tp{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;ZSIGMA_AB_cut_tp{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">UR</span><span class="p">))[</span><span class="mi">20</span><span class="p">::</span><span class="mi">3</span><span class="p">]:</span>
+    <span class="c1"># Z</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdm_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <span class="n">min_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">((</span><span class="n">sdm_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sdi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;tp/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z$ U{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;Z_U{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+<span class="c1"># Z \Sigma AB</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">som_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span>
+                                                    <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdm_zew</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">TPR</span><span class="p">,</span> <span class="p">(</span><span class="n">tp</span> <span class="o">+</span> <span class="n">soi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span>
+                                                         <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sdi_zew</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;insulator&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z\Sigma_{{AB}}(w=0)$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;tp/D&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$Z\Sigma_{{AB}}(w=0)$ U{} $\beta$=100&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="s1">&#39;ZSIGMA_AB_cut_U{}_B100.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_int</span><span class="p">))</span>
+    <span class="c1"># plt.close()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_043.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_043.png" src="../_images/sphx_glr_plot_sigma_zero_freq_043.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_044.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_044.png" src="../_images/sphx_glr_plot_sigma_zero_freq_044.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_045.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_045.png" src="../_images/sphx_glr_plot_sigma_zero_freq_045.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_046.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_046.png" src="../_images/sphx_glr_plot_sigma_zero_freq_046.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_047.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_047.png" src="../_images/sphx_glr_plot_sigma_zero_freq_047.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_048.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_048.png" src="../_images/sphx_glr_plot_sigma_zero_freq_048.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_049.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_049.png" src="../_images/sphx_glr_plot_sigma_zero_freq_049.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_050.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_050.png" src="../_images/sphx_glr_plot_sigma_zero_freq_050.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_051.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_051.png" src="../_images/sphx_glr_plot_sigma_zero_freq_051.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_052.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_052.png" src="../_images/sphx_glr_plot_sigma_zero_freq_052.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_053.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_053.png" src="../_images/sphx_glr_plot_sigma_zero_freq_053.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_054.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_054.png" src="../_images/sphx_glr_plot_sigma_zero_freq_054.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_055.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_055.png" src="../_images/sphx_glr_plot_sigma_zero_freq_055.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_056.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_056.png" src="../_images/sphx_glr_plot_sigma_zero_freq_056.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_057.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_057.png" src="../_images/sphx_glr_plot_sigma_zero_freq_057.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_058.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_058.png" src="../_images/sphx_glr_plot_sigma_zero_freq_058.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_059.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_059.png" src="../_images/sphx_glr_plot_sigma_zero_freq_059.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_060.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_060.png" src="../_images/sphx_glr_plot_sigma_zero_freq_060.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_061.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_061.png" src="../_images/sphx_glr_plot_sigma_zero_freq_061.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_062.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_062.png" src="../_images/sphx_glr_plot_sigma_zero_freq_062.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_063.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_063.png" src="../_images/sphx_glr_plot_sigma_zero_freq_063.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_064.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_064.png" src="../_images/sphx_glr_plot_sigma_zero_freq_064.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_065.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_065.png" src="../_images/sphx_glr_plot_sigma_zero_freq_065.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_066.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_066.png" src="../_images/sphx_glr_plot_sigma_zero_freq_066.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_067.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_067.png" src="../_images/sphx_glr_plot_sigma_zero_freq_067.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_068.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_068.png" src="../_images/sphx_glr_plot_sigma_zero_freq_068.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_069.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_069.png" src="../_images/sphx_glr_plot_sigma_zero_freq_069.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_070.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_070.png" src="../_images/sphx_glr_plot_sigma_zero_freq_070.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_071.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_071.png" src="../_images/sphx_glr_plot_sigma_zero_freq_071.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_sigma_zero_freq_072.png"><img alt="../_images/sphx_glr_plot_sigma_zero_freq_072.png" src="../_images/sphx_glr_plot_sigma_zero_freq_072.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  22.488 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_sigma_zero_freq.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_sigma_zero_freq.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_sigma_zero_freq.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_sigma_zero_freq.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Zero frequency behavior of Sigma</a><ul>
+<li><a class="reference internal" href="#plots-over-the-shapes-of-sigma-at-zero-frequency">Plots over the shapes of Sigma at zero frequency</a></li>
+<li><a class="reference internal" href="#quasiparticle-observables">Quasiparticle observables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_re_T_dos.html"
+                        title="previous chapter">Evolution of DOS as function of temperature</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_sigma_zero_freq.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_re_T_dos.html" title="Evolution of DOS as function of temperature"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

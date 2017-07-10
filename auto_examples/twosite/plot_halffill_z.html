@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Following the Metal to Mott insulator Transition &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Double occupation of the Impurity" href="plot_dop_d.html" />
+    <link rel="prev" title="Quasiparticle decay for different local interaction strenghts" href="plot_dop_z.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_d.html" title="Double occupation of the Impurity"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_z.html" title="Quasiparticle decay for different local interaction strenghts"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="following-the-metal-to-mott-insulator-transition">
+<span id="sphx-glr-auto-examples-twosite-plot-halffill-z-py"></span><h1>Following the Metal to Mott insulator Transition<a class="headerlink" href="#following-the-metal-to-mott-insulator-transition" title="Permalink to this headline">¶</a></h1>
+<p>Plot of the Quasiparticle weigth decay for the Hubbard
+Model in the Bethe Lattice as the local interaction is raised.</p>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_halffill_z_001.png"><img alt="../../_images/sphx_glr_plot_halffill_z_001.png" src="../../_images/sphx_glr_plot_halffill_z_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../../_images/sphx_glr_plot_halffill_z_002.png"><img alt="../../_images/sphx_glr_plot_halffill_z_002.png" src="../../_images/sphx_glr_plot_halffill_z_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Code source: Óscar Nájera</span>
+<span class="c1"># License: BSD 3 clause</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dmft.twosite</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.twosite.html#dmft.twosite.dmft_loop" title="View documentation for dmft.twosite.dmft_loop"><span class="n">dmft_loop</span></a>
+
+
+<span class="k">def</span> <span class="nf">plot_z</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;matsubara&#39;</span><span class="p">,</span> <span class="n">du</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="n">fig</span> <span class="o">=</span> <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <span class="n">u_int</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">6.2</span><span class="p">,</span> <span class="n">du</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">]:</span>
+        <span class="n">out_file</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">+</span> <span class="s1">&#39;_halffill_b{}_dU{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">du</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">out_file</span> <span class="o">+</span> <span class="s1">&#39;.npy&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <a href="../../gen_modules/dmft.twosite.html#dmft.twosite.dmft_loop" title="View documentation for dmft.twosite.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">hop</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">out_file</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+
+        <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">res</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;+-&#39;</span><span class="p">,</span>
+                 <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">beta = {}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="s1">&#39;Quasiparticle weigth, estimated in {} frequencies&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">out_file</span> <span class="o">+</span> <span class="s1">&#39;_Z.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+
+<span class="n">plot_z</span><span class="p">(</span><span class="s1">&#39;real&#39;</span><span class="p">)</span>
+<span class="n">plot_z</span><span class="p">(</span><span class="s1">&#39;matsubara&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  2.047 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_halffill_z.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_halffill_z.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_halffill_z.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_halffill_z.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_dop_z.html"
+                        title="previous chapter">Quasiparticle decay for different local interaction strenghts</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_dop_d.html"
+                        title="next chapter">Double occupation of the Impurity</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/twosite/plot_halffill_z.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_d.html" title="Double occupation of the Impurity"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_z.html" title="Quasiparticle decay for different local interaction strenghts"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

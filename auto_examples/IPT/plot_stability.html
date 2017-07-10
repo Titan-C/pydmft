@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Stability of the solutions in the coexistence region &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="IPT Solver Existence of Metalic and insulating solution" href="plot_ipt.html" />
+    <link rel="prev" title="The Analytical Structure of a the Green’s Function" href="plot_analytical_structure_gf.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt.html" title="IPT Solver Existence of Metalic and insulating solution"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_analytical_structure_gf.html" title="The Analytical Structure of a the Green’s Function"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="stability-of-the-solutions-in-the-coexistence-region">
+<span id="sphx-glr-auto-examples-ipt-plot-stability-py"></span><h1>Stability of the solutions in the coexistence region<a class="headerlink" href="#stability-of-the-solutions-in-the-coexistence-region" title="Permalink to this headline">¶</a></h1>
+<p>As the Energy calculations from IPT source is not reliable enough
+another methods is also tested to find about the first order line in
+the transition.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">fit_gf</span></a>
+
+
+<span class="k">def</span> <span class="nf">hysteresis</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u_range</span><span class="p">):</span>
+    <span class="n">log_g</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">ceil</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="mi">256</span><span class="p">)))</span>
+    <span class="n">g_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="n">u_range</span><span class="p">:</span>
+        <span class="n">g_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">g_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">log_g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">g_iwn</span><span class="p">)</span>
+    <span class="n">dos</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><a href="../../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">fit_gf</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">gfs</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)(</span><span class="mf">0.</span><span class="p">)</span> <span class="k">for</span> <span class="n">gfs</span> <span class="ow">in</span> <span class="n">log_g</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">log_g</span><span class="p">,</span> <span class="n">dos</span>
+
+
+<span class="k">def</span> <span class="nf">point_stability</span><span class="p">(</span><span class="n">g_met</span><span class="p">,</span> <span class="n">g_ins</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+    <span class="n">mixture</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span> <span class="o">*</span> <span class="n">g_ins</span> <span class="o">+</span> <span class="n">c</span> <span class="o">*</span> <span class="n">g_met</span>
+    <span class="n">g_iwn_end</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">mixture</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+    <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.dot.html#numpy.dot" title="View documentation for numpy.dot"><span class="n">np</span><span class="o">.</span><span class="n">dot</span></a><span class="p">(</span><span class="n">g_iwn_end</span> <span class="o">-</span> <span class="n">mixture</span><span class="p">,</span> <span class="n">mixture</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">stability</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">metal_g</span><span class="p">,</span> <span class="n">insulator_g</span><span class="p">,</span> <span class="n">urange</span><span class="p">):</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span>
+        <span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">ceil</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="mi">256</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">g_met</span><span class="p">,</span> <span class="n">g_ins</span><span class="p">,</span> <span class="n">U</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">metal_g</span><span class="p">,</span> <span class="n">insulator_g</span><span class="p">,</span> <span class="n">urange</span><span class="p">):</span>
+        <span class="n">stab</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">point_stability</span><span class="p">,</span> <span class="n">g_met</span><span class="p">,</span> <span class="n">g_ins</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="n">shift</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.sum.html#numpy.sum" title="View documentation for numpy.sum"><span class="n">np</span><span class="o">.</span><span class="n">sum</span></a><span class="p">([</span><span class="n">stab</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">.</span><span class="mi">1</span><span class="p">)]))</span>
+
+    <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+<span class="n">urange</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">2.4</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mi">41</span><span class="p">)</span>
+
+<span class="n">TEMP</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">512.</span><span class="p">,</span> <span class="o">.</span><span class="mo">06</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">256</span><span class="p">)</span>
+<span class="n">shift_log</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">dos_log</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">BETA</span> <span class="ow">in</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">TEMP</span><span class="p">:</span>
+    <span class="n">metalG</span><span class="p">,</span> <span class="n">Mdos</span> <span class="o">=</span> <span class="n">hysteresis</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">urange</span><span class="p">)</span>
+    <span class="n">insulatorG</span><span class="p">,</span> <span class="n">Idos</span> <span class="o">=</span> <span class="n">hysteresis</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">urange</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">shift_log</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stability</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">metalG</span><span class="p">,</span> <span class="n">insulatorG</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">urange</span><span class="p">))</span>
+    <span class="n">dos_log</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Mdos</span><span class="p">,</span> <span class="n">Idos</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="functional-cost-for-transitioning-from-insulator-to-metal">
+<h2>Functional cost for transitioning from insulator to metal<a class="headerlink" href="#functional-cost-for-transitioning-from-insulator-to-metal" title="Permalink to this headline">¶</a></h2>
+<p>Following Moeller, G., Dobrosavljevi&#8217;c, V., &amp; Ruckenstein,
+A. (1999). RKKY interactions and the Mott transition. Physical
+Review B, 59(10), 6846–6854. I formulate the expense of
+transitioning from one solution to the other.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">Deltas</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">shift_log</span><span class="p">)</span><span class="o">.</span><span class="n">real</span>
+
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pylab.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+<span class="k">for</span> <span class="n">t</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">TEMP</span><span class="p">,</span> <span class="n">Deltas</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">urange</span><span class="p">,</span> <span class="n">df</span> <span class="o">+</span> <span class="n">t</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+
+<span class="n">crossing</span> <span class="o">=</span> <span class="p">[</span><span class="mf">3.39</span><span class="p">,</span> <span class="mf">3.33</span><span class="p">,</span> <span class="mf">3.24</span><span class="p">,</span> <span class="mf">3.12</span><span class="p">,</span> <span class="mf">3.01</span><span class="p">,</span>
+            <span class="mf">2.92</span><span class="p">,</span> <span class="mf">2.82</span><span class="p">,</span> <span class="mf">2.73</span><span class="p">,</span> <span class="mf">2.65</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">,</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mf">2.52</span><span class="p">]</span>
+<span class="n">UC1</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">2.57</span><span class="p">,</span> <span class="mf">2.57</span><span class="p">,</span> <span class="mf">2.57</span><span class="p">,</span> <span class="mf">2.57</span><span class="p">,</span> <span class="mf">2.55</span><span class="p">,</span> <span class="mf">2.55</span><span class="p">,</span>
+                <span class="mf">2.55</span><span class="p">,</span> <span class="mf">2.52</span><span class="p">,</span> <span class="mf">2.52</span><span class="p">,</span> <span class="mf">2.49</span><span class="p">,</span> <span class="mf">2.49</span><span class="p">,</span> <span class="mf">2.49</span><span class="p">])</span> <span class="o">+</span> <span class="o">.</span><span class="mo">02</span>
+<span class="n">UC2</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mf">3.39</span><span class="p">,</span> <span class="mf">3.33</span><span class="p">,</span> <span class="mf">3.24</span><span class="p">,</span> <span class="mf">3.18</span><span class="p">,</span> <span class="mf">3.06</span><span class="p">,</span> <span class="mf">2.97</span><span class="p">,</span>
+                <span class="mf">2.88</span><span class="p">,</span> <span class="mf">2.78</span><span class="p">,</span> <span class="mf">2.7</span><span class="p">,</span> <span class="mf">2.6</span><span class="p">,</span> <span class="mf">2.54</span><span class="p">,</span> <span class="mf">2.52</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">crossing</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">UC1</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">UC2</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$F$ + $T/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Functional cost to transition to metal&#39;</span><span class="p">)</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">urange</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/axis_api.html#matplotlib.axis" title="View documentation for matplotlib.pylab.axis"><span class="n">plt</span><span class="o">.</span><span class="n">axis</span></a><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_stability_001.png" class="align-center" src="../../_images/sphx_glr_plot_stability_001.png" />
+</div>
+<div class="section" id="colorful-phase-diagram-with-density-of-states-at-fermi-level">
+<h2>Colorful phase diagram with density of states at Fermi level<a class="headerlink" href="#colorful-phase-diagram-with-density-of-states-at-fermi-level" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">metal_dos</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">dos_log</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">insulator_dos</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">dos_log</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+
+
+<a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pylab.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="n">metal_dos</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/colorbar_api.html#matplotlib.colorbar" title="View documentation for matplotlib.pylab.colorbar"><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span></a><span class="p">()</span>
+
+<span class="n">z</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ma.masked_array.all.html#numpy.ma.masked_array" title="View documentation for numpy.ma.masked_array"><span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span></a><span class="p">(</span><span class="o">-</span><span class="n">insulator_dos</span><span class="p">,</span> <span class="o">-</span><span class="n">insulator_dos</span> <span class="o">&gt;</span> <span class="o">.</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=.</span><span class="mi">15</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<a href="http://matplotlib.org/api/axis_api.html#matplotlib.axis" title="View documentation for matplotlib.pylab.axis"><span class="n">plt</span><span class="o">.</span><span class="n">axis</span></a><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$T/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="s1">&#39;Phase diagram </span><span class="se">\n</span><span class="s1"> color represents $-</span><span class="se">\\</span><span class="s1">Im G_{{AA}}(0)$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">crossing</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">UC1</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">UC2</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">crossing</span><span class="p">)],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_stability_002.png" class="align-center" src="../../_images/sphx_glr_plot_stability_002.png" />
+<p><strong>Total running time of the script:</strong> ( 1 minutes  3.563 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_stability.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_stability.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_stability.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_stability.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Stability of the solutions in the coexistence region</a><ul>
+<li><a class="reference internal" href="#functional-cost-for-transitioning-from-insulator-to-metal">Functional cost for transitioning from insulator to metal</a></li>
+<li><a class="reference internal" href="#colorful-phase-diagram-with-density-of-states-at-fermi-level">Colorful phase diagram with density of states at Fermi level</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_analytical_structure_gf.html"
+                        title="previous chapter">The Analytical Structure of a the Green&#8217;s Function</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_ipt.html"
+                        title="next chapter">IPT Solver Existence of Metalic and insulating solution</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/IPT/plot_stability.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt.html" title="IPT Solver Existence of Metalic and insulating solution"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_analytical_structure_gf.html" title="The Analytical Structure of a the Green’s Function"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

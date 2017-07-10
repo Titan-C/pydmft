@@ -1,0 +1,911 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.dimer &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmft.utils" href="dmft.utils.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.utils.html" title="dmft.utils"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.dimer">
+<span id="dmft-dimer"></span><h1>dmft.dimer<a class="headerlink" href="#module-dmft.dimer" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dimer-bethe-lattice">
+<h2>Dimer Bethe lattice<a class="headerlink" href="#dimer-bethe-lattice" title="Permalink to this headline">¶</a></h2>
+<p>Non interacting dimer of a Bethe lattice
+Based on the work G. Moeller et all PRB 59, 10, 6846 (1999)</p>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="dmft.dimer.diag_loc_fermions">
+<code class="descclassname">dmft.dimer.</code><code class="descname">diag_loc_fermions</code><span class="sig-paren">(</span><em>basis_fermions</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.diag_loc_fermions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotate diagonal Fermion matrix operators from diagonal to local basis</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.dimer_dyson">
+<code class="descclassname">dmft.dimer.</code><code class="descname">dimer_dyson</code><span class="sig-paren">(</span><em>g0iw_d</em>, <em>g0iw_o</em>, <em>siw_d</em>, <em>siw_o</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.dimer_dyson" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns Dressed Green Function from G0 and Sigma</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.ekin">
+<code class="descclassname">dmft.dimer.</code><code class="descname">ekin</code><span class="sig-paren">(</span><em>giw_d</em>, <em>giw_o</em>, <em>w_n</em>, <em>tp</em>, <em>beta</em>, <em>t_sqr=0.25</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.ekin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the total kinetic energy of the dimer Bethe lattice</p>
+<div class="math">
+<p><img src="../_images/math/345d016c54e3e1855d07d46ce33925bd5a4f6296.png" alt="\langle T \rangle = \frac{8}{\beta} \sum_{n&gt;0}
+\left( t_\perp(G_{12}(i\omega_n) -\frac{t_\perp}{(i\omega_n)^2})
+    + t^2 ( G_{11}^2 - \frac{1}{(i\omega_n)^2}  + G_{12}^2 ) \right)
+    - (t_\perp^2+t^2)\beta"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>giw_d</strong> (<em>complex 1D ndarray</em>) &#8211; Diagonal entry of Green&#8217;s function <img class="math" src="../_images/math/bf1f690495c14821e38898f2c6c24c06d19fe5bc.png" alt="G_{11}"/></li>
+<li><strong>giw_o</strong> (<em>complex 1D ndarray</em>) &#8211; Off diagonal entry of Green&#8217;s function <img class="math" src="../_images/math/1e2869a44a431469c43dde748e64167067271de4.png" alt="G_{12}"/></li>
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Positive Matsubara frequencies</li>
+<li><strong>tp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Dimer hybridization strength</li>
+<li><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Inverse temperature</li>
+<li><strong>t_sqr</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; <img class="math" src="../_images/math/8ab3951c3ec48124e7cd632ee6cb27b9d984ccd2.png" alt="t^2"/> squared hopping to lattice, represent they lattice
+hybridization as <img class="math" src="../_images/math/8c29944dfab5ec355affe60381d5f657071706f3.png" alt="\Delta=t^2G"/></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p><a class="reference internal" href="../energies.html#kinetic-energy"><span class="std std-ref">Kinetic Energy</span></a></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.dimer.epot" title="dmft.dimer.epot"><code class="xref py py-func docutils literal"><span class="pre">epot()</span></code></a></p>
+</div>
+</dd></dl>
+
+<div class="section" id="examples-using-dmft-dimer-ekin">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.ekin</span></code><a class="headerlink" href="#examples-using-dmft-dimer-ekin" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id1">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id2">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id3">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so..."><div class="figure" id="id4">
+<img alt="../_images/sphx_glr_plot_energy_thumb.png" src="../_images/sphx_glr_plot_energy_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_energy.html#sphx-glr-dimer-lattice-plot-energy-py"><span class="std std-ref">Internal Energy in dimer solutions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id5">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id6">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id7">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id8">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id9">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.epot">
+<code class="descclassname">dmft.dimer.</code><code class="descname">epot</code><span class="sig-paren">(</span><em>giw_d</em>, <em>w_n</em>, <em>beta</em>, <em>M_3</em>, <em>e_kin</em>, <em>muN</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.epot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the total potential energy of the dimer</p>
+<div class="math">
+<p><img src="../_images/math/172e704941c5bd9196c4a35932e509c24ce0c98b.png" alt="\langle V \rangle = \frac{4}{\beta} \sum_{n&gt;0}
+i\omega_n(G_{11}(i\omega_n) -\frac{1}{i\omega_n} - \frac{M_3}{(i\omega_n)^3})
+- \frac{M_3\beta}{2}+ \frac{\mu}{2}\langle N \rangle - \frac{\langle T \rangle}{2}"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>giw_d</strong> (<em>complex 1D ndarray</em>) &#8211; Diagonal entry of Green&#8217;s function <img class="math" src="../_images/math/bf1f690495c14821e38898f2c6c24c06d19fe5bc.png" alt="G_{11}"/></li>
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Positive Matsubara frequencies</li>
+<li><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Inverse temperature</li>
+<li><strong>M_3</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Third Moment in tail expansion of <img class="math" src="../_images/math/bf1f690495c14821e38898f2c6c24c06d19fe5bc.png" alt="G_{11}"/></li>
+<li><strong>e_kin</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Kinetic energy of the dimer <img class="math" src="../_images/math/41ab3caed142c3aeb859a0b1b6b6e57eb4640a7a.png" alt="\langle T \rangle"/></li>
+<li><strong>muN</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Chemical potential weighted by occupation <img class="math" src="../_images/math/8910eaf9b43f5c077b33ec5f633b7ca7e3a8c17c.png" alt="\mu\langle N \rangle"/></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<p><a class="reference internal" href="../energies.html#potential-energy"><span class="std std-ref">Potential energy</span></a></p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.dimer.ekin" title="dmft.dimer.ekin"><code class="xref py py-func docutils literal"><span class="pre">ekin()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-epot">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.epot</span></code><a class="headerlink" href="#examples-using-dmft-dimer-epot" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id10">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id11">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id12">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so..."><div class="figure" id="id13">
+<img alt="../_images/sphx_glr_plot_energy_thumb.png" src="../_images/sphx_glr_plot_energy_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_energy.html#sphx-glr-dimer-lattice-plot-energy-py"><span class="std std-ref">Internal Energy in dimer solutions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id14">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id15">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id16">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id17">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id18">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.extract_flat_gf_iter">
+<code class="descclassname">dmft.dimer.</code><code class="descname">extract_flat_gf_iter</code><span class="sig-paren">(</span><em>filename</em>, <em>u_int</em>, <em>last</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.extract_flat_gf_iter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list with Green functions of last iterations</p>
+<p>At each iteration there are 4 Green functions sym_up, sym_dw,
+asym_up, asym_dw. Each one of them is extracted individually and
+is an element of the list.</p>
+<p>N.B. Because at half-filling there is particle-hole symmetry the
+sym=-conj(asym).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; path to hdf5 file</li>
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; local interaction value</li>
+<li><strong>last</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; counts the last iterations to extract</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ndarray of shape</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">last x 4 x nfreq</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-extract-flat-gf-iter">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.extract_flat_gf_iter</span></code><a class="headerlink" href="#examples-using-dmft-dimer-extract-flat-gf-iter" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Here I continue an insulator "><div class="figure" id="id19">
+<img alt="../_images/sphx_glr_plot_maxent_thumb.png" src="../_images/sphx_glr_plot_maxent_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/cthyb/plot_maxent.html#sphx-glr-dimer-lattice-cthyb-plot-maxent-py"><span class="std std-ref">Analytically continue a dimer GF by Maxent</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.get_sigmaiw">
+<code class="descclassname">dmft.dimer.</code><code class="descname">get_sigmaiw</code><span class="sig-paren">(</span><em>giw_d</em>, <em>giw_o</em>, <em>w_n</em>, <em>tp</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.get_sigmaiw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Sigma by dyson in paramagnetic case only 2 entries</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.gf_met">
+<code class="descclassname">dmft.dimer.</code><code class="descname">gf_met</code><span class="sig-paren">(</span><em>omega</em>, <em>mu</em>, <em>tp</em>, <em>t</em>, <em>tn</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.gf_met" title="Permalink to this definition">¶</a></dt>
+<dd><p>Double semi-circular density of states to represent the non-interacting
+dimer</p>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-gf-met">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.gf_met</span></code><a class="headerlink" href="#examples-using-dmft-dimer-gf-met" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id20">
+<img alt="../_images/sphx_glr_ipt_dimer_thumb.png" src="../_images/sphx_glr_ipt_dimer_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer.html#sphx-glr-dimer-lattice-ipt-dimer-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id21">
+<img alt="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" src="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer_bandwidt.html#sphx-glr-dimer-lattice-ipt-dimer-bandwidt-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id22">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id23">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id24">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Non interacting dimer of a Bethe lattice "><div class="figure" id="id25">
+<img alt="../_images/sphx_glr_plot_dimer_bethe_thumb.png" src="../_images/sphx_glr_plot_dimer_bethe_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dimer_bethe.html#sphx-glr-dimer-lattice-plot-dimer-bethe-py"><span class="std std-ref">Dimer Bethe lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id26">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id27">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id28">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so..."><div class="figure" id="id29">
+<img alt="../_images/sphx_glr_plot_energy_thumb.png" src="../_images/sphx_glr_plot_energy_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_energy.html#sphx-glr-dimer-lattice-plot-energy-py"><span class="std std-ref">Internal Energy in dimer solutions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id30">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id31">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id32">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id33">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id34">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id35">
+<img alt="../_images/sphx_glr_plot_scatering_fixB_thumb.png" src="../_images/sphx_glr_plot_scatering_fixB_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scatering_fixB.html#sphx-glr-dimer-lattice-plot-scatering-fixb-py"><span class="std std-ref">Scattering rates change across the Metal Insulator Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id36">
+<img alt="../_images/sphx_glr_plot_scattering_thumb.png" src="../_images/sphx_glr_plot_scattering_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scattering.html#sphx-glr-dimer-lattice-plot-scattering-py"><span class="std std-ref">Scattering rates change in Temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id37">
+<img alt="../_images/sphx_glr_plot_shape_gf_thumb.png" src="../_images/sphx_glr_plot_shape_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shape_gf.html#sphx-glr-dimer-lattice-plot-shape-gf-py"><span class="std std-ref">Form of the Greens Functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id38">
+<img alt="../_images/sphx_glr_plot_sigma_12_thumb.png" src="../_images/sphx_glr_plot_sigma_12_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_12.html#sphx-glr-dimer-lattice-plot-sigma-12-py"><span class="std std-ref">The change of Sigma_12</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id39">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id40">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id41">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id42">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.hamiltonian">
+<code class="descclassname">dmft.dimer.</code><code class="descname">hamiltonian</code><span class="sig-paren">(</span><em>u_int</em>, <em>mu</em>, <em>tp</em>, <em>basis_fermions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.hamiltonian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an isolated bi-atomic Hamiltonian in particle-hole
+symmetry at mu=0. Include chemical potential for grand Canonical calculations</p>
+<div class="math">
+<p><img src="../_images/math/adfcb2ba1215618c58a73deeb114a7c118d1b7ae.png" alt="\mathcal{H} - \mu N =
+-\frac{U}{2}(n_{a\uparrow} - n_{a\downarrow})^2
+-\frac{U}{2}(n_{b\uparrow} - n_{b\downarrow})^2  +
+t_\perp (a^\dagger_\uparrow b_\uparrow +
+         b^\dagger_\uparrow a_\uparrow +
+         a^\dagger_\downarrow b_\downarrow +
+         b^\dagger_\downarrow a_\downarrow)
+- \mu(n_{a\uparrow} + n_{a\downarrow})
+- \mu(n_{b\uparrow} + n_{b\downarrow})"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; local Coulomb interaction</li>
+<li><strong>mu</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; chemical potential</li>
+<li><strong>tp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; hopping amplitude between atoms</li>
+<li><strong>basis_fermions</strong> (<em>list</em>) &#8211; 4 element list with sparse matrices
+representing fermion destruction operators
+default basis is [a_up, b_up, a_dw, b_dw]</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>h_loc</strong> (<em>scipy.sparse.csr.csr_matrix</em>) &#8211; Hamiltonian</li>
+<li><strong>basis_fermions</strong> (<em>list scipy.sparse.csr.csr_matrix</em>) &#8211; fermion desctruction operators in sparse matrix form</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-hamiltonian">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.hamiltonian</span></code><a class="headerlink" href="#examples-using-dmft-dimer-hamiltonian" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="The atomic self-energy is extracted and plotted into the lattice Green&#x27;s function to see the be..."><div class="figure" id="id43">
+<img alt="../_images/sphx_glr_plot_hubbard_I_thumb.png" src="../_images/sphx_glr_plot_hubbard_I_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_hubbard_I.html#sphx-glr-dimer-lattice-plot-hubbard-i-py"><span class="std std-ref">Hubbard I for dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua..."><div class="figure" id="id44">
+<img alt="../_images/sphx_glr_plot_molecule_thumb.png" src="../_images/sphx_glr_plot_molecule_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_molecule.html#sphx-glr-dimer-lattice-plot-molecule-py"><span class="std std-ref">Isolated molecule spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua..."><div class="figure" id="id45">
+<img alt="../_images/sphx_glr_plot_molecule_spectra_thumb.png" src="../_images/sphx_glr_plot_molecule_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_molecule_spectra.html#sphx-glr-dimer-lattice-plot-molecule-spectra-py"><span class="std std-ref">Isolated molecule spectral function 2</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.hamiltonian_diag">
+<code class="descclassname">dmft.dimer.</code><code class="descname">hamiltonian_diag</code><span class="sig-paren">(</span><em>u_int</em>, <em>mu</em>, <em>tp</em>, <em>basis_fermions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.hamiltonian_diag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate an isolated bi-atomic Hamiltonian in particle-hole symmetry at
+mu=0. Include chemical potential for grand Canonical calculations</p>
+<p>This in the diagonal basis [as_up, s_up, as_dw, s_dw]</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.dimer.hamiltonian" title="dmft.dimer.hamiltonian"><code class="xref py py-func docutils literal"><span class="pre">hamiltonian()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-hamiltonian-diag">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.hamiltonian_diag</span></code><a class="headerlink" href="#examples-using-dmft-dimer-hamiltonian-diag" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Describing the position of the Self-Energy pole in the diagonal basis "><div class="figure" id="id46">
+<img alt="../_images/sphx_glr_plot_hubbard_III_thumb.png" src="../_images/sphx_glr_plot_hubbard_III_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_hubbard_III.html#sphx-glr-dimer-lattice-plot-hubbard-iii-py"><span class="std std-ref">Hubbard III for dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="The atomic self-energy is extracted and plotted into the lattice Green&#x27;s function to see the be..."><div class="figure" id="id47">
+<img alt="../_images/sphx_glr_plot_hubbard_I_diagonal_thumb.png" src="../_images/sphx_glr_plot_hubbard_I_diagonal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_hubbard_I_diagonal.html#sphx-glr-dimer-lattice-plot-hubbard-i-diagonal-py"><span class="std std-ref">Hubbard I for dimer diagonal basis</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua..."><div class="figure" id="id48">
+<img alt="../_images/sphx_glr_plot_molecule_spectra_thumb.png" src="../_images/sphx_glr_plot_molecule_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_molecule_spectra.html#sphx-glr-dimer-lattice-plot-molecule-spectra-py"><span class="std std-ref">Isolated molecule spectral function 2</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.ipt_dmft_loop">
+<code class="descclassname">dmft.dimer.</code><code class="descname">ipt_dmft_loop</code><span class="sig-paren">(</span><em>BETA</em>, <em>u_int</em>, <em>tp</em>, <em>giw_d</em>, <em>giw_o</em>, <em>tau</em>, <em>w_n</em>, <em>conv=1e-12</em>, <em>t=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.ipt_dmft_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self-consistently solve dimer DMFT problem with ipt solver</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>BETA</strong> (<em>float - inverse temperature</em>) &#8211; </li>
+<li><strong>u_int</strong> (<em>float - onsite interaction</em>) &#8211; </li>
+<li><strong>tp</strong> (<em>float - dimer hybridization</em>) &#8211; </li>
+<li><strong>giw_d</strong> (<em>1D ndarray complex - diagonal Green function G_11</em>) &#8211; </li>
+<li><strong>giw_o</strong> (<em>1D ndarray complex - off-diagonal Green function G_12</em>) &#8211; </li>
+<li><strong>tau</strong> (<em>1D ndarray real - imaginary time array</em>) &#8211; </li>
+<li><strong>w_n</strong> (<em>1D ndarray real - matsubara frequency points</em>) &#8211; </li>
+<li><strong>conv</strong> (<em>float - convergence criteria</em>) &#8211; </li>
+<li><strong>t</strong> (<em>float - renormalized lattice hopping</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>giw_d</strong> (<em>1D ndarray complex - diagonal Green function G_11</em>)</li>
+<li><strong>giw_o</strong> (<em>1D ndarray complex - off-diagonal Green function G_12</em>)</li>
+<li><strong>loops</strong> (<em>int - iterations for converge</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-ipt-dmft-loop">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.ipt_dmft_loop</span></code><a class="headerlink" href="#examples-using-dmft-dimer-ipt-dmft-loop" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id49">
+<img alt="../_images/sphx_glr_ipt_dimer_thumb.png" src="../_images/sphx_glr_ipt_dimer_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer.html#sphx-glr-dimer-lattice-ipt-dimer-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id50">
+<img alt="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" src="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer_bandwidt.html#sphx-glr-dimer-lattice-ipt-dimer-bandwidt-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id51">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id52">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id53">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id54">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id55">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id56">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id57">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so..."><div class="figure" id="id58">
+<img alt="../_images/sphx_glr_plot_energy_thumb.png" src="../_images/sphx_glr_plot_energy_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_energy.html#sphx-glr-dimer-lattice-plot-energy-py"><span class="std std-ref">Internal Energy in dimer solutions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id59">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id60">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id61">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id62">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id63">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id64">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id65">
+<img alt="../_images/sphx_glr_plot_scatering_fixB_thumb.png" src="../_images/sphx_glr_plot_scatering_fixB_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scatering_fixB.html#sphx-glr-dimer-lattice-plot-scatering-fixb-py"><span class="std std-ref">Scattering rates change across the Metal Insulator Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id66">
+<img alt="../_images/sphx_glr_plot_scattering_thumb.png" src="../_images/sphx_glr_plot_scattering_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scattering.html#sphx-glr-dimer-lattice-plot-scattering-py"><span class="std std-ref">Scattering rates change in Temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id67">
+<img alt="../_images/sphx_glr_plot_shape_gf_thumb.png" src="../_images/sphx_glr_plot_shape_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shape_gf.html#sphx-glr-dimer-lattice-plot-shape-gf-py"><span class="std std-ref">Form of the Greens Functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id68">
+<img alt="../_images/sphx_glr_plot_sigma_12_thumb.png" src="../_images/sphx_glr_plot_sigma_12_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_12.html#sphx-glr-dimer-lattice-plot-sigma-12-py"><span class="std std-ref">The change of Sigma_12</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id69">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id70">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id71">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id72">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.mat_2_inv">
+<code class="descclassname">dmft.dimer.</code><code class="descname">mat_2_inv</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.mat_2_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverts a 2x2 matrix</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.mat_inv">
+<code class="descclassname">dmft.dimer.</code><code class="descname">mat_inv</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.mat_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverts the relevant entries of the dimer Green&#8217;s function matrix</p>
+<div class="math">
+<p><img src="../_images/math/df1406942d74381cf325c94fefc349deaa6e24cb.png" alt="[a, b]^-1 = [a, -b]/(a^2 - b^2)"/></p>
+</div></dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-mat-inv">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.mat_inv</span></code><a class="headerlink" href="#examples-using-dmft-dimer-mat-inv" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id73">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="The atomic self-energy is extracted and plotted into the lattice Green&#x27;s function to see the be..."><div class="figure" id="id74">
+<img alt="../_images/sphx_glr_plot_hubbard_I_thumb.png" src="../_images/sphx_glr_plot_hubbard_I_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_hubbard_I.html#sphx-glr-dimer-lattice-plot-hubbard-i-py"><span class="std std-ref">Hubbard I for dimer</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.mat_mul">
+<code class="descclassname">dmft.dimer.</code><code class="descname">mat_mul</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>c</em>, <em>d</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.mat_mul" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies two Matrices of the dimer Green&#8217;s Functions</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.opt_sig">
+<code class="descclassname">dmft.dimer.</code><code class="descname">opt_sig</code><span class="sig-paren">(</span><em>lat_A1</em>, <em>lat_A2</em>, <em>nf</em>, <em>w</em>, <em>dosde</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.opt_sig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the optical conductivity from lattice spectral functions</p>
+<div class="math">
+<p><img src="../_images/math/fd08210344cc8a6dac19807b215d82e99617cf7d.png" alt="\sigma(w) = \int dE \rho(E) \Pi (E,w) / w"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lat_A1</strong> (<em>2D ndarrays</em>) &#8211; lattice Spectral functions A(E,w)</li>
+<li><strong>lat_A2</strong> (<em>2D ndarrays</em>) &#8211; lattice Spectral functions A(E,w)</li>
+<li><strong>nf</strong> (<em>1D ndarray</em>) &#8211; fermi function</li>
+<li><strong>w</strong> (<em>1D ndarray</em>) &#8211; real frequency array</li>
+<li><strong>dosde</strong> (<em>1D ndarray</em>) &#8211; differentially weighted density of states dE ρ(E)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>Re σ(w)</strong> (<em>1D ndarray</em>)</li>
+<li><em>Real part of optical conductivity. Posterior scaling required</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-func docutils literal"><span class="pre">bubble()</span></code></p>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.optical_conductivity">
+<code class="descclassname">dmft.dimer.</code><code class="descname">optical_conductivity</code><span class="sig-paren">(</span><em>beta</em>, <em>ss</em>, <em>sa</em>, <em>omega</em>, <em>tp</em>, <em>eps_k</em>, <em>eta=0.04</em>, <em>crop=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.optical_conductivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the contributions to the optical_conductivity in the dimer</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>beta</strong> (<em>float - Inverse Temperature</em>) &#8211; </li>
+<li><strong>ss</strong> (<em>1D complex ndarray - SYM real-freq self-energy</em>) &#8211; </li>
+<li><strong>sa</strong> (<em>1D complex ndarray - ASYM real-freq self-energy</em>) &#8211; </li>
+<li><strong>omega</strong> (<em>1D float ndarray - real frequency grid</em><em> (</em><em>equispaced</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>tp</strong> (<em>float - Dimer Hybridization</em>) &#8211; </li>
+<li><strong>eps_k</strong> (<em>1D float ndarray - Energy level bandwidth</em><em> (</em><em>equispaced</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>eta</strong> (<em>float - broadening for A</em><em>(</em><em>eps_k</em><em>, </em><em>w</em><em>)</em><em></em>) &#8211; </li>
+<li><strong>crop</strong> (<em>bool - Return only positive frequencies</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>intra_band</strong> (<em>Intra band Optical response</em>)</li>
+<li><strong>inter_band</strong> (<em>Inter band Optical response</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-optical-conductivity">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.optical_conductivity</span></code><a class="headerlink" href="#examples-using-dmft-dimer-optical-conductivity" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity of the correlated metal as the system is warmed up. Temperature ..."><div class="figure" id="id75">
+<img alt="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" src="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_track_on_temp.html#sphx-glr-dimer-lattice-plot-optical-track-on-temp-py"><span class="std std-ref">Dimer Mott transition Optical response with temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity from the correlated metal up to the transition point. The lost o..."><div class="figure" id="id76">
+<img alt="../_images/sphx_glr_plot_optical_transition_thumb.png" src="../_images/sphx_glr_plot_optical_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_transition.html#sphx-glr-dimer-lattice-plot-optical-transition-py"><span class="std std-ref">Dimer Mott transition Optical response</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.pade_diag">
+<code class="descclassname">dmft.dimer.</code><code class="descname">pade_diag</code><span class="sig-paren">(</span><em>gf_aa</em>, <em>gf_ab</em>, <em>w_n</em>, <em>w_set</em>, <em>w</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.pade_diag" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Take diagonal and off diagonal Matsubara functions in the local</dt>
+<dd><p class="first">basis and return real axis functions in the symmetric and
+anti-symmetric basis. Such that</p>
+<blockquote class="last">
+<div>⎡ⅈ⋅ωₙ + μ  - t⟂          0       ⎤     ⎡Σ_AA + Σ_AB       0     ⎤</div></blockquote>
+</dd>
+<dt>G^{-1} = ⎢                                ⎥  -  ⎢                        ⎥</dt>
+<dd>⎣        0        ⅈ⋅ωₙ + μ  + t⟂ ⎦     ⎣     0       Σ_AA - Σ_AB⎦</dd>
+</dl>
+<p>The Symmetric sum (Anti-bonding) returned first, Asymmetric is returned second</p>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-pade-diag">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.pade_diag</span></code><a class="headerlink" href="#examples-using-dmft-dimer-pade-diag" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id77">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id78">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id79">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id80">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id81">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.self_consistency">
+<code class="descclassname">dmft.dimer.</code><code class="descname">self_consistency</code><span class="sig-paren">(</span><em>omega</em>, <em>Gd</em>, <em>Gc</em>, <em>mu</em>, <em>tp</em>, <em>t2</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.self_consistency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the dimer Bethe lattice self consistent condition for the diagonal
+and out of diagonal block</p>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-dimer-self-consistency">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.dimer.self_consistency</span></code><a class="headerlink" href="#examples-using-dmft-dimer-self-consistency" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id82">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id83">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id84">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id85">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Non interacting dimer of a Bethe lattice "><div class="figure" id="id86">
+<img alt="../_images/sphx_glr_plot_dimer_bethe_thumb.png" src="../_images/sphx_glr_plot_dimer_bethe_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dimer_bethe.html#sphx-glr-dimer-lattice-plot-dimer-bethe-py"><span class="std std-ref">Dimer Bethe lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id87">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id88">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id89">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id90">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id91">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id92">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id93">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id94">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id95">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id96">
+<img alt="../_images/sphx_glr_plot_phases_thumb.png" src="../_images/sphx_glr_plot_phases_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phases.html#sphx-glr-dimer-lattice-plot-phases-py"><span class="std std-ref">Phase diagrams</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id97">
+<img alt="../_images/sphx_glr_plot_scatering_fixB_thumb.png" src="../_images/sphx_glr_plot_scatering_fixB_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scatering_fixB.html#sphx-glr-dimer-lattice-plot-scatering-fixb-py"><span class="std std-ref">Scattering rates change across the Metal Insulator Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id98">
+<img alt="../_images/sphx_glr_plot_scattering_thumb.png" src="../_images/sphx_glr_plot_scattering_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scattering.html#sphx-glr-dimer-lattice-plot-scattering-py"><span class="std std-ref">Scattering rates change in Temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id99">
+<img alt="../_images/sphx_glr_plot_shape_gf_thumb.png" src="../_images/sphx_glr_plot_shape_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shape_gf.html#sphx-glr-dimer-lattice-plot-shape-gf-py"><span class="std std-ref">Form of the Greens Functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id100">
+<img alt="../_images/sphx_glr_plot_sigma_12_thumb.png" src="../_images/sphx_glr_plot_sigma_12_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_12.html#sphx-glr-dimer-lattice-plot-sigma-12-py"><span class="std std-ref">The change of Sigma_12</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id101">
+<img alt="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" src="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_zero_freq.html#sphx-glr-dimer-lattice-plot-sigma-zero-freq-py"><span class="std std-ref">Zero frequency behavior of Sigma</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id102">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.sorted_basis">
+<code class="descclassname">dmft.dimer.</code><code class="descname">sorted_basis</code><span class="sig-paren">(</span><em>basis_numbering=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.sorted_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the basis of states for the electrons in the molecule
+Enforces ordering in particle number an Sz projection</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.dimer.symdata">
+<code class="descclassname">dmft.dimer.</code><code class="descname">symdata</code><span class="sig-paren">(</span><em>gfs_array</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.dimer.symdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assuming the gfs_array has shape (4, n_freqs)
+conjugate the last 2 columns to make the complete array be SYM</p>
+</dd></dl>
+
+<div style='clear:both'></div></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.dimer</a><ul>
+<li><a class="reference internal" href="#dimer-bethe-lattice">Dimer Bethe lattice</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-ekin">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.ekin</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-epot">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.epot</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-extract-flat-gf-iter">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.extract_flat_gf_iter</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-gf-met">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.gf_met</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-hamiltonian">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.hamiltonian</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-hamiltonian-diag">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.hamiltonian_diag</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-ipt-dmft-loop">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.ipt_dmft_loop</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-mat-inv">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.mat_inv</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-optical-conductivity">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.optical_conductivity</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-pade-diag">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.pade_diag</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-dimer-self-consistency">Examples using <code class="docutils literal"><span class="pre">dmft.dimer.self_consistency</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dmft.utils.html"
+                        title="next chapter">dmft.utils</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.dimer.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.utils.html" title="dmft.utils"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

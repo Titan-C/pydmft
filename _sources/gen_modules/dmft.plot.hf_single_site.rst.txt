@@ -1,0 +1,151 @@
+
+dmft.plot.hf_single_site
+========================
+
+.. automodule:: dmft.plot.hf_single_site
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: autocorrelation_function
+
+   .. include:: backreferences/dmft.plot.hf_single_site.autocorrelation_function.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: averager
+
+   .. include:: backreferences/dmft.plot.hf_single_site.averager.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: collect_bined_saves
+
+   .. include:: backreferences/dmft.plot.hf_single_site.collect_bined_saves.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: energies
+
+   .. include:: backreferences/dmft.plot.hf_single_site.energies.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: fit_dos
+
+   .. include:: backreferences/dmft.plot.hf_single_site.fit_dos.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: get_giw
+
+   .. include:: backreferences/dmft.plot.hf_single_site.get_giw.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: get_sigmaiw
+
+   .. include:: backreferences/dmft.plot.hf_single_site.get_sigmaiw.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gf_tail
+
+   .. include:: backreferences/dmft.plot.hf_single_site.gf_tail.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: glob
+
+   .. include:: backreferences/dmft.plot.hf_single_site.glob.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: interpol
+
+   .. include:: backreferences/dmft.plot.hf_single_site.interpol.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: label_convergence
+
+   .. include:: backreferences/dmft.plot.hf_single_site.label_convergence.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: list_show_conv
+
+   .. include:: backreferences/dmft.plot.hf_single_site.list_show_conv.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: phases
+
+   .. include:: backreferences/dmft.plot.hf_single_site.phases.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: plot_fit_dos
+
+   .. include:: backreferences/dmft.plot.hf_single_site.plot_fit_dos.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: show_conv
+
+   .. include:: backreferences/dmft.plot.hf_single_site.show_conv.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+
+   Classes
+   -------
+
+   
+   .. autoclass:: interp1d
+      :members:
+   
+   
+
+   
+   
+   

@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Isolated molecule spectral function &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Comparing Spectral functions" href="plot_comparing_spectra.html" />
+    <link rel="prev" title="Optical conductivity of bonding Spectral Function" href="plot_optical_conductivity_bonding.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_comparing_spectra.html" title="Comparing Spectral functions"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_optical_conductivity_bonding.html" title="Optical conductivity of bonding Spectral Function"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="isolated-molecule-spectral-function">
+<span id="sphx-glr-dimer-lattice-plot-molecule-py"></span><h1>Isolated molecule spectral function<a class="headerlink" href="#isolated-molecule-spectral-function" title="Permalink to this headline">¶</a></h1>
+<p>For the case of contact interaction in the di-atomic molecule case
+spectral function are evaluated by means of the Lehmann representation</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.linalg</span> <span class="kn">as</span> <span class="nn">LA</span>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">matsubara_freq</span></a><span class="p">,</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gw_invfouriertrans</span></a>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">import</span> <span class="nn">slaveparticles.quantum.operators</span> <span class="kn">as</span> <span class="nn">op</span>
+</pre></div>
+</div>
+<div class="section" id="real-space-representation">
+<h2>Real space representation<a class="headerlink" href="#real-space-representation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">plot_real_gf</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">oper_pair</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">beta</span><span class="p">):</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">axw</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1j</span> <span class="o">*</span> <span class="mf">1e-2</span>
+    <span class="n">gfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">gf_lehmann</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">oper_pair</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">gw</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gfs</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">gw</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;${}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">gw</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;Real Frequencies Green functions, $\beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Re e G(\omega)$&#39;</span><span class="p">)</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$-\Im m(\omega)/\pi$&#39;</span><span class="p">)</span>
+        <span class="n">axw</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">plot_eigen_spectra</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+    <span class="n">h_at</span><span class="p">,</span> <span class="n">oper</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.hamiltonian" title="View documentation for dmft.dimer.hamiltonian"><span class="n">dimer</span><span class="o">.</span><span class="n">hamiltonian</span></a><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+    <span class="n">eig_e</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">eig_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.linalg.eigvalsh.html#scipy.linalg.eigvalsh" title="View documentation for scipy.linalg.eigvalsh"><span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span></a><span class="p">(</span><span class="n">h_at</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">todense</span><span class="p">()))</span>
+    <span class="n">eig_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.linalg.eigvalsh.html#scipy.linalg.eigvalsh" title="View documentation for scipy.linalg.eigvalsh"><span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span></a><span class="p">(</span><span class="n">h_at</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span> <span class="mi">5</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">todense</span><span class="p">()))</span>
+    <span class="n">eig_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.linalg.eigvalsh.html#scipy.linalg.eigvalsh" title="View documentation for scipy.linalg.eigvalsh"><span class="n">LA</span><span class="o">.</span><span class="n">eigvalsh</span></a><span class="p">(</span><span class="n">h_at</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span><span class="o">.</span><span class="n">todense</span><span class="p">()))</span>
+
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="s1">&#39;Many particle Energy Spectra U={} $t_\perp={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">))</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">(</span><span class="n">eig_e</span><span class="p">),</span> <span class="s2">&quot;o-&quot;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="s1">&#39;Energy&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s1">&#39;Eigenstate by N particle block&#39;</span><span class="p">)</span>
+
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.axvline" title="View documentation for matplotlib.pyplot.axvline"><span class="n">plt</span><span class="o">.</span><span class="n">axvline</span></a><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">3.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.axvline" title="View documentation for matplotlib.pyplot.axvline"><span class="n">plt</span><span class="o">.</span><span class="n">axvline</span></a><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">9.5</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">plot_matsubara_gf</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">oper_pair</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+    <span class="n">gwp</span><span class="p">,</span> <span class="n">axwn</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">gwp</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">gtp</span><span class="p">,</span> <span class="n">axt</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+    <span class="n">wn</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">tau</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">gfs</span> <span class="o">=</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">gf_lehmann</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">wn</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+           <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">oper_pair</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">giw</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">gfs</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wn</span><span class="p">,</span> <span class="n">giw</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">color</span> <span class="o">+</span> <span class="s1">&#39;s-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;${}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wn</span><span class="p">,</span> <span class="n">giw</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">color</span> <span class="o">+</span> <span class="s1">&#39;o-&#39;</span><span class="p">)</span>
+
+        <span class="n">tail</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]</span> <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">4.</span><span class="p">]</span>
+        <span class="n">gt</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">wn</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>
+        <span class="n">axt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">gt</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;${}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;Matsubara Green functions, $\beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega_n$&#39;</span><span class="p">)</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Re e G(i\omega_n)$&#39;</span><span class="p">)</span>
+        <span class="n">axwn</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Im m G(i\omega_n)$&#39;</span><span class="p">)</span>
+
+        <span class="n">axt</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+        <span class="n">axt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">axt</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+            <span class="sa">r</span><span class="s1">&#39;Imaginary time Green functions, $\beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+        <span class="n">axt</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+        <span class="n">axt</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\tau)$&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">plot_greenfunctions</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+    <span class="n">c_v</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;a\uparrow&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;a\downarrow&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;b\uparrow&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;b\downarrow&#39;</span><span class="p">]</span>
+    <span class="n">plot_eigen_spectra</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+
+    <span class="n">h_at</span><span class="p">,</span> <span class="n">oper</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.hamiltonian" title="View documentation for dmft.dimer.hamiltonian"><span class="n">dimer</span><span class="o">.</span><span class="n">hamiltonian</span></a><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+    <span class="n">oper_pair</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">([</span><span class="n">oper</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">oper</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">product</span><span class="p">(</span><span class="s1">&#39;AB&#39;</span><span class="p">,</span> <span class="n">repeat</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">diagonalize</span><span class="p">(</span><span class="n">h_at</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span>
+    <span class="n">plot_real_gf</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">oper_pair</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+    <span class="n">plot_matsubara_gf</span><span class="p">(</span><span class="n">eig_e</span><span class="p">,</span> <span class="n">eig_v</span><span class="p">,</span> <span class="n">oper_pair</span><span class="p">,</span> <span class="n">c_v</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="the-non-interacting-case-t-perp-0-2">
+<h3>The non-interacting case $t_perp=0.2$<a class="headerlink" href="#the-non-interacting-case-t-perp-0-2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plot_greenfunctions</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_001.png"><img alt="../_images/sphx_glr_plot_molecule_001.png" src="../_images/sphx_glr_plot_molecule_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_002.png"><img alt="../_images/sphx_glr_plot_molecule_002.png" src="../_images/sphx_glr_plot_molecule_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_003.png"><img alt="../_images/sphx_glr_plot_molecule_003.png" src="../_images/sphx_glr_plot_molecule_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_004.png"><img alt="../_images/sphx_glr_plot_molecule_004.png" src="../_images/sphx_glr_plot_molecule_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="the-non-interacting-case-t-perp-0-8">
+<h3>The non-interacting case $t_perp=0.8$<a class="headerlink" href="#the-non-interacting-case-t-perp-0-8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plot_greenfunctions</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_005.png"><img alt="../_images/sphx_glr_plot_molecule_005.png" src="../_images/sphx_glr_plot_molecule_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_006.png"><img alt="../_images/sphx_glr_plot_molecule_006.png" src="../_images/sphx_glr_plot_molecule_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_007.png"><img alt="../_images/sphx_glr_plot_molecule_007.png" src="../_images/sphx_glr_plot_molecule_007.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_008.png"><img alt="../_images/sphx_glr_plot_molecule_008.png" src="../_images/sphx_glr_plot_molecule_008.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="the-interacting-case-u-1-t-perp-0-2">
+<h3>The interacting case $U=1$ $t_perp=0.2$<a class="headerlink" href="#the-interacting-case-u-1-t-perp-0-2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plot_greenfunctions</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_009.png"><img alt="../_images/sphx_glr_plot_molecule_009.png" src="../_images/sphx_glr_plot_molecule_009.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_010.png"><img alt="../_images/sphx_glr_plot_molecule_010.png" src="../_images/sphx_glr_plot_molecule_010.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_011.png"><img alt="../_images/sphx_glr_plot_molecule_011.png" src="../_images/sphx_glr_plot_molecule_011.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_012.png"><img alt="../_images/sphx_glr_plot_molecule_012.png" src="../_images/sphx_glr_plot_molecule_012.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+<div class="section" id="the-interacting-case-u-1-t-perp-0-5">
+<h3>The interacting case $U=1$ $t_perp=0.5$<a class="headerlink" href="#the-interacting-case-u-1-t-perp-0-5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">plot_greenfunctions</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_013.png"><img alt="../_images/sphx_glr_plot_molecule_013.png" src="../_images/sphx_glr_plot_molecule_013.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_014.png"><img alt="../_images/sphx_glr_plot_molecule_014.png" src="../_images/sphx_glr_plot_molecule_014.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_015.png"><img alt="../_images/sphx_glr_plot_molecule_015.png" src="../_images/sphx_glr_plot_molecule_015.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_molecule_016.png"><img alt="../_images/sphx_glr_plot_molecule_016.png" src="../_images/sphx_glr_plot_molecule_016.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="the-symmetric-and-anti-symmetric-bands">
+<h2>The symmetric and anti-symmetric bands<a class="headerlink" href="#the-symmetric-and-anti-symmetric-bands" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1">#h_at, oper = dimer.hamiltonian_diag(U, mu, tp)</span>
+<span class="c1">#eig_e, eig_v = op.diagonalize(h_at.todense())</span>
+<span class="c1">#</span>
+<span class="c1">#oper_pair = product([oper[0], oper[1]], repeat=2)</span>
+
+<span class="c1">#plot_real_gf(eig_e, eig_v, oper_pair, c_v, names)</span>
+
+<span class="c1"># TODO: verify the asy/sym basis scale</span>
+<span class="c1"># TODO: view in the local one the of diag terms</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  2.946 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_molecule.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_molecule.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_molecule.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_molecule.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Isolated molecule spectral function</a><ul>
+<li><a class="reference internal" href="#real-space-representation">Real space representation</a><ul>
+<li><a class="reference internal" href="#the-non-interacting-case-t-perp-0-2">The non-interacting case $t_perp=0.2$</a></li>
+<li><a class="reference internal" href="#the-non-interacting-case-t-perp-0-8">The non-interacting case $t_perp=0.8$</a></li>
+<li><a class="reference internal" href="#the-interacting-case-u-1-t-perp-0-2">The interacting case $U=1$ $t_perp=0.2$</a></li>
+<li><a class="reference internal" href="#the-interacting-case-u-1-t-perp-0-5">The interacting case $U=1$ $t_perp=0.5$</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-symmetric-and-anti-symmetric-bands">The symmetric and anti-symmetric bands</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_optical_conductivity_bonding.html"
+                        title="previous chapter">Optical conductivity of bonding Spectral Function</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_comparing_spectra.html"
+                        title="next chapter">Comparing Spectral functions</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_molecule.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_comparing_spectra.html" title="Comparing Spectral functions"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_optical_conductivity_bonding.html" title="Optical conductivity of bonding Spectral Function"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Phase diagrams on Bandwidth &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Evolution of DOS as function of temperature" href="plot_shift.html" />
+    <link rel="prev" title="Various schemes for obtaining the spectral dispersion" href="plot_build_dispersions.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_shift.html" title="Evolution of DOS as function of temperature"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_build_dispersions.html" title="Various schemes for obtaining the spectral dispersion"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="phase-diagrams-on-bandwidth">
+<span id="sphx-glr-dimer-lattice-plot-phase-bandwidth-py"></span><h1>Phase diagrams on Bandwidth<a class="headerlink" href="#phase-diagrams-on-bandwidth" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span><span class="p">,</span> <span class="n">ceil</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">as</span> <span class="nn">ipt</span>
+
+
+<span class="k">def</span> <span class="nf">dos_at_fermi_level_fixbeta</span><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">ylist</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
+    <span class="n">dos_fl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">gf</span><span class="o">.</span><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">save_file</span> <span class="o">=</span> <span class="s1">&#39;phase_dimer_ipt_{}.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phasename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_file</span><span class="p">):</span>
+        <span class="n">dos_fl</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dos_fl</span>
+
+    <span class="k">for</span> <span class="n">xdat</span> <span class="ow">in</span> <span class="n">xlist</span><span class="p">:</span>
+        <span class="n">filestr</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phasename</span><span class="p">,</span> <span class="n">xdat</span><span class="p">)</span>
+        <span class="n">gfs</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">filestr</span><span class="p">)</span>
+        <span class="n">dos_fl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><a href="../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">gf</span><span class="o">.</span><span class="n">fit_gf</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">])(</span><span class="mf">0.</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ylist</span><span class="p">]))</span>
+
+    <span class="n">dos_fl</span> <span class="o">=</span> <span class="o">-</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">dos_fl</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">dos_fl</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dos_fl</span>
+
+
+<span class="k">def</span> <span class="nf">plot_phase_diagram_fixbeta</span><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">ylist</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">ylist</span><span class="p">)</span>
+    <span class="n">yrange</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ylist</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">yrange</span> <span class="o">=</span> <span class="n">yrange</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span>
+                  <span class="n">dos_at_fermi_level_fixbeta</span><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">yrange</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span>
+                                             <span class="s1">&#39;disk/phase_Dimer_ipt_{}/tp{:.3}/giw.npy&#39;</span><span class="p">),</span>
+                  <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+
+<span class="n">TPR</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+<span class="n">Drange</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">,</span> <span class="mi">81</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">1000.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">,</span> <span class="mf">30.</span><span class="p">]:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+    <span class="n">plot_phase_diagram_fixbeta</span><span class="p">(</span>
+        <span class="n">TPR</span><span class="p">,</span> <span class="n">Drange</span><span class="p">,</span> <span class="s1">&#39;D_met_B{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plot_phase_diagram_fixbeta</span><span class="p">(</span>
+        <span class="n">TPR</span><span class="p">,</span> <span class="n">Drange</span><span class="p">,</span> <span class="s1">&#39;D_ins_B{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">),</span> <span class="n">beta</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="o">.</span><span class="mi">21</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$t_\perp/U$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$D/U$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s1">&#39;Phase diagram $</span><span class="se">\\</span><span class="s1">beta={}$,</span><span class="se">\n</span><span class="s1"> color represents $-</span><span class="se">\\</span><span class="s1">Im G_{{AA}}(0)$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_001.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_001.png" src="../_images/sphx_glr_plot_phase_bandwidth_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_002.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_002.png" src="../_images/sphx_glr_plot_phase_bandwidth_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_003.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_003.png" src="../_images/sphx_glr_plot_phase_bandwidth_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">dos_at_fermi_level_temp</span><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span> <span class="n">datapath</span><span class="p">):</span>
+    <span class="n">dos_fl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">save_file</span> <span class="o">=</span> <span class="s1">&#39;phase_dimer_ipt_{}.npy&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phasename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">save_file</span><span class="p">):</span>
+        <span class="n">dos_fl</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dos_fl</span>
+
+    <span class="k">for</span> <span class="n">T</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">:</span>
+        <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">gf</span><span class="o">.</span><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="n">filestr</span> <span class="o">=</span> <span class="n">datapath</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">phasename</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span><span class="p">)</span>
+        <span class="n">gfs</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">filestr</span><span class="p">)</span>
+        <span class="n">dos_fl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><a href="../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">gf</span><span class="o">.</span><span class="n">fit_gf</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">gfs</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">][:</span><span class="mi">3</span><span class="p">])(</span><span class="mf">0.</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xlist</span><span class="p">]))</span>
+
+    <span class="n">dos_fl</span> <span class="o">=</span> <span class="o">-</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">dos_fl</span><span class="p">)</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.save.html#numpy.save" title="View documentation for numpy.save"><span class="n">np</span><span class="o">.</span><span class="n">save</span></a><span class="p">(</span><span class="n">save_file</span><span class="p">,</span> <span class="n">dos_fl</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dos_fl</span>
+
+
+<span class="k">def</span> <span class="nf">plot_phase_diagram_temp</span><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.meshgrid.html#numpy.meshgrid" title="View documentation for numpy.meshgrid"><span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span></a><span class="p">(</span><span class="n">xlist</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
+    <span class="n">x_range</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xlist</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">x_range</span> <span class="o">=</span> <span class="n">x_range</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dos_at_fermi_level_temp</span><span class="p">(</span><span class="n">x_range</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">phasename</span><span class="p">,</span>
+                                                <span class="s1">&#39;disk/phase_Dimer_ipt_{}/B{:.5}/giw.npy&#39;</span><span class="p">),</span>
+                  <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;viridis&#39;</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()])</span>
+
+<span class="n">TEMP</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">512.</span><span class="p">,</span> <span class="o">.</span><span class="mi">08</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">400</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">tp</span> <span class="ow">in</span> <span class="p">[</span><span class="o">.</span><span class="mi">15</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">]:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">()</span>
+    <span class="n">plot_phase_diagram_temp</span><span class="p">(</span><span class="n">Drange</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">,</span> <span class="s1">&#39;D_met_tp{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">plot_phase_diagram_temp</span><span class="p">(</span><span class="n">Drange</span><span class="p">,</span> <span class="n">TEMP</span><span class="p">,</span> <span class="s1">&#39;D_ins_tp{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">),</span> <span class="n">ax</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$T/U$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$D/U$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span>
+        <span class="s1">&#39;Phase diagram $t_</span><span class="se">\\</span><span class="s1">perp={}$,</span><span class="se">\n</span><span class="s1"> color represents $-</span><span class="se">\\</span><span class="s1">Im G_{{AA}}(0)$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tp</span><span class="p">))</span>
+
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.show" title="View documentation for matplotlib.pyplot.show"><span class="n">plt</span><span class="o">.</span><span class="n">show</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_004.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_004.png" src="../_images/sphx_glr_plot_phase_bandwidth_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_005.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_005.png" src="../_images/sphx_glr_plot_phase_bandwidth_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_phase_bandwidth_006.png"><img alt="../_images/sphx_glr_plot_phase_bandwidth_006.png" src="../_images/sphx_glr_plot_phase_bandwidth_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.437 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_phase_bandwidth.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_phase_bandwidth.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_phase_bandwidth.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_phase_bandwidth.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_build_dispersions.html"
+                        title="previous chapter">Various schemes for obtaining the spectral dispersion</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_shift.html"
+                        title="next chapter">Evolution of DOS as function of temperature</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_phase_bandwidth.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_shift.html" title="Evolution of DOS as function of temperature"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_build_dispersions.html" title="Various schemes for obtaining the spectral dispersion"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

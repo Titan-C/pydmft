@@ -1,0 +1,115 @@
+
+dmft.twosite
+============
+
+.. automodule:: dmft.twosite
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: diagonalize
+
+   .. include:: backreferences/dmft.twosite.diagonalize.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: dmft_loop
+
+   .. include:: backreferences/dmft.twosite.dmft_loop.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: expected_value
+
+   .. include:: backreferences/dmft.twosite.expected_value.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gf_lehmann
+
+   .. include:: backreferences/dmft.twosite.gf_lehmann.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gw_invfouriertrans
+
+   .. include:: backreferences/dmft.twosite.gw_invfouriertrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: m2_weight
+
+   .. include:: backreferences/dmft.twosite.m2_weight.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: matsubara_Z
+
+   .. include:: backreferences/dmft.twosite.matsubara_Z.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: matsubara_freq
+
+   .. include:: backreferences/dmft.twosite.matsubara_freq.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: quad
+
+   .. include:: backreferences/dmft.twosite.quad.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: refine_mat_solution
+
+   .. include:: backreferences/dmft.twosite.refine_mat_solution.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+
+   Classes
+   -------
+
+   
+   .. autoclass:: TwoSite
+      :members:
+   .. autoclass:: TwoSite_Matsubara
+      :members:
+   .. autoclass:: TwoSite_Real
+      :members:
+   
+   
+
+   
+   
+   

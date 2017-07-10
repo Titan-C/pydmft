@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Fourier Transforms &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="The Metal Mott Insulator transition" href="IPT/plot_mit.html" />
+    <link rel="prev" title="Interacting atom spectral function" href="plot_atom.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="IPT/plot_mit.html" title="The Metal Mott Insulator transition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_atom.html" title="Interacting atom spectral function"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fourier-transforms">
+<span id="sphx-glr-auto-examples-plot-fourier-py"></span><h1>Fourier Transforms<a class="headerlink" href="#fourier-transforms" title="Permalink to this headline">¶</a></h1>
+<p>Transforming the non-interacting Green&#8217;s Function for the Bethe
+lattice.  Using the analytical expression for the tails. It is
+important to note that to get good enough resolution in the time
+domain at least <img class="math" src="../_images/math/410a9d0df9c135dd73b269cba7ef04dcfd932b1f.png" alt="\beta"/> Matsubara frequencies are needed.</p>
+<p>If the Greens Functions is very asymmetric one better use
+<img class="math" src="../_images/math/6339c36c6cbaa252ea932dd5817653126bc24257.png" alt="2\beta"/> Matsubara frequencies as for the Fourier transform
+improves with a large interval of zeros.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+                                <span class="s1">&#39;axes.titlesize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">&#39;figure.autolayout&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>
+
+<span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">c_v</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">mu</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="n">c_v</span><span class="p">):</span>
+    <span class="n">giw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">gtau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="n">mu</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">giw</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="s1">&#39;o:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Re G$, $\mu={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">giw</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">c</span><span class="o">+</span><span class="s1">&#39;s:&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">gtau</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\mu={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$i\omega_n$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(i\omega_n)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\tau)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_fourier_001.png" class="align-center" src="../_images/sphx_glr_plot_fourier_001.png" />
+<div class="section" id="review-on-resolution">
+<h2>Review on resolution<a class="headerlink" href="#review-on-resolution" title="Permalink to this headline">¶</a></h2>
+<p>Here comes to evidence the need of having a long contribution of
+zeros from the tail subtracted Matsubara Green function. There is
+a reduced noise in the function transformed with its third moment
+coming from the self-consistency(Black line)</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\tau)$&#39;</span><span class="p">)</span>
+<span class="n">c_v</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">mu</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.</span><span class="p">],</span> <span class="n">c_v</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">64</span><span class="p">))</span>
+    <span class="n">giw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">gtau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="n">mu</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gtau</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\mu={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+    <span class="n">gtau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="n">mu</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gtau</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+    <span class="n">giw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">gtau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="n">mu</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gtau</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\mu={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mu</span><span class="p">))</span>
+    <span class="n">gtau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="n">mu</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gtau</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\ln (-G(\tau))$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\beta$ frequencies&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\ln (-G(\tau))$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$2\beta$ frequencies&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_fourier_002.png" class="align-center" src="../_images/sphx_glr_plot_fourier_002.png" />
+</div>
+<div class="section" id="including-the-self-energy-of-the-atomic-limit-so-to-have-a-third-moment">
+<h2>Including the self-energy of the atomic limit so to have a third moment<a class="headerlink" href="#including-the-self-energy-of-the-atomic-limit-so-to-have-a-third-moment" title="Permalink to this headline">¶</a></h2>
+<p>Here the there are the 3 improvements. Large tail subtracted
+Matsubara Green function, tail from the Self-Energy and tail of the
+self-consistency</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="mi">1j</span><span class="o">*</span><span class="n">w_n</span><span class="p">)</span>
+<span class="n">giiw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mf">0.25</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">giiw</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">gitau</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Green function in the atomic limit&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$i\omega_n$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Im m G(i\omega_n)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$G(\tau)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_fourier_003.png" class="align-center" src="../_images/sphx_glr_plot_fourier_003.png" />
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">64</span><span class="p">))</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="mi">1j</span><span class="o">*</span><span class="n">w_n</span><span class="p">)</span>
+<span class="n">giiw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mf">0.25</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gitau</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gitau</span><span class="p">)</span>
+
+<span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">128</span><span class="p">))</span>
+<span class="n">sigma</span> <span class="o">=</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span><span class="p">(</span><span class="mi">1j</span><span class="o">*</span><span class="n">w_n</span><span class="p">)</span>
+<span class="n">giiw</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mf">0.25</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gitau</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="o">-</span><span class="n">gitau</span><span class="p">)</span>
+<span class="n">gitau</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.gw_invfouriertrans" title="View documentation for dmft.common.gw_invfouriertrans"><span class="n">gf</span><span class="o">.</span><span class="n">gw_invfouriertrans</span></a><span class="p">(</span><span class="n">giiw</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="p">[</span><span class="mf">1.</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">2.5</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="mi">4</span><span class="o">+</span><span class="mf">0.25</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">gf</span><span class="o">.</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">gitau</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Green function in the atomic limit&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\ln (-G(\tau))$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\beta$ frequencies&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\ln (-G(\tau))$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$2\beta$ frequencies&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\tau$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">64</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="../_images/sphx_glr_plot_fourier_004.png" class="align-center" src="../_images/sphx_glr_plot_fourier_004.png" />
+<p><strong>Total running time of the script:</strong> ( 0 minutes  1.064 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_fourier.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_fourier.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_fourier.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_fourier.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Fourier Transforms</a><ul>
+<li><a class="reference internal" href="#review-on-resolution">Review on resolution</a></li>
+<li><a class="reference internal" href="#including-the-self-energy-of-the-atomic-limit-so-to-have-a-third-moment">Including the self-energy of the atomic limit so to have a third moment</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_atom.html"
+                        title="previous chapter">Interacting atom spectral function</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="IPT/plot_mit.html"
+                        title="next chapter">The Metal Mott Insulator transition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_examples/plot_fourier.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="IPT/plot_mit.html" title="The Metal Mott Insulator transition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_atom.html" title="Interacting atom spectral function"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

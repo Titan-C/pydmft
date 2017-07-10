@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hubbard I solver &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Non-interacting atom under external field spectral function" href="plot_atom_field.html" />
+    <link rel="prev" title="Hubbard III approximation" href="plot_hubbardIII.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_atom_field.html" title="Non-interacting atom under external field spectral function"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardIII.html" title="Hubbard III approximation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hubbard-i-solver">
+<span id="sphx-glr-auto-examples-plot-hubbardi-py"></span><h1>Hubbard I solver<a class="headerlink" href="#hubbard-i-solver" title="Permalink to this headline">¶</a></h1>
+<p>Atomic limit expression of the self-energy
+is described by</p>
+<div class="math">
+<p><img src="../_images/math/bce0629f06ae7c652d53a8a80e739067bbb9cec2.png" alt="\Sigma(\omega) =\frac{U n}{2} + \frac{ \frac{U^{2} n}{2} \left( 1 - \frac{n}{2}\right)}{\omega + \mu  - U \left(1 - \frac{n}{2}\right)}"/></p>
+</div><p>This approximation is most accurate in the limit of strong coupling,
+as there the atomic case is closer. Nevertheless it is possible to see
+the formation of the Hubbard Bands and the redistribution of spectral
+weight.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Sep 28 15:25:30 2015</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">rcParams</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;figure.figsize&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="s1">&#39;axes.labelsize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+                                <span class="s1">&#39;axes.titlesize&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span> <span class="s1">&#39;figure.autolayout&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">hubbard_aprox</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">dmu</span><span class="p">,</span> <span class="n">omega</span><span class="p">):</span>
+
+    <span class="n">k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">65</span><span class="p">)</span>
+
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">U</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dmu</span>
+
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">n</span><span class="o">*</span><span class="n">U</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">U</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="p">(</span><span class="n">omega</span> <span class="o">+</span> <span class="mf">0.05j</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">U</span><span class="p">)</span>
+    <span class="n">eps_k</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.cos.html#numpy.cos" title="View documentation for numpy.cos"><span class="n">np</span><span class="o">.</span><span class="n">cos</span></a><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="n">lat_gf</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.subtract.outer"><span class="n">np</span><span class="o">.</span><span class="n">subtract</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="n">omega</span> <span class="o">+</span> <span class="mf">0.05j</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">-</span> <span class="n">sigma</span><span class="p">,</span>  <span class="n">eps_k</span><span class="p">))</span>
+    <span class="n">A_kw</span> <span class="o">=</span> <span class="o">-</span><span class="n">lat_gf</span><span class="o">.</span><span class="n">imag</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.pcolormesh" title="View documentation for matplotlib.pyplot.pcolormesh"><span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span></a><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">A_kw</span> <span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;hot_r&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xticks" title="View documentation for matplotlib.pyplot.xticks"><span class="n">plt</span><span class="o">.</span><span class="n">xticks</span></a><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\Gamma$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">])</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlim" title="View documentation for matplotlib.pyplot.xlim"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">])</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylabel" title="View documentation for matplotlib.pyplot.ylabel"><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/colorbar_api.html#matplotlib.colorbar" title="View documentation for matplotlib.pyplot.colorbar"><span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Band dispersion for $\langle n\rangle$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                           <span class="n">gridspec_kw</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">height_ratios</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]))</span>
+    <span class="n">A_kw</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">A_kw</span><span class="p">)</span>
+    <span class="n">A_w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.sum.html#numpy.sum" title="View documentation for numpy.sum"><span class="n">np</span><span class="o">.</span><span class="n">sum</span></a><span class="p">(</span><span class="n">A_kw</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">A_w</span><span class="o">/</span><span class="nb">max</span><span class="p">(</span><span class="n">A_w</span><span class="p">))</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(\omega)$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Spectral function for $\langle n\rangle$=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+    <span class="n">A_kw</span> <span class="o">+=</span> <span class="n">k</span>
+
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">A_kw</span><span class="p">[:,</span> <span class="p">::</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="nb">min</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">omega</span><span class="p">)])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">([</span><span class="sa">r</span><span class="s1">&#39;$\Gamma$&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$X$&#39;</span><span class="p">])</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(k, \omega)$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Starting with the half-filling case where the system is particle hole
+symmetric and there is a simple way to describe the Fermi energy. For
+this simple ilustration the 1D problem is worked on as the Self-energy
+is still momentum independent.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">omega</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span>
+<span class="n">hubbard_aprox</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardI_001.png"><img alt="../_images/sphx_glr_plot_hubbardI_001.png" src="../_images/sphx_glr_plot_hubbardI_001.png" style="width: 376.0px; height: 376.0px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardI_002.png"><img alt="../_images/sphx_glr_plot_hubbardI_002.png" src="../_images/sphx_glr_plot_hubbardI_002.png" style="width: 376.0px; height: 376.0px;" /></a>
+</li>
+</ul>
+<p>When doping the system it is possible to see the spectral weight
+redistribution. How the less occupied band is wider.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Chemical potential is not well set for the target occupation</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">hubbard_aprox</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">omega</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardI_003.png"><img alt="../_images/sphx_glr_plot_hubbardI_003.png" src="../_images/sphx_glr_plot_hubbardI_003.png" style="width: 376.0px; height: 376.0px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_hubbardI_004.png"><img alt="../_images/sphx_glr_plot_hubbardI_004.png" src="../_images/sphx_glr_plot_hubbardI_004.png" style="width: 376.0px; height: 376.0px;" /></a>
+</li>
+</ul>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.737 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbardI.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_hubbardI.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_hubbardI.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_hubbardI.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_hubbardIII.html"
+                        title="previous chapter">Hubbard III approximation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_atom_field.html"
+                        title="next chapter">Non-interacting atom under external field spectral function</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/auto_examples/plot_hubbardI.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_atom_field.html" title="Non-interacting atom under external field spectral function"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_hubbardIII.html" title="Hubbard III approximation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

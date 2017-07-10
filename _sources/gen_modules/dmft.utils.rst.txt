@@ -1,0 +1,63 @@
+
+dmft.utils
+==========
+
+.. automodule:: dmft.utils
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: bubble
+
+   .. include:: backreferences/dmft.utils.bubble.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: dc_conductivity
+
+   .. include:: backreferences/dmft.utils.dc_conductivity.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: differential_weight
+
+   .. include:: backreferences/dmft.utils.differential_weight.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: optical_conductivity
+
+   .. include:: backreferences/dmft.utils.optical_conductivity.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: trapz
+
+   .. include:: backreferences/dmft.utils.trapz.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+   
+
+   
+   
+   

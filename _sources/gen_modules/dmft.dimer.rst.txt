@@ -1,0 +1,175 @@
+
+dmft.dimer
+==========
+
+.. automodule:: dmft.dimer
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: diag_loc_fermions
+
+   .. include:: backreferences/dmft.dimer.diag_loc_fermions.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: dimer_dyson
+
+   .. include:: backreferences/dmft.dimer.dimer_dyson.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ekin
+
+   .. include:: backreferences/dmft.dimer.ekin.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: epot
+
+   .. include:: backreferences/dmft.dimer.epot.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: extract_flat_gf_iter
+
+   .. include:: backreferences/dmft.dimer.extract_flat_gf_iter.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: get_sigmaiw
+
+   .. include:: backreferences/dmft.dimer.get_sigmaiw.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gf_met
+
+   .. include:: backreferences/dmft.dimer.gf_met.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: hamiltonian
+
+   .. include:: backreferences/dmft.dimer.hamiltonian.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: hamiltonian_diag
+
+   .. include:: backreferences/dmft.dimer.hamiltonian_diag.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ipt_dmft_loop
+
+   .. include:: backreferences/dmft.dimer.ipt_dmft_loop.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: mat_2_inv
+
+   .. include:: backreferences/dmft.dimer.mat_2_inv.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: mat_inv
+
+   .. include:: backreferences/dmft.dimer.mat_inv.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: mat_mul
+
+   .. include:: backreferences/dmft.dimer.mat_mul.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: opt_sig
+
+   .. include:: backreferences/dmft.dimer.opt_sig.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: optical_conductivity
+
+   .. include:: backreferences/dmft.dimer.optical_conductivity.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: pade_diag
+
+   .. include:: backreferences/dmft.dimer.pade_diag.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: self_consistency
+
+   .. include:: backreferences/dmft.dimer.self_consistency.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: sorted_basis
+
+   .. include:: backreferences/dmft.dimer.sorted_basis.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: symdata
+
+   .. include:: backreferences/dmft.dimer.symdata.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+   
+
+   
+   
+   

@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Various schemes for obtaining the spectral dispersion &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Phase diagrams on Bandwidth" href="plot_phase_bandwidth.html" />
+    <link rel="prev" title="Dispersion of the spectral function" href="plot_integrated_spectra.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_phase_bandwidth.html" title="Phase diagrams on Bandwidth"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_integrated_spectra.html" title="Dispersion of the spectral function"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="various-schemes-for-obtaining-the-spectral-dispersion">
+<span id="sphx-glr-dimer-lattice-plot-build-dispersions-py"></span><h1>Various schemes for obtaining the spectral dispersion<a class="headerlink" href="#various-schemes-for-obtaining-the-spectral-dispersion" title="Permalink to this headline">¶</a></h1>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_001.png"><img alt="../_images/sphx_glr_plot_build_dispersions_001.png" src="../_images/sphx_glr_plot_build_dispersions_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_002.png"><img alt="../_images/sphx_glr_plot_build_dispersions_002.png" src="../_images/sphx_glr_plot_build_dispersions_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_003.png"><img alt="../_images/sphx_glr_plot_build_dispersions_003.png" src="../_images/sphx_glr_plot_build_dispersions_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_004.png"><img alt="../_images/sphx_glr_plot_build_dispersions_004.png" src="../_images/sphx_glr_plot_build_dispersions_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_005.png"><img alt="../_images/sphx_glr_plot_build_dispersions_005.png" src="../_images/sphx_glr_plot_build_dispersions_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_006.png"><img alt="../_images/sphx_glr_plot_build_dispersions_006.png" src="../_images/sphx_glr_plot_build_dispersions_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_007.png"><img alt="../_images/sphx_glr_plot_build_dispersions_007.png" src="../_images/sphx_glr_plot_build_dispersions_007.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_build_dispersions_008.png"><img alt="../_images/sphx_glr_plot_build_dispersions_008.png" src="../_images/sphx_glr_plot_build_dispersions_008.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Mon Apr 11 14:17:29 2016</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">as</span> <span class="nn">ipt</span>
+<span class="kn">from</span> <span class="nn">dmft.plot</span> <span class="kn">import</span> <span class="n">plot_band_dispersion</span>
+
+
+<span class="k">def</span> <span class="nf">ipt_u_tp</span><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="s1">&#39;ins&#39;</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">1024</span><span class="p">))</span>
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.gf_met" title="View documentation for dmft.dimer.gf_met"><span class="n">dimer</span><span class="o">.</span><span class="n">gf_met</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">==</span> <span class="s1">&#39;ins&#39;</span><span class="p">:</span>
+        <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">+</span> <span class="mi">4j</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.zeros_like.html#numpy.zeros_like" title="View documentation for numpy.zeros_like"><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0j</span>
+
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">loops</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.ipt_dmft_loop" title="View documentation for dmft.dimer.ipt_dmft_loop"><span class="n">dimer</span><span class="o">.</span><span class="n">ipt_dmft_loop</span></a><span class="p">(</span>
+        <span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="mf">1e-12</span><span class="p">)</span>
+    <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+        <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">giw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">giw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span><span class="p">,</span> <span class="n">w_n</span>
+
+
+<span class="k">def</span> <span class="nf">construct_dispersions</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+    <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">ipt_u_tp</span><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">800</span><span class="p">)</span>
+    <span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+    <span class="n">w_set</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+
+    <span class="n">ss</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span>
+        <span class="mi">1j</span> <span class="o">*</span> <span class="n">siw_d</span><span class="o">.</span><span class="n">imag</span> <span class="o">+</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>  <span class="c1"># A-bond</span>
+    <span class="n">sa</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span>
+        <span class="mi">1j</span> <span class="o">*</span> <span class="n">siw_d</span><span class="o">.</span><span class="n">imag</span> <span class="o">-</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>  <span class="c1"># bond</span>
+    <span class="n">lat_gfs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-2j</span> <span class="o">-</span> <span class="n">ss</span><span class="p">)</span>
+    <span class="n">lat_gfa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-2j</span> <span class="o">-</span> <span class="n">sa</span><span class="p">)</span>
+    <span class="n">Aw</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="o">-.</span><span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">lat_gfa</span> <span class="o">+</span> <span class="n">lat_gfs</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Spectral Function dispersion</span><span class="se">\n</span><span class="s1">$U={}$, $t_</span><span class="se">\\</span><span class="s1">perp={}$, $</span><span class="se">\\</span><span class="s1">beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">)</span>
+
+    <span class="c1"># Continuate in Sigma Diagonal then return to local</span>
+    <span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="s1">&#39;Local &#39;</span> <span class="o">+</span> <span class="n">title</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">,</span> <span class="s1">&#39;intensity&#39;</span><span class="p">)</span>
+    <span class="n">file_r</span> <span class="o">=</span> <span class="s2">&quot;Aew_B{}U{}tp{}_{}_&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="n">file_r</span> <span class="o">+</span> <span class="s1">&#39;psl.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="c1"># Continuate in Sigma Diagonal only plot anti-bonding</span>
+    <span class="n">Aw</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="o">-</span><span class="n">lat_gfs</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span>  <span class="n">Aw</span><span class="p">,</span> <span class="s1">&#39;Anti-Bond &#39;</span> <span class="o">+</span> <span class="n">title</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">,</span>  <span class="s1">&#39;intensity&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="n">file_r</span> <span class="o">+</span> <span class="s1">&#39;psa.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="c1"># Continuate the dispersion on G(e, w)_AA</span>
+    <span class="n">Ag</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eps_k</span><span class="p">:</span>
+        <span class="n">gd</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.mat_inv" title="View documentation for dmft.dimer.mat_inv"><span class="n">dimer</span><span class="o">.</span><span class="n">mat_inv</span></a><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">-</span> <span class="n">e</span> <span class="o">-</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">siw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="o">-</span><span class="n">tp</span> <span class="o">-</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Ag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="o">-</span><a href="../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">gd</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">1e-2j</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">(</span>
+        <span class="n">Ag</span><span class="p">),</span> <span class="s1">&#39;Local &#39;</span> <span class="o">+</span> <span class="n">title</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">,</span> <span class="s1">&#39;intensity&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="n">file_r</span> <span class="o">+</span> <span class="s1">&#39;pgl.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+    <span class="c1"># Continuate on G(e, w)_AA but skipping frequencies for smooth output</span>
+    <span class="n">w_set</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">Ag</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eps_k</span><span class="p">:</span>
+        <span class="n">gd</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.mat_inv" title="View documentation for dmft.dimer.mat_inv"><span class="n">dimer</span><span class="o">.</span><span class="n">mat_inv</span></a><span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">-</span> <span class="n">e</span> <span class="o">-</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">siw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="o">-</span><span class="n">tp</span> <span class="o">-</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">real</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">Ag</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="o">-</span><a href="../gen_modules/dmft.common.html#dmft.common.pade_continuation" title="View documentation for dmft.common.pade_continuation"><span class="n">gf</span><span class="o">.</span><span class="n">pade_continuation</span></a><span class="p">(</span><span class="n">gd</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="mf">1e-2j</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">(</span>
+        <span class="n">Ag</span><span class="p">),</span> <span class="s1">&#39;Local &#39;</span> <span class="o">+</span> <span class="n">title</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">,</span> <span class="s1">&#39;intensity&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.savefig" title="View documentation for matplotlib.pyplot.savefig"><span class="n">plt</span><span class="o">.</span><span class="n">savefig</span></a><span class="p">(</span><span class="n">file_r</span> <span class="o">+</span> <span class="s1">&#39;pgls.png&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;png&#39;</span><span class="p">,</span>
+                <span class="n">transparent</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s1">&#39;tight&#39;</span><span class="p">,</span> <span class="n">pad_inches</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+
+<span class="n">construct_dispersions</span><span class="p">(</span><span class="mf">100.</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;met&#39;</span><span class="p">)</span>
+<span class="n">construct_dispersions</span><span class="p">(</span><span class="mf">100.</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="o">.</span><span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;ins&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  7.588 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_build_dispersions.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_build_dispersions.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_build_dispersions.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_build_dispersions.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_integrated_spectra.html"
+                        title="previous chapter">Dispersion of the spectral function</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_phase_bandwidth.html"
+                        title="next chapter">Phase diagrams on Bandwidth</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_build_dispersions.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_phase_bandwidth.html" title="Phase diagrams on Bandwidth"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_integrated_spectra.html" title="Dispersion of the spectral function"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

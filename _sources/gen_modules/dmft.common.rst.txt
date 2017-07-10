@@ -1,0 +1,167 @@
+
+dmft.common
+===========
+
+.. automodule:: dmft.common
+
+   
+   
+
+   Functions
+   ---------
+
+   
+
+   .. autofunction:: fermi_dist
+
+   .. include:: backreferences/dmft.common.fermi_dist.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: fft
+
+   .. include:: backreferences/dmft.common.fft.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: fit_gf
+
+   .. include:: backreferences/dmft.common.fit_gf.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: freq_tail_fourier
+
+   .. include:: backreferences/dmft.common.freq_tail_fourier.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: greenF
+
+   .. include:: backreferences/dmft.common.greenF.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gt_fouriertrans
+
+   .. include:: backreferences/dmft.common.gt_fouriertrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: gw_invfouriertrans
+
+   .. include:: backreferences/dmft.common.gw_invfouriertrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: ifft
+
+   .. include:: backreferences/dmft.common.ifft.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: lin_tail_fit
+
+   .. include:: backreferences/dmft.common.lin_tail_fit.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: lstsq
+
+   .. include:: backreferences/dmft.common.lstsq.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: matsubara_freq
+
+   .. include:: backreferences/dmft.common.matsubara_freq.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: pade_coefficients
+
+   .. include:: backreferences/dmft.common.pade_coefficients.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: pade_continuation
+
+   .. include:: backreferences/dmft.common.pade_continuation.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: pade_rec
+
+   .. include:: backreferences/dmft.common.pade_rec.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: semi_circle
+
+   .. include:: backreferences/dmft.common.semi_circle.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: semi_circle_hiltrans
+
+   .. include:: backreferences/dmft.common.semi_circle_hiltrans.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: tail
+
+   .. include:: backreferences/dmft.common.tail.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+
+   .. autofunction:: tau_wn_setup
+
+   .. include:: backreferences/dmft.common.tau_wn_setup.examples
+
+   .. raw:: html
+
+	       <div style='clear:both'></div>
+   
+   
+
+   
+   
+   
+
+   
+   
+   

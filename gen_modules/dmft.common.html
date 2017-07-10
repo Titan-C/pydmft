@@ -1,0 +1,1147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.common &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmft.twosite" href="dmft.twosite.html" />
+    <link rel="prev" title="Modules Reference API" href="../reference.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.twosite.html" title="dmft.twosite"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../reference.html" title="Modules Reference API"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.common">
+<span id="dmft-common"></span><h1>dmft.common<a class="headerlink" href="#module-dmft.common" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="green-functions">
+<h2>Green Functions<a class="headerlink" href="#green-functions" title="Permalink to this headline">¶</a></h2>
+<p>Interface to treat arrays as the Green functions. Deals with their
+Fourier Transforms from Matsubara frequencies to Imaginary time.</p>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="dmft.common.fermi_dist">
+<code class="descclassname">dmft.common.</code><code class="descname">fermi_dist</code><span class="sig-paren">(</span><em>energy</em>, <em>beta</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.fermi_dist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fermi Dirac distribution</p>
+</dd></dl>
+
+<div class="section" id="examples-using-dmft-common-fermi-dist">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.fermi_dist</span></code><a class="headerlink" href="#examples-using-dmft-common-fermi-dist" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id2">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id3">
+<img alt="../_images/sphx_glr_plot_bandwith_dos_thumb.png" src="../_images/sphx_glr_plot_bandwith_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwith_dos.html#sphx-glr-dimer-lattice-plot-bandwith-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id4">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity of the correlated metal as the system is warmed up. Temperature ..."><div class="figure" id="id5">
+<img alt="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" src="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_track_on_temp.html#sphx-glr-dimer-lattice-plot-optical-track-on-temp-py"><span class="std std-ref">Dimer Mott transition Optical response with temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity from the correlated metal up to the transition point. The lost o..."><div class="figure" id="id6">
+<img alt="../_images/sphx_glr_plot_optical_transition_thumb.png" src="../_images/sphx_glr_plot_optical_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_transition.html#sphx-glr-dimer-lattice-plot-optical-transition-py"><span class="std std-ref">Dimer Mott transition Optical response</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id7">
+<img alt="../_images/sphx_glr_plot_re_T_dos_thumb.png" src="../_images/sphx_glr_plot_re_T_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_re_T_dos.html#sphx-glr-dimer-lattice-plot-re-t-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.fft">
+<code class="descclassname">dmft.common.</code><code class="descname">fft</code><span class="sig-paren">(</span><em>a</em>, <em>n=None</em>, <em>axis=-1</em>, <em>norm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.fft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the one-dimensional discrete Fourier Transform.</p>
+<p>This function computes the one-dimensional <em>n</em>-point discrete Fourier
+Transform (DFT) with the efficient Fast Fourier Transform (FFT)
+algorithm [CT].</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) &#8211; Input array, can be complex.</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Length of the transformed axis of the output.
+If <cite>n</cite> is smaller than the length of the input, the input is cropped.
+If it is larger, the input is padded with zeros.  If <cite>n</cite> is not given,
+the length of the input along the axis specified by <cite>axis</cite> is used.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Axis over which to compute the FFT.  If not given, the last axis is
+used.</li>
+<li><strong>norm</strong> (<em>{None</em><em>, </em><em>&quot;ortho&quot;}</em><em>, </em><em>optional</em>) &#8211; <div class="versionadded">
+<p><span class="versionmodified">New in version 1.10.0.</span></p>
+</div>
+<p>Normalization mode (see <cite>numpy.fft</cite>). Default is None.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> &#8211; The truncated or zero-padded input, transformed along the axis
+indicated by <cite>axis</cite>, or the last one if <cite>axis</cite> is not specified.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">complex ndarray</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">IndexError</span></code> &#8211; if <cite>axes</cite> is larger than the last axis of <cite>a</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-func docutils literal"><span class="pre">numpy.fft()</span></code></dt>
+<dd>for definition of the DFT and conventions used.</dd>
+<dt><a class="reference internal" href="#dmft.common.ifft" title="dmft.common.ifft"><code class="xref py py-func docutils literal"><span class="pre">ifft()</span></code></a></dt>
+<dd>The inverse of <cite>fft</cite>.</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">fft2()</span></code></dt>
+<dd>The two-dimensional FFT.</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">fftn()</span></code></dt>
+<dd>The <em>n</em>-dimensional FFT.</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">rfftn()</span></code></dt>
+<dd>The <em>n</em>-dimensional FFT of real input.</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">fftfreq()</span></code></dt>
+<dd>Frequency bins for given FFT parameters.</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>FFT (Fast Fourier Transform) refers to a way the discrete Fourier
+Transform (DFT) can be calculated efficiently, by using symmetries in the
+calculated terms.  The symmetry is highest when <cite>n</cite> is a power of 2, and
+the transform is therefore most efficient for these sizes.</p>
+<p>The DFT is defined, with the conventions used in this implementation, in
+the documentation for the <cite>numpy.fft</cite> module.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="ct" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[CT]</td><td>Cooley, James W., and John W. Tukey, 1965, &#8220;An algorithm for the
+machine calculation of complex Fourier series,&#8221; <em>Math. Comput.</em>
+19: 297-301.</td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
+<span class="go">array([ -3.44505240e-16 +1.14383329e-17j,</span>
+<span class="go">         8.00000000e+00 -5.71092652e-15j,</span>
+<span class="go">         2.33482938e-16 +1.22460635e-16j,</span>
+<span class="go">         1.64863782e-15 +1.77635684e-15j,</span>
+<span class="go">         9.95839695e-17 +2.33482938e-16j,</span>
+<span class="go">         0.00000000e+00 +1.66837030e-15j,</span>
+<span class="go">         1.14383329e-17 +1.22460635e-16j,</span>
+<span class="go">         -1.64863782e-15 +1.77635684e-15j])</span>
+</pre></div>
+</div>
+<p>In this example, real input has an FFT which is Hermitian, i.e., symmetric
+in the real part and anti-symmetric in the imaginary part, as described in
+the <cite>numpy.fft</cite> documentation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">freq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftfreq</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;, &lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.fit_gf">
+<code class="descclassname">dmft.common.</code><code class="descname">fit_gf</code><span class="sig-paren">(</span><em>w_n</em>, <em>giw</em>, <em>p=2</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.fit_gf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a quadratic fit of the <em>first&#8217;s</em> matsubara frequencies
+to estimate the value at zero energy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; First&#8217;s matsubara frequencies to fit</li>
+<li><strong>giw</strong> (<em>real array</em>) &#8211; Function to fit</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Callable for inter - extrapolate function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-fit-gf">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.fit_gf</span></code><a class="headerlink" href="#examples-using-dmft-common-fit-gf" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Have a look at the coexistence region and the metal insulator transition from the point of view..."><div class="figure" id="id8">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_bandwidth_transition.html#sphx-glr-auto-examples-ipt-plot-bandwidth-transition-py"><span class="std std-ref">IPT bandwidth controlled</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Study the end of the crossover region "><div class="figure" id="id9">
+<img alt="../_images/sphx_glr_plot_crossover_thumb.png" src="../_images/sphx_glr_plot_crossover_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_crossover.html#sphx-glr-auto-examples-ipt-plot-crossover-py"><span class="std std-ref">IPT Transition at crossover</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to find the coexistance regions."><div class="figure" id="id10">
+<img alt="../_images/sphx_glr_plot_ipt_coex_thumb.png" src="../_images/sphx_glr_plot_ipt_coex_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt_coex.html#sphx-glr-auto-examples-ipt-plot-ipt-coex-py"><span class="std std-ref">IPT Hysteresis loop</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="As the Energy calculations from IPT source is not reliable enough another methods is also teste..."><div class="figure" id="id11">
+<img alt="../_images/sphx_glr_plot_stability_thumb.png" src="../_images/sphx_glr_plot_stability_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_stability.html#sphx-glr-auto-examples-ipt-plot-stability-py"><span class="std std-ref">Stability of the solutions in the coexistence region</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=" "><div class="figure" id="id12">
+<img alt="../_images/sphx_glr_plot_phase_bandwidth_thumb.png" src="../_images/sphx_glr_plot_phase_bandwidth_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phase_bandwidth.html#sphx-glr-dimer-lattice-plot-phase-bandwidth-py"><span class="std std-ref">Phase diagrams on Bandwidth</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id13">
+<img alt="../_images/sphx_glr_plot_phases_thumb.png" src="../_images/sphx_glr_plot_phases_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phases.html#sphx-glr-dimer-lattice-plot-phases-py"><span class="std std-ref">Phase diagrams</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.freq_tail_fourier">
+<code class="descclassname">dmft.common.</code><code class="descname">freq_tail_fourier</code><span class="sig-paren">(</span><em>tail_coef</em>, <em>beta</em>, <em>tau</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.freq_tail_fourier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fourier transforms analytically the slow decaying tail_coefs of
+the Greens functions <a class="reference internal" href="#matsubara" id="id1">[matsubara]</a></p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><img class="math" src="../_images/math/bdb0e6946d3d8fc1b5d62a3d8ddcac08b01f1be5.png" alt="G(iw)"/></th>
+<th class="head"><img class="math" src="../_images/math/da9ff7cc0e3c836d80b21fa689dc82e7642ec984.png" alt="G(t)"/></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><img class="math" src="../_images/math/6366de0561bf84c9184e8e0e8dd5b09930651ca5.png" alt="(i\omega)^{-1}"/></td>
+<td><img class="math" src="../_images/math/6d1dfad2279e1d0f34aca0756d3a131007efb8ed.png" alt="-\frac{1}{2}"/></td>
+</tr>
+<tr class="row-odd"><td><img class="math" src="../_images/math/d7a2da98fdca39b289d057efe378b42bf3be1555.png" alt="(i\omega)^{-2}"/></td>
+<td><img class="math" src="../_images/math/e0abaf3a183f6c0990f6e06907f6b6ca63de69c6.png" alt="\frac{1}{2}(\tau-\beta/2)"/></td>
+</tr>
+<tr class="row-even"><td><img class="math" src="../_images/math/308f73ca071f2c0e207b94a150234b42766cf511.png" alt="(i\omega)^{-3}"/></td>
+<td><img class="math" src="../_images/math/83c669c92b151d67889bd6cce2a82c5de15ff141.png" alt="-\frac{1}{4}(\tau^2 -\beta\tau)"/></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.common.gw_invfouriertrans" title="dmft.common.gw_invfouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gw_invfouriertrans()</span></code></a>, <a class="reference internal" href="#dmft.common.gt_fouriertrans" title="dmft.common.gt_fouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gt_fouriertrans()</span></code></a></p>
+</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="matsubara" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[matsubara]</a></td><td><a class="reference external" href="https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain">https://en.wikipedia.org/wiki/Matsubara_frequency#Time_Domain</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.greenF">
+<code class="descclassname">dmft.common.</code><code class="descname">greenF</code><span class="sig-paren">(</span><em>w_n</em>, <em>sigma=0</em>, <em>mu=0</em>, <em>D=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.greenF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Bethe lattice Green function, defined as part of the
+hilbert transform.</p>
+<div class="math">
+<p><img src="../_images/math/489e302caa7b126ce4647e732288044db26afcd4.png" alt="G(i\omega_n) = \frac{2}{i\omega_n + \mu - \Sigma +
+\sqrt{(i\omega_n + \mu - \Sigma)^2 - D^2}}"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies.</li>
+<li><strong>sigma</strong> (<em>complex float</em><em> or </em><a class="reference external" href="https://docs.python.org/2/library/array.html#module-array" title="(in Python v2.7)"><em>array</em></a>) &#8211; local self-energy</li>
+<li><strong>mu</strong> (<em>real float</em>) &#8211; chemical potential</li>
+<li><strong>D</strong> (<em>real</em>) &#8211; Half-bandwidth of the bethe lattice non-interacting density of states</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Greens function in matsubara frequencies, all odd
+entries are zeros</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-greenf">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.greenF</span></code><a class="headerlink" href="#examples-using-dmft-common-greenf" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Transforming the non-interacting Green&#x27;s Function for the Bethe lattice.  Using the analytical ..."><div class="figure" id="id14">
+<img alt="../_images/sphx_glr_plot_fourier_thumb.png" src="../_images/sphx_glr_plot_fourier_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_fourier.html#sphx-glr-auto-examples-plot-fourier-py"><span class="std std-ref">Fourier Transforms</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id15">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Have a look at the coexistence region and the metal insulator transition from the point of view..."><div class="figure" id="id16">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_bandwidth_transition.html#sphx-glr-auto-examples-ipt-plot-bandwidth-transition-py"><span class="std std-ref">IPT bandwidth controlled</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Study the end of the crossover region "><div class="figure" id="id17">
+<img alt="../_images/sphx_glr_plot_crossover_thumb.png" src="../_images/sphx_glr_plot_crossover_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_crossover.html#sphx-glr-auto-examples-ipt-plot-crossover-py"><span class="std std-ref">IPT Transition at crossover</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id18">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using the formalism presented in [1]_ I calculate the stability of the IPT solution within the ..."><div class="figure" id="id19">
+<img alt="../_images/sphx_glr_plot_free_transition_thumb.png" src="../_images/sphx_glr_plot_free_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_free_transition.html#sphx-glr-auto-examples-ipt-plot-free-transition-py"><span class="std std-ref">Transition on free energy</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id20">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to find the coexistance regions."><div class="figure" id="id21">
+<img alt="../_images/sphx_glr_plot_ipt_coex_thumb.png" src="../_images/sphx_glr_plot_ipt_coex_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt_coex.html#sphx-glr-auto-examples-ipt-plot-ipt-coex-py"><span class="std std-ref">IPT Hysteresis loop</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="As the Energy calculations from IPT source is not reliable enough another methods is also teste..."><div class="figure" id="id22">
+<img alt="../_images/sphx_glr_plot_stability_thumb.png" src="../_images/sphx_glr_plot_stability_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_stability.html#sphx-glr-auto-examples-ipt-plot-stability-py"><span class="std std-ref">Stability of the solutions in the coexistence region</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id23">
+<img alt="../_images/sphx_glr_plot_transition_thumb.png" src="../_images/sphx_glr_plot_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_transition.html#sphx-glr-auto-examples-ipt-plot-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Describing the position of the Self-Energy pole in the diagonal basis "><div class="figure" id="id24">
+<img alt="../_images/sphx_glr_plot_hubbard_III_thumb.png" src="../_images/sphx_glr_plot_hubbard_III_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_hubbard_III.html#sphx-glr-dimer-lattice-plot-hubbard-iii-py"><span class="std std-ref">Hubbard III for dimer</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.gt_fouriertrans">
+<code class="descclassname">dmft.common.</code><code class="descname">gt_fouriertrans</code><span class="sig-paren">(</span><em>g_tau</em>, <em>tau</em>, <em>w_n</em>, <em>tail_coef=(1.0</em>, <em>0.0</em>, <em>0.0)</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.gt_fouriertrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward fourier transform for the interacting Green function
+in which only the interval <img class="math" src="../_images/math/1af2b2317fd4e1538dfe13db6d32dfaa02905638.png" alt="[0,\beta)"/> is required and output given
+into positive fermionic matsubara frequencies up to the given cutoff.
+Time array is twice as dense as frequency array</p>
+<div class="math">
+<p><img src="../_images/math/3b30f831030c26e8e167d5dd720c18a0734c04b6.png" alt="G(i\omega_n) = \int_0^\beta G(\tau)
+e^{i\omega_n \tau} d\tau"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g_tau</strong> (<em>real float array</em>) &#8211; Imaginary time interacting Green function</li>
+<li><strong>tau</strong> (<em>real float array</em>) &#8211; Imaginary time points</li>
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies. Only use the positive ones</li>
+<li><strong>tail_coef</strong> (<em>list of floats size 3</em>) &#8211; The first moments of the tails</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Greens function in matsubara frequencies</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.common.freq_tail_fourier" title="dmft.common.freq_tail_fourier"><code class="xref py py-func docutils literal"><span class="pre">freq_tail_fourier()</span></code></a>, <a class="reference internal" href="#dmft.common.gt_fouriertrans" title="dmft.common.gt_fouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gt_fouriertrans()</span></code></a></p>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.gw_invfouriertrans">
+<code class="descclassname">dmft.common.</code><code class="descname">gw_invfouriertrans</code><span class="sig-paren">(</span><em>g_iwn</em>, <em>tau</em>, <em>w_n</em>, <em>tail_coef=(1.0</em>, <em>0.0</em>, <em>0.0)</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.gw_invfouriertrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs an inverse fourier transform of the green Function in which
+only the imaginary positive matsubara frequencies
+<img class="math" src="../_images/math/2745c94df379fe5e13506293a0d53668b3e31072.png" alt="\omega_n= \pi(2n+1)/\beta"/> with <img class="math" src="../_images/math/49663b5a757b04e92d8da86d8ac5b16de7dbddef.png" alt="n \in \mathbb{N}"/> are used.
+The high frequency tails are transformed analytically up to the third moment.</p>
+<p>Output is the real valued positivite imaginary time green function.
+For the positive time output <img class="math" src="../_images/math/4011e821790318bcfc3984408518bd60603958ef.png" alt="\tau \in [0;\beta)"/>.
+Array sizes need not match between frequencies and times, but a time array
+twice as dense is recommended for best performance of the Fast Fourrier
+transform.</p>
+<div class="math">
+<p><img src="../_images/math/f3177afbac7fb08997adb6080d8c90bfc2839d88.png" alt="G(\tau) &amp;= \frac{1}{\beta} \sum_{\omega_n}
+            G(i\omega_n)e^{-i\omega_n \tau} \\
+&amp;= \frac{1}{\beta} \sum_{\omega_n}\left( G(i\omega_n)
+   -\frac{1}{i\omega_n}\right) e^{-i\omega_n \tau} +
+   \frac{1}{\beta} \sum_{\omega_n}\frac{1}{i\omega_n}e^{-i\omega_n \tau} \\"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g_iwn</strong> (<em>real float array</em>) &#8211; Imaginary time interacting Green function</li>
+<li><strong>tau</strong> (<em>real float array</em>) &#8211; Imaginary time points</li>
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies. Only use the positive ones</li>
+<li><strong>tail_coef</strong> (<em>list of floats size 3</em>) &#8211; The first moments of the tails</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Greens function in matsubara frequencies</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.common.gt_fouriertrans" title="dmft.common.gt_fouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gt_fouriertrans()</span></code></a>, <a class="reference internal" href="#dmft.common.freq_tail_fourier" title="dmft.common.freq_tail_fourier"><code class="xref py py-func docutils literal"><span class="pre">freq_tail_fourier()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-gw-invfouriertrans">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.gw_invfouriertrans</span></code><a class="headerlink" href="#examples-using-dmft-common-gw-invfouriertrans" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the single orbital case the atomic Green function as giv..."><div class="figure" id="id25">
+<img alt="../_images/sphx_glr_plot_atom_thumb.png" src="../_images/sphx_glr_plot_atom_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_atom.html#sphx-glr-auto-examples-plot-atom-py"><span class="std std-ref">Interacting atom spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Transforming the non-interacting Green&#x27;s Function for the Bethe lattice.  Using the analytical ..."><div class="figure" id="id26">
+<img alt="../_images/sphx_glr_plot_fourier_thumb.png" src="../_images/sphx_glr_plot_fourier_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_fourier.html#sphx-glr-auto-examples-plot-fourier-py"><span class="std std-ref">Fourier Transforms</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua..."><div class="figure" id="id27">
+<img alt="../_images/sphx_glr_plot_molecule_thumb.png" src="../_images/sphx_glr_plot_molecule_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_molecule.html#sphx-glr-dimer-lattice-plot-molecule-py"><span class="std std-ref">Isolated molecule spectral function</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.ifft">
+<code class="descclassname">dmft.common.</code><code class="descname">ifft</code><span class="sig-paren">(</span><em>a</em>, <em>n=None</em>, <em>axis=-1</em>, <em>norm=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.ifft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the one-dimensional inverse discrete Fourier Transform.</p>
+<p>This function computes the inverse of the one-dimensional <em>n</em>-point
+discrete Fourier transform computed by <cite>fft</cite>.  In other words,
+<code class="docutils literal"><span class="pre">ifft(fft(a))</span> <span class="pre">==</span> <span class="pre">a</span></code> to within numerical accuracy.
+For a general description of the algorithm and definitions,
+see <cite>numpy.fft</cite>.</p>
+<p>The input should be ordered in the same way as is returned by <cite>fft</cite>,
+i.e.,</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">a[0]</span></code> should contain the zero frequency term,</li>
+<li><code class="docutils literal"><span class="pre">a[1:n//2]</span></code> should contain the positive-frequency terms,</li>
+<li><code class="docutils literal"><span class="pre">a[n//2</span> <span class="pre">+</span> <span class="pre">1:]</span></code> should contain the negative-frequency terms, in
+increasing order starting from the most negative frequency.</li>
+</ul>
+<p>For an even number of input points, <code class="docutils literal"><span class="pre">A[n//2]</span></code> represents the sum of
+the values at the positive and negative Nyquist frequencies, as the two
+are aliased together. See <cite>numpy.fft</cite> for details.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em>array_like</em>) &#8211; Input array, can be complex.</li>
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Length of the transformed axis of the output.
+If <cite>n</cite> is smaller than the length of the input, the input is cropped.
+If it is larger, the input is padded with zeros.  If <cite>n</cite> is not given,
+the length of the input along the axis specified by <cite>axis</cite> is used.
+See notes about padding issues.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Axis over which to compute the inverse DFT.  If not given, the last
+axis is used.</li>
+<li><strong>norm</strong> (<em>{None</em><em>, </em><em>&quot;ortho&quot;}</em><em>, </em><em>optional</em>) &#8211; <div class="versionadded">
+<p><span class="versionmodified">New in version 1.10.0.</span></p>
+</div>
+<p>Normalization mode (see <cite>numpy.fft</cite>). Default is None.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> &#8211; The truncated or zero-padded input, transformed along the axis
+indicated by <cite>axis</cite>, or the last one if <cite>axis</cite> is not specified.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">complex ndarray</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">IndexError</span></code> &#8211; If <cite>axes</cite> is larger than the last axis of <cite>a</cite>.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-func docutils literal"><span class="pre">numpy.fft()</span></code></dt>
+<dd>An introduction, with definitions and general explanations.</dd>
+<dt><a class="reference internal" href="#dmft.common.fft" title="dmft.common.fft"><code class="xref py py-func docutils literal"><span class="pre">fft()</span></code></a></dt>
+<dd>The one-dimensional (forward) FFT, of which <cite>ifft</cite> is the inverse</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">ifft2()</span></code></dt>
+<dd>The two-dimensional inverse FFT.</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">ifftn()</span></code></dt>
+<dd>The n-dimensional inverse FFT.</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>If the input parameter <cite>n</cite> is larger than the size of the input, the input
+is padded by appending zeros at the end.  Even though this is the common
+approach, it might lead to surprising results.  If a different padding is
+desired, it must be performed before calling <cite>ifft</cite>.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="go">array([ 1.+0.j,  0.+1.j, -1.+0.j,  0.-1.j])</span>
+</pre></div>
+</div>
+<p>Create and plot a band-limited signal with random phases:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">400</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n</span><span class="p">[</span><span class="mi">40</span><span class="p">:</span><span class="mi">60</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">((</span><span class="s1">&#39;real&#39;</span><span class="p">,</span> <span class="s1">&#39;imaginary&#39;</span><span class="p">))</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.lin_tail_fit">
+<code class="descclassname">dmft.common.</code><code class="descname">lin_tail_fit</code><span class="sig-paren">(</span><em>w_n</em>, <em>inp_gf</em>, <em>x</em>, <em>span=30</em>, <em>negative_freq=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.lin_tail_fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a Least squares fit to the tail of Green function</p>
+<p>the fit is done in inp_gf[-x:-x + span]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Matsubara frequencies</li>
+<li><strong>inp_gf</strong> (<em>complex 1D ndarray</em>) &#8211; Green function to fit</li>
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; counting from last element from where to do the fit</li>
+<li><strong>span</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; amount of frequencies to do the fit over</li>
+<li><strong>negative_freq</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; Array has negative Matsubara frequencies</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Tail patched Green function (copy of origal)
+real 1D ndarray : The First 3 moments</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex 1D ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.lstsq">
+<code class="descclassname">dmft.common.</code><code class="descname">lstsq</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>cond=None</em>, <em>overwrite_a=False</em>, <em>overwrite_b=False</em>, <em>check_finite=True</em>, <em>lapack_driver=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.lstsq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute least-squares solution to equation Ax = b.</p>
+<p>Compute a vector x such that the 2-norm <code class="docutils literal"><span class="pre">|b</span> <span class="pre">-</span> <span class="pre">A</span> <span class="pre">x|</span></code> is minimized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>a</strong> (<em></em><em>(</em><em>M</em><em>, </em><em>N</em><em>) </em><em>array_like</em>) &#8211; Left hand side matrix (2-D array).</li>
+<li><strong>b</strong> (<em></em><em>(</em><em>M</em><em>,</em><em></em><em>) or </em><em></em><em>(</em><em>M</em><em>, </em><em>K</em><em>) </em><em>array_like</em>) &#8211; Right hand side matrix or vector (1-D or 2-D array).</li>
+<li><strong>cond</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; Cutoff for &#8216;small&#8217; singular values; used to determine effective
+rank of a. Singular values smaller than
+<code class="docutils literal"><span class="pre">rcond</span> <span class="pre">*</span> <span class="pre">largest_singular_value</span></code> are considered zero.</li>
+<li><strong>overwrite_a</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; Discard data in <cite>a</cite> (may enhance performance). Default is False.</li>
+<li><strong>overwrite_b</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; Discard data in <cite>b</cite> (may enhance performance). Default is False.</li>
+<li><strong>check_finite</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; Whether to check that the input matrices contain only finite numbers.
+Disabling may give a performance gain, but may result in problems
+(crashes, non-termination) if the inputs do contain infinities or NaNs.</li>
+<li><strong>lapack_driver</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em>, </em><em>optional</em>) &#8211; <p>Which LAPACK driver is used to solve the least-squares problem.
+Options are <code class="docutils literal"><span class="pre">'gelsd'</span></code>, <code class="docutils literal"><span class="pre">'gelsy'</span></code>, <code class="docutils literal"><span class="pre">'gelss'</span></code>. Default
+(<code class="docutils literal"><span class="pre">'gelsd'</span></code>) is a good choice.  However, <code class="docutils literal"><span class="pre">'gelsy'</span></code> can be slightly
+faster on many problems.  <code class="docutils literal"><span class="pre">'gelss'</span></code> was used historically.  It is
+generally slow but uses less memory.</p>
+<div class="versionadded">
+<p><span class="versionmodified">New in version 0.17.0.</span></p>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>x</strong> (<em>(N,) or (N, K) ndarray</em>) &#8211; Least-squares solution.  Return shape matches shape of <cite>b</cite>.</li>
+<li><strong>residues</strong> (<em>() or (1,) or (K,) ndarray</em>) &#8211; Sums of residues, squared 2-norm for each column in <code class="docutils literal"><span class="pre">b</span> <span class="pre">-</span> <span class="pre">a</span> <span class="pre">x</span></code>.
+If rank of matrix a is <code class="docutils literal"><span class="pre">&lt;</span> <span class="pre">N</span></code> or <code class="docutils literal"><span class="pre">N</span> <span class="pre">&gt;</span> <span class="pre">M</span></code>, or <code class="docutils literal"><span class="pre">'gelsy'</span></code> is used,
+this is an empty array. If b was 1-D, this is an (1,) shape array,
+otherwise the shape is (K,).</li>
+<li><strong>rank</strong> (<em>int</em>) &#8211; Effective rank of matrix <cite>a</cite>.</li>
+<li><strong>s</strong> (<em>(min(M,N),) ndarray or None</em>) &#8211; Singular values of <cite>a</cite>. The condition number of a is
+<code class="docutils literal"><span class="pre">abs(s[0]</span> <span class="pre">/</span> <span class="pre">s[-1])</span></code>. None is returned when <code class="docutils literal"><span class="pre">'gelsy'</span></code> is used.</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">LinAlgError</span></code> &#8211; If computation does not converge.</li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> &#8211; When parameters are wrong.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-func docutils literal"><span class="pre">optimize.nnls()</span></code></dt>
+<dd>linear least squares with non-negativity constraint</dd>
+</dl>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.matsubara_freq">
+<code class="descclassname">dmft.common.</code><code class="descname">matsubara_freq</code><span class="sig-paren">(</span><em>beta=16.0</em>, <em>size=256</em>, <em>fer=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.matsubara_freq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates an array containing the matsubara frequencies under the
+formula</p>
+<div class="math">
+<p><img src="../_images/math/8586acbd9c5760e5136037f6ff9c1ce09a5d335e.png" alt="\omega_n = \frac{\pi(2n + f)}{\beta}"/></p>
+</div><p>where <img class="math" src="../_images/math/8847f0bad8697a38c629cff6eac357039376b14d.png" alt="f=1"/> in the case of fermions, and zero for bosons</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Inverse temperature of the system</li>
+<li><strong>size</strong> (<em>integer</em>) &#8211; size of the array : amount of matsubara frequencies</li>
+<li><strong>fer</strong> (<em>0</em><em> or </em><em>1 integer</em>) &#8211; dealing with fermionic particles</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">real ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-matsubara-freq">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.matsubara_freq</span></code><a class="headerlink" href="#examples-using-dmft-common-matsubara-freq" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the single orbital case the atomic Green function as giv..."><div class="figure" id="id28">
+<img alt="../_images/sphx_glr_plot_atom_thumb.png" src="../_images/sphx_glr_plot_atom_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_atom.html#sphx-glr-auto-examples-plot-atom-py"><span class="std std-ref">Interacting atom spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="An Isolated atom with non-interacting electrons is set under the influence of an external magne..."><div class="figure" id="id29">
+<img alt="../_images/sphx_glr_plot_atom_field_thumb.png" src="../_images/sphx_glr_plot_atom_field_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_atom_field.html#sphx-glr-auto-examples-plot-atom-field-py"><span class="std std-ref">Non-interacting atom under external field spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Non interacting dimer of a Bethe lattice "><div class="figure" id="id30">
+<img alt="../_images/sphx_glr_plot_dimer_bethe_thumb.png" src="../_images/sphx_glr_plot_dimer_bethe_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dimer_bethe.html#sphx-glr-dimer-lattice-plot-dimer-bethe-py"><span class="std std-ref">Dimer Bethe lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua..."><div class="figure" id="id31">
+<img alt="../_images/sphx_glr_plot_molecule_thumb.png" src="../_images/sphx_glr_plot_molecule_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_molecule.html#sphx-glr-dimer-lattice-plot-molecule-py"><span class="std std-ref">Isolated molecule spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=" "><div class="figure" id="id32">
+<img alt="../_images/sphx_glr_plot_phase_bandwidth_thumb.png" src="../_images/sphx_glr_plot_phase_bandwidth_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phase_bandwidth.html#sphx-glr-dimer-lattice-plot-phase-bandwidth-py"><span class="std std-ref">Phase diagrams on Bandwidth</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id33">
+<img alt="../_images/sphx_glr_plot_phases_thumb.png" src="../_images/sphx_glr_plot_phases_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phases.html#sphx-glr-dimer-lattice-plot-phases-py"><span class="std std-ref">Phase diagrams</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.pade_coefficients">
+<code class="descclassname">dmft.common.</code><code class="descname">pade_coefficients</code><span class="sig-paren">(</span><em>g_iw</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.pade_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the Pade coefficients for the desired green Function</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>g_iw</strong> (<em>complex ndarray</em>) &#8211; single axis</li>
+<li><strong>w_n</strong> (<em>real ndarray</em>) &#8211; Matsubara frequencies</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-pade-coefficients">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_coefficients</span></code><a class="headerlink" href="#examples-using-dmft-common-pade-coefficients" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id34">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.pade_continuation">
+<code class="descclassname">dmft.common.</code><code class="descname">pade_continuation</code><span class="sig-paren">(</span><em>gfunc</em>, <em>w_n</em>, <em>w</em>, <em>w_set=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.pade_continuation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Continate the green Function by Padé</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gfunc</strong> (<em>complex 1D ndarray</em>) &#8211; Green function to be continued</li>
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Matsubara frequencies</li>
+<li><strong>w</strong> (<em>real 1D ndarray</em>) &#8211; real frequency array</li>
+<li><strong>w_set</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em> or </em><em>int 1D ndarray</em>) &#8211; Amount of frequency point to sample
+index of points to sample for continuation</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.common.pade_coefficients" title="dmft.common.pade_coefficients"><code class="xref py py-func docutils literal"><span class="pre">pade_coefficients()</span></code></a>, <a class="reference internal" href="#dmft.common.pade_rec" title="dmft.common.pade_rec"><code class="xref py py-func docutils literal"><span class="pre">pade_rec()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-pade-continuation">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_continuation</span></code><a class="headerlink" href="#examples-using-dmft-common-pade-continuation" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id35">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id36">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id37">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id38">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id39">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.pade_rec">
+<code class="descclassname">dmft.common.</code><code class="descname">pade_rec</code><span class="sig-paren">(</span><em>pc</em>, <em>w</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.pade_rec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pade recursion formula for continued Fractions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pc</strong> (<em>complex ndarray</em>) &#8211; pade coefficients</li>
+<li><strong>w</strong> (<em>real ndarray</em>) &#8211; real frequencies</li>
+<li><strong>w_n</strong> (<em>real ndarray</em>) &#8211; Matsubara frequencies</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-pade-rec">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_rec</span></code><a class="headerlink" href="#examples-using-dmft-common-pade-rec" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id40">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.semi_circle">
+<code class="descclassname">dmft.common.</code><code class="descname">semi_circle</code><span class="sig-paren">(</span><em>energy</em>, <em>hopping</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.semi_circle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bethe lattice in inf dim density of states</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.semi_circle_hiltrans">
+<code class="descclassname">dmft.common.</code><code class="descname">semi_circle_hiltrans</code><span class="sig-paren">(</span><em>zeta</em>, <em>D=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.semi_circle_hiltrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the Hilbert transform with a semicircular DOS</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.common.greenF" title="dmft.common.greenF"><code class="xref py py-func docutils literal"><span class="pre">greenF()</span></code></a></p>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-semi-circle-hiltrans">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.semi_circle_hiltrans</span></code><a class="headerlink" href="#examples-using-dmft-common-semi-circle-hiltrans" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="In this approach the aim is to find the band dispersion of the insulating system but including ..."><div class="figure" id="id41">
+<img alt="../_images/sphx_glr_plot_hubbardIII_thumb.png" src="../_images/sphx_glr_plot_hubbardIII_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_hubbardIII.html#sphx-glr-auto-examples-plot-hubbardiii-py"><span class="std std-ref">Hubbard III approximation</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Atomic limit expression of the self-energy is described by"><div class="figure" id="id42">
+<img alt="../_images/sphx_glr_plot_hubbardI_bethe_thumb.png" src="../_images/sphx_glr_plot_hubbardI_bethe_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_hubbardI_bethe.html#sphx-glr-auto-examples-plot-hubbardi-bethe-py"><span class="std std-ref">Hubbard I solver Bethe lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id43">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency IPT solver follow the spectral function along the metal to insulator tra..."><div class="figure" id="id44">
+<img alt="../_images/sphx_glr_plot_mit_thumb.png" src="../_images/sphx_glr_plot_mit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_mit.html#sphx-glr-auto-examples-ipt-plot-mit-py"><span class="std std-ref">The Metal Mott Insulator transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="What does the insulator show for Hubbard bands. They are sharp as in the Hubbard I approximatio..."><div class="figure" id="id45">
+<img alt="../_images/sphx_glr_plot_dispersion_thumb.png" src="../_images/sphx_glr_plot_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/twosite/plot_dispersion.html#sphx-glr-auto-examples-twosite-plot-dispersion-py"><span class="std std-ref">Spectral dispersion of insulator</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id46">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id47">
+<img alt="../_images/sphx_glr_plot_bandwith_dos_thumb.png" src="../_images/sphx_glr_plot_bandwith_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwith_dos.html#sphx-glr-dimer-lattice-plot-bandwith-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id48">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id49">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id50">
+<img alt="../_images/sphx_glr_plot_dos_transition_thumb.png" src="../_images/sphx_glr_plot_dos_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_transition.html#sphx-glr-dimer-lattice-plot-dos-transition-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id51">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id52">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id53">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id54">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity of the correlated metal as the system is warmed up. Temperature ..."><div class="figure" id="id55">
+<img alt="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" src="../_images/sphx_glr_plot_optical_track_on_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_track_on_temp.html#sphx-glr-dimer-lattice-plot-optical-track-on-temp-py"><span class="std std-ref">Dimer Mott transition Optical response with temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity from the correlated metal up to the transition point. The lost o..."><div class="figure" id="id56">
+<img alt="../_images/sphx_glr_plot_optical_transition_thumb.png" src="../_images/sphx_glr_plot_optical_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_transition.html#sphx-glr-dimer-lattice-plot-optical-transition-py"><span class="std std-ref">Dimer Mott transition Optical response</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id57">
+<img alt="../_images/sphx_glr_plot_re_T_dos_thumb.png" src="../_images/sphx_glr_plot_re_T_dos_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_re_T_dos.html#sphx-glr-dimer-lattice-plot-re-t-dos-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi..."><div class="figure" id="id58">
+<img alt="../_images/sphx_glr_plot_shift_thumb.png" src="../_images/sphx_glr_plot_shift_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shift.html#sphx-glr-dimer-lattice-plot-shift-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.tail">
+<code class="descclassname">dmft.common.</code><code class="descname">tail</code><span class="sig-paren">(</span><em>w_n</em>, <em>coef</em>, <em>powers</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.tail" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.common.tau_wn_setup">
+<code class="descclassname">dmft.common.</code><code class="descname">tau_wn_setup</code><span class="sig-paren">(</span><em>parms</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.common.tau_wn_setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>return two numpy arrays one corresponding to the imaginary time array
+and the other to the matsubara frequencies. The time array is twice as
+dense for best results in the Fast Fourier Transform.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parms</strong> (<em>dictionary</em>) &#8211; with keywords BETA, N_MATSUBARA</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#tuple" title="(in Python v2.7)">tuple</a> (tau real ndarray, w_n real ndarray)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-common-tau-wn-setup">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.common.tau_wn_setup</span></code><a class="headerlink" href="#examples-using-dmft-common-tau-wn-setup" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Transforming the non-interacting Green&#x27;s Function for the Bethe lattice.  Using the analytical ..."><div class="figure" id="id59">
+<img alt="../_images/sphx_glr_plot_fourier_thumb.png" src="../_images/sphx_glr_plot_fourier_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/plot_fourier.html#sphx-glr-auto-examples-plot-fourier-py"><span class="std std-ref">Fourier Transforms</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id60">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Have a look at the coexistence region and the metal insulator transition from the point of view..."><div class="figure" id="id61">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_bandwidth_transition.html#sphx-glr-auto-examples-ipt-plot-bandwidth-transition-py"><span class="std std-ref">IPT bandwidth controlled</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Study the end of the crossover region "><div class="figure" id="id62">
+<img alt="../_images/sphx_glr_plot_crossover_thumb.png" src="../_images/sphx_glr_plot_crossover_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_crossover.html#sphx-glr-auto-examples-ipt-plot-crossover-py"><span class="std std-ref">IPT Transition at crossover</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id63">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using the formalism presented in [1]_ I calculate the stability of the IPT solution within the ..."><div class="figure" id="id64">
+<img alt="../_images/sphx_glr_plot_free_transition_thumb.png" src="../_images/sphx_glr_plot_free_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_free_transition.html#sphx-glr-auto-examples-ipt-plot-free-transition-py"><span class="std std-ref">Transition on free energy</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id65">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to find the coexistance regions."><div class="figure" id="id66">
+<img alt="../_images/sphx_glr_plot_ipt_coex_thumb.png" src="../_images/sphx_glr_plot_ipt_coex_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt_coex.html#sphx-glr-auto-examples-ipt-plot-ipt-coex-py"><span class="std std-ref">IPT Hysteresis loop</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="As the Energy calculations from IPT source is not reliable enough another methods is also teste..."><div class="figure" id="id67">
+<img alt="../_images/sphx_glr_plot_stability_thumb.png" src="../_images/sphx_glr_plot_stability_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_stability.html#sphx-glr-auto-examples-ipt-plot-stability-py"><span class="std std-ref">Stability of the solutions in the coexistence region</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id68">
+<img alt="../_images/sphx_glr_plot_transition_thumb.png" src="../_images/sphx_glr_plot_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_transition.html#sphx-glr-auto-examples-ipt-plot-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id69">
+<img alt="../_images/sphx_glr_ipt_dimer_thumb.png" src="../_images/sphx_glr_ipt_dimer_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer.html#sphx-glr-dimer-lattice-ipt-dimer-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer"><div class="figure" id="id70">
+<img alt="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" src="../_images/sphx_glr_ipt_dimer_bandwidt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/ipt_dimer_bandwidt.html#sphx-glr-dimer-lattice-ipt-dimer-bandwidt-py"><span class="std std-ref">IPT Solver for a dimer</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id71">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id72">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id73">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id74">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id75">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id76">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id77">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so..."><div class="figure" id="id78">
+<img alt="../_images/sphx_glr_plot_energy_thumb.png" src="../_images/sphx_glr_plot_energy_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_energy.html#sphx-glr-dimer-lattice-plot-energy-py"><span class="std std-ref">Internal Energy in dimer solutions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id79">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id80">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id81">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id82">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id83">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id84">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id85">
+<img alt="../_images/sphx_glr_plot_phases_thumb.png" src="../_images/sphx_glr_plot_phases_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phases.html#sphx-glr-dimer-lattice-plot-phases-py"><span class="std std-ref">Phase diagrams</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id86">
+<img alt="../_images/sphx_glr_plot_scatering_fixB_thumb.png" src="../_images/sphx_glr_plot_scatering_fixB_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scatering_fixB.html#sphx-glr-dimer-lattice-plot-scatering-fixb-py"><span class="std std-ref">Scattering rates change across the Metal Insulator Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id87">
+<img alt="../_images/sphx_glr_plot_scattering_thumb.png" src="../_images/sphx_glr_plot_scattering_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scattering.html#sphx-glr-dimer-lattice-plot-scattering-py"><span class="std std-ref">Scattering rates change in Temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id88">
+<img alt="../_images/sphx_glr_plot_shape_gf_thumb.png" src="../_images/sphx_glr_plot_shape_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shape_gf.html#sphx-glr-dimer-lattice-plot-shape-gf-py"><span class="std std-ref">Form of the Greens Functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id89">
+<img alt="../_images/sphx_glr_plot_sigma_12_thumb.png" src="../_images/sphx_glr_plot_sigma_12_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_12.html#sphx-glr-dimer-lattice-plot-sigma-12-py"><span class="std std-ref">The change of Sigma_12</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id90">
+<img alt="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" src="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_zero_freq.html#sphx-glr-dimer-lattice-plot-sigma-zero-freq-py"><span class="std std-ref">Zero frequency behavior of Sigma</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated..."><div class="figure" id="id91">
+<img alt="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_ins_tp0.8.html#sphx-glr-dimer-lattice-plot-thermodynamics-ins-tp0-8-py"><span class="std std-ref">Thermodynamics of the Band insulator in the Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id92">
+<img alt="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_insulator.html#sphx-glr-dimer-lattice-plot-thermodynamics-insulator-py"><span class="std std-ref">Thermodynamics of the insulator Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. "><div class="figure" id="id93">
+<img alt="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" src="../_images/sphx_glr_plot_thermodynamics_metal_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_thermodynamics_metal.html#sphx-glr-dimer-lattice-plot-thermodynamics-metal-py"><span class="std std-ref">Thermodynamics of the metallic Dimer lattice</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id94">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.common</a><ul>
+<li><a class="reference internal" href="#green-functions">Green Functions</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#examples-using-dmft-common-fermi-dist">Examples using <code class="docutils literal"><span class="pre">dmft.common.fermi_dist</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-fit-gf">Examples using <code class="docutils literal"><span class="pre">dmft.common.fit_gf</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-greenf">Examples using <code class="docutils literal"><span class="pre">dmft.common.greenF</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-gw-invfouriertrans">Examples using <code class="docutils literal"><span class="pre">dmft.common.gw_invfouriertrans</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-matsubara-freq">Examples using <code class="docutils literal"><span class="pre">dmft.common.matsubara_freq</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-pade-coefficients">Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_coefficients</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-pade-continuation">Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_continuation</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-pade-rec">Examples using <code class="docutils literal"><span class="pre">dmft.common.pade_rec</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-semi-circle-hiltrans">Examples using <code class="docutils literal"><span class="pre">dmft.common.semi_circle_hiltrans</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-common-tau-wn-setup">Examples using <code class="docutils literal"><span class="pre">dmft.common.tau_wn_setup</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../reference.html"
+                        title="previous chapter">Modules Reference API</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dmft.twosite.html"
+                        title="next chapter">dmft.twosite</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.common.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.twosite.html" title="dmft.twosite"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../reference.html" title="Modules Reference API"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

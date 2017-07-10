@@ -1,0 +1,1089 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.ipt_imag &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="dmft.ipt_real" href="dmft.ipt_real.html" />
+    <link rel="prev" title="dmft.twosite" href="dmft.twosite.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.ipt_real.html" title="dmft.ipt_real"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dmft.twosite.html" title="dmft.twosite"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.ipt_imag">
+<span id="dmft-ipt-imag"></span><h1>dmft.ipt_imag<a class="headerlink" href="#module-dmft.ipt_imag" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="ipt-solver-single-band">
+<h2>IPT Solver Single Band<a class="headerlink" href="#ipt-solver-single-band" title="Permalink to this headline">¶</a></h2>
+<p>Within the iterative perturbative theory (IPT) the aim is to express the
+self-energy of the impurity problem as</p>
+<div class="math">
+<p><img src="../_images/math/b1b10777086c5f140ec8ca4291f4c1acc0401e17.png" alt="\Sigma_\sigma(\tau) \approx U\mathcal{G}_\sigma^0(0)
+-U^2 \mathcal{G}_\sigma^0(\tau)
+     \mathcal{G}_{\bar{\sigma}}^0(-\tau)
+     \mathcal{G}_{\bar{\sigma}}^0(\tau)"/></p>
+</div><p>The contribution of the Hartree-term is drooped because at half-filling
+it cancels with the chemical potential. The next equalities are
+obtained by using the anti-periodicity of the fermionic imaginary time
+Green functions, and because of the half-filled case and particle hole
+symmetry the last equality is fulfilled</p>
+<div class="math">
+<p><img src="../_images/math/0e662fd00a5cfca6dd62d12818aae5a798c239d6.png" alt="\mathcal{G}(-\tau) = -\mathcal{G}(-\tau+\beta)p = -\mathcal{G}(\tau)"/></p>
+</div><p>As such for the single band paramagnetic case at half-filling the self
+energy is estimated by</p>
+<div class="math">
+<p><img src="../_images/math/6b6bdf24fca115a70af33ed320720985fa33d65a.png" alt="\Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3"/></p>
+</div><div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="dmft.ipt_imag.dimer_sigma">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">dimer_sigma</code><span class="sig-paren">(</span><em>u_int</em>, <em>tp</em>, <em>g0iw_d</em>, <em>g0iw_o</em>, <em>tau</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.dimer_sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a Green function it returns the self-energy</p>
+<div class="math">
+<p><img src="../_images/math/34fa12cf0a7d96646c816e350390d93c0ecad7e3.png" alt="\Sigma(\tau) \approx - U^2 \mathcal{G}^0(\tau)\mathcal{G}^0(-\tau)\mathcal{G}^0(\tau)"/></p>
+</div><p>Which is done element wise given the form of the local interaction
+in the dimer. For symmetry reasons only the 2 arrays are returned,
+corresponding to the diagonal and off-diagonal terms of the matrix
+self-energy</p>
+<p>The Fourier transforms uses an empirically established tail expansion</p>
+<div class="math">
+<p><img src="../_images/math/3cf5399d03e45165fcc6f99f168a9fdbedc1591c.png" alt="\Sigma(i\omega_n\rightarrow \infty)_{AA} =
+\frac{U^2}{4i\omega_n} + \frac{M_3}{(i\omega_n)^3}"/></p>
+</div><div class="math">
+<p><img src="../_images/math/d7b733b81c7ed4612be343550242e01f98de1078.png" alt="\Sigma(i\omega_n\rightarrow \infty)_{AB} = \frac{M_2}{2(i\omega_n)^2}"/></p>
+</div><p>where <img class="math" src="../_images/math/510f0ff88f74193b8a36a75f86595ed1e90c43e9.png" alt="M_3,M_2"/> are calculated from the derivatives of the <img class="math" src="../_images/math/1a05fc9cba4cf877dc624585ff4b2a77d594b8c8.png" alt="\Sigma(\tau)"/></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>local contact interaction</em>) &#8211; </li>
+<li><strong>tp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>dimer hybridization strength</em>) &#8211; </li>
+<li><strong>g0iw_d</strong> (<em>complex 1D ndarray</em>) &#8211; <em>bare</em> local Green function, the Weiss field</li>
+<li><strong>g0iw_o</strong> (<em>complex 1D ndarray</em>) &#8211; <em>bare</em> hybridizing Green function, the Weiss field</li>
+<li><strong>tau</strong> (<em>real 1D array</em>) &#8211; Imaginary time points, not included edge point of <img class="math" src="../_images/math/673db572593344d1b0cdd9dce919409ecf15e9e2.png" alt="\beta^-"/></li>
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Matsubara frequencies</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="examples-using-dmft-ipt-imag-dimer-sigma">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.dimer_sigma</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-dimer-sigma" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id5">
+<img alt="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" src="../_images/sphx_glr_plot_ad_hod_disorder_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ad_hod_disorder.html#sphx-glr-dimer-lattice-plot-ad-hod-disorder-py"><span class="std std-ref">Comparing the effect of disorder</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id6">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb1.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_bandwidth_transition.html#sphx-glr-dimer-lattice-plot-bandwidth-transition-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id7">
+<img alt="../_images/sphx_glr_plot_build_dispersions_thumb.png" src="../_images/sphx_glr_plot_build_dispersions_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_build_dispersions.html#sphx-glr-dimer-lattice-plot-build-dispersions-py"><span class="std std-ref">Various schemes for obtaining the spectral dispersion</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id8">
+<img alt="../_images/sphx_glr_plot_comparing_spectra_thumb.png" src="../_images/sphx_glr_plot_comparing_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_comparing_spectra.html#sphx-glr-dimer-lattice-plot-comparing-spectra-py"><span class="std std-ref">Comparing Spectral functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id9">
+<img alt="../_images/sphx_glr_plot_docc_transition_thumb.png" src="../_images/sphx_glr_plot_docc_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition.html#sphx-glr-dimer-lattice-plot-docc-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id10">
+<img alt="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" src="../_images/sphx_glr_plot_docc_transition_below_QCP_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_docc_transition_below_QCP.html#sphx-glr-dimer-lattice-plot-docc-transition-below-qcp-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id11">
+<img alt="../_images/sphx_glr_plot_dos_T_thumb.png" src="../_images/sphx_glr_plot_dos_T_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_dos_T.html#sphx-glr-dimer-lattice-plot-dos-t-py"><span class="std std-ref">Evolution of DOS as function of temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste..."><div class="figure" id="id12">
+<img alt="../_images/sphx_glr_plot_integrated_spectra_thumb.png" src="../_images/sphx_glr_plot_integrated_spectra_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_integrated_spectra.html#sphx-glr-dimer-lattice-plot-integrated-spectra-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id13">
+<img alt="../_images/sphx_glr_plot_ipt_insulator_thumb.png" src="../_images/sphx_glr_plot_ipt_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_ipt_insulator.html#sphx-glr-dimer-lattice-plot-ipt-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id14">
+<img alt="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" src="../_images/sphx_glr_plot_landau_2ndfit_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_landau_2ndfit.html#sphx-glr-dimer-lattice-plot-landau-2ndfit-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id15">
+<img alt="../_images/sphx_glr_plot_line_dispersion_thumb.png" src="../_images/sphx_glr_plot_line_dispersion_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_line_dispersion.html#sphx-glr-dimer-lattice-plot-line-dispersion-py"><span class="std std-ref">Dispersion of the spectral function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id16">
+<img alt="../_images/sphx_glr_plot_mott_insulator_thumb.png" src="../_images/sphx_glr_plot_mott_insulator_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_mott_insulator.html#sphx-glr-dimer-lattice-plot-mott-insulator-py"><span class="std std-ref">INSULATOR</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id17">
+<img alt="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" src="../_images/sphx_glr_plot_optical_conductivity_bonding_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_optical_conductivity_bonding.html#sphx-glr-dimer-lattice-plot-optical-conductivity-bonding-py"><span class="std std-ref">Optical conductivity of bonding Spectral Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id18">
+<img alt="../_images/sphx_glr_plot_phases_thumb.png" src="../_images/sphx_glr_plot_phases_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_phases.html#sphx-glr-dimer-lattice-plot-phases-py"><span class="std std-ref">Phase diagrams</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id19">
+<img alt="../_images/sphx_glr_plot_scatering_fixB_thumb.png" src="../_images/sphx_glr_plot_scatering_fixB_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scatering_fixB.html#sphx-glr-dimer-lattice-plot-scatering-fixb-py"><span class="std std-ref">Scattering rates change across the Metal Insulator Transition</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t..."><div class="figure" id="id20">
+<img alt="../_images/sphx_glr_plot_scattering_thumb.png" src="../_images/sphx_glr_plot_scattering_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_scattering.html#sphx-glr-dimer-lattice-plot-scattering-py"><span class="std std-ref">Scattering rates change in Temperature</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id21">
+<img alt="../_images/sphx_glr_plot_shape_gf_thumb.png" src="../_images/sphx_glr_plot_shape_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_shape_gf.html#sphx-glr-dimer-lattice-plot-shape-gf-py"><span class="std std-ref">Form of the Greens Functions</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id22">
+<img alt="../_images/sphx_glr_plot_sigma_12_thumb.png" src="../_images/sphx_glr_plot_sigma_12_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_12.html#sphx-glr-dimer-lattice-plot-sigma-12-py"><span class="std std-ref">The change of Sigma_12</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=""><div class="figure" id="id23">
+<img alt="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" src="../_images/sphx_glr_plot_sigma_zero_freq_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_sigma_zero_freq.html#sphx-glr-dimer-lattice-plot-sigma-zero-freq-py"><span class="std std-ref">Zero frequency behavior of Sigma</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st..."><div class="figure" id="id24">
+<img alt="../_images/sphx_glr_plot_transition_temp_thumb.png" src="../_images/sphx_glr_plot_transition_temp_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../dimer_lattice/plot_transition_temp.html#sphx-glr-dimer-lattice-plot-transition-temp-py"><span class="std std-ref">Study the behavior of the Dimer Bethe lattice in the Transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.dmft_loop">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">dmft_loop</code><span class="sig-paren">(</span><em>u_int</em>, <em>t</em>, <em>g_iwn</em>, <em>w_n</em>, <em>tau</em>, <em>mix=1</em>, <em>conv=0.001</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.dmft_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs the paramagnetic(spin degenerate) self-consistent loop in a
+bethe lattice given the input</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Local interation strength</li>
+<li><strong>t</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Hopping amplitude between bethe lattice nearest neighbors</li>
+<li><strong>g_iwn</strong> (<em>complex float ndarray</em>) &#8211; Matsubara frequencies starting guess Green function</li>
+<li><strong>tau</strong> (<em>real float ndarray</em>) &#8211; Imaginary time points. Only use the positive range</li>
+<li><strong>mix</strong> (real <img class="math" src="../_images/math/2c912609d098f0c432d2394d2585e33bf9c8f9a8.png" alt="\in [0, 1]"/>) &#8211; fraction of new solution for next input as bath Green function</li>
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies. Only use the positive ones</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Green&#8217;s function in matsubara frequencies
+Self energy</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple 2 complex ndarrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-imag-dmft-loop">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.dmft_loop</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-dmft-loop" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Here I plot the form of the Green&#x27;s function in the upper complex plane. To show the connection..."><div class="figure" id="id25">
+<img alt="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" src="../_images/sphx_glr_plot_analytical_structure_gf_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_analytical_structure_gf.html#sphx-glr-auto-examples-ipt-plot-analytical-structure-gf-py"><span class="std std-ref">The Analytical Structure of a the Green&#8217;s Function</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Have a look at the coexistence region and the metal insulator transition from the point of view..."><div class="figure" id="id26">
+<img alt="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" src="../_images/sphx_glr_plot_bandwidth_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_bandwidth_transition.html#sphx-glr-auto-examples-ipt-plot-bandwidth-transition-py"><span class="std std-ref">IPT bandwidth controlled</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Study the end of the crossover region "><div class="figure" id="id27">
+<img alt="../_images/sphx_glr_plot_crossover_thumb.png" src="../_images/sphx_glr_plot_crossover_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_crossover.html#sphx-glr-auto-examples-ipt-plot-crossover-py"><span class="std std-ref">IPT Transition at crossover</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id28">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Using the formalism presented in [1]_ I calculate the stability of the IPT solution within the ..."><div class="figure" id="id29">
+<img alt="../_images/sphx_glr_plot_free_transition_thumb.png" src="../_images/sphx_glr_plot_free_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_free_transition.html#sphx-glr-auto-examples-ipt-plot-free-transition-py"><span class="std std-ref">Transition on free energy</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to express the self-energy of the imp..."><div class="figure" id="id30">
+<img alt="../_images/sphx_glr_plot_ipt_thumb.png" src="../_images/sphx_glr_plot_ipt_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt.html#sphx-glr-auto-examples-ipt-plot-ipt-py"><span class="std std-ref">IPT Solver Existence of Metalic and insulating solution</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Within the iterative perturbative theory (IPT) the aim is to find the coexistance regions."><div class="figure" id="id31">
+<img alt="../_images/sphx_glr_plot_ipt_coex_thumb.png" src="../_images/sphx_glr_plot_ipt_coex_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_ipt_coex.html#sphx-glr-auto-examples-ipt-plot-ipt-coex-py"><span class="std std-ref">IPT Hysteresis loop</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="As the Energy calculations from IPT source is not reliable enough another methods is also teste..."><div class="figure" id="id32">
+<img alt="../_images/sphx_glr_plot_stability_thumb.png" src="../_images/sphx_glr_plot_stability_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_stability.html#sphx-glr-auto-examples-ipt-plot-stability-py"><span class="std std-ref">Stability of the solutions in the coexistence region</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id33">
+<img alt="../_images/sphx_glr_plot_transition_thumb.png" src="../_images/sphx_glr_plot_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_transition.html#sphx-glr-auto-examples-ipt-plot-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.e_mean">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">e_mean</code><span class="sig-paren">(</span><em>beta</em>, <em>D=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.e_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the average kinetic Energy per particle in semicircle dos</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.ekin">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">ekin</code><span class="sig-paren">(</span><em>g_iw</em>, <em>s_iw</em>, <em>beta</em>, <em>w_n</em>, <em>ek_mean</em>, <em>g_iwfree</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.ekin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the Kinetic Energy</p>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-imag-ekin">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.ekin</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-ekin" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id34">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.ekin_tau">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">ekin_tau</code><span class="sig-paren">(</span><em>g_iw</em>, <em>tau</em>, <em>w_n</em>, <em>u_int</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.ekin_tau" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.epot">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">epot</code><span class="sig-paren">(</span><em>g_iw</em>, <em>s_iw</em>, <em>u</em>, <em>beta</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.epot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the Potential Energy</p>
+<p>Using the local Green Function and self energy the potential
+energy is calculated using <a class="reference internal" href="../energies.html#potential-energy"><span class="std std-ref">Potential energy</span></a></p>
+<p>Taking the tail of this product to decay in the half-filled single
+band case as:</p>
+<div class="math">
+<p><img src="../_images/math/423b7097d7e7a7f3668169c3c7f392a3a8592b8d.png" alt="\Sigma G \rightarrow \frac{U^2}{4(i\omega_n)^2}"/></p>
+</div><p>The potential energy per spin is calculated by</p>
+<div class="math">
+<p><img src="../_images/math/f47e8e588dc042aed6f66fd1f5cd741e8227e487.png" alt="\langle V \rangle = \frac{1}{\beta} \sum_{n} \frac{1}{2} (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4(i\omega_n)^2} + \frac{U^2}{4(i\omega_n)^2})"/></p>
+</div><div class="math">
+<p><img src="../_images/math/492b2dda6e95a1d20bbc9323c2ff55522cfc1a23.png" alt="= \frac{1}{\beta} \sum_{n&gt;0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4(i\omega_n)^2}) + \frac{U^2}{8\beta} \sum_{n} \frac{1}{(i\omega_n)^2}"/></p>
+</div><div class="math">
+<p><img src="../_images/math/13761ff02fa5ccb3ccd0942d5db2411b985e02dc.png" alt="= \frac{1}{\beta} \sum_{n&gt;0} \Re e (\Sigma(i\omega_n)G(i\omega_n) - \frac{U^2}{4(i\omega_n)^2}) - \frac{U^2\beta}{32}"/></p>
+</div></dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-imag-epot">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.epot</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-epot" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id35">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form..."><div class="figure" id="id36">
+<img alt="../_images/sphx_glr_plot_transition_thumb.png" src="../_images/sphx_glr_plot_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_transition.html#sphx-glr-auto-examples-ipt-plot-transition-py"><span class="std std-ref">Landau Theory of the Mott transition</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.fsolve">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">fsolve</code><span class="sig-paren">(</span><em>func</em>, <em>x0</em>, <em>args=()</em>, <em>fprime=None</em>, <em>full_output=0</em>, <em>col_deriv=0</em>, <em>xtol=1.49012e-08</em>, <em>maxfev=0</em>, <em>band=None</em>, <em>epsfcn=None</em>, <em>factor=100</em>, <em>diag=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.fsolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the roots of a function.</p>
+<p>Return the roots of the (non-linear) equations defined by
+<code class="docutils literal"><span class="pre">func(x)</span> <span class="pre">=</span> <span class="pre">0</span></code> given a starting estimate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> (callable <code class="docutils literal"><span class="pre">f(x,</span> <span class="pre">*args)</span></code>) &#8211; A function that takes at least one (possibly vector) argument.</li>
+<li><strong>x0</strong> (<em>ndarray</em>) &#8211; The starting estimate for the roots of <code class="docutils literal"><span class="pre">func(x)</span> <span class="pre">=</span> <span class="pre">0</span></code>.</li>
+<li><strong>args</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#tuple" title="(in Python v2.7)"><em>tuple</em></a><em>, </em><em>optional</em>) &#8211; Any extra arguments to <cite>func</cite>.</li>
+<li><strong>fprime</strong> (callable <code class="docutils literal"><span class="pre">f(x,</span> <span class="pre">*args)</span></code>, optional) &#8211; A function to compute the Jacobian of <cite>func</cite> with derivatives
+across the rows. By default, the Jacobian will be estimated.</li>
+<li><strong>full_output</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; If True, return optional outputs.</li>
+<li><strong>col_deriv</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; Specify whether the Jacobian function computes derivatives down
+the columns (faster, because there is no transpose operation).</li>
+<li><strong>xtol</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; The calculation will terminate if the relative error between two
+consecutive iterates is at most <cite>xtol</cite>.</li>
+<li><strong>maxfev</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; The maximum number of calls to the function. If zero, then
+<code class="docutils literal"><span class="pre">100*(N+1)</span></code> is the maximum where N is the number of elements
+in <cite>x0</cite>.</li>
+<li><strong>band</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#tuple" title="(in Python v2.7)"><em>tuple</em></a><em>, </em><em>optional</em>) &#8211; If set to a two-sequence containing the number of sub- and
+super-diagonals within the band of the Jacobi matrix, the
+Jacobi matrix is considered banded (only for <code class="docutils literal"><span class="pre">fprime=None</span></code>).</li>
+<li><strong>epsfcn</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; A suitable step length for the forward-difference
+approximation of the Jacobian (for <code class="docutils literal"><span class="pre">fprime=None</span></code>). If
+<cite>epsfcn</cite> is less than the machine precision, it is assumed
+that the relative errors in the functions are of the order of
+the machine precision.</li>
+<li><strong>factor</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>optional</em>) &#8211; A parameter determining the initial step bound
+(<code class="docutils literal"><span class="pre">factor</span> <span class="pre">*</span> <span class="pre">||</span> <span class="pre">diag</span> <span class="pre">*</span> <span class="pre">x||</span></code>).  Should be in the interval
+<code class="docutils literal"><span class="pre">(0.1,</span> <span class="pre">100)</span></code>.</li>
+<li><strong>diag</strong> (<em>sequence</em><em>, </em><em>optional</em>) &#8211; N positive entries that serve as a scale factors for the
+variables.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul>
+<li><p class="first"><strong>x</strong> (<em>ndarray</em>) &#8211; The solution (or the result of the last iteration for
+an unsuccessful call).</p>
+</li>
+<li><p class="first"><strong>infodict</strong> (<em>dict</em>) &#8211; A dictionary of optional outputs with the keys:</p>
+<dl class="docutils">
+<dt><code class="docutils literal"><span class="pre">nfev</span></code></dt>
+<dd><p class="first last">number of function calls</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">njev</span></code></dt>
+<dd><p class="first last">number of Jacobian calls</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">fvec</span></code></dt>
+<dd><p class="first last">function evaluated at the output</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">fjac</span></code></dt>
+<dd><p class="first last">the orthogonal matrix, q, produced by the QR
+factorization of the final approximate Jacobian
+matrix, stored column wise</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">r</span></code></dt>
+<dd><p class="first last">upper triangular matrix produced by QR factorization
+of the same matrix</p>
+</dd>
+<dt><code class="docutils literal"><span class="pre">qtf</span></code></dt>
+<dd><p class="first last">the vector <code class="docutils literal"><span class="pre">(transpose(q)</span> <span class="pre">*</span> <span class="pre">fvec)</span></code></p>
+</dd>
+</dl>
+</li>
+<li><p class="first"><strong>ier</strong> (<em>int</em>) &#8211; An integer flag.  Set to 1 if a solution was found, otherwise refer
+to <cite>mesg</cite> for more information.</p>
+</li>
+<li><p class="first"><strong>mesg</strong> (<em>str</em>) &#8211; If no solution is found, <cite>mesg</cite> details the cause of failure.</p>
+</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="docutils">
+<dt><code class="xref py py-func docutils literal"><span class="pre">root()</span></code></dt>
+<dd>Interface to root finding algorithms for multivariate</dd>
+</dl>
+<p class="last"><code class="xref py py-func docutils literal"><span class="pre">functions.()</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<p><code class="docutils literal"><span class="pre">fsolve</span></code> is a wrapper around MINPACK&#8217;s hybrd and hybrj algorithms.</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.gt_fouriertrans">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">gt_fouriertrans</code><span class="sig-paren">(</span><em>g_tau</em>, <em>tau</em>, <em>w_n</em>, <em>tail_coef=(1.0</em>, <em>0.0</em>, <em>0.0)</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.gt_fouriertrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a forward fourier transform for the interacting Green function
+in which only the interval <img class="math" src="../_images/math/1af2b2317fd4e1538dfe13db6d32dfaa02905638.png" alt="[0,\beta)"/> is required and output given
+into positive fermionic matsubara frequencies up to the given cutoff.
+Time array is twice as dense as frequency array</p>
+<div class="math">
+<p><img src="../_images/math/3b30f831030c26e8e167d5dd720c18a0734c04b6.png" alt="G(i\omega_n) = \int_0^\beta G(\tau)
+e^{i\omega_n \tau} d\tau"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g_tau</strong> (<em>real float array</em>) &#8211; Imaginary time interacting Green function</li>
+<li><strong>tau</strong> (<em>real float array</em>) &#8211; Imaginary time points</li>
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies. Only use the positive ones</li>
+<li><strong>tail_coef</strong> (<em>list of floats size 3</em>) &#8211; The first moments of the tails</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Greens function in matsubara frequencies</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-func docutils literal"><span class="pre">freq_tail_fourier()</span></code>, <a class="reference internal" href="#dmft.ipt_imag.gt_fouriertrans" title="dmft.ipt_imag.gt_fouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gt_fouriertrans()</span></code></a></p>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.gw_invfouriertrans">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">gw_invfouriertrans</code><span class="sig-paren">(</span><em>g_iwn</em>, <em>tau</em>, <em>w_n</em>, <em>tail_coef=(1.0</em>, <em>0.0</em>, <em>0.0)</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.gw_invfouriertrans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs an inverse fourier transform of the green Function in which
+only the imaginary positive matsubara frequencies
+<img class="math" src="../_images/math/2745c94df379fe5e13506293a0d53668b3e31072.png" alt="\omega_n= \pi(2n+1)/\beta"/> with <img class="math" src="../_images/math/49663b5a757b04e92d8da86d8ac5b16de7dbddef.png" alt="n \in \mathbb{N}"/> are used.
+The high frequency tails are transformed analytically up to the third moment.</p>
+<p>Output is the real valued positivite imaginary time green function.
+For the positive time output <img class="math" src="../_images/math/4011e821790318bcfc3984408518bd60603958ef.png" alt="\tau \in [0;\beta)"/>.
+Array sizes need not match between frequencies and times, but a time array
+twice as dense is recommended for best performance of the Fast Fourrier
+transform.</p>
+<div class="math">
+<p><img src="../_images/math/f3177afbac7fb08997adb6080d8c90bfc2839d88.png" alt="G(\tau) &amp;= \frac{1}{\beta} \sum_{\omega_n}
+            G(i\omega_n)e^{-i\omega_n \tau} \\
+&amp;= \frac{1}{\beta} \sum_{\omega_n}\left( G(i\omega_n)
+   -\frac{1}{i\omega_n}\right) e^{-i\omega_n \tau} +
+   \frac{1}{\beta} \sum_{\omega_n}\frac{1}{i\omega_n}e^{-i\omega_n \tau} \\"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>g_iwn</strong> (<em>real float array</em>) &#8211; Imaginary time interacting Green function</li>
+<li><strong>tau</strong> (<em>real float array</em>) &#8211; Imaginary time points</li>
+<li><strong>w_n</strong> (<em>real float array</em>) &#8211; fermionic matsubara frequencies. Only use the positive ones</li>
+<li><strong>tail_coef</strong> (<em>list of floats size 3</em>) &#8211; The first moments of the tails</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Interacting Greens function in matsubara frequencies</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">complex ndarray</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dmft.ipt_imag.gt_fouriertrans" title="dmft.ipt_imag.gt_fouriertrans"><code class="xref py py-func docutils literal"><span class="pre">gt_fouriertrans()</span></code></a>, <code class="xref py py-func docutils literal"><span class="pre">freq_tail_fourier()</span></code></p>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.jit">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">jit</code><span class="sig-paren">(</span><em>signature_or_function=None</em>, <em>locals={}</em>, <em>target='cpu'</em>, <em>cache=False</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.jit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This decorator is used to compile a Python function into native code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>signature</strong> &#8211; The (optional) signature or list of signatures to be compiled.
+If not passed, required signatures will be compiled when the
+decorated function is called, depending on the argument values.
+As a convenience, you can directly pass the function to be compiled
+instead.</li>
+<li><strong>locals</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; Mapping of local variable names to Numba types. Used to override the
+types deduced by Numba&#8217;s type inference engine.</li>
+<li><strong>target</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; Specifies the target platform to compile for. Valid targets are cpu,
+gpu, npyufunc, and cuda. Defaults to cpu.</li>
+<li><strong>targetoptions</strong> &#8211; <dl class="docutils">
+<dt>For a cpu target, valid options are:</dt>
+<dd><dl class="first last docutils">
+<dt>nopython: bool</dt>
+<dd>Set to True to disable the use of PyObjects and Python API
+calls. The default behavior is to allow the use of PyObjects
+and Python API. Default value is False.</dd>
+<dt>forceobj: bool</dt>
+<dd>Set to True to force the use of PyObjects for every value.
+Default value is False.</dd>
+<dt>looplift: bool</dt>
+<dd>Set to True to enable jitting loops in nopython mode while
+leaving surrounding code in object mode. This allows functions
+to allocate NumPy arrays and use Python objects, while the
+tight loops in the function can still be compiled in nopython
+mode. Any arrays that the tight loop uses should be created
+before the loop is entered. Default value is True.</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><em>A callable usable as a compiled function.  Actual compiling will be</em></li>
+<li><em>done lazily if no explicit signatures are passed.</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>The function can be used in the following ways:</p>
+<ol class="arabic">
+<li><p class="first">jit(signatures, target=&#8217;cpu&#8217;, <a href="#id1"><span class="problematic" id="id2">**</span></a>targetoptions) -&gt; jit(function)</p>
+<blockquote>
+<div><p>Equivalent to:</p>
+<blockquote>
+<div><p>d = dispatcher(function, targetoptions)
+for signature in signatures:</p>
+<blockquote>
+<div><p>d.compile(signature)</p>
+</div></blockquote>
+</div></blockquote>
+<p>Create a dispatcher object for a python function.  Then, compile
+the function with the given signature(s).</p>
+<p>Example:</p>
+<blockquote>
+<div><p>&#64;jit(&#8220;int32(int32, int32)&#8221;)
+def foo(x, y):</p>
+<blockquote>
+<div><p>return x + y</p>
+</div></blockquote>
+<p>&#64;jit([&#8220;int32(int32, int32)&#8221;, &#8220;float32(float32, float32)&#8221;])
+def bar(x, y):</p>
+<blockquote>
+<div><p>return x + y</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</li>
+<li><p class="first">jit(function, target=&#8217;cpu&#8217;, <a href="#id3"><span class="problematic" id="id4">**</span></a>targetoptions) -&gt; dispatcher</p>
+<blockquote>
+<div><p>Create a dispatcher function object that specializes at call site.</p>
+<p>Examples:</p>
+<blockquote>
+<div><p>&#64;jit
+def foo(x, y):</p>
+<blockquote>
+<div><p>return x + y</p>
+</div></blockquote>
+<p>&#64;jit(target=&#8217;cpu&#8217;, nopython=True)
+def bar(x, y):</p>
+<blockquote>
+<div><p>return x + y</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</li>
+</ol>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.n_half">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">n_half</code><span class="sig-paren">(</span><em>mu</em>, <em>beta</em>, <em>D=1</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.n_half" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the deviation from half-filling in semicircle dos</p>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-imag-n-half">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.n_half</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-n-half" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="To study the stability of the solutions in the coexistence region"><div class="figure" id="id37">
+<img alt="../_images/sphx_glr_plot_energies_thumb.png" src="../_images/sphx_glr_plot_energies_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_energies.html#sphx-glr-auto-examples-ipt-plot-energies-py"><span class="std std-ref">IPT Hysteresis Energy analysis</span></a></span></p>
+</div>
+</div><div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.quad">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">quad</code><span class="sig-paren">(</span><em>func</em>, <em>a</em>, <em>b</em>, <em>args=()</em>, <em>full_output=0</em>, <em>epsabs=1.49e-08</em>, <em>epsrel=1.49e-08</em>, <em>limit=50</em>, <em>points=None</em>, <em>weight=None</em>, <em>wvar=None</em>, <em>wopts=None</em>, <em>maxp1=50</em>, <em>limlst=50</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.quad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a definite integral.</p>
+<p>Integrate func from <cite>a</cite> to <cite>b</cite> (possibly infinite interval) using a
+technique from the Fortran library QUADPACK.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> (<em>{function</em><em>, </em><em>scipy.LowLevelCallable}</em>) &#8211; <p>A Python function or method to integrate.  If <cite>func</cite> takes many
+arguments, it is integrated along the axis corresponding to the
+first argument.</p>
+<p>If the user desires improved integration performance, then <cite>f</cite> may
+be a <cite>scipy.LowLevelCallable</cite> with one of the signatures:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">double</span> <span class="n">func</span><span class="p">(</span><span class="n">double</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">func</span><span class="p">(</span><span class="n">double</span> <span class="n">x</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span><span class="n">user_data</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">func</span><span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span> <span class="o">*</span><span class="n">xx</span><span class="p">)</span>
+<span class="n">double</span> <span class="n">func</span><span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span> <span class="o">*</span><span class="n">xx</span><span class="p">,</span> <span class="n">void</span> <span class="o">*</span><span class="n">user_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">user_data</span></code> is the data contained in the <cite>scipy.LowLevelCallable</cite>.
+In the call forms with <code class="docutils literal"><span class="pre">xx</span></code>,  <code class="docutils literal"><span class="pre">n</span></code> is the length of the <code class="docutils literal"><span class="pre">xx</span></code>
+array which contains <code class="docutils literal"><span class="pre">xx[0]</span> <span class="pre">==</span> <span class="pre">x</span></code> and the rest of the items are
+numbers contained in the <code class="docutils literal"><span class="pre">args</span></code> argument of quad.</p>
+<p>In addition, certain ctypes call signatures are supported for
+backward compatibility, but those should not be used in new code.</p>
+</li>
+<li><strong>a</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Lower limit of integration (use -numpy.inf for -infinity).</li>
+<li><strong>b</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; Upper limit of integration (use numpy.inf for +infinity).</li>
+<li><strong>args</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#tuple" title="(in Python v2.7)"><em>tuple</em></a><em>, </em><em>optional</em>) &#8211; Extra arguments to pass to <cite>func</cite>.</li>
+<li><strong>full_output</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Non-zero to return a dictionary of integration information.
+If non-zero, warning messages are also suppressed and the
+message is appended to the output tuple.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><ul class="simple">
+<li><strong>y</strong> (<em>float</em>) &#8211; The integral of func from <cite>a</cite> to <cite>b</cite>.</li>
+<li><strong>abserr</strong> (<em>float</em>) &#8211; An estimate of the absolute error in the result.</li>
+<li><strong>infodict</strong> (<em>dict</em>) &#8211; A dictionary containing additional information.
+Run scipy.integrate.quad_explain() for more information.</li>
+<li><em>message</em> &#8211; A convergence message.</li>
+<li><em>explain</em> &#8211; Appended only with &#8216;cos&#8217; or &#8216;sin&#8217; weighting and infinite
+integration limits, it contains an explanation of the codes in
+infodict[&#8216;ierlst&#8217;]</li>
+</ul>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Other Parameters:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li><strong>epsabs</strong> (<em>float or int, optional</em>) &#8211; Absolute error tolerance.</li>
+<li><strong>epsrel</strong> (<em>float or int, optional</em>) &#8211; Relative error tolerance.</li>
+<li><strong>limit</strong> (<em>float or int, optional</em>) &#8211; An upper bound on the number of subintervals used in the adaptive
+algorithm.</li>
+<li><strong>points</strong> (<em>(sequence of floats,ints), optional</em>) &#8211; A sequence of break points in the bounded integration interval
+where local difficulties of the integrand may occur (e.g.,
+singularities, discontinuities). The sequence does not have
+to be sorted.</li>
+<li><strong>weight</strong> (<em>float or int, optional</em>) &#8211; String indicating weighting function. Full explanation for this
+and the remaining arguments can be found below.</li>
+<li><strong>wvar</strong> (<em>optional</em>) &#8211; Variables for use with weighting functions.</li>
+<li><strong>wopts</strong> (<em>optional</em>) &#8211; Optional input for reusing Chebyshev moments.</li>
+<li><strong>maxp1</strong> (<em>float or int, optional</em>) &#8211; An upper bound on the number of Chebyshev moments.</li>
+<li><strong>limlst</strong> (<em>int, optional</em>) &#8211; Upper bound on the number of cycles (&gt;=3) for use with a sinusoidal
+weighting and an infinite end-point.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><code class="xref py py-func docutils literal"><span class="pre">dblquad()</span></code></dt>
+<dd>double integral</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">tplquad()</span></code></dt>
+<dd>triple integral</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">nquad()</span></code></dt>
+<dd>n-dimensional integrals (uses <cite>quad</cite> recursively)</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">fixed_quad()</span></code></dt>
+<dd>fixed-order Gaussian quadrature</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">quadrature()</span></code></dt>
+<dd>adaptive Gaussian quadrature</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">odeint()</span></code></dt>
+<dd>ODE integrator</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">ode()</span></code></dt>
+<dd>ODE integrator</dd>
+<dt><a class="reference internal" href="#dmft.ipt_imag.simps" title="dmft.ipt_imag.simps"><code class="xref py py-func docutils literal"><span class="pre">simps()</span></code></a></dt>
+<dd>integrator for sampled data</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">romb()</span></code></dt>
+<dd>integrator for sampled data</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">scipy.special()</span></code></dt>
+<dd>for coefficients and roots of orthogonal polynomials</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p><strong>Extra information for quad() inputs and outputs</strong></p>
+<p>If full_output is non-zero, then the third output argument
+(infodict) is a dictionary with entries as tabulated below.  For
+infinite limits, the range is transformed to (0,1) and the
+optional outputs are given with respect to this transformed range.
+Let M be the input argument limit and let K be infodict[&#8216;last&#8217;].
+The entries are:</p>
+<dl class="docutils">
+<dt>&#8216;neval&#8217;</dt>
+<dd>The number of function evaluations.</dd>
+<dt>&#8216;last&#8217;</dt>
+<dd>The number, K, of subintervals produced in the subdivision process.</dd>
+<dt>&#8216;alist&#8217;</dt>
+<dd>A rank-1 array of length M, the first K elements of which are the
+left end points of the subintervals in the partition of the
+integration range.</dd>
+<dt>&#8216;blist&#8217;</dt>
+<dd>A rank-1 array of length M, the first K elements of which are the
+right end points of the subintervals.</dd>
+<dt>&#8216;rlist&#8217;</dt>
+<dd>A rank-1 array of length M, the first K elements of which are the
+integral approximations on the subintervals.</dd>
+<dt>&#8216;elist&#8217;</dt>
+<dd>A rank-1 array of length M, the first K elements of which are the
+moduli of the absolute error estimates on the subintervals.</dd>
+<dt>&#8216;iord&#8217;</dt>
+<dd>A rank-1 integer array of length M, the first L elements of
+which are pointers to the error estimates over the subintervals
+with <code class="docutils literal"><span class="pre">L=K</span></code> if <code class="docutils literal"><span class="pre">K&lt;=M/2+2</span></code> or <code class="docutils literal"><span class="pre">L=M+1-K</span></code> otherwise. Let I be the
+sequence <code class="docutils literal"><span class="pre">infodict['iord']</span></code> and let E be the sequence
+<code class="docutils literal"><span class="pre">infodict['elist']</span></code>.  Then <code class="docutils literal"><span class="pre">E[I[1]],</span> <span class="pre">...,</span> <span class="pre">E[I[L]]</span></code> forms a
+decreasing sequence.</dd>
+</dl>
+<p>If the input argument points is provided (i.e. it is not None),
+the following additional outputs are placed in the output
+dictionary.  Assume the points sequence is of length P.</p>
+<dl class="docutils">
+<dt>&#8216;pts&#8217;</dt>
+<dd>A rank-1 array of length P+2 containing the integration limits
+and the break points of the intervals in ascending order.
+This is an array giving the subintervals over which integration
+will occur.</dd>
+<dt>&#8216;level&#8217;</dt>
+<dd>A rank-1 integer array of length M (=limit), containing the
+subdivision levels of the subintervals, i.e., if (aa,bb) is a
+subinterval of <code class="docutils literal"><span class="pre">(pts[1],</span> <span class="pre">pts[2])</span></code> where <code class="docutils literal"><span class="pre">pts[0]</span></code> and <code class="docutils literal"><span class="pre">pts[2]</span></code>
+are adjacent elements of <code class="docutils literal"><span class="pre">infodict['pts']</span></code>, then (aa,bb) has level l
+if <code class="docutils literal"><span class="pre">|bb-aa|</span> <span class="pre">=</span> <span class="pre">|pts[2]-pts[1]|</span> <span class="pre">*</span> <span class="pre">2**(-l)</span></code>.</dd>
+<dt>&#8216;ndin&#8217;</dt>
+<dd>A rank-1 integer array of length P+2.  After the first integration
+over the intervals (pts[1], pts[2]), the error estimates over some
+of the intervals may have been increased artificially in order to
+put their subdivision forward.  This array has ones in slots
+corresponding to the subintervals for which this happens.</dd>
+</dl>
+<p><strong>Weighting the integrand</strong></p>
+<p>The input variables, <em>weight</em> and <em>wvar</em>, are used to weight the
+integrand by a select list of functions.  Different integration
+methods are used to compute the integral with these weighting
+functions.  The possible values of weight and the corresponding
+weighting functions are.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="15%" />
+<col width="53%" />
+<col width="32%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head"><code class="docutils literal"><span class="pre">weight</span></code></th>
+<th class="head">Weight function used</th>
+<th class="head"><code class="docutils literal"><span class="pre">wvar</span></code></th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>&#8216;cos&#8217;</td>
+<td>cos(w*x)</td>
+<td>wvar = w</td>
+</tr>
+<tr class="row-odd"><td>&#8216;sin&#8217;</td>
+<td>sin(w*x)</td>
+<td>wvar = w</td>
+</tr>
+<tr class="row-even"><td>&#8216;alg&#8217;</td>
+<td>g(x) = ((x-a)**alpha)*((b-x)**beta)</td>
+<td>wvar = (alpha, beta)</td>
+</tr>
+<tr class="row-odd"><td>&#8216;alg-loga&#8217;</td>
+<td>g(x)*log(x-a)</td>
+<td>wvar = (alpha, beta)</td>
+</tr>
+<tr class="row-even"><td>&#8216;alg-logb&#8217;</td>
+<td>g(x)*log(b-x)</td>
+<td>wvar = (alpha, beta)</td>
+</tr>
+<tr class="row-odd"><td>&#8216;alg-log&#8217;</td>
+<td>g(x)*log(x-a)*log(b-x)</td>
+<td>wvar = (alpha, beta)</td>
+</tr>
+<tr class="row-even"><td>&#8216;cauchy&#8217;</td>
+<td>1/(x-c)</td>
+<td>wvar = c</td>
+</tr>
+</tbody>
+</table>
+<p>wvar holds the parameter w, (alpha, beta), or c depending on the weight
+selected.  In these expressions, a and b are the integration limits.</p>
+<p>For the &#8216;cos&#8217; and &#8216;sin&#8217; weighting, additional inputs and outputs are
+available.</p>
+<p>For finite integration limits, the integration is performed using a
+Clenshaw-Curtis method which uses Chebyshev moments.  For repeated
+calculations, these moments are saved in the output dictionary:</p>
+<dl class="docutils">
+<dt>&#8216;momcom&#8217;</dt>
+<dd>The maximum level of Chebyshev moments that have been computed,
+i.e., if <code class="docutils literal"><span class="pre">M_c</span></code> is <code class="docutils literal"><span class="pre">infodict['momcom']</span></code> then the moments have been
+computed for intervals of length <code class="docutils literal"><span class="pre">|b-a|</span> <span class="pre">*</span> <span class="pre">2**(-l)</span></code>,
+<code class="docutils literal"><span class="pre">l=0,1,...,M_c</span></code>.</dd>
+<dt>&#8216;nnlog&#8217;</dt>
+<dd>A rank-1 integer array of length M(=limit), containing the
+subdivision levels of the subintervals, i.e., an element of this
+array is equal to l if the corresponding subinterval is
+<code class="docutils literal"><span class="pre">|b-a|*</span> <span class="pre">2**(-l)</span></code>.</dd>
+<dt>&#8216;chebmo&#8217;</dt>
+<dd>A rank-2 array of shape (25, maxp1) containing the computed
+Chebyshev moments.  These can be passed on to an integration
+over the same interval by passing this array as the second
+element of the sequence wopts and passing infodict[&#8216;momcom&#8217;] as
+the first element.</dd>
+</dl>
+<p>If one of the integration limits is infinite, then a Fourier integral is
+computed (assuming w neq 0).  If full_output is 1 and a numerical error
+is encountered, besides the error message attached to the output tuple,
+a dictionary is also appended to the output tuple which translates the
+error codes in the array <code class="docutils literal"><span class="pre">info['ierlst']</span></code> to English messages.  The
+output information dictionary contains the following entries instead of
+&#8216;last&#8217;, &#8216;alist&#8217;, &#8216;blist&#8217;, &#8216;rlist&#8217;, and &#8216;elist&#8217;:</p>
+<dl class="docutils">
+<dt>&#8216;lst&#8217;</dt>
+<dd>The number of subintervals needed for the integration (call it <code class="docutils literal"><span class="pre">K_f</span></code>).</dd>
+<dt>&#8216;rslst&#8217;</dt>
+<dd>A rank-1 array of length M_f=limlst, whose first <code class="docutils literal"><span class="pre">K_f</span></code> elements
+contain the integral contribution over the interval
+<code class="docutils literal"><span class="pre">(a+(k-1)c,</span> <span class="pre">a+kc)</span></code> where <code class="docutils literal"><span class="pre">c</span> <span class="pre">=</span> <span class="pre">(2*floor(|w|)</span> <span class="pre">+</span> <span class="pre">1)</span> <span class="pre">*</span> <span class="pre">pi</span> <span class="pre">/</span> <span class="pre">|w|</span></code>
+and <code class="docutils literal"><span class="pre">k=1,2,...,K_f</span></code>.</dd>
+<dt>&#8216;erlst&#8217;</dt>
+<dd>A rank-1 array of length <code class="docutils literal"><span class="pre">M_f</span></code> containing the error estimate
+corresponding to the interval in the same position in
+<code class="docutils literal"><span class="pre">infodict['rslist']</span></code>.</dd>
+<dt>&#8216;ierlst&#8217;</dt>
+<dd>A rank-1 integer array of length <code class="docutils literal"><span class="pre">M_f</span></code> containing an error flag
+corresponding to the interval in the same position in
+<code class="docutils literal"><span class="pre">infodict['rslist']</span></code>.  See the explanation dictionary (last entry
+in the output tuple) for the meaning of the codes.</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Calculate <img class="math" src="../_images/math/cb35e21bea00df8744e9d8b07ce9e847c203c661.png" alt="\int^4_0 x^2 dx"/> and compare with an analytic result</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">integrate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x2</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">x2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">(21.333333333333332, 2.3684757858670003e-13)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="mi">4</span><span class="o">**</span><span class="mi">3</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>  <span class="c1"># analytical result</span>
+<span class="go">21.3333333333</span>
+</pre></div>
+</div>
+<p>Calculate <img class="math" src="../_images/math/9cc72575af1d0384cc56a7c2bdad32d76bb2ba9a.png" alt="\int^\infty_0 e^{-x} dx"/></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">invexp</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">invexp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+<span class="go">(1.0, 5.842605999138044e-11)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">a</span> <span class="p">:</span> <span class="n">a</span><span class="o">*</span><span class="n">x</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span>
+<span class="go">1.5</span>
+</pre></div>
+</div>
+<p>Calculate <img class="math" src="../_images/math/43558dab4b087d557e279b95171b5dec8d2445f1.png" alt="\int^1_0 x^2 + y^2 dx"/> with ctypes, holding
+y parameter as 1:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">testlib</span><span class="o">.</span><span class="n">c</span> <span class="o">=&gt;</span>
+    <span class="n">double</span> <span class="n">func</span><span class="p">(</span><span class="nb">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">double</span> <span class="n">args</span><span class="p">[</span><span class="n">n</span><span class="p">]){</span>
+        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">];}</span>
+<span class="nb">compile</span> <span class="n">to</span> <span class="n">library</span> <span class="n">testlib</span><span class="o">.*</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">integrate</span>
+<span class="kn">import</span> <span class="nn">ctypes</span>
+<span class="n">lib</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">CDLL</span><span class="p">(</span><span class="s1">&#39;/home/.../testlib.*&#39;</span><span class="p">)</span> <span class="c1">#use absolute path</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">restype</span> <span class="o">=</span> <span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span>
+<span class="n">lib</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">argtypes</span> <span class="o">=</span> <span class="p">(</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_int</span><span class="p">,</span><span class="n">ctypes</span><span class="o">.</span><span class="n">c_double</span><span class="p">)</span>
+<span class="n">integrate</span><span class="o">.</span><span class="n">quad</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">func</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,(</span><span class="mi">1</span><span class="p">))</span>
+<span class="c1">#(1.3333333333333333, 1.4802973661668752e-14)</span>
+<span class="nb">print</span><span class="p">((</span><span class="mf">1.0</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="mf">3.0</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mf">0.0</span><span class="o">**</span><span class="mi">3</span><span class="o">/</span><span class="mf">3.0</span> <span class="o">+</span> <span class="mf">0.0</span><span class="p">))</span> <span class="c1">#Analytic result</span>
+<span class="c1"># 1.3333333333333333</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.simps">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">simps</code><span class="sig-paren">(</span><em>y</em>, <em>x=None</em>, <em>dx=1</em>, <em>axis=-1</em>, <em>even='avg'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.simps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate y(x) using samples along the given axis and the composite
+Simpson&#8217;s rule.  If x is None, spacing of dx is assumed.</p>
+<p>If there are an even number of samples, N, then there are an odd
+number of intervals (N-1), but Simpson&#8217;s rule requires an even number
+of intervals.  The parameter &#8216;even&#8217; controls how this is handled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>y</strong> (<em>array_like</em>) &#8211; Array to be integrated.</li>
+<li><strong>x</strong> (<em>array_like</em><em>, </em><em>optional</em>) &#8211; If given, the points at which <cite>y</cite> is sampled.</li>
+<li><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Spacing of integration points along axis of <cite>y</cite>. Only used when
+<cite>x</cite> is None. Default is 1.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Axis along which to integrate. Default is the last axis.</li>
+<li><strong>even</strong> (<em>str {'avg'</em><em>, </em><em>'first'</em><em>, </em><em>'last'}</em><em>, </em><em>optional</em>) &#8211; <dl class="docutils">
+<dt>&#8216;avg&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Average two results:1) use the first N-2 intervals with</span></dt>
+<dd>a trapezoidal rule on the last interval and 2) use the last
+N-2 intervals with a trapezoidal rule on the first interval.</dd>
+<dt>&#8216;first&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Use Simpson&#8217;s rule for the first N-2 intervals with</span></dt>
+<dd>a trapezoidal rule on the last interval.</dd>
+<dt>&#8216;last&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">Use Simpson&#8217;s rule for the last N-2 intervals with a</span></dt>
+<dd>trapezoidal rule on the first interval.</dd>
+</dl>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<dl class="last docutils">
+<dt><a class="reference internal" href="#dmft.ipt_imag.quad" title="dmft.ipt_imag.quad"><code class="xref py py-func docutils literal"><span class="pre">quad()</span></code></a></dt>
+<dd>adaptive quadrature using QUADPACK</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">romberg()</span></code></dt>
+<dd>adaptive Romberg quadrature</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">quadrature()</span></code></dt>
+<dd>adaptive Gaussian quadrature</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">fixed_quad()</span></code></dt>
+<dd>fixed-order Gaussian quadrature</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">dblquad()</span></code></dt>
+<dd>double integrals</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">tplquad()</span></code></dt>
+<dd>triple integrals</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">romb()</span></code></dt>
+<dd>integrators for sampled data</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">cumtrapz()</span></code></dt>
+<dd>cumulative integration for sampled data</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">ode()</span></code></dt>
+<dd>ODE integrators</dd>
+<dt><code class="xref py py-func docutils literal"><span class="pre">odeint()</span></code></dt>
+<dd>ODE integrators</dd>
+</dl>
+</div>
+<p class="rubric">Notes</p>
+<p>For an odd number of samples that are equally spaced the result is
+exact if the function is a polynomial of order 3 or less.  If
+the samples are not equally spaced, then the result is exact only
+if the function is a polynomial of order 2 or less.</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.ipt_imag.single_band_ipt_solver">
+<code class="descclassname">dmft.ipt_imag.</code><code class="descname">single_band_ipt_solver</code><span class="sig-paren">(</span><em>u_int</em>, <em>g_0_iwn</em>, <em>w_n</em>, <em>tau</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.ipt_imag.single_band_ipt_solver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a Green function it returns a dressed one and the self-energy</p>
+<div class="math">
+<p><img src="../_images/math/6b6bdf24fca115a70af33ed320720985fa33d65a.png" alt="\Sigma(\tau) \approx U^2 \mathcal{G}^0(\tau)^3"/></p>
+</div><div class="math">
+<p><img src="../_images/math/8d0d41c250e8d41f86d46e2a73e6286d8be4bdea.png" alt="G = \mathcal{G}^0(i\omega_n)/(1 - \Sigma(i\omega_n)\mathcal{G}^0(i\omega_n))"/></p>
+</div><p>The Fourier transforms use as tail expansion of the atomic limit self-enegy</p>
+<div class="math">
+<p><img src="../_images/math/61ddd0bf340780589281885bab0ea76e7c08e25a.png" alt="\Sigma(i\omega_n\rightarrow \infty) = \frac{U^2}{4(i\omega_n)}"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>u_int</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>local contact interaction</em>) &#8211; </li>
+<li><strong>g_0_iwn</strong> (<em>complex 1D ndarray</em>) &#8211; <em>bare</em> Green function, the Weiss field</li>
+<li><strong>w_n</strong> (<em>real 1D ndarray</em>) &#8211; Matsubara frequencies</li>
+<li><strong>tau</strong> (<em>real 1D array</em>) &#8211; Imaginary time points, not included edge point of <img class="math" src="../_images/math/673db572593344d1b0cdd9dce919409ecf15e9e2.png" alt="\beta^-"/></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="examples-using-dmft-ipt-imag-single-band-ipt-solver">
+<h4>Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.single_band_ipt_solver</span></code><a class="headerlink" href="#examples-using-dmft-ipt-imag-single-band-ipt-solver" title="Permalink to this headline">¶</a></h4>
+<div class="sphx-glr-thumbcontainer" tooltip="Using the formalism presented in [1]_ I calculate the stability of the IPT solution within the ..."><div class="figure" id="id38">
+<img alt="../_images/sphx_glr_plot_free_transition_thumb.png" src="../_images/sphx_glr_plot_free_transition_thumb.png" />
+<p class="caption"><span class="caption-text"><a class="reference internal" href="../auto_examples/IPT/plot_free_transition.html#sphx-glr-auto-examples-ipt-plot-free-transition-py"><span class="std std-ref">Transition on free energy</span></a></span></p>
+</div>
+</div><div style='clear:both'></div></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.ipt_imag</a><ul>
+<li><a class="reference internal" href="#ipt-solver-single-band">IPT Solver Single Band</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-dimer-sigma">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.dimer_sigma</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-dmft-loop">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.dmft_loop</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-ekin">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.ekin</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-epot">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.epot</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-n-half">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.n_half</span></code></a></li>
+<li><a class="reference internal" href="#examples-using-dmft-ipt-imag-single-band-ipt-solver">Examples using <code class="docutils literal"><span class="pre">dmft.ipt_imag.single_band_ipt_solver</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dmft.twosite.html"
+                        title="previous chapter">dmft.twosite</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="dmft.ipt_real.html"
+                        title="next chapter">dmft.ipt_real</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.ipt_imag.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="dmft.ipt_real.html" title="dmft.ipt_real"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dmft.twosite.html" title="dmft.twosite"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

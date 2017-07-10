@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>IPT Transition at crossover &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="IPT bandwidth controlled" href="plot_bandwidth_transition.html" />
+    <link rel="prev" title="The Metal Mott Insulator transition" href="plot_mit.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_bandwidth_transition.html" title="IPT bandwidth controlled"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_mit.html" title="The Metal Mott Insulator transition"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ipt-transition-at-crossover">
+<span id="sphx-glr-auto-examples-ipt-plot-crossover-py"></span><h1>IPT Transition at crossover<a class="headerlink" href="#ipt-transition-at-crossover" title="Permalink to this headline">¶</a></h1>
+<p>Study the end of the crossover region</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">from</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">fit_gf</span></a>
+<span class="kn">from</span> <span class="nn">dmft.twosite</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.twosite.html#dmft.twosite.matsubara_Z" title="View documentation for dmft.twosite.matsubara_Z"><span class="n">matsubara_Z</span></a>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+
+<span class="k">def</span> <span class="nf">hysteresis</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u_range</span><span class="p">):</span>
+    <span class="n">log_g_sig</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">g_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="n">u_range</span><span class="p">:</span>
+        <span class="n">g_iwn</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">g_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="n">log_g_sig</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">g_iwn</span><span class="p">,</span> <span class="n">sigma</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">log_g_sig</span>
+
+
+<span class="n">U</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">2.2</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">betarange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mf">17.85</span><span class="p">,</span> <span class="mf">19.2</span><span class="p">,</span> <span class="mf">20.</span><span class="p">,</span> <span class="mf">21.3</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="n">betarange</span><span class="p">:</span>
+    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hysteresis</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="quasiparticle-weight">
+<h2>Quasiparticle weight<a class="headerlink" href="#quasiparticle-weight" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">figz</span><span class="p">,</span> <span class="n">axz</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">betarange</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="n">u_zet</span> <span class="o">=</span> <span class="p">[</span><a href="../../gen_modules/dmft.twosite.html#dmft.twosite.matsubara_Z" title="View documentation for dmft.twosite.matsubara_Z"><span class="n">matsubara_Z</span></a><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">sigma</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
+    <span class="n">axz</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">u_zet</span><span class="p">,</span> <span class="s1">&#39;+-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+<span class="n">axz</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Quasiparticle weigth&#39;</span><span class="p">)</span>
+<span class="n">axz</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axz</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+<span class="n">axz</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_crossover_001.png" class="align-center" src="../../_images/sphx_glr_plot_crossover_001.png" />
+</div>
+<div class="section" id="spectral-density-at-fermi-level">
+<h2>Spectral density at Fermi level<a class="headerlink" href="#spectral-density-at-fermi-level" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">figf</span><span class="p">,</span> <span class="n">axf</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">betarange</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">u_fl</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><a href="../../gen_modules/dmft.common.html#dmft.common.fit_gf" title="View documentation for dmft.common.fit_gf"><span class="n">fit_gf</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="n">g_iwn</span><span class="o">.</span><span class="n">imag</span><span class="p">)(</span><span class="mf">0.</span><span class="p">)</span><span class="k">for</span> <span class="n">g_iwn</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">result</span><span class="p">]</span>
+    <span class="n">axf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">u_fl</span><span class="p">,</span> <span class="s1">&#39;x:&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+
+<span class="n">axf</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Dos(0)&#39;</span><span class="p">)</span>
+<span class="n">axz</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Density of states at Fermi level&#39;</span><span class="p">)</span>
+<span class="n">axf</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_crossover_002.png" class="align-center" src="../../_images/sphx_glr_plot_crossover_002.png" />
+</div>
+<div class="section" id="double-occupation">
+<h2>Double occupation<a class="headerlink" href="#double-occupation" title="Permalink to this headline">¶</a></h2>
+<p>Is proportional to the Potential energy which is defined in
+<a class="reference internal" href="../../energies.html#potential-energy"><span class="std std-ref">Potential energy</span></a> the tail of this function behaves as</p>
+<div class="math">
+<p><img src="../../_images/math/eb0c28306f0f359c26714e0ce0f8adadd60c9d97.png" alt="\Sigma G(i\omega_n\rightarrow \infty)= \frac{U^2}{8(i\omega_n)^2}"/></p>
+</div><p>Then to find out the double occupation one uses the relation</p>
+<div class="math">
+<p><img src="../../_images/math/667bc401de49e978225626381177f63915c0b9e6.png" alt="\langle n_\uparrow n_\downarrow \rangle = \frac{2\langle V \rangle}{U}+\frac{1}{4}"/></p>
+</div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">figd</span><span class="p">,</span> <span class="n">axd</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">beta</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">betarange</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="n">beta</span><span class="p">))</span>
+    <span class="n">V</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">([</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">s</span> <span class="o">*</span> <span class="n">g</span> <span class="o">+</span> <span class="n">u</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">8.</span> <span class="o">/</span> <span class="n">w_n</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">beta</span>
+                    <span class="k">for</span> <span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">s</span><span class="p">),</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">U</span><span class="p">)])</span> <span class="o">-</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">U</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">8.</span>
+
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">2.</span> <span class="o">/</span> <span class="n">U</span> <span class="o">*</span> <span class="n">V</span> <span class="o">+</span> <span class="mf">0.25</span>
+    <span class="n">axd</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">))</span>
+
+<span class="n">axd</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Double occupation&#39;</span><span class="p">)</span>
+<span class="n">axd</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axd</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle n_\uparrow n_\downarrow \rangle$&#39;</span><span class="p">)</span>
+<span class="n">axd</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_crossover_003.png" class="align-center" src="../../_images/sphx_glr_plot_crossover_003.png" />
+<p><strong>Total running time of the script:</strong> ( 0 minutes  1.452 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_crossover.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_crossover.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_crossover.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_crossover.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">IPT Transition at crossover</a><ul>
+<li><a class="reference internal" href="#quasiparticle-weight">Quasiparticle weight</a></li>
+<li><a class="reference internal" href="#spectral-density-at-fermi-level">Spectral density at Fermi level</a></li>
+<li><a class="reference internal" href="#double-occupation">Double occupation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_mit.html"
+                        title="previous chapter">The Metal Mott Insulator transition</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_bandwidth_transition.html"
+                        title="next chapter">IPT bandwidth controlled</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/IPT/plot_crossover.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_bandwidth_transition.html" title="IPT bandwidth controlled"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_mit.html" title="The Metal Mott Insulator transition"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

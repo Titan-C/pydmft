@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Iterator for CTQMC of a dimer &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iterator-for-ctqmc-of-a-dimer">
+<span id="sphx-glr-dimer-lattice-cthyb-dimer-it-py"></span><h1>Iterator for CTQMC of a dimer<a class="headerlink" href="#iterator-for-ctqmc-of-a-dimer" title="Permalink to this headline">¶</a></h1>
+<p>This module runs ctqmc impurity solver for one-band model.
+The executable shoule exist in directory params[&#8216;exe&#8217;]</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">dmft.plot.cthyb_h_single_site</span> <span class="kn">as</span> <span class="nn">psb</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;DMFT loop for CTHYB single band&#39;</span><span class="p">,</span>
+                                 <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-BETA&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="mf">64.</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;The inverse temperature&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-Niter&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of iterations&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-U&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="p">[</span><span class="mf">2.7</span><span class="p">],</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Local interaction strength&#39;</span><span class="p">)</span>
+
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-odir&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;coex/B{BETA}_U{U}&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Output directory&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-new_seed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                    <span class="n">metavar</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;U_src&#39;</span><span class="p">,</span> <span class="s1">&#39;U_target&#39;</span><span class="p">,</span> <span class="s1">&#39;avg_over&#39;</span><span class="p">),</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Resume DMFT loops from on disk data files&#39;</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+<span class="n">Niter</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">Niter</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">BETA</span>
+<span class="n">M</span> <span class="o">=</span> <span class="mf">10e6</span>
+
+
+<span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;exe&quot;</span><span class="p">:</span>          <span class="p">[</span><span class="s1">&#39;ctqmc&#39;</span><span class="p">,</span>        <span class="s2">&quot;# Path to executable&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;Delta&quot;</span><span class="p">:</span>        <span class="p">[</span><span class="s2">&quot;Delta.inp&quot;</span><span class="p">,</span>    <span class="s2">&quot;# Input bath function hybridization&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;cix&quot;</span><span class="p">:</span>          <span class="p">[</span><span class="s2">&quot;dim_band.imp&quot;</span><span class="p">,</span> <span class="s2">&quot;# Input file with atomic state&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;beta&quot;</span><span class="p">:</span>         <span class="p">[</span><span class="n">BETA</span><span class="p">,</span>           <span class="s2">&quot;# Inverse temperature&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;M&quot;</span><span class="p">:</span>            <span class="p">[</span><span class="n">M</span><span class="p">,</span>              <span class="s2">&quot;# Number of Monte Carlo steps&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;nom&quot;</span><span class="p">:</span>          <span class="p">[</span><span class="n">BETA</span><span class="p">,</span>           <span class="s2">&quot;# number of Matsubara frequency points to sample&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;nomD&quot;</span><span class="p">:</span>         <span class="p">[</span><span class="mi">0</span><span class="p">,</span>              <span class="s2">&quot;# number of Matsubara points using the Dyson Equation&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;Segment&quot;</span><span class="p">:</span>      <span class="p">[</span><span class="mi">0</span><span class="p">,</span>              <span class="s2">&quot;# Whether to use segment type algorithm&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;aom&quot;</span><span class="p">:</span>          <span class="p">[</span><span class="mi">5</span><span class="p">,</span>              <span class="s2">&quot;# number of frequency points to determin high frequency tail&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;tsample&quot;</span><span class="p">:</span>      <span class="p">[</span><span class="mi">30</span><span class="p">,</span>             <span class="s2">&quot;# how often to record the measurements&quot;</span> <span class="p">],</span>
+          <span class="s2">&quot;PChangeOrder&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span>            <span class="s2">&quot;# Ratio between trial steps: add-remove-a-kink / move-a-kink&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;OCA_G&quot;</span><span class="p">:</span>        <span class="p">[</span><span class="bp">False</span><span class="p">,</span>          <span class="s2">&quot;# No OCA diagrams being computed - for speed&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;minM&quot;</span><span class="p">:</span>         <span class="p">[</span><span class="mf">1e-10</span><span class="p">,</span>          <span class="s2">&quot;# The smallest allowed value for the atomic trace&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;minD&quot;</span><span class="p">:</span>         <span class="p">[</span><span class="mf">1e-10</span><span class="p">,</span>          <span class="s2">&quot;# The smallest allowed value for the determinant&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;Nmax&quot;</span><span class="p">:</span>         <span class="p">[</span><span class="n">BETA</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span>         <span class="s2">&quot;# Maximum perturbation order allowed&quot;</span><span class="p">],</span>
+          <span class="s2">&quot;GlobalFlip&quot;</span><span class="p">:</span>   <span class="p">[</span><span class="mi">100000</span><span class="p">,</span>         <span class="s2">&quot;# Global flip shold be tried&quot;</span><span class="p">],</span>
+          <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">CreateInputFile</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+    <span class="s2">&quot; Creates input file (PARAMS) for CT-QMC solver&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;PARAMS&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">parfile</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">vaule</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="n">parfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;{}</span><span class="se">\t</span><span class="s1">{}</span><span class="se">\t</span><span class="s1">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">vaule</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vaule</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+
+<span class="k">def</span> <span class="nf">DMFT_SCC</span><span class="p">(</span><span class="n">fDelta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This subroutine creates Delta.inp from Gf.out for DMFT on bethe</span>
+<span class="sd">    lattice: Delta=t^2*G If Gf.out does not exist, it creates Gf.out</span>
+<span class="sd">    which corresponds to the non-interacting model In the latter case</span>
+<span class="sd">    also creates the inpurity cix file, which contains information</span>
+<span class="sd">    about the atomic states.&quot;&quot;&quot;</span>
+    <span class="n">fileGf</span> <span class="o">=</span> <span class="s1">&#39;Gf.out&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">Gf</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.loadtxt.html#numpy.loadtxt" title="View documentation for numpy.loadtxt"><span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span></a><span class="p">(</span><span class="n">fileGf</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="c1"># If output file exists, start from previous iteration</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># otherwise start from non-interacting limit</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Starting from non-interacting model at beta&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">BETA</span><span class="p">))</span>
+        <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.matsubara_freq" title="View documentation for dmft.common.matsubara_freq"><span class="n">gf</span><span class="o">.</span><span class="n">matsubara_freq</span></a><span class="p">(</span><span class="n">BETA</span><span class="p">)</span>
+        <span class="n">Gf</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">gf</span><span class="o">.</span><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span>
+        <span class="n">Gf</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">w_n</span><span class="p">,</span> <span class="n">Gf</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">Gf</span><span class="o">.</span><span class="n">imag</span><span class="p">])</span>
+
+    <span class="c1"># Preparing input file Delta.inp</span>
+    <span class="n">delta</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">Gf</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">Gf</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">Gf</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">Gf</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">Gf</span><span class="p">[</span><span class="mi">2</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.savetxt.html#numpy.savetxt" title="View documentation for numpy.savetxt"><span class="n">np</span><span class="o">.</span><span class="n">savetxt</span></a><span class="p">(</span><span class="n">fDelta</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">set_new_seed</span><span class="p">(</span><span class="n">setup</span><span class="p">):</span>
+    <span class="n">new_seed</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">new_seed</span>
+    <span class="n">avg_over</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_seed</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">prev_iter</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="n">setup</span><span class="o">.</span><span class="n">odir</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="n">new_seed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span>
+                            <span class="s1">&#39;/Gf.out.*&#39;</span><span class="p">))[</span><span class="o">-</span><span class="n">avg_over</span><span class="p">:]</span>
+    <span class="n">giw</span> <span class="o">=</span> <span class="n">psb</span><span class="o">.</span><span class="n">averager</span><span class="p">(</span><span class="n">prev_iter</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">udir</span> <span class="o">=</span> <span class="n">setup</span><span class="o">.</span><span class="n">odir</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">setup</span><span class="o">.</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="n">new_seed</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">udir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">udir</span><span class="p">)</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.savetxt.html#numpy.savetxt" title="View documentation for numpy.savetxt"><span class="n">np</span><span class="o">.</span><span class="n">savetxt</span></a><span class="p">(</span><span class="n">udir</span> <span class="o">+</span> <span class="s1">&#39;/Gf.out&#39;</span><span class="p">,</span> <span class="n">giw</span><span class="p">)</span>
+    <span class="c1"># creating impurity cix file</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">udir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;cix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">icix</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">dmft_loop_pm</span><span class="p">(</span><span class="n">Uc</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creating parameters file PARAMS for qmc execution&quot;&quot;&quot;</span>
+    <span class="n">uparams</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">Uc</span><span class="o">/</span><span class="mf">2.</span><span class="p">,</span> <span class="s2">&quot;# Chemical potential&quot;</span><span class="p">]}</span>
+    <span class="n">params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">uparams</span><span class="p">)</span>
+    <span class="n">CreateInputFile</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+    <span class="n">mpi_prefix</span> <span class="o">=</span> <span class="s1">&#39;mpirun -np 12&#39;</span>
+
+    <span class="n">fh_info</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;info.dat&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+    <span class="n">prev_iter</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;Gf.out.*&#39;</span><span class="p">))</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Loop at beta &#39;</span><span class="p">,</span> <span class="n">BETA</span><span class="p">,</span> <span class="s1">&#39; U=&#39;</span><span class="p">,</span> <span class="n">Uc</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">prev_iter</span><span class="p">,</span> <span class="n">prev_iter</span> <span class="o">+</span> <span class="n">Niter</span><span class="p">):</span>
+        <span class="c1"># Constructing bath Delta.inp from Green&#39;s function</span>
+        <span class="n">DMFT_SCC</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;Delta&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Running ctqmc</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running ---- qmc it: &#39;</span><span class="p">,</span> <span class="n">it</span><span class="p">,</span> <span class="s1">&#39;-----&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">mpi_prefix</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;exe&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;  PARAMS &gt; nohup_imp.out 2&gt;&amp;1 &#39;</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">fh_info</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">fh_info</span><span class="p">)</span>
+        <span class="n">fh_info</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="c1"># Some copying to store data obtained so far (at each iteration)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;Gf.out&#39;</span><span class="p">,</span> <span class="s1">&#39;Gf.out.{:02}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="s1">&#39;Sig.out&#39;</span><span class="p">,</span> <span class="s1">&#39;Sig.out.{:02}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>
+
+
+<span class="n">CWD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">new_seed</span><span class="p">:</span>
+    <span class="n">set_new_seed</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">Uc</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">U</span><span class="p">:</span>
+
+    <span class="n">udir</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">odir</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="o">=</span><span class="n">Uc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">udir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">udir</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;cix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">udir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;cix&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">udir</span><span class="p">)</span>
+    <span class="n">dmft_loop_pm</span><span class="p">(</span><span class="n">Uc</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">CWD</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.000 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/dimer_it.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">dimer_it.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/dimer_it.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">dimer_it.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/cthyb/dimer_it.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

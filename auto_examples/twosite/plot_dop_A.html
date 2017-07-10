@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Following the Metal to Mott insulator Transition &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Following the Metal to Mott insulator Transition" href="plot_halffill_matsubara.html" />
+    <link rel="prev" title="Double occupation of the Impurity" href="plot_dop_d.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill_matsubara.html" title="Following the Metal to Mott insulator Transition"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_d.html" title="Double occupation of the Impurity"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="following-the-metal-to-mott-insulator-transition">
+<span id="sphx-glr-auto-examples-twosite-plot-dop-a-py"></span><h1>Following the Metal to Mott insulator Transition<a class="headerlink" href="#following-the-metal-to-mott-insulator-transition" title="Permalink to this headline">¶</a></h1>
+<p>Sequence of plots showing the transfer of spectral weight for a Hubbard
+Model in the Bethe Lattice as the local dopping is increased.</p>
+<img alt="../../_images/sphx_glr_plot_dop_A_001.png" class="align-center" src="../../_images/sphx_glr_plot_dop_A_001.png" />
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Code source: Óscar Nájera</span>
+<span class="c1"># License: BSD 3 clause</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">slaveparticles.quantum</span> <span class="kn">import</span> <span class="n">dos</span>
+
+<span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;real&#39;</span>
+<span class="n">u</span> <span class="o">=</span> <span class="mf">8.0</span>
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">1e3</span>
+<span class="n">dop</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">]</span>
+<span class="n">out_file</span> <span class="o">=</span> <span class="n">axis</span><span class="o">+</span><span class="s1">&#39;_dop_b{}_U{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span>
+<span class="n">res</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.load.html#numpy.load" title="View documentation for numpy.load"><span class="n">np</span><span class="o">.</span><span class="n">load</span></a><span class="p">(</span><span class="n">out_file</span><span class="o">+</span><span class="s1">&#39;.npy&#39;</span><span class="p">)</span>
+
+<span class="n">f</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dop</span><span class="p">),</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$A(\omega)$ under doping U={} at &#39;</span>
+                  <span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">beta=${}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">beta</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">omega / t$&#39;</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">dop</span><span class="p">):</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">res</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">omega</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">GF</span><span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$\Sigma$&#39;</span><span class="p">]</span>
+    <span class="n">ra</span> <span class="o">=</span> <span class="n">w</span> <span class="o">+</span> <span class="n">sim</span><span class="o">.</span><span class="n">mu</span> <span class="o">-</span> <span class="n">s</span>
+    <span class="n">rho</span> <span class="o">=</span> <span class="n">dos</span><span class="o">.</span><span class="n">bethe_lattice</span><span class="p">(</span><span class="n">ra</span><span class="p">,</span> <span class="n">sim</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s1">&#39;n={:.2f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">ocupations</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.36</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;n={:.2f}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">ocupations</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">handlelength</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  0.397 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dop_A.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dop_A.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dop_A.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dop_A.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_dop_d.html"
+                        title="previous chapter">Double occupation of the Impurity</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_halffill_matsubara.html"
+                        title="next chapter">Following the Metal to Mott insulator Transition</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/twosite/plot_dop_A.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_halffill_matsubara.html" title="Following the Metal to Mott insulator Transition"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_dop_d.html" title="Double occupation of the Impurity"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dmft.plot.hf_single_site &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="DMFT examples" href="../auto_examples/index.html" />
+    <link rel="prev" title="dmft.utils" href="dmft.utils.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../auto_examples/index.html" title="DMFT examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dmft.utils.html" title="dmft.utils"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" accesskey="U">Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-dmft.plot.hf_single_site">
+<span id="dmft-plot-hf-single-site"></span><h1>dmft.plot.hf_single_site<a class="headerlink" href="#module-dmft.plot.hf_single_site" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="plotting-utilities-for-the-single-site-dmft-phase-diagram">
+<h2>Plotting utilities for the Single site DMFT phase diagram<a class="headerlink" href="#plotting-utilities-for-the-single-site-dmft-phase-diagram" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="dmft.plot.hf_single_site.autocorrelation_function">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">autocorrelation_function</code><span class="sig-paren">(</span><em>spins_log</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.autocorrelation_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the autocorrelation function of the auxiliary Ising fields</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>spins_log</strong> (<em>ndarray 1D</em><em> or </em><em>2D</em>) &#8211; Monte Carlo time evolution of the auxiliary Ising field</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.averager">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">averager</code><span class="sig-paren">(</span><em>sim_dir</em>, <em>observable</em>, <em>last_iterations</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.averager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averages the observable arrays in sim_dir for the last_iterations</p>
+<p>last_iteration is a list of folder names</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.collect_bined_saves">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">collect_bined_saves</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.collect_bined_saves" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.energies">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">energies</code><span class="sig-paren">(</span><em>beta</em>, <em>filestr='SB_PM_B{}.h5'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the potential, and kinetic energy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>beta</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a><em>, </em><em>inverse temperature</em>) &#8211; </li>
+<li><strong>filestr</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a><em>, </em><em>results file name</em><em>, </em><em>beta is replaced in format</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Contains, potential energy, Kinetic energy, values of U</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple of 3 ndarrays</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.fit_dos">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">fit_dos</code><span class="sig-paren">(</span><em>beta</em>, <em>avg</em>, <em>filestr='disk/SB_PM_B{}'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.fit_dos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits for all Green&#8217;s functions at a given beta their
+density of states at the Fermi energy</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>beta</strong> (<em>float inverse temperature</em>) &#8211; </li>
+<li><strong>avg</strong> (<em>int number of last iterations to average over</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">arrays of Interaction, Fitted and source GF imaginary part</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.get_giw">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">get_giw</code><span class="sig-paren">(</span><em>sim_dir</em>, <em>iteration_slice</em>, <em>tau=None</em>, <em>w_n=None</em>, <em>setup=None</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.get_giw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recovers with Fourier Transform G_iw from H5 file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>h5parent</strong> (<em>hdf5 group to go</em>) &#8211; </li>
+<li><strong>iteration_slice</strong> (<em>list of iteration names to average over</em>) &#8211; </li>
+<li><strong>tau</strong> (<em>1D real array time slices of HF data</em>) &#8211; </li>
+<li><strong>w_n</strong> (<em>1D real array matsubara frequencies</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>tuple</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><img class="math" src="../_images/math/f36101c441bcf511a4c70e9f0fd21507af66d746.png" alt="G(\tau)"/>, <img class="math" src="../_images/math/df108627fc264acf6fa78b30138618c67077e468.png" alt="G(i\omega_n)"/></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.get_sigmaiw">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">get_sigmaiw</code><span class="sig-paren">(</span><em>h5parent</em>, <em>iteration</em>, <em>tau</em>, <em>w_n</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.get_sigmaiw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the self-energy with the Dyson equation</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.gf_tail">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">gf_tail</code><span class="sig-paren">(</span><em>gtau</em>, <em>U</em>, <em>mu</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.gf_tail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimates the known first 3 moments of the tail</p>
+<p>Starting from the high energy expansion of <a class="reference internal" href="#self-energy" id="id1">[self-energy]</a></p>
+<div class="math">
+<p><img src="../_images/math/1a9127fb4fdabd43acc8c0649651203a89f89151.png" alt="\Sigma(i\omega_n \rightarrow \infty) = U \left(n_{\bar{\sigma}} - \frac{1}{2}\right)
++ \frac{U^2}{i\omega_n} n_{\bar{\sigma}} (1 - n_{\bar{\sigma}})"/></p>
+</div><p>Then in the Bethe lattice where the self consistency is
+<img class="math" src="../_images/math/0265aac3edaeabc838a36c2e42fc35b78fe8455d.png" alt="-t^2G"/> the Green function decays as</p>
+<div class="math">
+<p><img src="../_images/math/1eb26dc73147825f0181cd66147de748a5a55a82.png" alt="G(i\omega_n \rightarrow \infty) = \frac{1}{i\omega_n}
+- \frac{\mu + U(\frac{1}{2} + G(\tau=0^+))}{(i\omega_n)^2}
++ \frac{t^2 + U^2/4 + \mu^2 - U\mu + 2U\mu G(\tau=0^+)}{(i\omega_n)^3}"/></p>
+</div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>gtau</strong> (<em>Imaginary Time Green function array</em>) &#8211; </li>
+<li><strong>U</strong> (<em>float Local interaction</em>) &#8211; </li>
+<li><strong>mu</strong> (<em>float chemical potential</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="self-energy" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[self-energy]</a></td><td>: Gull, E. et al. Reviews of Modern Physics, 83(2), 384 <a class="reference external" href="http://dx.doi.org/10.1103/RevModPhys.83.349">http://dx.doi.org/10.1103/RevModPhys.83.349</a></td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.glob">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">glob</code><span class="sig-paren">(</span><em>pathname</em>, <em>*</em>, <em>recursive=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.glob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of paths matching a pathname pattern.</p>
+<p>The pattern may contain simple shell-style wildcards a la
+fnmatch. However, unlike fnmatch, filenames starting with a
+dot are special cases that are not matched by &#8216;*&#8217; and &#8216;?&#8217;
+patterns.</p>
+<p>If recursive is true, the pattern &#8216;**&#8217; will match any files and
+zero or more directories and subdirectories.</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.interpol">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">interpol</code><span class="sig-paren">(</span><em>gtau</em>, <em>Lrang</em>, <em>add_edge=False</em>, <em>same_particle=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.interpol" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function interpolates <img class="math" src="../_images/math/f36101c441bcf511a4c70e9f0fd21507af66d746.png" alt="G(\tau)"/> onto a different array</p>
+<p>it keep track of the shape of the Greens functions in Beta^-.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gtau</strong> (<em>ndarray</em>) &#8211; Green function to interpolate</li>
+<li><strong>Lrang</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; number of points to describe</li>
+<li><strong>add_edge</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; if the point Beta^- is missing add it</li>
+<li><strong>same_particle</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; because fermion commutation relations if same fermion the
+edge has an extra -1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.label_convergence">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">label_convergence</code><span class="sig-paren">(</span><em>beta</em>, <em>u_int</em>, <em>axes</em>, <em>graf</em>, <em>n_freq</em>, <em>xlim</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.label_convergence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Label the axes of the common plot of the evolution of DMFT loops</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.list_show_conv">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">list_show_conv</code><span class="sig-paren">(</span><em>beta</em>, <em>filestr='SB_PM_B{}'</em>, <em>n_freq=5</em>, <em>xlim=2</em>, <em>skip=5</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.list_show_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots in individual figures for all interactions the DMFT loops</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.phases">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">phases</code><span class="sig-paren">(</span><em>beta_array</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.phases" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scatter plot of the DOS at Fermi level</p>
+<p>Shows the phase diagram of the impurity model of DMFT</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.plot_fit_dos">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">plot_fit_dos</code><span class="sig-paren">(</span><em>beta</em>, <em>avg</em>, <em>filestr='SB_PM_B{}'</em>, <em>xlim=2</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.plot_fit_dos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the evolution of the Green&#8217;s function in DMFT iterations</p>
+</dd></dl>
+
+<div style='clear:both'></div><dl class="function">
+<dt id="dmft.plot.hf_single_site.show_conv">
+<code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">show_conv</code><span class="sig-paren">(</span><em>beta</em>, <em>u_int</em>, <em>filestr='SB_{simt}_B{beta}'</em>, <em>n_freq=5</em>, <em>xlim=2</em>, <em>skip=5</em>, <em>simt='PM'</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.show_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the evolution of the Green&#8217;s function in DMFT iterations</p>
+</dd></dl>
+
+<div style='clear:both'></div></div>
+<div class="section" id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="dmft.plot.hf_single_site.interp1d">
+<em class="property">class </em><code class="descclassname">dmft.plot.hf_single_site.</code><code class="descname">interp1d</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>kind='linear'</em>, <em>axis=-1</em>, <em>copy=True</em>, <em>bounds_error=None</em>, <em>fill_value=nan</em>, <em>assume_sorted=False</em><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.interp1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate a 1-D function.</p>
+<p><cite>x</cite> and <cite>y</cite> are arrays of values used to approximate some function f:
+<code class="docutils literal"><span class="pre">y</span> <span class="pre">=</span> <span class="pre">f(x)</span></code>.  This class returns a function whose call method uses
+interpolation to find the value of new points.</p>
+<p>Note that calling <cite>interp1d</cite> with NaNs present in input values results in
+undefined behaviour.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> (<em></em><em>(</em><em>N</em><em>,</em><em></em><em>) </em><em>array_like</em>) &#8211; A 1-D array of real values.</li>
+<li><strong>y</strong> (<em></em><em>(</em><em>..</em><em>,</em><em>N</em><em>,</em><em>..</em><em>) </em><em>array_like</em>) &#8211; A N-D array of real values. The length of <cite>y</cite> along the interpolation
+axis must be equal to the length of <cite>x</cite>.</li>
+<li><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Specifies the kind of interpolation as a string
+(&#8216;linear&#8217;, &#8216;nearest&#8217;, &#8216;zero&#8217;, &#8216;slinear&#8217;, &#8216;quadratic&#8217;, &#8216;cubic&#8217;
+where &#8216;zero&#8217;, &#8216;slinear&#8217;, &#8216;quadratic&#8217; and &#8216;cubic&#8217; refer to a spline
+interpolation of zeroth, first, second or third order) or as an
+integer specifying the order of the spline interpolator to use.
+Default is &#8216;linear&#8217;.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a><em>, </em><em>optional</em>) &#8211; Specifies the axis of <cite>y</cite> along which to interpolate.
+Interpolation defaults to the last axis of <cite>y</cite>.</li>
+<li><strong>copy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; If True, the class makes internal copies of x and y.
+If False, references to <cite>x</cite> and <cite>y</cite> are used. The default is to copy.</li>
+<li><strong>bounds_error</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; If True, a ValueError is raised any time interpolation is attempted on
+a value outside of the range of x (where extrapolation is
+necessary). If False, out of bounds values are assigned <cite>fill_value</cite>.
+By default, an error is raised unless <cite>fill_value=&#8221;extrapolate&#8221;</cite>.</li>
+<li><strong>fill_value</strong> (<em>array-like</em><em> or </em><em></em><em>(</em><em>array-like</em><em>, </em><em>array_like</em><em>) or </em><em>&quot;extrapolate&quot;</em><em>, </em><em>optional</em>) &#8211; <ul>
+<li>if a ndarray (or float), this value will be used to fill in for
+requested points outside of the data range. If not provided, then
+the default is NaN. The array-like must broadcast properly to the
+dimensions of the non-interpolation axes.</li>
+<li>If a two-element tuple, then the first element is used as a
+fill value for <code class="docutils literal"><span class="pre">x_new</span> <span class="pre">&lt;</span> <span class="pre">x[0]</span></code> and the second element is used for
+<code class="docutils literal"><span class="pre">x_new</span> <span class="pre">&gt;</span> <span class="pre">x[-1]</span></code>. Anything that is not a 2-element tuple (e.g.,
+list or ndarray, regardless of shape) is taken to be a single
+array-like argument meant to be used for both bounds as
+<code class="docutils literal"><span class="pre">below,</span> <span class="pre">above</span> <span class="pre">=</span> <span class="pre">fill_value,</span> <span class="pre">fill_value</span></code>.<div class="versionadded">
+<p><span class="versionmodified">New in version 0.17.0.</span></p>
+</div>
+</li>
+<li>If &#8220;extrapolate&#8221;, then points outside the data range will be
+extrapolated.<div class="versionadded">
+<p><span class="versionmodified">New in version 0.17.0.</span></p>
+</div>
+</li>
+</ul>
+</li>
+<li><strong>assume_sorted</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) &#8211; If False, values of <cite>x</cite> can be in any order and they are sorted first.
+If True, <cite>x</cite> has to be an array of monotonically increasing values.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="dmft.plot.hf_single_site.interp1d.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#dmft.plot.hf_single_site.interp1d.__call__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal"><span class="pre">splrep</span></code>, <code class="xref py py-class docutils literal"><span class="pre">splev</span></code></p>
+<dl class="last docutils">
+<dt><code class="xref py py-class docutils literal"><span class="pre">UnivariateSpline</span></code></dt>
+<dd>An object-oriented wrapper of the FITPACK routines.</dd>
+<dt><code class="xref py py-class docutils literal"><span class="pre">interp2d</span></code></dt>
+<dd>2-D interpolation</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="o">/</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">f</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">xnew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ynew</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">xnew</span><span class="p">)</span>   <span class="c1"># use interpolation function returned by `interp1d`</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">xnew</span><span class="p">,</span> <span class="n">ynew</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dmft.plot.hf_single_site</a><ul>
+<li><a class="reference internal" href="#plotting-utilities-for-the-single-site-dmft-phase-diagram">Plotting utilities for the Single site DMFT phase diagram</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dmft.utils.html"
+                        title="previous chapter">dmft.utils</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../auto_examples/index.html"
+                        title="next chapter">DMFT examples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/gen_modules/dmft.plot.hf_single_site.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../auto_examples/index.html" title="DMFT examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dmft.utils.html" title="dmft.utils"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../reference.html" >Modules Reference API</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

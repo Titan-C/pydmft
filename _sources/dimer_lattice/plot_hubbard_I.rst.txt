@@ -1,0 +1,235 @@
+
+
+.. _sphx_glr_dimer_lattice_plot_hubbard_I.py:
+
+
+===================
+Hubbard I for dimer
+===================
+
+The atomic self-energy is extracted and plotted into the lattice
+Green's function to see the behavior of the insulating state.
+
+
+
+.. code-block:: python
+
+    # Created Mon Mar 14 13:56:37 2016
+    # Author: Óscar Nájera
+
+    from __future__ import division, absolute_import, print_function
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from dmft.common import gw_invfouriertrans
+    from dmft.plot import plot_band_dispersion
+    import dmft.dimer as dimer
+    import slaveparticles.quantum.operators as op
+
+
+
+
+
+
+
+
+Approximating Hubbard I
+=======================
+
+Here I use the molecule self-energy
+
+
+
+.. code-block:: python
+
+
+    def molecule_sigma(omega, U, mu, tp, beta):
+        """Return molecule self-energy in the given frequency axis"""
+
+        h_at, oper = dimer.hamiltonian(U, mu, tp)
+        oper_pair = [[oper[0], oper[0]], [oper[0], oper[1]]]
+
+        eig_e, eig_v = op.diagonalize(h_at.todense())
+        gfsU = np.array([op.gf_lehmann(eig_e, eig_v, c.T, beta, omega, d)
+                         for c, d in oper_pair])
+
+        invg = dimer.mat_inv(gfsU[0], gfsU[1])
+        plt.plot(omega.real, -gfsU[0].imag, label='Interacting')
+        plt.plot(omega.real, -dimer.mat_inv(omega, -tp)[0].imag, label='Free')
+        plt.xlabel(r'$\omega$')
+        plt.ylabel(r'$A(\omega)$')
+        plt.title(r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+        plt.legend(loc=0)
+
+        return [omega - invg[0], -tp - invg[1]]
+
+
+
+
+
+
+
+
+The Real axis Self-energy
+-------------------------
+
+
+
+.. code-block:: python
+
+
+    def plot_self_energy(w, sd_w, so_w, U, mu, tp, beta):
+        f, ax = plt.subplots(2, sharex=True)
+        ax[0].plot(w, sd_w.real, label='Real')
+        ax[0].plot(w, sd_w.imag, label='Imag')
+        ax[1].plot(w, so_w.real, label='Real')
+        ax[1].plot(w, so_w.imag, label='Imag')
+        ax[0].legend(loc=0)
+        ax[1].set_xlabel(r'$\omega$')
+        ax[0].set_ylabel(r'$\Sigma_{AA}(\omega)$')
+        ax[1].set_ylabel(r'$\Sigma_{AB}(\omega)$')
+        ax[0].set_title(
+            r'Isolated dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta))
+
+    w = np.linspace(-3, 3, 800)
+    U, mu, tp, beta = 2.15, 0., 0.3, 100.
+    sd_w, so_w = molecule_sigma(w + 5e-5j, U, mu, tp, beta)
+    plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
+
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_001.png
+            :scale: 47
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_002.png
+            :scale: 47
+
+
+
+
+Hubbard I Band dispersion
+-------------------------
+
+
+
+.. code-block:: python
+
+
+    eps_k = np.linspace(-1, 1, 61)
+    lat_gf = dimer.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+    Aw = -lat_gf[0].imag / np.pi
+
+    plot_band_dispersion(
+        w, Aw, r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta), eps_k)
+
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_003.png
+            :scale: 47
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_004.png
+            :scale: 47
+
+
+
+
+The Real axis Self-energy
+-------------------------
+
+
+
+.. code-block:: python
+
+
+    w = np.linspace(-3, 3, 800)
+    U, mu, tp, beta = 2.15, 0., 0.3, 5.
+    sd_w, so_w = molecule_sigma(w + 5e-5j, U, mu, tp, beta)
+    plot_self_energy(w, sd_w, so_w, U, mu, tp, beta)
+
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_005.png
+            :scale: 47
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_006.png
+            :scale: 47
+
+
+
+
+Hubbard I Band dispersion
+-------------------------
+
+
+
+.. code-block:: python
+
+
+    eps_k = np.linspace(-1, 1, 61)
+    lat_gf = dimer.mat_inv(np.add.outer(-eps_k, w + 5e-2j - sd_w), -tp - so_w)
+    Aw = -lat_gf[0].imag / np.pi
+    plot_band_dispersion(
+        w, Aw, r'Hubbard I dimer $U={}$, $t_\perp={}$, $\beta={}$'.format(U, tp, beta), eps_k)
+
+
+
+.. rst-class:: sphx-glr-horizontal
+
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_007.png
+            :scale: 47
+
+    *
+
+      .. image:: /dimer_lattice/images/sphx_glr_plot_hubbard_I_008.png
+            :scale: 47
+
+
+
+
+**Total running time of the script:** ( 0 minutes  1.208 seconds)
+
+
+
+.. container:: sphx-glr-footer
+
+
+  .. container:: sphx-glr-download
+
+     :download:`Download Python source code: plot_hubbard_I.py <plot_hubbard_I.py>`
+
+
+
+  .. container:: sphx-glr-download
+
+     :download:`Download Jupyter notebook: plot_hubbard_I.ipynb <plot_hubbard_I.ipynb>`
+
+.. rst-class:: sphx-glr-signature
+
+    `Generated by Sphinx-Gallery <https://sphinx-gallery.readthedocs.io>`_

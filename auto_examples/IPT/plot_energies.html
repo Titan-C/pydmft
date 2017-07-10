@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>IPT Hysteresis Energy analysis &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Quasiparticle decay for different local interaction strenghts" href="../twosite/plot_dop_z.html" />
+    <link rel="prev" title="Landau Theory of the Mott transition" href="plot_transition.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../twosite/plot_dop_z.html" title="Quasiparticle decay for different local interaction strenghts"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_transition.html" title="Landau Theory of the Mott transition"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ipt-hysteresis-energy-analysis">
+<span id="sphx-glr-auto-examples-ipt-plot-energies-py"></span><h1>IPT Hysteresis Energy analysis<a class="headerlink" href="#ipt-hysteresis-energy-analysis" title="Permalink to this headline">¶</a></h1>
+<p>To study the stability of the solutions in the coexistence region</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a>
+<span class="kn">from</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.n_half" title="View documentation for dmft.ipt_imag.n_half"><span class="n">n_half</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.ekin" title="View documentation for dmft.ipt_imag.ekin"><span class="n">ekin</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.epot" title="View documentation for dmft.ipt_imag.epot"><span class="n">epot</span></a><span class="p">,</span> <span class="n">ekin_tau</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1.inset_locator</span> <span class="kn">import</span> <span class="n">mark_inset</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.axes_grid1.inset_locator</span> <span class="kn">import</span> <span class="n">zoomed_inset_axes</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.integrate.quad.html#scipy.integrate.quad" title="View documentation for scipy.integrate.quad"><span class="n">quad</span></a>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="View documentation for scipy.integrate.simps"><span class="n">simps</span></a>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.optimize.fsolve.html#scipy.optimize.fsolve" title="View documentation for scipy.optimize.fsolve"><span class="n">fsolve</span></a>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">slaveparticles.quantum.dos</span> <span class="kn">as</span> <span class="nn">dos</span>
+</pre></div>
+</div>
+<div class="section" id="total-energy">
+<h2>Total energy<a class="headerlink" href="#total-energy" title="Permalink to this headline">¶</a></h2>
+<p>One uses the formula for the <a class="reference internal" href="../../energies.html#kinetic-energy"><span class="std std-ref">Kinetic Energy</span></a> and
+<a class="reference internal" href="../../energies.html#potential-energy"><span class="std std-ref">Potential energy</span></a> and adds them up.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">hysteresis</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u_range</span><span class="p">):</span>
+    <span class="n">log_g_sig</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="n">beta</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+    <span class="n">g_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">u_int</span> <span class="ow">in</span> <span class="n">u_range</span><span class="p">:</span>
+        <span class="n">g_iwn</span><span class="p">,</span> <span class="n">sigma</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">g_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+        <span class="n">log_g_sig</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">g_iwn</span><span class="p">,</span> <span class="n">sigma</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">log_g_sig</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span>
+
+
+<span class="k">def</span> <span class="nf">energy</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u_range</span><span class="p">,</span> <span class="n">g_s_results</span><span class="p">):</span>
+    <span class="n">g_s_iw_log</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span> <span class="o">=</span> <span class="n">g_s_results</span>
+    <span class="n">g_iwfree</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.optimize.fsolve.html#scipy.optimize.fsolve" title="View documentation for scipy.optimize.fsolve"><span class="n">fsolve</span></a><span class="p">(</span><a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.n_half" title="View documentation for dmft.ipt_imag.n_half"><span class="n">n_half</span></a><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">beta</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">e_mean</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.integrate.quad.html#scipy.integrate.quad" title="View documentation for scipy.integrate.quad"><span class="n">quad</span></a><span class="p">(</span><span class="n">dos</span><span class="o">.</span><span class="n">bethe_fermi_ene</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">beta</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">kin</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">([</span><a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.ekin" title="View documentation for dmft.ipt_imag.ekin"><span class="n">ekin</span></a><span class="p">(</span><span class="n">g_iw</span><span class="p">,</span> <span class="n">s_iw</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">e_mean</span><span class="p">,</span> <span class="n">g_iwfree</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">g_iw</span><span class="p">,</span> <span class="n">s_iw</span> <span class="ow">in</span> <span class="n">g_s_iw_log</span><span class="p">])</span>
+    <span class="n">pot</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">([</span><a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.epot" title="View documentation for dmft.ipt_imag.epot"><span class="n">epot</span></a><span class="p">(</span><span class="n">g_iw</span><span class="p">,</span> <span class="n">s_iw</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="p">(</span><span class="n">g_iw</span><span class="p">,</span> <span class="n">s_iw</span><span class="p">),</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">g_s_iw_log</span><span class="p">,</span> <span class="n">u_range</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">kin</span><span class="p">,</span> <span class="n">pot</span>
+
+
+<span class="n">U</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">2.4</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">,</span> <span class="mi">41</span><span class="p">)</span>
+<span class="n">rU</span> <span class="o">=</span> <span class="n">U</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="n">E_log</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">BETARANGE</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.around.html#numpy.around" title="View documentation for numpy.around"><span class="n">np</span><span class="o">.</span><span class="n">around</span></a><span class="p">(</span>
+    <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.hstack.html#numpy.hstack" title="View documentation for numpy.hstack"><span class="n">np</span><span class="o">.</span><span class="n">hstack</span></a><span class="p">(([</span><span class="mf">1024.</span><span class="p">,</span> <span class="mf">512.</span><span class="p">],</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.logspace.html#numpy.logspace" title="View documentation for numpy.logspace"><span class="n">np</span><span class="o">.</span><span class="n">logspace</span></a><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.5</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))),</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">BETA</span> <span class="ow">in</span> <span class="n">BETARANGE</span><span class="p">:</span>
+    <span class="n">Ti</span><span class="p">,</span> <span class="n">Vi</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">rU</span><span class="p">,</span> <span class="n">hysteresis</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">rU</span><span class="p">))</span>
+    <span class="n">Tm</span><span class="p">,</span> <span class="n">Vm</span> <span class="o">=</span> <span class="n">energy</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">hysteresis</span><span class="p">(</span><span class="n">BETA</span><span class="p">,</span> <span class="n">U</span><span class="p">))</span>
+    <span class="n">E_log</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">Tm</span><span class="p">,</span> <span class="n">Vm</span><span class="p">,</span> <span class="n">Ti</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Vi</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">fige</span><span class="p">,</span> <span class="n">axe</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">fige</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">hspace</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">]):</span>
+    <span class="n">BETA</span> <span class="o">=</span> <span class="n">BETARANGE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">Tm</span><span class="p">,</span> <span class="n">Vm</span><span class="p">,</span> <span class="n">Ti</span><span class="p">,</span> <span class="n">Vi</span> <span class="o">=</span> <span class="n">E_log</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">axe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">Tm</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\beta={:.0f}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">BETA</span><span class="p">))</span>
+    <span class="n">axe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">Ti</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
+    <span class="n">axe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">Vm</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+    <span class="n">axe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">Vi</span><span class="p">,</span> <span class="n">j</span> <span class="o">+</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
+    <span class="n">axe</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="p">(</span><span class="n">Tm</span> <span class="o">+</span> <span class="n">Vm</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">Ti</span> <span class="o">+</span> <span class="n">Vi</span><span class="p">),</span> <span class="n">j</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+<span class="n">axe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle T \rangle$&#39;</span><span class="p">)</span>
+<span class="n">axe</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle V \rangle$&#39;</span><span class="p">)</span>
+<span class="n">axe</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Delta \langle  H \rangle$&#39;</span><span class="p">)</span>
+<span class="n">axe</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axe</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;U/D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_energies_001.png" class="align-center" src="../../_images/sphx_glr_plot_energies_001.png" />
+</div>
+<div class="section" id="change-of-the-internal-energy-with-temperature">
+<h2>Change of the internal energy with temperature<a class="headerlink" href="#change-of-the-internal-energy-with-temperature" title="Permalink to this headline">¶</a></h2>
+<p>The next plots show the internal energy. The zoomed insets give
+insight to the low temperature behavior where the existence of 2
+solutions becomes evident too. The metallic solution has the
+characteristic Fermi liquid behavior with the internal energy being
+proportional to <img class="math" src="../../_images/math/607b9c097b256457f9084a34a6c65ab28c949892.png" alt="T^2"/>. Within the coexistence region, for the
+particularly selected value of interaction one also sees how the
+metallic solution at low temperatures has a lower energy than the
+insulator. The final remark is that the insulating solution remains
+flat in energy at low temperatures.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">E_log</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.rollaxis.html#numpy.rollaxis" title="View documentation for numpy.rollaxis"><span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.rollaxis.html#numpy.rollaxis" title="View documentation for numpy.rollaxis"><span class="n">np</span><span class="o">.</span><span class="n">rollaxis</span></a><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.asarray.html#numpy.asarray" title="View documentation for numpy.asarray"><span class="n">np</span><span class="o">.</span><span class="n">asarray</span></a><span class="p">(</span><span class="n">E_log</span><span class="p">),</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">Tm</span><span class="p">,</span> <span class="n">Vm</span><span class="p">,</span> <span class="n">Ti</span><span class="p">,</span> <span class="n">Vi</span> <span class="o">=</span> <span class="n">E_log</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">E_log</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">E_log</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">E_log</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">Hm</span> <span class="o">=</span> <span class="n">Tm</span> <span class="o">+</span> <span class="n">Vm</span>
+<span class="n">Hi</span> <span class="o">=</span> <span class="n">Ti</span> <span class="o">+</span> <span class="n">Vi</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">axins</span> <span class="o">=</span> <span class="n">zoomed_inset_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">plot_zoom</span><span class="p">(</span><span class="n">ul</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="n">Hm</span><span class="p">[</span><span class="n">ul</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="n">ul</span><span class="p">]))</span>
+    <span class="n">axins</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="n">Hm</span><span class="p">[</span><span class="n">ul</span><span class="p">],</span> <span class="n">color</span> <span class="o">+</span> <span class="s1">&#39;+-&#39;</span><span class="p">)</span>
+    <span class="n">axins</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span><span class="p">,</span> <span class="n">Hi</span><span class="p">[</span><span class="n">ul</span><span class="p">],</span> <span class="n">color</span> <span class="o">+</span> <span class="s1">&#39;+-&#39;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">40</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">]):</span>
+    <span class="n">plot_zoom</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+<span class="n">axins</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">axins</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-.</span><span class="mo">031</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">])</span>
+<span class="n">mark_inset</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">axins</span><span class="p">,</span> <span class="n">loc1</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc2</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;0.5&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;T/D&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\langle  H \rangle$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_energies_002.png" class="align-center" src="../../_images/sphx_glr_plot_energies_002.png" />
+</div>
+<div class="section" id="the-heat-capacity">
+<h2>The heat Capacity<a class="headerlink" href="#the-heat-capacity" title="Permalink to this headline">¶</a></h2>
+<p>Is obtained by differentiating the interval Energy by Temperature</p>
+<div class="math">
+<p><img src="../../_images/math/5cfd89d5cedb5b429dab07d56c057325ac6843e7.png" alt="C_v = \frac{\partial\langle  H \rangle}{\partial T}"/></p>
+</div><p>The discontinuity in the internal energy originated from the
+existence of two solution cause a sudden jump to negative values in
+the numerical approximation of the derivative to estimate the Heat
+Capacity. As such those points are replaced by zero. This
+approximation is here justified in the spirit that at the low
+temperatures where this happens the calculated density of points is
+high and as such little information is lost when integrating over
+the heat capacity if this values are missing.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">heat_capacity</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ediff1d.html#numpy.ediff1d" title="View documentation for numpy.ediff1d"><span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span></a><span class="p">(</span><span class="n">H</span><span class="p">)</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ediff1d.html#numpy.ediff1d" title="View documentation for numpy.ediff1d"><span class="n">np</span><span class="o">.</span><span class="n">ediff1d</span></a><span class="p">(</span><span class="n">temp</span><span class="p">))</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="mf">1e-5</span><span class="p">)</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">BETARANGE</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">heat_capacity</span><span class="p">(</span><span class="n">Hm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">heat_capacity</span><span class="p">(</span><span class="n">Hm</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;met U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">8</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">heat_capacity</span><span class="p">(</span><span class="n">Hi</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ins U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">8</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">1240</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pylab.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;T/D&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Heat Capacity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_energies_003.png" class="align-center" src="../../_images/sphx_glr_plot_energies_003.png" />
+</div>
+<div class="section" id="the-entropy">
+<h2>The entropy<a class="headerlink" href="#the-entropy" title="Permalink to this headline">¶</a></h2>
+<div class="math">
+<p><img src="../../_images/math/5c84ffb56bb5a94fe940e4c71c15799b5ceb9e3c.png" alt="S(T) = \ln 2 - \int_T^\infty \frac{C_v}{T'} dT'"/></p>
+</div><p>The use of the saturation value of the entropy at high temperatures
+allows to more reliably estimate the entropy as the high temperature
+behavior of the system is smoother</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">entropy</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">temp</span><span class="p">):</span>
+    <span class="n">cv_temp</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.hstack.html#numpy.hstack" title="View documentation for numpy.hstack"><span class="n">np</span><span class="o">.</span><span class="n">hstack</span></a><span class="p">((</span><span class="n">heat_capacity</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span> <span class="o">/</span> <span class="n">temp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">S</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><a href="http://docs.scipy.org/doc/scipy-0.15.1/reference/generated/scipy.integrate.simps.html#scipy.integrate.simps" title="View documentation for scipy.integrate.simps"><span class="n">simps</span></a><span class="p">(</span><span class="n">cv_temp</span><span class="p">[</span><span class="n">i</span><span class="p">:],</span> <span class="n">T</span><span class="p">[</span><span class="n">i</span><span class="p">:])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">))])</span>
+    <span class="k">return</span> <span class="n">log</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span> <span class="o">-</span> <span class="n">S</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">entropy</span><span class="p">(</span><span class="n">Hm</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">entropy</span><span class="p">(</span><span class="n">Hm</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">8</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogx</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">entropy</span><span class="p">(</span><span class="n">Hi</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">T</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;U=&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">U</span><span class="p">[</span><span class="mi">8</span><span class="p">]))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">1240</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pylab.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;T/D&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Entropy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_energies_004.png" class="align-center" src="../../_images/sphx_glr_plot_energies_004.png" />
+</div>
+<div class="section" id="the-free-energy-landscape">
+<h2>The Free Energy landscape<a class="headerlink" href="#the-free-energy-landscape" title="Permalink to this headline">¶</a></h2>
+<p>The final IPT coexistence region as described by the Free Energy. It
+can be seen how in general the insulating solution is more favorable
+as the difference in free energy is positive there. The first order
+transition line can also be seen.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">Sm</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">entropy</span><span class="p">(</span><span class="n">Hm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">U</span><span class="p">))])</span>
+<span class="n">Si</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="n">entropy</span><span class="p">(</span><span class="n">Hi</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">T</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">U</span><span class="p">))])</span>
+<span class="n">twosol</span> <span class="o">=</span> <span class="p">(</span><span class="n">Hm</span> <span class="o">-</span> <span class="n">Hi</span> <span class="o">-</span> <span class="n">T</span> <span class="o">*</span> <span class="p">(</span><span class="n">Sm</span> <span class="o">-</span> <span class="n">Si</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">Hm</span> <span class="o">-</span> <span class="n">Hi</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">1.2e-4</span><span class="p">)</span>
+<span class="n">rT</span> <span class="o">=</span> <span class="n">T</span><span class="p">[</span><span class="n">T</span> <span class="o">&lt;</span> <span class="mf">0.07</span><span class="p">]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">rT</span><span class="p">,</span> <span class="n">twosol</span><span class="o">.</span><span class="n">T</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">rT</span><span class="p">)],</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;inferno&#39;</span><span class="p">))</span>
+<span class="c1">#plt.axis([x.min(), x.max(), 0, y.max()])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$U/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$T/D$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+    <span class="s1">&#39;Phase diagram </span><span class="se">\n</span><span class="s1"> color represents $-</span><span class="se">\\</span><span class="s1">Im G_{{AA}}(0)$&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_energies_005.png" class="align-center" src="../../_images/sphx_glr_plot_energies_005.png" />
+<p><strong>Total running time of the script:</strong> ( 0 minutes  53.559 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_energies.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_energies.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_energies.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_energies.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">IPT Hysteresis Energy analysis</a><ul>
+<li><a class="reference internal" href="#total-energy">Total energy</a></li>
+<li><a class="reference internal" href="#change-of-the-internal-energy-with-temperature">Change of the internal energy with temperature</a></li>
+<li><a class="reference internal" href="#the-heat-capacity">The heat Capacity</a></li>
+<li><a class="reference internal" href="#the-entropy">The entropy</a></li>
+<li><a class="reference internal" href="#the-free-energy-landscape">The Free Energy landscape</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_transition.html"
+                        title="previous chapter">Landau Theory of the Mott transition</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../twosite/plot_dop_z.html"
+                        title="next chapter">Quasiparticle decay for different local interaction strenghts</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/IPT/plot_energies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../twosite/plot_dop_z.html" title="Quasiparticle decay for different local interaction strenghts"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_transition.html" title="Landau Theory of the Mott transition"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

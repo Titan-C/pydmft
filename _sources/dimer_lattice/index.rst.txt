@@ -1,0 +1,815 @@
+:orphan:
+
+.. _dimer_lattice:
+
+=======================
+The Dimer Hubbard Model
+=======================
+
+This gallery covers the investigation done around the Dimer Hubbard
+Model in a Bethe lattice. I allows to establish a connection between a
+Mott insulator and a band insulator.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Non interacting dimer of a Bethe lattice ">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_dimer_bethe_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_dimer_bethe.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_dimer_bethe
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity of the correlated metal as the system is warmed up. Temperature ...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_optical_track_on_temp_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_optical_track_on_temp.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_optical_track_on_temp
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Track the optical conductivity from the correlated metal up to the transition point. The lost o...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_optical_transition_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_optical_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_optical_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Within the coexistence region calculate for various temperatures the internal energy of each so...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_energy_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_energy.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_energy
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_sigma_12_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_sigma_12.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_sigma_12
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_shape_gf_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_shape_gf.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_shape_gf
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_dos_transition_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_dos_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_dos_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_bandwith_dos_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_bandwith_dos.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_bandwith_dos
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_transition_temp_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_transition_temp.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_transition_temp
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. ">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_thermodynamics_metal_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_thermodynamics_metal.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_thermodynamics_metal
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Specific Regions of the phase diagram are reviewed to inspect the behavior of the insulating st...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_bandwidth_transition_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_bandwidth_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_bandwidth_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In the weakly correlated region at $t_\perp=0.8$ the Thermodynamics of the system is calculated...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_thermodynamics_ins_tp0.8_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_thermodynamics_ins_tp0.8.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_thermodynamics_ins_tp0.8
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The atomic self-energy is extracted and plotted into the lattice Green&#x27;s function to see the be...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_hubbard_I_diagonal_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_hubbard_I_diagonal.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_hubbard_I_diagonal
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The atomic self-energy is extracted and plotted into the lattice Green&#x27;s function to see the be...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_hubbard_I_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_hubbard_I.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_hubbard_I
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Close to the coexistence region the Energy of the system is calculated. ">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_thermodynamics_insulator_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_thermodynamics_insulator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_thermodynamics_insulator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_ad_hod_disorder_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_ad_hod_disorder.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_ad_hod_disorder
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_ipt_dimer_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_ipt_dimer.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/ipt_dimer
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Simple IPT solver for a dimer">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_ipt_dimer_bandwidt_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_ipt_dimer_bandwidt.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/ipt_dimer_bandwidt
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_scatering_fixB_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_scatering_fixB.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_scatering_fixB
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Comparison of the energy resolved spectral functions in the Dimer Hubbard Model in the coexiste...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_integrated_spectra_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_integrated_spectra.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_integrated_spectra
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_build_dispersions_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_build_dispersions.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_build_dispersions
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" ">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_phase_bandwidth_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_phase_bandwidth.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_phase_bandwidth
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_shift_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_shift.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_shift
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Describing the position of the Self-Energy pole in the diagonal basis ">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_hubbard_III_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_hubbard_III.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_hubbard_III
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_landau_2ndfit_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_landau_2ndfit.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_landau_2ndfit
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_docc_transition_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_docc_transition.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_docc_transition
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_optical_conductivity_bonding_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_optical_conductivity_bonding.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_optical_conductivity_bonding
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_molecule_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_molecule.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_molecule
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_comparing_spectra_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_comparing_spectra.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_comparing_spectra
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="For the case of contact interaction in the di-atomic molecule case spectral function are evalua...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_molecule_spectra_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_molecule_spectra.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_molecule_spectra
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_mott_insulator_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_mott_insulator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_mott_insulator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Perform a fit of the order parameter, linked to double occupation to match a Landau theory form...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_docc_transition_below_QCP_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_docc_transition_below_QCP.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_docc_transition_below_QCP
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_dos_T_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_dos_T.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_dos_T
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_line_dispersion_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_line_dispersion.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_line_dispersion
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_ipt_insulator_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_ipt_insulator.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_ipt_insulator
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Explore the low energy expansion of the Matsubara self-energy. The zero frequency value being t...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_scattering_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_scattering.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_scattering
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_phases_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_phases.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_phases
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Using a real frequency solver in the IPT scheme the Density of states is tracked through the fi...">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_re_T_dos_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_re_T_dos.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_re_T_dos
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="">
+
+.. only:: html
+
+    .. figure:: /dimer_lattice/images/thumb/sphx_glr_plot_sigma_zero_freq_thumb.png
+
+        :ref:`sphx_glr_dimer_lattice_plot_sigma_zero_freq.py`
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /dimer_lattice/plot_sigma_zero_freq
+.. raw:: html
+
+    <div style='clear:both'></div>
+
+
+
+.. container:: sphx-glr-footer
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Python source code: dimer_lattice_python.zip <//home/oscar/dev/dmft-learn/doc/dimer_lattice/dimer_lattice_python.zip>`
+
+
+
+  .. container:: sphx-glr-download
+
+    :download:`Download all examples in Jupyter notebooks: dimer_lattice_jupyter.zip <//home/oscar/dev/dmft-learn/doc/dimer_lattice/dimer_lattice_jupyter.zip>`
+
+.. rst-class:: sphx-glr-signature
+
+    `Generated by Sphinx-Gallery <https://sphinx-gallery.readthedocs.io>`_

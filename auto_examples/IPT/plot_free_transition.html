@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Transition on free energy &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="IPT Hysteresis loop" href="plot_ipt_coex.html" />
+    <link rel="prev" title="IPT bandwidth controlled" href="plot_bandwidth_transition.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt_coex.html" title="IPT Hysteresis loop"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_bandwidth_transition.html" title="IPT bandwidth controlled"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="transition-on-free-energy">
+<span id="sphx-glr-auto-examples-ipt-plot-free-transition-py"></span><h1>Transition on free energy<a class="headerlink" href="#transition-on-free-energy" title="Permalink to this headline">¶</a></h1>
+<p>Using the formalism presented in <a class="footnote-reference" href="#id2" id="id1">[1]</a> I calculate the stability of the
+IPT solution within the coexistence region.</p>
+<table class="docutils footnote" frame="void" id="id2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Moeller, G., V. Dobrosavljevi&#8217;c, &amp; Ruckenstein, A. E. (1999). RKKY
+interactions and the Mott transition. Physical Review B, 59(10),
+6846–6854. <a class="reference external" href="http://dx.doi.org/10.1103/physrevb.59.6846">http://dx.doi.org/10.1103/physrevb.59.6846</a></td></tr>
+</tbody>
+</table>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Created Fri Apr 21 15:11:05 2017</span>
+<span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">trapz</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">from</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.single_band_ipt_solver" title="View documentation for dmft.ipt_imag.single_band_ipt_solver"><span class="n">single_band_ipt_solver</span></a>
+<span class="kn">from</span> <span class="nn">dmft.common</span> <span class="kn">import</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a>
+
+
+<span class="k">def</span> <span class="nf">mix</span><span class="p">(</span><span class="n">gmet</span><span class="p">,</span> <span class="n">gins</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">l</span><span class="p">)</span> <span class="o">*</span> <span class="n">gins</span> <span class="o">+</span> <span class="n">l</span> <span class="o">*</span> <span class="n">gmet</span>
+
+
+<span class="k">def</span> <span class="nf">one_loop</span><span class="p">(</span><span class="n">giw</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
+    <span class="n">iw_n</span> <span class="o">=</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span>
+    <span class="n">g_0_iwn</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">iw_n</span> <span class="o">-</span> <span class="n">t</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">giw</span><span class="p">)</span>
+    <span class="n">g_iwn</span><span class="p">,</span> <span class="n">sigma_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.single_band_ipt_solver" title="View documentation for dmft.ipt_imag.single_band_ipt_solver"><span class="n">single_band_ipt_solver</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">g_0_iwn</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">g_iwn</span>
+
+
+<span class="k">def</span> <span class="nf">free_energy_change</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">mix_grid</span><span class="p">):</span>
+
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">11</span><span class="p">))</span>
+
+    <span class="n">ig_iwn</span><span class="p">,</span> <span class="n">is_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span>
+        <span class="n">u_int</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.j</span> <span class="o">/</span> <span class="p">(</span><span class="n">w_n</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">),</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+
+    <span class="n">mg_iwn</span><span class="p">,</span> <span class="n">ms_iwn</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dmft_loop" title="View documentation for dmft.ipt_imag.dmft_loop"><span class="n">dmft_loop</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <a href="../../gen_modules/dmft.common.html#dmft.common.greenF" title="View documentation for dmft.common.greenF"><span class="n">greenF</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">),</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-10</span><span class="p">)</span>
+
+    <span class="n">solution_diff</span> <span class="o">=</span> <span class="n">mg_iwn</span> <span class="o">-</span> <span class="n">ig_iwn</span>
+
+    <span class="n">integrand</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">mix_grid</span><span class="p">:</span>
+        <span class="n">g_in</span> <span class="o">=</span> <span class="n">mix</span><span class="p">(</span><span class="n">mg_iwn</span><span class="p">,</span> <span class="n">ig_iwn</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+        <span class="n">g_grad</span> <span class="o">=</span> <span class="n">one_loop</span><span class="p">(</span><span class="n">g_in</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span> <span class="o">-</span> <span class="n">g_in</span>
+        <span class="n">integrand</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.dot.html#numpy.dot" title="View documentation for numpy.dot"><span class="n">np</span><span class="o">.</span><span class="n">dot</span></a><span class="p">(</span><span class="n">g_grad</span><span class="p">,</span> <span class="n">solution_diff</span><span class="p">)</span><span class="o">.</span><span class="n">real</span> <span class="o">/</span> <span class="n">beta</span><span class="p">)</span>
+
+    <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">trapz</span><span class="p">(</span><span class="n">integrand</span><span class="p">[:</span><span class="n">i</span><span class="p">],</span> <span class="n">mix_grid</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+                           <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">mix_grid</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span>
+
+
+<span class="n">mix_grid</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">201</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>High in the coexistence region</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">U</span> <span class="o">=</span> <span class="mf">2.6</span>
+<span class="k">for</span> <span class="n">temp</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.003</span><span class="p">,</span> <span class="mf">0.009</span><span class="p">,</span> <span class="mf">0.015</span><span class="p">,</span> <span class="mf">0.021</span><span class="p">,</span> <span class="mf">0.027</span><span class="p">,</span> <span class="mf">0.033</span><span class="p">,</span> <span class="mf">0.037</span><span class="p">]:</span>
+    <span class="n">beta</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">temp</span>
+    <span class="n">delta_f</span> <span class="o">=</span> <span class="n">free_energy_change</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mix_grid</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mix_grid</span><span class="p">,</span> <span class="n">delta_f</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;T={:.3}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">beta</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;$l$ Admixture of metallic solution&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Delta F(l)$: Change in free energy&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;$U/D={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pylab.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_free_transition_001.png" class="align-center" src="../../_images/sphx_glr_plot_free_transition_001.png" />
+<p>Lower in the coexistence region</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">U</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">52.</span><span class="p">,</span> <span class="mf">57.38</span><span class="p">,</span> <span class="mf">64.</span><span class="p">,</span> <span class="mf">100.</span><span class="p">]:</span>
+    <span class="n">delta_f</span> <span class="o">=</span> <span class="n">free_energy_change</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">U</span><span class="p">,</span> <span class="n">mix_grid</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mix_grid</span><span class="p">,</span> <span class="n">delta_f</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;T={:.3}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">beta</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;$l$ Admixture of metallic solution&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\Delta F(l)$: Change in free energy&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;$U/D={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">))</span>
+<a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pylab.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_free_transition_002.png" class="align-center" src="../../_images/sphx_glr_plot_free_transition_002.png" />
+<p><strong>Total running time of the script:</strong> ( 0 minutes  9.189 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_free_transition.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_free_transition.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_free_transition.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_free_transition.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_bandwidth_transition.html"
+                        title="previous chapter">IPT bandwidth controlled</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_ipt_coex.html"
+                        title="next chapter">IPT Hysteresis loop</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/auto_examples/IPT/plot_free_transition.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt_coex.html" title="IPT Hysteresis loop"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_bandwidth_transition.html" title="IPT bandwidth controlled"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >DMFT examples</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,763 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dispersion of the spectral function &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="INSULATOR" href="plot_ipt_insulator.html" />
+    <link rel="prev" title="Evolution of DOS as function of temperature" href="plot_dos_T.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt_insulator.html" title="INSULATOR"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_dos_T.html" title="Evolution of DOS as function of temperature"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dispersion-of-the-spectral-function">
+<span id="sphx-glr-dimer-lattice-plot-line-dispersion-py"></span><h1>Dispersion of the spectral function<a class="headerlink" href="#dispersion-of-the-spectral-function" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span>
+                        <span class="n">unicode_literals</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.dimer</span> <span class="kn">as</span> <span class="nn">dimer</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_imag</span> <span class="kn">as</span> <span class="nn">ipt</span>
+<span class="kn">from</span> <span class="nn">dmft.plot</span> <span class="kn">import</span> <span class="n">plot_band_dispersion</span>
+
+
+<span class="k">def</span> <span class="nf">loop_u_tp</span><span class="p">(</span><span class="n">u_range</span><span class="p">,</span> <span class="n">tprange</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="s1">&#39;mott gap&#39;</span><span class="p">):</span>
+    <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.tau_wn_setup" title="View documentation for dmft.common.tau_wn_setup"><span class="n">gf</span><span class="o">.</span><span class="n">tau_wn_setup</span></a><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">BETA</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span> <span class="n">N_MATSUBARA</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">beta</span><span class="p">,</span> <span class="mi">256</span><span class="p">)))</span>
+    <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.gf_met" title="View documentation for dmft.dimer.gf_met"><span class="n">dimer</span><span class="o">.</span><span class="n">gf_met</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="o">==</span> <span class="s1">&#39;mott gap&#39;</span><span class="p">:</span>
+        <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span> <span class="o">+</span> <span class="mi">4j</span> <span class="o">/</span> <span class="n">w_n</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.zeros_like.html#numpy.zeros_like" title="View documentation for numpy.zeros_like"><span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span></a><span class="p">(</span><span class="n">w_n</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0j</span>
+
+    <span class="n">giw_s</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sigma_iw</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">iterations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">u_range</span><span class="p">,</span> <span class="n">tprange</span><span class="p">):</span>
+        <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">loops</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.ipt_dmft_loop" title="View documentation for dmft.dimer.ipt_dmft_loop"><span class="n">dimer</span><span class="o">.</span><span class="n">ipt_dmft_loop</span></a><span class="p">(</span>
+            <span class="n">beta</span><span class="p">,</span> <span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+        <span class="n">giw_s</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">))</span>
+        <span class="n">iterations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loops</span><span class="p">)</span>
+        <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.self_consistency" title="View documentation for dmft.dimer.self_consistency"><span class="n">dimer</span><span class="o">.</span><span class="n">self_consistency</span></a><span class="p">(</span>
+            <span class="mi">1j</span> <span class="o">*</span> <span class="n">w_n</span><span class="p">,</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">giw_d</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">giw_o</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">)</span>
+        <span class="n">siw_d</span><span class="p">,</span> <span class="n">siw_o</span> <span class="o">=</span> <a href="../gen_modules/dmft.ipt_imag.html#dmft.ipt_imag.dimer_sigma" title="View documentation for dmft.ipt_imag.dimer_sigma"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_sigma</span></a><span class="p">(</span><span class="n">u_int</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">g0iw_d</span><span class="p">,</span> <span class="n">g0iw_o</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">w_n</span><span class="p">)</span>
+        <span class="n">sigma_iw</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">siw_d</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">siw_o</span><span class="o">.</span><span class="n">copy</span><span class="p">()))</span>
+
+    <span class="k">print</span><span class="p">(</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">iterations</span><span class="p">))</span>
+
+    <span class="k">return</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">giw_s</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.array.html#numpy.array" title="View documentation for numpy.array"><span class="n">np</span><span class="o">.</span><span class="n">array</span></a><span class="p">(</span><span class="n">sigma_iw</span><span class="p">),</span> <span class="n">w_n</span>
+
+
+<span class="k">def</span> <span class="nf">plot_greenfunct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">gfunc</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.subplots" title="View documentation for matplotlib.pyplot.subplots"><span class="n">plt</span><span class="o">.</span><span class="n">subplots</span></a><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">gfunc</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Re e$&#39;</span> <span class="o">+</span> <span class="n">ylabel</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="n">gfunc</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$-\Im m$&#39;</span> <span class="o">+</span> <span class="n">ylabel</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;$(\omega)$&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">ax</span>
+
+
+<span class="k">def</span> <span class="nf">plot_pole_eq</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <a href="../gen_modules/dmft.common.html#dmft.common" title="View documentation for dmft.common"><span class="n">gf</span></a><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+    <a href="http://matplotlib.org/api/figure_api.html#matplotlib.figure" title="View documentation for matplotlib.pyplot.figure"><span class="n">plt</span><span class="o">.</span><span class="n">figure</span></a><span class="p">()</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Im m \Sigma$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <a href="../gen_modules/dmft.common.html#dmft.common" title="View documentation for dmft.common"><span class="n">gf</span></a><span class="p">)</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\Re e G^{-1}$&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><a href="../gen_modules/dmft.common.html#dmft.common" title="View documentation for dmft.common"><span class="n">gf</span></a><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;DOS&#39;</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/legend_api.html#matplotlib.legend" title="View documentation for matplotlib.pyplot.legend"><span class="n">plt</span><span class="o">.</span><span class="n">legend</span></a><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.title" title="View documentation for matplotlib.pyplot.title"><span class="n">plt</span><span class="o">.</span><span class="n">title</span></a><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">ur</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">U</span><span class="p">,</span> <span class="p">(</span><span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">),</span> <span class="p">(</span><span class="n">sig_d</span><span class="p">,</span> <span class="n">sig_o</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ur</span><span class="p">,</span> <span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">):</span>
+        <span class="n">gs</span><span class="p">,</span> <span class="n">ga</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.pade_diag" title="View documentation for dmft.dimer.pade_diag"><span class="n">dimer</span><span class="o">.</span><span class="n">pade_diag</span></a><span class="p">(</span><span class="n">giw_d</span><span class="p">,</span> <span class="n">giw_o</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w_set</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="n">ss</span><span class="p">,</span> <span class="n">sa</span> <span class="o">=</span> <a href="../gen_modules/dmft.dimer.html#dmft.dimer.pade_diag" title="View documentation for dmft.dimer.pade_diag"><span class="n">dimer</span><span class="o">.</span><span class="n">pade_diag</span></a><span class="p">(</span><span class="n">sig_d</span><span class="p">,</span> <span class="n">sig_o</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w_set</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+        <span class="n">gst</span> <span class="o">=</span> <a href="../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span>
+            <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">real</span> <span class="o">-</span> <span class="mi">1j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ss</span><span class="o">.</span><span class="n">imag</span><span class="p">)))</span>
+
+        <span class="n">lat_gfs</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">-</span> <span class="n">ss</span><span class="p">)</span>
+        <span class="n">lat_gfa</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.outer.html#numpy.outer" title="View documentation for numpy.add.outer"><span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">outer</span></a><span class="p">(</span><span class="o">-</span><span class="n">eps_k</span><span class="p">,</span> <span class="n">w</span> <span class="o">+</span> <span class="n">tp</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">-</span> <span class="n">sa</span><span class="p">)</span>
+        <span class="c1">#Aw = np.clip(-.5 * (lat_gfa + lat_gfs).imag / np.pi, 0, 2)</span>
+
+        <span class="n">Aw</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.clip.html#numpy.clip" title="View documentation for numpy.clip"><span class="n">np</span><span class="o">.</span><span class="n">clip</span></a><span class="p">(</span><span class="o">-</span><span class="n">lat_gfs</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">title</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;IPT lattice dimer $U={}$, $t_\perp={}$, $\beta={}$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">BETA</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_greenfunct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">gs</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$G$&#39;</span><span class="p">)</span>
+        <span class="n">plot_greenfunct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">gst</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$G$&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+        <span class="n">plot_greenfunct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">tp</span> <span class="o">-</span> <span class="o">.</span><span class="mi">25</span> <span class="o">*</span> <span class="n">gst</span><span class="p">),</span> <span class="n">title</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$G0$&#39;</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_greenfunct</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;$\Sigma$&#39;</span><span class="p">)</span>
+
+        <span class="n">plot_pole_eq</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">gst</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+        <span class="n">plot_band_dispersion</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">Aw</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">eps_k</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="metals">
+<h2>Metals<a class="headerlink" href="#metals" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.175</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.</span><span class="p">]</span>
+<span class="n">BETA</span> <span class="o">=</span> <span class="mf">100.</span>
+<span class="n">tp</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">loop_u_tp</span><span class="p">(</span><span class="n">urange</span><span class="p">,</span> <span class="n">tp</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ones_like.html#numpy.ones_like" title="View documentation for numpy.ones_like"><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span></a><span class="p">(</span><span class="n">urange</span><span class="p">),</span> <span class="n">BETA</span><span class="p">,</span> <span class="s2">&quot;M&quot;</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">800</span><span class="p">)</span>
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">w_set</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.concatenate.html#numpy.concatenate" title="View documentation for numpy.concatenate"><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span></a><span class="p">((</span><a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="n">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_001.png"><img alt="../_images/sphx_glr_plot_line_dispersion_001.png" src="../_images/sphx_glr_plot_line_dispersion_001.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_002.png"><img alt="../_images/sphx_glr_plot_line_dispersion_002.png" src="../_images/sphx_glr_plot_line_dispersion_002.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_003.png"><img alt="../_images/sphx_glr_plot_line_dispersion_003.png" src="../_images/sphx_glr_plot_line_dispersion_003.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_004.png"><img alt="../_images/sphx_glr_plot_line_dispersion_004.png" src="../_images/sphx_glr_plot_line_dispersion_004.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_005.png"><img alt="../_images/sphx_glr_plot_line_dispersion_005.png" src="../_images/sphx_glr_plot_line_dispersion_005.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_006.png"><img alt="../_images/sphx_glr_plot_line_dispersion_006.png" src="../_images/sphx_glr_plot_line_dispersion_006.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_007.png"><img alt="../_images/sphx_glr_plot_line_dispersion_007.png" src="../_images/sphx_glr_plot_line_dispersion_007.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_008.png"><img alt="../_images/sphx_glr_plot_line_dispersion_008.png" src="../_images/sphx_glr_plot_line_dispersion_008.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_009.png"><img alt="../_images/sphx_glr_plot_line_dispersion_009.png" src="../_images/sphx_glr_plot_line_dispersion_009.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_010.png"><img alt="../_images/sphx_glr_plot_line_dispersion_010.png" src="../_images/sphx_glr_plot_line_dispersion_010.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_011.png"><img alt="../_images/sphx_glr_plot_line_dispersion_011.png" src="../_images/sphx_glr_plot_line_dispersion_011.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_012.png"><img alt="../_images/sphx_glr_plot_line_dispersion_012.png" src="../_images/sphx_glr_plot_line_dispersion_012.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_013.png"><img alt="../_images/sphx_glr_plot_line_dispersion_013.png" src="../_images/sphx_glr_plot_line_dispersion_013.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_014.png"><img alt="../_images/sphx_glr_plot_line_dispersion_014.png" src="../_images/sphx_glr_plot_line_dispersion_014.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_015.png"><img alt="../_images/sphx_glr_plot_line_dispersion_015.png" src="../_images/sphx_glr_plot_line_dispersion_015.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_016.png"><img alt="../_images/sphx_glr_plot_line_dispersion_016.png" src="../_images/sphx_glr_plot_line_dispersion_016.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_017.png"><img alt="../_images/sphx_glr_plot_line_dispersion_017.png" src="../_images/sphx_glr_plot_line_dispersion_017.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_018.png"><img alt="../_images/sphx_glr_plot_line_dispersion_018.png" src="../_images/sphx_glr_plot_line_dispersion_018.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_019.png"><img alt="../_images/sphx_glr_plot_line_dispersion_019.png" src="../_images/sphx_glr_plot_line_dispersion_019.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_020.png"><img alt="../_images/sphx_glr_plot_line_dispersion_020.png" src="../_images/sphx_glr_plot_line_dispersion_020.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_021.png"><img alt="../_images/sphx_glr_plot_line_dispersion_021.png" src="../_images/sphx_glr_plot_line_dispersion_021.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_022.png"><img alt="../_images/sphx_glr_plot_line_dispersion_022.png" src="../_images/sphx_glr_plot_line_dispersion_022.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_023.png"><img alt="../_images/sphx_glr_plot_line_dispersion_023.png" src="../_images/sphx_glr_plot_line_dispersion_023.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_024.png"><img alt="../_images/sphx_glr_plot_line_dispersion_024.png" src="../_images/sphx_glr_plot_line_dispersion_024.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_025.png"><img alt="../_images/sphx_glr_plot_line_dispersion_025.png" src="../_images/sphx_glr_plot_line_dispersion_025.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">171</span> <span class="mi">109</span>  <span class="mi">94</span>  <span class="mi">75</span>  <span class="mi">42</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="insulators">
+<h2>Insulators<a class="headerlink" href="#insulators" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.175</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">]</span>
+<span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">loop_u_tp</span><span class="p">(</span>
+    <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ones_like.html#numpy.ones_like" title="View documentation for numpy.ones_like"><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span></a><span class="p">(</span><span class="n">urange</span><span class="p">),</span> <span class="n">BETA</span><span class="p">)</span>
+
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_026.png"><img alt="../_images/sphx_glr_plot_line_dispersion_026.png" src="../_images/sphx_glr_plot_line_dispersion_026.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_027.png"><img alt="../_images/sphx_glr_plot_line_dispersion_027.png" src="../_images/sphx_glr_plot_line_dispersion_027.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_028.png"><img alt="../_images/sphx_glr_plot_line_dispersion_028.png" src="../_images/sphx_glr_plot_line_dispersion_028.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_029.png"><img alt="../_images/sphx_glr_plot_line_dispersion_029.png" src="../_images/sphx_glr_plot_line_dispersion_029.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_030.png"><img alt="../_images/sphx_glr_plot_line_dispersion_030.png" src="../_images/sphx_glr_plot_line_dispersion_030.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_031.png"><img alt="../_images/sphx_glr_plot_line_dispersion_031.png" src="../_images/sphx_glr_plot_line_dispersion_031.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_032.png"><img alt="../_images/sphx_glr_plot_line_dispersion_032.png" src="../_images/sphx_glr_plot_line_dispersion_032.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_033.png"><img alt="../_images/sphx_glr_plot_line_dispersion_033.png" src="../_images/sphx_glr_plot_line_dispersion_033.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_034.png"><img alt="../_images/sphx_glr_plot_line_dispersion_034.png" src="../_images/sphx_glr_plot_line_dispersion_034.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_035.png"><img alt="../_images/sphx_glr_plot_line_dispersion_035.png" src="../_images/sphx_glr_plot_line_dispersion_035.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_036.png"><img alt="../_images/sphx_glr_plot_line_dispersion_036.png" src="../_images/sphx_glr_plot_line_dispersion_036.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_037.png"><img alt="../_images/sphx_glr_plot_line_dispersion_037.png" src="../_images/sphx_glr_plot_line_dispersion_037.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_038.png"><img alt="../_images/sphx_glr_plot_line_dispersion_038.png" src="../_images/sphx_glr_plot_line_dispersion_038.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_039.png"><img alt="../_images/sphx_glr_plot_line_dispersion_039.png" src="../_images/sphx_glr_plot_line_dispersion_039.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_040.png"><img alt="../_images/sphx_glr_plot_line_dispersion_040.png" src="../_images/sphx_glr_plot_line_dispersion_040.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_041.png"><img alt="../_images/sphx_glr_plot_line_dispersion_041.png" src="../_images/sphx_glr_plot_line_dispersion_041.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_042.png"><img alt="../_images/sphx_glr_plot_line_dispersion_042.png" src="../_images/sphx_glr_plot_line_dispersion_042.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_043.png"><img alt="../_images/sphx_glr_plot_line_dispersion_043.png" src="../_images/sphx_glr_plot_line_dispersion_043.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_044.png"><img alt="../_images/sphx_glr_plot_line_dispersion_044.png" src="../_images/sphx_glr_plot_line_dispersion_044.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_045.png"><img alt="../_images/sphx_glr_plot_line_dispersion_045.png" src="../_images/sphx_glr_plot_line_dispersion_045.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_046.png"><img alt="../_images/sphx_glr_plot_line_dispersion_046.png" src="../_images/sphx_glr_plot_line_dispersion_046.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_047.png"><img alt="../_images/sphx_glr_plot_line_dispersion_047.png" src="../_images/sphx_glr_plot_line_dispersion_047.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_048.png"><img alt="../_images/sphx_glr_plot_line_dispersion_048.png" src="../_images/sphx_glr_plot_line_dispersion_048.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_049.png"><img alt="../_images/sphx_glr_plot_line_dispersion_049.png" src="../_images/sphx_glr_plot_line_dispersion_049.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_050.png"><img alt="../_images/sphx_glr_plot_line_dispersion_050.png" src="../_images/sphx_glr_plot_line_dispersion_050.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_051.png"><img alt="../_images/sphx_glr_plot_line_dispersion_051.png" src="../_images/sphx_glr_plot_line_dispersion_051.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_052.png"><img alt="../_images/sphx_glr_plot_line_dispersion_052.png" src="../_images/sphx_glr_plot_line_dispersion_052.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_053.png"><img alt="../_images/sphx_glr_plot_line_dispersion_053.png" src="../_images/sphx_glr_plot_line_dispersion_053.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_054.png"><img alt="../_images/sphx_glr_plot_line_dispersion_054.png" src="../_images/sphx_glr_plot_line_dispersion_054.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_055.png"><img alt="../_images/sphx_glr_plot_line_dispersion_055.png" src="../_images/sphx_glr_plot_line_dispersion_055.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_056.png"><img alt="../_images/sphx_glr_plot_line_dispersion_056.png" src="../_images/sphx_glr_plot_line_dispersion_056.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_057.png"><img alt="../_images/sphx_glr_plot_line_dispersion_057.png" src="../_images/sphx_glr_plot_line_dispersion_057.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_058.png"><img alt="../_images/sphx_glr_plot_line_dispersion_058.png" src="../_images/sphx_glr_plot_line_dispersion_058.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_059.png"><img alt="../_images/sphx_glr_plot_line_dispersion_059.png" src="../_images/sphx_glr_plot_line_dispersion_059.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_060.png"><img alt="../_images/sphx_glr_plot_line_dispersion_060.png" src="../_images/sphx_glr_plot_line_dispersion_060.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_061.png"><img alt="../_images/sphx_glr_plot_line_dispersion_061.png" src="../_images/sphx_glr_plot_line_dispersion_061.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_062.png"><img alt="../_images/sphx_glr_plot_line_dispersion_062.png" src="../_images/sphx_glr_plot_line_dispersion_062.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_063.png"><img alt="../_images/sphx_glr_plot_line_dispersion_063.png" src="../_images/sphx_glr_plot_line_dispersion_063.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_064.png"><img alt="../_images/sphx_glr_plot_line_dispersion_064.png" src="../_images/sphx_glr_plot_line_dispersion_064.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_065.png"><img alt="../_images/sphx_glr_plot_line_dispersion_065.png" src="../_images/sphx_glr_plot_line_dispersion_065.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_066.png"><img alt="../_images/sphx_glr_plot_line_dispersion_066.png" src="../_images/sphx_glr_plot_line_dispersion_066.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_067.png"><img alt="../_images/sphx_glr_plot_line_dispersion_067.png" src="../_images/sphx_glr_plot_line_dispersion_067.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_068.png"><img alt="../_images/sphx_glr_plot_line_dispersion_068.png" src="../_images/sphx_glr_plot_line_dispersion_068.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_069.png"><img alt="../_images/sphx_glr_plot_line_dispersion_069.png" src="../_images/sphx_glr_plot_line_dispersion_069.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_070.png"><img alt="../_images/sphx_glr_plot_line_dispersion_070.png" src="../_images/sphx_glr_plot_line_dispersion_070.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">308</span> <span class="mi">197</span> <span class="mi">178</span> <span class="mi">102</span>  <span class="mi">75</span>  <span class="mi">42</span>  <span class="mi">18</span>  <span class="mi">10</span>   <span class="mi">8</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id1">
+<h2>Insulators<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">2.175</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">]</span>
+<span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">loop_u_tp</span><span class="p">(</span>
+    <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ones_like.html#numpy.ones_like" title="View documentation for numpy.ones_like"><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span></a><span class="p">(</span><span class="n">urange</span><span class="p">),</span> <span class="n">BETA</span><span class="p">)</span>
+
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_071.png"><img alt="../_images/sphx_glr_plot_line_dispersion_071.png" src="../_images/sphx_glr_plot_line_dispersion_071.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_072.png"><img alt="../_images/sphx_glr_plot_line_dispersion_072.png" src="../_images/sphx_glr_plot_line_dispersion_072.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_073.png"><img alt="../_images/sphx_glr_plot_line_dispersion_073.png" src="../_images/sphx_glr_plot_line_dispersion_073.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_074.png"><img alt="../_images/sphx_glr_plot_line_dispersion_074.png" src="../_images/sphx_glr_plot_line_dispersion_074.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_075.png"><img alt="../_images/sphx_glr_plot_line_dispersion_075.png" src="../_images/sphx_glr_plot_line_dispersion_075.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_076.png"><img alt="../_images/sphx_glr_plot_line_dispersion_076.png" src="../_images/sphx_glr_plot_line_dispersion_076.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_077.png"><img alt="../_images/sphx_glr_plot_line_dispersion_077.png" src="../_images/sphx_glr_plot_line_dispersion_077.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_078.png"><img alt="../_images/sphx_glr_plot_line_dispersion_078.png" src="../_images/sphx_glr_plot_line_dispersion_078.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_079.png"><img alt="../_images/sphx_glr_plot_line_dispersion_079.png" src="../_images/sphx_glr_plot_line_dispersion_079.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_080.png"><img alt="../_images/sphx_glr_plot_line_dispersion_080.png" src="../_images/sphx_glr_plot_line_dispersion_080.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_081.png"><img alt="../_images/sphx_glr_plot_line_dispersion_081.png" src="../_images/sphx_glr_plot_line_dispersion_081.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_082.png"><img alt="../_images/sphx_glr_plot_line_dispersion_082.png" src="../_images/sphx_glr_plot_line_dispersion_082.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_083.png"><img alt="../_images/sphx_glr_plot_line_dispersion_083.png" src="../_images/sphx_glr_plot_line_dispersion_083.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_084.png"><img alt="../_images/sphx_glr_plot_line_dispersion_084.png" src="../_images/sphx_glr_plot_line_dispersion_084.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_085.png"><img alt="../_images/sphx_glr_plot_line_dispersion_085.png" src="../_images/sphx_glr_plot_line_dispersion_085.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_086.png"><img alt="../_images/sphx_glr_plot_line_dispersion_086.png" src="../_images/sphx_glr_plot_line_dispersion_086.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_087.png"><img alt="../_images/sphx_glr_plot_line_dispersion_087.png" src="../_images/sphx_glr_plot_line_dispersion_087.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_088.png"><img alt="../_images/sphx_glr_plot_line_dispersion_088.png" src="../_images/sphx_glr_plot_line_dispersion_088.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_089.png"><img alt="../_images/sphx_glr_plot_line_dispersion_089.png" src="../_images/sphx_glr_plot_line_dispersion_089.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_090.png"><img alt="../_images/sphx_glr_plot_line_dispersion_090.png" src="../_images/sphx_glr_plot_line_dispersion_090.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_091.png"><img alt="../_images/sphx_glr_plot_line_dispersion_091.png" src="../_images/sphx_glr_plot_line_dispersion_091.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_092.png"><img alt="../_images/sphx_glr_plot_line_dispersion_092.png" src="../_images/sphx_glr_plot_line_dispersion_092.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_093.png"><img alt="../_images/sphx_glr_plot_line_dispersion_093.png" src="../_images/sphx_glr_plot_line_dispersion_093.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_094.png"><img alt="../_images/sphx_glr_plot_line_dispersion_094.png" src="../_images/sphx_glr_plot_line_dispersion_094.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_095.png"><img alt="../_images/sphx_glr_plot_line_dispersion_095.png" src="../_images/sphx_glr_plot_line_dispersion_095.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_096.png"><img alt="../_images/sphx_glr_plot_line_dispersion_096.png" src="../_images/sphx_glr_plot_line_dispersion_096.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_097.png"><img alt="../_images/sphx_glr_plot_line_dispersion_097.png" src="../_images/sphx_glr_plot_line_dispersion_097.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_098.png"><img alt="../_images/sphx_glr_plot_line_dispersion_098.png" src="../_images/sphx_glr_plot_line_dispersion_098.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_099.png"><img alt="../_images/sphx_glr_plot_line_dispersion_099.png" src="../_images/sphx_glr_plot_line_dispersion_099.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_100.png"><img alt="../_images/sphx_glr_plot_line_dispersion_100.png" src="../_images/sphx_glr_plot_line_dispersion_100.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_101.png"><img alt="../_images/sphx_glr_plot_line_dispersion_101.png" src="../_images/sphx_glr_plot_line_dispersion_101.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_102.png"><img alt="../_images/sphx_glr_plot_line_dispersion_102.png" src="../_images/sphx_glr_plot_line_dispersion_102.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_103.png"><img alt="../_images/sphx_glr_plot_line_dispersion_103.png" src="../_images/sphx_glr_plot_line_dispersion_103.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_104.png"><img alt="../_images/sphx_glr_plot_line_dispersion_104.png" src="../_images/sphx_glr_plot_line_dispersion_104.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_105.png"><img alt="../_images/sphx_glr_plot_line_dispersion_105.png" src="../_images/sphx_glr_plot_line_dispersion_105.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_106.png"><img alt="../_images/sphx_glr_plot_line_dispersion_106.png" src="../_images/sphx_glr_plot_line_dispersion_106.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_107.png"><img alt="../_images/sphx_glr_plot_line_dispersion_107.png" src="../_images/sphx_glr_plot_line_dispersion_107.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_108.png"><img alt="../_images/sphx_glr_plot_line_dispersion_108.png" src="../_images/sphx_glr_plot_line_dispersion_108.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_109.png"><img alt="../_images/sphx_glr_plot_line_dispersion_109.png" src="../_images/sphx_glr_plot_line_dispersion_109.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_110.png"><img alt="../_images/sphx_glr_plot_line_dispersion_110.png" src="../_images/sphx_glr_plot_line_dispersion_110.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">275</span> <span class="mi">191</span>  <span class="mi">70</span>  <span class="mi">17</span>  <span class="mi">11</span>  <span class="mi">10</span>   <span class="mi">9</span>   <span class="mi">8</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>Insulators<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">]</span>
+<span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">loop_u_tp</span><span class="p">(</span>
+    <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ones_like.html#numpy.ones_like" title="View documentation for numpy.ones_like"><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span></a><span class="p">(</span><span class="n">urange</span><span class="p">),</span> <span class="n">BETA</span><span class="p">)</span>
+
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_111.png"><img alt="../_images/sphx_glr_plot_line_dispersion_111.png" src="../_images/sphx_glr_plot_line_dispersion_111.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_112.png"><img alt="../_images/sphx_glr_plot_line_dispersion_112.png" src="../_images/sphx_glr_plot_line_dispersion_112.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_113.png"><img alt="../_images/sphx_glr_plot_line_dispersion_113.png" src="../_images/sphx_glr_plot_line_dispersion_113.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_114.png"><img alt="../_images/sphx_glr_plot_line_dispersion_114.png" src="../_images/sphx_glr_plot_line_dispersion_114.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_115.png"><img alt="../_images/sphx_glr_plot_line_dispersion_115.png" src="../_images/sphx_glr_plot_line_dispersion_115.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_116.png"><img alt="../_images/sphx_glr_plot_line_dispersion_116.png" src="../_images/sphx_glr_plot_line_dispersion_116.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_117.png"><img alt="../_images/sphx_glr_plot_line_dispersion_117.png" src="../_images/sphx_glr_plot_line_dispersion_117.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_118.png"><img alt="../_images/sphx_glr_plot_line_dispersion_118.png" src="../_images/sphx_glr_plot_line_dispersion_118.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_119.png"><img alt="../_images/sphx_glr_plot_line_dispersion_119.png" src="../_images/sphx_glr_plot_line_dispersion_119.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_120.png"><img alt="../_images/sphx_glr_plot_line_dispersion_120.png" src="../_images/sphx_glr_plot_line_dispersion_120.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_121.png"><img alt="../_images/sphx_glr_plot_line_dispersion_121.png" src="../_images/sphx_glr_plot_line_dispersion_121.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_122.png"><img alt="../_images/sphx_glr_plot_line_dispersion_122.png" src="../_images/sphx_glr_plot_line_dispersion_122.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_123.png"><img alt="../_images/sphx_glr_plot_line_dispersion_123.png" src="../_images/sphx_glr_plot_line_dispersion_123.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_124.png"><img alt="../_images/sphx_glr_plot_line_dispersion_124.png" src="../_images/sphx_glr_plot_line_dispersion_124.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_125.png"><img alt="../_images/sphx_glr_plot_line_dispersion_125.png" src="../_images/sphx_glr_plot_line_dispersion_125.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_126.png"><img alt="../_images/sphx_glr_plot_line_dispersion_126.png" src="../_images/sphx_glr_plot_line_dispersion_126.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_127.png"><img alt="../_images/sphx_glr_plot_line_dispersion_127.png" src="../_images/sphx_glr_plot_line_dispersion_127.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_128.png"><img alt="../_images/sphx_glr_plot_line_dispersion_128.png" src="../_images/sphx_glr_plot_line_dispersion_128.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_129.png"><img alt="../_images/sphx_glr_plot_line_dispersion_129.png" src="../_images/sphx_glr_plot_line_dispersion_129.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_130.png"><img alt="../_images/sphx_glr_plot_line_dispersion_130.png" src="../_images/sphx_glr_plot_line_dispersion_130.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_131.png"><img alt="../_images/sphx_glr_plot_line_dispersion_131.png" src="../_images/sphx_glr_plot_line_dispersion_131.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_132.png"><img alt="../_images/sphx_glr_plot_line_dispersion_132.png" src="../_images/sphx_glr_plot_line_dispersion_132.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_133.png"><img alt="../_images/sphx_glr_plot_line_dispersion_133.png" src="../_images/sphx_glr_plot_line_dispersion_133.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_134.png"><img alt="../_images/sphx_glr_plot_line_dispersion_134.png" src="../_images/sphx_glr_plot_line_dispersion_134.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_135.png"><img alt="../_images/sphx_glr_plot_line_dispersion_135.png" src="../_images/sphx_glr_plot_line_dispersion_135.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_136.png"><img alt="../_images/sphx_glr_plot_line_dispersion_136.png" src="../_images/sphx_glr_plot_line_dispersion_136.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_137.png"><img alt="../_images/sphx_glr_plot_line_dispersion_137.png" src="../_images/sphx_glr_plot_line_dispersion_137.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_138.png"><img alt="../_images/sphx_glr_plot_line_dispersion_138.png" src="../_images/sphx_glr_plot_line_dispersion_138.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_139.png"><img alt="../_images/sphx_glr_plot_line_dispersion_139.png" src="../_images/sphx_glr_plot_line_dispersion_139.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_140.png"><img alt="../_images/sphx_glr_plot_line_dispersion_140.png" src="../_images/sphx_glr_plot_line_dispersion_140.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_141.png"><img alt="../_images/sphx_glr_plot_line_dispersion_141.png" src="../_images/sphx_glr_plot_line_dispersion_141.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_142.png"><img alt="../_images/sphx_glr_plot_line_dispersion_142.png" src="../_images/sphx_glr_plot_line_dispersion_142.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_143.png"><img alt="../_images/sphx_glr_plot_line_dispersion_143.png" src="../_images/sphx_glr_plot_line_dispersion_143.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_144.png"><img alt="../_images/sphx_glr_plot_line_dispersion_144.png" src="../_images/sphx_glr_plot_line_dispersion_144.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_145.png"><img alt="../_images/sphx_glr_plot_line_dispersion_145.png" src="../_images/sphx_glr_plot_line_dispersion_145.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_146.png"><img alt="../_images/sphx_glr_plot_line_dispersion_146.png" src="../_images/sphx_glr_plot_line_dispersion_146.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_147.png"><img alt="../_images/sphx_glr_plot_line_dispersion_147.png" src="../_images/sphx_glr_plot_line_dispersion_147.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_148.png"><img alt="../_images/sphx_glr_plot_line_dispersion_148.png" src="../_images/sphx_glr_plot_line_dispersion_148.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_149.png"><img alt="../_images/sphx_glr_plot_line_dispersion_149.png" src="../_images/sphx_glr_plot_line_dispersion_149.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_150.png"><img alt="../_images/sphx_glr_plot_line_dispersion_150.png" src="../_images/sphx_glr_plot_line_dispersion_150.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_151.png"><img alt="../_images/sphx_glr_plot_line_dispersion_151.png" src="../_images/sphx_glr_plot_line_dispersion_151.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_152.png"><img alt="../_images/sphx_glr_plot_line_dispersion_152.png" src="../_images/sphx_glr_plot_line_dispersion_152.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_153.png"><img alt="../_images/sphx_glr_plot_line_dispersion_153.png" src="../_images/sphx_glr_plot_line_dispersion_153.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_154.png"><img alt="../_images/sphx_glr_plot_line_dispersion_154.png" src="../_images/sphx_glr_plot_line_dispersion_154.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_155.png"><img alt="../_images/sphx_glr_plot_line_dispersion_155.png" src="../_images/sphx_glr_plot_line_dispersion_155.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_156.png"><img alt="../_images/sphx_glr_plot_line_dispersion_156.png" src="../_images/sphx_glr_plot_line_dispersion_156.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_157.png"><img alt="../_images/sphx_glr_plot_line_dispersion_157.png" src="../_images/sphx_glr_plot_line_dispersion_157.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_158.png"><img alt="../_images/sphx_glr_plot_line_dispersion_158.png" src="../_images/sphx_glr_plot_line_dispersion_158.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_159.png"><img alt="../_images/sphx_glr_plot_line_dispersion_159.png" src="../_images/sphx_glr_plot_line_dispersion_159.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_160.png"><img alt="../_images/sphx_glr_plot_line_dispersion_160.png" src="../_images/sphx_glr_plot_line_dispersion_160.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">185</span> <span class="mi">136</span>  <span class="mi">48</span>  <span class="mi">25</span>  <span class="mi">14</span>  <span class="mi">10</span>   <span class="mi">9</span>   <span class="mi">8</span>   <span class="mi">7</span>   <span class="mi">7</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>Insulators<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="mf">0.95</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">.</span><span class="mi">5</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">,</span> <span class="mf">4.</span><span class="p">,</span> <span class="mf">5.</span><span class="p">]</span>
+<span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">w_n</span> <span class="o">=</span> <span class="n">loop_u_tp</span><span class="p">(</span>
+    <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span> <span class="o">*</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.ones_like.html#numpy.ones_like" title="View documentation for numpy.ones_like"><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span></a><span class="p">(</span><span class="n">urange</span><span class="p">),</span> <span class="n">BETA</span><span class="p">)</span>
+
+<span class="n">eps_k</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">61</span><span class="p">)</span>
+<span class="n">plot_dispersions</span><span class="p">(</span><span class="n">giw_s</span><span class="p">,</span> <span class="n">sigma_iw</span><span class="p">,</span> <span class="n">urange</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">w_n</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">w_set</span><span class="p">)</span>
+
+
+<span class="c1">#urange = [3.2]</span>
+<span class="c1">#beta = 100.</span>
+<span class="c1">#tp = 0.2</span>
+<span class="c1"># giw_s, sigma_iw, w_n = loop_u_tp(</span>
+<span class="c1"># urange, tp * np.ones_like(urange), beta)</span>
+<span class="c1">#</span>
+<span class="c1">#w = np.linspace(-8, 8, 1600)</span>
+<span class="c1">#w_set = np.concatenate((np.arange(80), np.arange(90, 140, 25)))</span>
+<span class="c1">#eps_k = np.linspace(-2., 1., 61)</span>
+<span class="c1">#ss, gs = plot_dispersions(giw_s, sigma_iw, urange, tp, w_n, w, w_set)</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#tau, w_n = gf.tau_wn_setup(dict(BETA=beta, N_MATSUBARA=max(5 * beta, 256)))</span>
+<span class="c1">#tp = 0.2</span>
+<span class="c1"># g0iw_d, g0iw_o = dimer.self_consistency(</span>
+<span class="c1"># 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)</span>
+<span class="c1">#siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)</span>
+<span class="c1">#giw_d, giw_o = dimer.dimer_dyson(g0iw_d, g0iw_o, siw_d, siw_o)</span>
+<span class="c1"># g0iw_d, g0iw_o = dimer.self_consistency(</span>
+<span class="c1"># 1j * w_n, giw_s[0], giw_s[0], 0., tp, 0.25)</span>
+<span class="c1">#siw_d, siw_o = ipt.dimer_sigma(urange[0], tp, g0iw_d, g0iw_o, tau, w_n)</span>
+<span class="c1"># ss, gs = plot_dispersions(</span>
+<span class="c1"># np.array([giw_d, giw_o]), np.array([siw_d, siw_o]), urange, tp, w_n, w,</span>
+<span class="c1"># w_set)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_161.png"><img alt="../_images/sphx_glr_plot_line_dispersion_161.png" src="../_images/sphx_glr_plot_line_dispersion_161.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_162.png"><img alt="../_images/sphx_glr_plot_line_dispersion_162.png" src="../_images/sphx_glr_plot_line_dispersion_162.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_163.png"><img alt="../_images/sphx_glr_plot_line_dispersion_163.png" src="../_images/sphx_glr_plot_line_dispersion_163.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_164.png"><img alt="../_images/sphx_glr_plot_line_dispersion_164.png" src="../_images/sphx_glr_plot_line_dispersion_164.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_165.png"><img alt="../_images/sphx_glr_plot_line_dispersion_165.png" src="../_images/sphx_glr_plot_line_dispersion_165.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_166.png"><img alt="../_images/sphx_glr_plot_line_dispersion_166.png" src="../_images/sphx_glr_plot_line_dispersion_166.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_167.png"><img alt="../_images/sphx_glr_plot_line_dispersion_167.png" src="../_images/sphx_glr_plot_line_dispersion_167.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_168.png"><img alt="../_images/sphx_glr_plot_line_dispersion_168.png" src="../_images/sphx_glr_plot_line_dispersion_168.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_169.png"><img alt="../_images/sphx_glr_plot_line_dispersion_169.png" src="../_images/sphx_glr_plot_line_dispersion_169.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_170.png"><img alt="../_images/sphx_glr_plot_line_dispersion_170.png" src="../_images/sphx_glr_plot_line_dispersion_170.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_171.png"><img alt="../_images/sphx_glr_plot_line_dispersion_171.png" src="../_images/sphx_glr_plot_line_dispersion_171.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_172.png"><img alt="../_images/sphx_glr_plot_line_dispersion_172.png" src="../_images/sphx_glr_plot_line_dispersion_172.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_173.png"><img alt="../_images/sphx_glr_plot_line_dispersion_173.png" src="../_images/sphx_glr_plot_line_dispersion_173.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_174.png"><img alt="../_images/sphx_glr_plot_line_dispersion_174.png" src="../_images/sphx_glr_plot_line_dispersion_174.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_175.png"><img alt="../_images/sphx_glr_plot_line_dispersion_175.png" src="../_images/sphx_glr_plot_line_dispersion_175.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_176.png"><img alt="../_images/sphx_glr_plot_line_dispersion_176.png" src="../_images/sphx_glr_plot_line_dispersion_176.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_177.png"><img alt="../_images/sphx_glr_plot_line_dispersion_177.png" src="../_images/sphx_glr_plot_line_dispersion_177.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_178.png"><img alt="../_images/sphx_glr_plot_line_dispersion_178.png" src="../_images/sphx_glr_plot_line_dispersion_178.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_179.png"><img alt="../_images/sphx_glr_plot_line_dispersion_179.png" src="../_images/sphx_glr_plot_line_dispersion_179.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_180.png"><img alt="../_images/sphx_glr_plot_line_dispersion_180.png" src="../_images/sphx_glr_plot_line_dispersion_180.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_181.png"><img alt="../_images/sphx_glr_plot_line_dispersion_181.png" src="../_images/sphx_glr_plot_line_dispersion_181.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_182.png"><img alt="../_images/sphx_glr_plot_line_dispersion_182.png" src="../_images/sphx_glr_plot_line_dispersion_182.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_183.png"><img alt="../_images/sphx_glr_plot_line_dispersion_183.png" src="../_images/sphx_glr_plot_line_dispersion_183.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_184.png"><img alt="../_images/sphx_glr_plot_line_dispersion_184.png" src="../_images/sphx_glr_plot_line_dispersion_184.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_185.png"><img alt="../_images/sphx_glr_plot_line_dispersion_185.png" src="../_images/sphx_glr_plot_line_dispersion_185.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_186.png"><img alt="../_images/sphx_glr_plot_line_dispersion_186.png" src="../_images/sphx_glr_plot_line_dispersion_186.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_187.png"><img alt="../_images/sphx_glr_plot_line_dispersion_187.png" src="../_images/sphx_glr_plot_line_dispersion_187.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_188.png"><img alt="../_images/sphx_glr_plot_line_dispersion_188.png" src="../_images/sphx_glr_plot_line_dispersion_188.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_189.png"><img alt="../_images/sphx_glr_plot_line_dispersion_189.png" src="../_images/sphx_glr_plot_line_dispersion_189.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_190.png"><img alt="../_images/sphx_glr_plot_line_dispersion_190.png" src="../_images/sphx_glr_plot_line_dispersion_190.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_191.png"><img alt="../_images/sphx_glr_plot_line_dispersion_191.png" src="../_images/sphx_glr_plot_line_dispersion_191.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_192.png"><img alt="../_images/sphx_glr_plot_line_dispersion_192.png" src="../_images/sphx_glr_plot_line_dispersion_192.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_193.png"><img alt="../_images/sphx_glr_plot_line_dispersion_193.png" src="../_images/sphx_glr_plot_line_dispersion_193.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_194.png"><img alt="../_images/sphx_glr_plot_line_dispersion_194.png" src="../_images/sphx_glr_plot_line_dispersion_194.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_195.png"><img alt="../_images/sphx_glr_plot_line_dispersion_195.png" src="../_images/sphx_glr_plot_line_dispersion_195.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_196.png"><img alt="../_images/sphx_glr_plot_line_dispersion_196.png" src="../_images/sphx_glr_plot_line_dispersion_196.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_197.png"><img alt="../_images/sphx_glr_plot_line_dispersion_197.png" src="../_images/sphx_glr_plot_line_dispersion_197.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_198.png"><img alt="../_images/sphx_glr_plot_line_dispersion_198.png" src="../_images/sphx_glr_plot_line_dispersion_198.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_199.png"><img alt="../_images/sphx_glr_plot_line_dispersion_199.png" src="../_images/sphx_glr_plot_line_dispersion_199.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_200.png"><img alt="../_images/sphx_glr_plot_line_dispersion_200.png" src="../_images/sphx_glr_plot_line_dispersion_200.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_201.png"><img alt="../_images/sphx_glr_plot_line_dispersion_201.png" src="../_images/sphx_glr_plot_line_dispersion_201.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_202.png"><img alt="../_images/sphx_glr_plot_line_dispersion_202.png" src="../_images/sphx_glr_plot_line_dispersion_202.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_203.png"><img alt="../_images/sphx_glr_plot_line_dispersion_203.png" src="../_images/sphx_glr_plot_line_dispersion_203.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_204.png"><img alt="../_images/sphx_glr_plot_line_dispersion_204.png" src="../_images/sphx_glr_plot_line_dispersion_204.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_205.png"><img alt="../_images/sphx_glr_plot_line_dispersion_205.png" src="../_images/sphx_glr_plot_line_dispersion_205.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_206.png"><img alt="../_images/sphx_glr_plot_line_dispersion_206.png" src="../_images/sphx_glr_plot_line_dispersion_206.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_207.png"><img alt="../_images/sphx_glr_plot_line_dispersion_207.png" src="../_images/sphx_glr_plot_line_dispersion_207.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_208.png"><img alt="../_images/sphx_glr_plot_line_dispersion_208.png" src="../_images/sphx_glr_plot_line_dispersion_208.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_209.png"><img alt="../_images/sphx_glr_plot_line_dispersion_209.png" src="../_images/sphx_glr_plot_line_dispersion_209.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+<li><a class="first reference internal image-reference" href="../_images/sphx_glr_plot_line_dispersion_210.png"><img alt="../_images/sphx_glr_plot_line_dispersion_210.png" src="../_images/sphx_glr_plot_line_dispersion_210.png" style="width: 300.79999999999995px; height: 225.6px;" /></a>
+</li>
+</ul>
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">95</span> <span class="mi">62</span> <span class="mi">21</span> <span class="mi">16</span> <span class="mi">12</span> <span class="mi">10</span>  <span class="mi">8</span>  <span class="mi">7</span>  <span class="mi">7</span>  <span class="mi">6</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 0 minutes  29.589 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_line_dispersion.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_line_dispersion.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../_downloads/plot_line_dispersion.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_line_dispersion.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dispersion of the spectral function</a><ul>
+<li><a class="reference internal" href="#metals">Metals</a></li>
+<li><a class="reference internal" href="#insulators">Insulators</a></li>
+<li><a class="reference internal" href="#id1">Insulators</a></li>
+<li><a class="reference internal" href="#id2">Insulators</a></li>
+<li><a class="reference internal" href="#id3">Insulators</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_dos_T.html"
+                        title="previous chapter">Evolution of DOS as function of temperature</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_ipt_insulator.html"
+                        title="next chapter">INSULATOR</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/dimer_lattice/plot_line_dispersion.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_ipt_insulator.html" title="INSULATOR"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_dos_T.html" title="Evolution of DOS as function of temperature"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >The Dimer Hubbard Model</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>

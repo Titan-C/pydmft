@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dimer Mott transition &#8212; Learn DMFT 0.5.0-git documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/gallery.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.5.0-git',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dimer-mott-transition">
+<span id="sphx-glr-dimer-lattice-nature-dimer-plot-dimer-transition-py"></span><h1>Dimer Mott transition<a class="headerlink" href="#dimer-mott-transition" title="Permalink to this headline">¶</a></h1>
+<p>Follow the spectral function from the correlated metal into the dimer
+Mott insulator. The spectral functions is decomposed into the bonding
+and anti-bonding contributions to make it explicit that is is a
+phenomenon of the quasiparticles opening a band gap.</p>
+<p>Using real frequencies solver</p>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="plot_order_param_transition.html#sphx-glr-dimer-lattice-nature-dimer-plot-order-param-transition-py"><span class="std std-ref">The insulator transition order parameter</span></a></p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># author: Óscar Nájera</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">dmft.common</span> <span class="kn">as</span> <span class="nn">gf</span>
+<span class="kn">import</span> <span class="nn">dmft.ipt_real</span> <span class="kn">as</span> <span class="nn">ipt</span>
+
+<span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">dw</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">beta</span> <span class="o">=</span> <span class="mf">800.</span>
+<span class="n">nfp</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fermi_dist" title="View documentation for dmft.common.fermi_dist"><span class="n">gf</span><span class="o">.</span><span class="n">fermi_dist</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-scenario">
+<h1>The <img class="math" src="../../_images/math/51f0cfe53960d28ae00274ecbb36842500e34407.png" alt="t_\perp/D=0.3"/> scenario<a class="headerlink" href="#the-scenario" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tp</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="n">gss</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">-</span> <span class="n">tp</span><span class="p">)</span>
+<span class="n">gsa</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">+</span> <span class="n">tp</span><span class="p">)</span>
+<span class="n">urange</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.arange.html#numpy.arange" title="View documentation for numpy.arange"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">3.47</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">]</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.close" title="View documentation for matplotlib.pyplot.close"><span class="n">plt</span><span class="o">.</span><span class="n">close</span></a><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">U</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">urange</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">gss</span><span class="p">,</span> <span class="n">gsa</span><span class="p">),</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">sa</span><span class="p">)</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_real.html#dmft.ipt_real.dimer_dmft" title="View documentation for dmft.ipt_real.dimer_dmft"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_dmft</span></a><span class="p">(</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">nfp</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">dw</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">gsa</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.1</span> <span class="o">*</span> <span class="n">i</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="n">gss</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="n">gsa</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="p">(</span><span class="n">gss</span> <span class="o">+</span> <span class="n">gsa</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.axhline" title="View documentation for matplotlib.pyplot.axhline"><span class="n">plt</span><span class="o">.</span><span class="n">axhline</span></a><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/text_api.html#matplotlib.text" title="View documentation for matplotlib.pyplot.text"><span class="n">plt</span><span class="o">.</span><span class="n">text</span></a><span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">1.45</span> <span class="o">+</span> <span class="n">shift</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$U/D={}$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlim" title="View documentation for matplotlib.pyplot.xlim"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="n">shift</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.yticks" title="View documentation for matplotlib.pyplot.yticks"><span class="n">plt</span><span class="o">.</span><span class="n">yticks</span></a><span class="p">([])</span>
+<span class="c1"># plt.savefig(&#39;dimer_transition_spectra.pdf&#39;)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_dimer_transition_001.png" class="align-center" src="../../_images/sphx_glr_plot_dimer_transition_001.png" />
+</div>
+<div class="section" id="id1">
+<h1>The <img class="math" src="../../_images/math/0cb59b092cc7b7d57a0b5ee7ba9a99004291c424.png" alt="t_\perp/D=0.8"/> scenario<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">w</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="p">)</span>
+<span class="n">dw</span> <span class="o">=</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">nfp</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.fermi_dist" title="View documentation for dmft.common.fermi_dist"><span class="n">gf</span><span class="o">.</span><span class="n">fermi_dist</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">beta</span><span class="p">)</span>
+<span class="n">tp</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="n">gss</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">-</span> <span class="n">tp</span><span class="p">)</span>
+<span class="n">gsa</span> <span class="o">=</span> <a href="../../gen_modules/dmft.common.html#dmft.common.semi_circle_hiltrans" title="View documentation for dmft.common.semi_circle_hiltrans"><span class="n">gf</span><span class="o">.</span><span class="n">semi_circle_hiltrans</span></a><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="mf">5e-3j</span> <span class="o">+</span> <span class="n">tp</span><span class="p">)</span>
+<span class="n">urange</span> <span class="o">=</span> <a href="http://docs.scipy.org/doc/numpy-1.9.1/reference/generated/numpy.linspace.html#numpy.linspace" title="View documentation for numpy.linspace"><span class="n">np</span><span class="o">.</span><span class="n">linspace</span></a><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">1.64</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">urange</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.352</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">]</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.close" title="View documentation for matplotlib.pyplot.close"><span class="n">plt</span><span class="o">.</span><span class="n">close</span></a><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">U</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">urange</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">gss</span><span class="p">,</span> <span class="n">gsa</span><span class="p">),</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">sa</span><span class="p">)</span> <span class="o">=</span> <a href="../../gen_modules/dmft.ipt_real.html#dmft.ipt_real.dimer_dmft" title="View documentation for dmft.ipt_real.dimer_dmft"><span class="n">ipt</span><span class="o">.</span><span class="n">dimer_dmft</span></a><span class="p">(</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">nfp</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">dw</span><span class="p">,</span> <span class="n">gss</span><span class="p">,</span> <span class="n">gsa</span><span class="p">,</span> <span class="n">conv</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.1</span> <span class="o">*</span> <span class="n">i</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="n">gss</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;C0&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="n">gsa</span><span class="o">.</span><span class="n">imag</span><span class="p">,</span> <span class="s1">&#39;C1&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot" title="View documentation for matplotlib.pyplot.plot"><span class="n">plt</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">shift</span> <span class="o">+</span> <span class="o">-</span><span class="p">(</span><span class="n">gss</span> <span class="o">+</span> <span class="n">gsa</span><span class="p">)</span><span class="o">.</span><span class="n">imag</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+    <a href="http://matplotlib.org/api/text_api.html#matplotlib.text" title="View documentation for matplotlib.pyplot.text"><span class="n">plt</span><span class="o">.</span><span class="n">text</span></a><span class="p">(</span><span class="o">-</span><span class="mf">2.8</span><span class="p">,</span> <span class="mf">1.45</span> <span class="o">+</span> <span class="n">shift</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;$U/D={}$&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">U</span><span class="p">),</span> <span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlabel" title="View documentation for matplotlib.pyplot.xlabel"><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span></a><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;$\omega$&#39;</span><span class="p">)</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.xlim" title="View documentation for matplotlib.pyplot.xlim"><span class="n">plt</span><span class="o">.</span><span class="n">xlim</span></a><span class="p">([</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.ylim" title="View documentation for matplotlib.pyplot.ylim"><span class="n">plt</span><span class="o">.</span><span class="n">ylim</span></a><span class="p">([</span><span class="n">shift</span><span class="p">,</span> <span class="mf">2.1</span><span class="p">])</span>
+<a href="http://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.yticks" title="View documentation for matplotlib.pyplot.yticks"><span class="n">plt</span><span class="o">.</span><span class="n">yticks</span></a><span class="p">([])</span>
+<span class="c1"># plt.savefig(&#39;dimer_transition_spectra_tp0.8.pdf&#39;)</span>
+</pre></div>
+</div>
+<img alt="../../_images/sphx_glr_plot_dimer_transition_002.png" class="align-center" src="../../_images/sphx_glr_plot_dimer_transition_002.png" />
+<p class="sphx-glr-script-out">Out:</p>
+<div class="sphx-glr-script-out highlight-default"><div class="highlight"><pre><span></span><span class="n">Failed</span> <span class="n">to</span> <span class="n">converge</span> <span class="ow">in</span> <span class="n">less</span> <span class="n">than</span> <span class="mi">3000</span> <span class="n">iterations</span>
+</pre></div>
+</div>
+<p><strong>Total running time of the script:</strong> ( 2 minutes  1.693 seconds)</p>
+<div class="sphx-glr-footer docutils container">
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dimer_transition.py" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_dimer_transition.py</span></code></a></div>
+<div class="sphx-glr-download docutils container">
+<a class="reference download internal" href="../../_downloads/plot_dimer_transition.ipynb" download=""><code class="xref download docutils literal"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_dimer_transition.ipynb</span></code></a></div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.readthedocs.io">Generated by Sphinx-Gallery</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dimer Mott transition</a></li>
+<li><a class="reference internal" href="#the-scenario">The <img class="math" src="../../_images/math/51f0cfe53960d28ae00274ecbb36842500e34407.png" alt="t_\perp/D=0.3"/> scenario</a></li>
+<li><a class="reference internal" href="#id1">The <img class="math" src="../../_images/math/0cb59b092cc7b7d57a0b5ee7ba9a99004291c424.png" alt="t_\perp/D=0.8"/> scenario</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/dimer_lattice/nature_dimer/plot_dimer_transition.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Learn DMFT 0.5.0-git documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2014-2017, Óscar Nájera.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.5.
+    </div>
+  </body>
+</html>
