@@ -3,16 +3,20 @@
 A python library to work on quantum interacting systems. It is focused for
 research using the Dynamical Mean Field Theory (DMFT)[dmft-rmp](#dmft-rmp)
 
-This library was developed during my Doctoral research stay at the
-[Laboratoire de Physique des solides in Orsay, France](https://www.lps.u-psud.fr/?lang=fr).
-
 The particular highlight of this library is the gallery of examples for
 which I have developed the scripts to reproduce known results in this field
 and also provide with my personal research work, showing how it was done
-and referencing the publication it appeared.
+and referencing the publication it appeared. Other examples are just test
+that resulted in dead ends. Examples exist but not all of them are well
+documented.
+
+You can access the documentation in (https://titan-c.github.io/pydmft)
 
 If you find problems with it, open an issue or even better a pull
 request. If you use it cite it.
+
+This library was developed during my Doctoral research stay at the
+[Laboratoire de Physique des solides in Orsay, France](https://www.lps.u-psud.fr/?lang=fr).
 
 ## Similar Projects
 
