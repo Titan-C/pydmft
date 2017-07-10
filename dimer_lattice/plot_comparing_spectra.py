@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 r"""
-=========
-For paper
-=========
+============================
+Comparing Spectral functions
+============================
 
 """
 # Created Mon Apr 11 14:17:29 2016
@@ -56,6 +56,7 @@ def plot_spectral(u_int, tp, BETA, seed, w, w_set, pole, sty, ax):
     gst = gf.semi_circle_hiltrans(w - tp - (ss.real - 1j * np.abs(ss.imag)))
 
     plot_pole_eq(w, gst, ss, pole, sty, ax)
+
 
 ###############################################################################
 # Metals

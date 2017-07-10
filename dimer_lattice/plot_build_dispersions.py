@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 r"""
-=========
-For paper
-=========
+=====================================================
+Various schemes for obtaining the spectral dispersion
+=====================================================
 
 """
 # Created Mon Apr 11 14:17:29 2016
@@ -88,6 +88,7 @@ def construct_dispersions(BETA, u_int, tp, seed):
         Ag), 'Local ' + title, eps_k, 'intensity')
     plt.savefig(file_r + 'pgls.png', format='png',
                 transparent=False, bbox_inches='tight', pad_inches=0.05)
+
 
 construct_dispersions(100., 2.5, .3, 'met')
 construct_dispersions(100., 2.5, .3, 'ins')
