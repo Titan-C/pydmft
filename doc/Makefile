@@ -49,7 +49,9 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 	rm -rf auto_examples/
-	rm -rf gen_modules/*
+	rm -rf gen_modules/
+	rm -rf dimer_lattice/
+
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
