@@ -11,7 +11,7 @@ from Cython.Distutils import build_ext
 import dmft
 import numpy as np
 
-with open('README.rst') as f:
+with open('readme.md') as f:
     long_description = f.read()
 
 setup(
