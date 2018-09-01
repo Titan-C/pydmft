@@ -7,11 +7,12 @@ Installing packages on code for DMFT
 from setuptools import setup, find_packages
 from Cython.Distutils import Extension
 from Cython.Distutils import build_ext
+import codecs
 
 import dmft
 import numpy as np
 
-with open('readme.md') as f:
+with codecs.open('readme.md', 'r', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
